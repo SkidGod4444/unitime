@@ -1,5 +1,5 @@
 {
-  "name": "server",
+  "name": "@unitime/server",
   "scripts": {
     "dev": "bun run --hot src/index.ts"
   },
