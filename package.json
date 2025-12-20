@@ -4,6 +4,9 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "dev:web": "turbo run dev --filter=@unitime/web",
+    "dev:server": "turbo run dev --filter=@unitime/server",
+    "dev:mobile": "turbo run dev --filter=@unitime/mobile",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types"

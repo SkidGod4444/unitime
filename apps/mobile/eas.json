@@ -1,0 +1,47 @@
+{
+    "cli": {
+      "version": ">= 16.3.2",
+      "appVersionSource": "remote"
+    },
+    "build": {
+      "development": {
+        "developmentClient": true,
+        "distribution": "internal",
+        "resourceClass": "large",
+        "android": {
+          "image": "latest"
+        },
+        "ios": {
+          "simulator": true,
+          "image": "latest"
+        },
+        "env": {
+          "APP_VARIANT": "development",
+        //   "GOOGLE_API_KEY": "AIzaSyCal7uTDlhyNFTQf_KK4hB5VZrhYQC82XA",
+        //   "EXPO_PUBLIC_GEOAPIFY_API_KEY": "adc6ac87d4c34e22b1878e19acf6ce76"
+        }
+      },
+      "preview": {
+        "distribution": "internal",
+        "android": {
+          "buildType": "apk"
+        },
+        "env": {
+          "APP_VARIANT": "preview"
+        },
+        "autoIncrement": true
+      },
+      "production": {
+        "android": {
+          "buildType": "apk"
+        },
+        "autoIncrement": true,
+        "env": {
+          "APP_VARIANT": "production"
+        }
+      }
+    },
+    "submit": {
+      "production": {}
+    }
+  }
