@@ -7,7 +7,7 @@
       "development": {
         "developmentClient": true,
         "distribution": "internal",
-        "resourceClass": "large",
+        "resourceClass": "medium",
         "android": {
           "image": "latest"
         },
@@ -16,7 +16,7 @@
           "image": "latest"
         },
         "env": {
-          "APP_VARIANT": "development",
+          "APP_VARIANT": "development"
         //   "GOOGLE_API_KEY": "AIzaSyCal7uTDlhyNFTQf_KK4hB5VZrhYQC82XA",
         //   "EXPO_PUBLIC_GEOAPIFY_API_KEY": "adc6ac87d4c34e22b1878e19acf6ce76"
         }

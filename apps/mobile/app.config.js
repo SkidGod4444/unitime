@@ -23,13 +23,13 @@ const getAppName = () => {
 export default ({ config }) => ({
   ...config,
   name: getAppName(),
-  slug: 'UNiTIME',
+  slug: 'unitime',
   version: '1.0.1',
   orientation: 'portrait',
   icon: './assets/icons/logo.png',
-  scheme: 'UNiTIME',
+  scheme: 'unitime',
   userInterfaceStyle: 'automatic',
-  newArchEnabled: false,
+  newArchEnabled: true,
   deepLinking: true,
   plugins: [
     'expo-localization',
@@ -131,7 +131,7 @@ export default ({ config }) => ({
   android: {
     ...config.android,
     package: getUniqueIdentifier(),
-    googleServicesFile: "gserve.json",
+    // googleServicesFile: "./gserve.json",
     adaptiveIcon: {
       foregroundImage: './assets/icons/logo.png',
       backgroundColor: '#000000',
@@ -180,7 +180,7 @@ export default ({ config }) => ({
       origin: false,
     },
     eas: {
-        projectId: "ad4c6f82-df65-49d3-af39-57a0f7054699"
+        projectId: "7c92f536-ed65-4cbb-856a-f32a8f8eacac"
       }
   },
 });
