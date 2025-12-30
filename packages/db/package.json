@@ -1,0 +1,22 @@
+{
+  "name": "@unitime/db",
+  "module": "src/index.ts",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./client": {
+      "import": "./src/client/index.ts"
+    }
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "^2.2.0",
+    "@supabase/supabase-js": "^2.89.0",
+    "react-native-url-polyfill": "^3.0.0"
+  }
+}

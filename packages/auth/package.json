@@ -1,11 +1,23 @@
 {
   "name": "@unitime/auth",
-  "module": "index.ts",
   "type": "module",
+  "private": true,
+  "exports": {
+    ".": {
+      "import": ".src/auth.ts"
+    },
+    "./client": {
+      "import": "./src/client.ts"
+    }
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },
   "peerDependencies": {
     "typescript": "^5"
+  },
+  "dependencies": {
+    "@better-auth/passkey": "^1.4.9",
+    "better-auth": "^1.4.9"
   }
 }
