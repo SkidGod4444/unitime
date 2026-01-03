@@ -84,7 +84,7 @@ export default function TabsLayout() {
           tabBarIcon: ({ focused }) => (
             <TabBarIcons
               focused={focused}
-              icon={focused ? "home" : "home-outline"}
+              icon={focused ? "library" : "library-outline"}
               size={24}
             />
           ),
@@ -100,6 +100,51 @@ export default function TabsLayout() {
             <TabBarIcons
               focused={focused}
               icon={focused ? "time" : "time-outline"}
+              size={24}
+            />
+          ),
+          tabBarButton: (props) => <NoEffectTabButton {...props} />,
+        }}
+      />
+      <Tabs.Screen
+        name="notify"
+        options={{
+          title: "Notify",
+          headerShown: false,
+          tabBarIcon: ({ focused }) => (
+            <TabBarIcons
+              focused={focused}
+              icon={focused ? "notifications" : "notifications-outline"}
+              size={24}
+            />
+          ),
+          tabBarButton: (props) => <NoEffectTabButton {...props} />,
+        }}
+      />
+      <Tabs.Screen
+        name="notice"
+        options={{
+          title: "Notice",
+          headerShown: false,
+          tabBarIcon: ({ focused }) => (
+            <TabBarIcons
+              focused={focused}
+              icon={focused ? "megaphone" : "megaphone-outline"}
+              size={24}
+            />
+          ),
+          tabBarButton: (props) => <NoEffectTabButton {...props} />,
+        }}
+      />
+      <Tabs.Screen
+        name="chat"
+        options={{
+          title: "Chat",
+          headerShown: false,
+          tabBarIcon: ({ focused }) => (
+            <TabBarIcons
+              focused={focused}
+              icon={focused ? "chatbubbles" : "chatbubbles-outline"}
               size={24}
             />
           ),

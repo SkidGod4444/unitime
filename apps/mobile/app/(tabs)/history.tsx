@@ -1,10 +1,10 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import { StatusBar } from "expo-status-bar";
+import { Text } from "react-native";
 
 export default function History() {
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
-      <StatusBar style="dark" />
+      <Text>History</Text>
     </SafeAreaView>
   );
 }

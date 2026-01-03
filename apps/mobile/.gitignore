@@ -38,5 +38,6 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
-gserve.json
+# gserve.json
+google-services.json
 app-example
