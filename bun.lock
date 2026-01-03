@@ -19,7 +19,9 @@
         "@react-navigation/bottom-tabs": "^7.4.0",
         "@react-navigation/elements": "^2.6.3",
         "@react-navigation/native": "^7.1.8",
+        "@unitime/auth": "workspace:*",
         "@unitime/db": "workspace:*",
+        "@unitime/types": "workspace:*",
         "expo": "~54.0.30",
         "expo-build-properties": "^1.0.10",
         "expo-constants": "~18.0.12",
@@ -147,6 +149,15 @@
         "globals": "^16.5.0",
         "typescript": "^5.9.2",
         "typescript-eslint": "^8.49.0",
+      },
+    },
+    "packages/types": {
+      "name": "@unitime/types",
+      "devDependencies": {
+        "@types/bun": "latest",
+      },
+      "peerDependencies": {
+        "typescript": "^5",
       },
     },
     "packages/typescript-config": {
@@ -822,6 +833,8 @@
     "@unitime/mobile": ["@unitime/mobile@workspace:apps/mobile"],
 
     "@unitime/server": ["@unitime/server@workspace:apps/server"],
+
+    "@unitime/types": ["@unitime/types@workspace:packages/types"],
 
     "@unitime/web": ["@unitime/web@workspace:apps/web"],
 

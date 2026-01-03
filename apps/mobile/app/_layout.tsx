@@ -4,7 +4,6 @@ import { useFonts } from "expo-font";
 import "./globals.css";
 import { StatusBar } from "expo-status-bar";
 import { LocalStoreProvider } from "@/contexts/localstore.cntxt";
-import { useEffect } from "react";
 import { PermsProvider } from "@/contexts/perms.cntxt";
 
 export default function RootLayout() {
@@ -19,7 +18,9 @@ export default function RootLayout() {
     "Lora-SemiBoldItalic": require("../assets/fonts/Lora-SemiBoldItalic.ttf"),
   });
 
-  return <Stack />;
+  return (
+    <AppContent fontsLoaded={fontsLoaded} />
+  );
 
   function AppContent({ fontsLoaded }: { fontsLoaded: boolean }) {
     // useEffect(() => {
@@ -32,7 +33,7 @@ export default function RootLayout() {
     //   return null;
     // }
 
-    // console.log("Theme provider initialized with theme:", theme);
+    // console.log("Theme provider initialized with theme:", theme);```````
     return (
       <LocalStoreProvider>
         <PermsProvider>
