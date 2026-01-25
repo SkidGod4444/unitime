@@ -1,10 +1,11 @@
-import { Stack } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
-import { useFonts } from "expo-font";
-import "./globals.css";
-import { StatusBar } from "expo-status-bar";
+import QRScannerWidget from "@/components/qr.scanner.widget";
 import { LocalStoreProvider } from "@/contexts/localstore.cntxt";
 import { PermsProvider } from "@/contexts/perms.cntxt";
+import { useFonts } from "expo-font";
+import { Stack, usePathname } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import "./globals.css";
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -18,11 +19,13 @@ export default function RootLayout() {
     "Lora-SemiBoldItalic": require("../assets/fonts/Lora-SemiBoldItalic.ttf"),
   });
 
-  return (
-    <AppContent fontsLoaded={fontsLoaded} />
-  );
+  return <AppContent fontsLoaded={fontsLoaded} />;
 
   function AppContent({ fontsLoaded }: { fontsLoaded: boolean }) {
+    const pathname = usePathname();
+    const isQRScannerScreen =
+      pathname.includes("qr-scanner") || pathname.includes("chat");
+
     // useEffect(() => {
     //   if (fontsLoaded && !loading) {
     //     SplashScreen.hideAsync();
@@ -35,12 +38,15 @@ export default function RootLayout() {
 
     // console.log("Theme provider initialized with theme:", theme);```````
     return (
-      <LocalStoreProvider>
-        <PermsProvider>
-          <StatusBar style={"dark"} animated />
-          <Stack screenOptions={{ headerShown: false }} />
-        </PermsProvider>
-      </LocalStoreProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <LocalStoreProvider>
+          <PermsProvider>
+            <StatusBar style={"dark"} animated />
+            <Stack screenOptions={{ headerShown: false }} />
+            {!isQRScannerScreen && <QRScannerWidget />}
+          </PermsProvider>
+        </LocalStoreProvider>
+      </GestureHandlerRootView>
     );
   }
 }

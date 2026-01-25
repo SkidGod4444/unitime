@@ -53,7 +53,7 @@ export default function TabsLayout() {
           borderWidth: 2,
           paddingTop: 0,
           borderRadius: 20,
-          marginBottom: Platform.OS === "ios" ? 35 : 5,
+          marginBottom: Platform.OS === "ios" ? 35 : 15,
           marginHorizontal: 15,
           display: "flex",
           alignItems: "center",
@@ -122,24 +122,9 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="notice"
+        name="chats"
         options={{
-          title: "Notice",
-          headerShown: false,
-          tabBarIcon: ({ focused }) => (
-            <TabBarIcons
-              focused={focused}
-              icon={focused ? "megaphone" : "megaphone-outline"}
-              size={24}
-            />
-          ),
-          tabBarButton: (props) => <NoEffectTabButton {...props} />,
-        }}
-      />
-      <Tabs.Screen
-        name="chat"
-        options={{
-          title: "Chat",
+          title: "Chats",
           headerShown: false,
           tabBarIcon: ({ focused }) => (
             <TabBarIcons

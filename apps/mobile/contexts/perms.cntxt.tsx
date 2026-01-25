@@ -9,6 +9,7 @@ import * as Network from "expo-network";
 import * as Location from "expo-location";
 import * as MediaLibrary from "expo-media-library";
 import * as Notifications from "expo-notifications";
+import { Camera, PermissionStatus } from "expo-camera";
 import { AppState } from "react-native";
 import { useLocalStore } from "./localstore.cntxt";
 
@@ -17,9 +18,11 @@ type PermsContextType = {
   locationPermission: Location.PermissionStatus | null;
   mediaLibraryPermission: MediaLibrary.PermissionStatus | null;
   notificationPermission: Notifications.PermissionStatus | null;
+  cameraPermission: PermissionStatus | null;
   requestLocationPermission: () => Promise<void>;
   requestMediaLibraryPermission: () => Promise<void>;
   requestNotificationPermission: () => Promise<void>;
+  requestCameraPermission: () => Promise<void>;
 };
 
 const PermsContext = createContext<PermsContextType>({
@@ -27,9 +30,11 @@ const PermsContext = createContext<PermsContextType>({
   locationPermission: null,
   mediaLibraryPermission: null,
   notificationPermission: null,
+  cameraPermission: null,
   requestLocationPermission: async () => {},
   requestMediaLibraryPermission: async () => {},
   requestNotificationPermission: async () => {},
+  requestCameraPermission: async () => {},
 });
 
 export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -44,6 +49,8 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
     useState<MediaLibrary.PermissionStatus | null>(null);
   const [notificationPermission, setNotificationPermission] =
     useState<Notifications.PermissionStatus | null>(null);
+  const [cameraPermission, setCameraPermission] =
+    useState<PermissionStatus | null>(null);
 
   const checkConnection = useCallback(async () => {
     try {
@@ -128,6 +135,20 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, []);
 
+  const checkCameraPermission = useCallback(async () => {
+    try {
+      const result = await Camera.getCameraPermissionsAsync();
+      if (result && result.status) {
+        setCameraPermission(result.status);
+        return result.status;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error checking camera permission:", error);
+      return null;
+    }
+  }, []);
+
   const requestLocationPermission = useCallback(async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -155,6 +176,17 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, []);
 
+  const requestCameraPermission = useCallback(async () => {
+    try {
+      const result = await Camera.requestCameraPermissionsAsync();
+      if (result && result.status) {
+        setCameraPermission(result.status);
+      }
+    } catch (error) {
+      console.error("Error requesting camera permission:", error);
+    }
+  }, []);
+
   const checkAllPermissions = useCallback(async () => {
     await checkConnection();
 
@@ -172,6 +204,11 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
     if (notifStatus !== Notifications.PermissionStatus.GRANTED) {
       await requestNotificationPermission();
     }
+
+    const cameraStatus = await checkCameraPermission();
+    if (cameraStatus !== PermissionStatus.GRANTED) {
+      await requestCameraPermission();
+    }
   }, [
     checkConnection,
     checkLocationPermission,
@@ -180,6 +217,8 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
     requestMediaLibraryPermission,
     checkNotificationPermission,
     requestNotificationPermission,
+    checkCameraPermission,
+    requestCameraPermission,
   ]);
 
   const refreshPermissions = useCallback(async () => {
@@ -187,11 +226,13 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
     await checkLocationPermission();
     await checkMediaLibraryPermission();
     await checkNotificationPermission();
+    await checkCameraPermission();
   }, [
     checkConnection,
     checkLocationPermission,
     checkMediaLibraryPermission,
     checkNotificationPermission,
+    checkCameraPermission,
   ]);
 
   useEffect(() => {
@@ -229,9 +270,11 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
         locationPermission,
         mediaLibraryPermission,
         notificationPermission,
+        cameraPermission,
         requestLocationPermission,
         requestMediaLibraryPermission,
         requestNotificationPermission,
+        requestCameraPermission,
       }}
     >
       {children}

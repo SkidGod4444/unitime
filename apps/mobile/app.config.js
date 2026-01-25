@@ -95,6 +95,12 @@ export default ({ config }) => ({
       },
     ],
     [
+      'expo-camera',
+      {
+        cameraPermission: "Allow $(PRODUCT_NAME) to access your camera to scan QR codes.",
+      },
+    ],
+    [
       'expo-build-properties',
       {
         android: {
@@ -119,6 +125,7 @@ export default ({ config }) => ({
       NSLocationWhenInUseUsageDescription: 'Allow this app to use your location.',
       NSLocationAlwaysUsageDescription: 'Allow this app to always access your location.',
       NSLocationAlwaysAndWhenInUseUsageDescription: 'Allow this app to access your location.',
+      NSCameraUsageDescription: 'Allow this app to access your camera to scan QR codes.',
     },
     entitlements: {
       'com.apple.developer.networking.wifi-info': true,
