@@ -37,6 +37,7 @@ export default function RootLayout() {
     // }
 
     // console.log("Theme provider initialized with theme:", theme);```````
+    console.log("Fonts loaded:", fontsLoaded);
     return (
       <GestureHandlerRootView style={{ flex: 1 }}>
         <LocalStoreProvider>

@@ -50,6 +50,7 @@ export default function QRScannerWidget() {
   // Save position to storage
   const savePosition = async (x: number, y: number) => {
     try {
+      console.log("Saving widget position:", x, y);
       await setItem(STORAGE_KEY, JSON.stringify({ x, y }));
     } catch (error) {
       console.error("Error saving widget position:", error);
@@ -144,11 +145,11 @@ export default function QRScannerWidget() {
   return (
     <GestureDetector gesture={composedGesture}>
       <Animated.View 
-        className="absolute w-14 h-14 z-[500]"
+        className="absolute w-12 h-12 z-[500]"
         style={animatedStyle}
       >
         <View 
-          className="w-14 h-14 rounded-2xl justify-center items-center shadow-md"
+          className="w-12 h-12 rounded-xl justify-center items-center shadow-md"
           style={{
             backgroundColor: colors.secondary,
             shadowColor: "#000",

@@ -19,6 +19,12 @@ const getAppName = () => {
   return 'UNiTIME';
 };
 
+const getAppIcon = () => {
+  if (IS_DEV) return './assets/icons/logo.png';
+  if (IS_PREVIEW) return './assets/icons/logo.png';
+  return './assets/icons/logo.png';
+};
+
 
 export default ({ config }) => ({
   ...config,
@@ -26,7 +32,7 @@ export default ({ config }) => ({
   slug: 'unitime',
   version: '1.0.1',
   orientation: 'portrait',
-  icon: './assets/icons/logo.png',
+  icon: getAppIcon(),
   scheme: 'unitime',
   userInterfaceStyle: 'automatic',
   newArchEnabled: true,
@@ -50,7 +56,7 @@ export default ({ config }) => ({
     [
       'expo-splash-screen',
       {
-        image: './assets/icons/logo.png',
+        image: getAppIcon(),
         imageWidth: 200,
         resizeMode: 'contain',
         backgroundColor: "#000000",
@@ -90,7 +96,7 @@ export default ({ config }) => ({
     [
       "expo-notifications",
       {
-        icon: "./assets/icons/logo.png",
+        icon: getAppIcon(),
         color: "#ffffff",
       },
     ],

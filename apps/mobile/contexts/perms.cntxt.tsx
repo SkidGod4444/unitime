@@ -1,15 +1,16 @@
+import { Camera, PermissionStatus } from "expo-camera";
+import * as Location from "expo-location";
+import * as MediaLibrary from "expo-media-library";
+import * as Network from "expo-network";
+import * as Notifications from "expo-notifications";
 import React, {
   createContext,
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
-import * as Network from "expo-network";
-import * as Location from "expo-location";
-import * as MediaLibrary from "expo-media-library";
-import * as Notifications from "expo-notifications";
-import { Camera, PermissionStatus } from "expo-camera";
 import { AppState } from "react-native";
 import { useLocalStore } from "./localstore.cntxt";
 
@@ -51,6 +52,9 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
     useState<Notifications.PermissionStatus | null>(null);
   const [cameraPermission, setCameraPermission] =
     useState<PermissionStatus | null>(null);
+  
+  // Use ref to track interval ID across renders and closures
+  const intervalRef = useRef<NodeJS.Timeout | number | null>(null);
 
   const checkConnection = useCallback(async () => {
     try {
@@ -73,23 +77,31 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
   const checkLocationPermission = useCallback(async () => {
     try {
       const { status } = await Location.getForegroundPermissionsAsync();
-      if (status === Location.PermissionStatus.GRANTED) {
-        const location = await Location.getCurrentPositionAsync({});
-        console.log("Current location:", location);
-        //   await fetch(
-        //     `${process.env.EXPO_PUBLIC_ORIGIN}/v1/user/update/${loggedInUser?.$id}`,
-        //     {
-        //       method: "PUT",
-        //       headers: {
-        //         "Content-Type": "application/json",
-        //       },
-        //       body: JSON.stringify({
-        //         cordinates: [`${location.coords.latitude}`,`${location.coords.longitude}`],
-        //       }),
-        //     },
-        //   );
-      }
       setLocationPermission(status);
+      
+      // Only fetch location when app is in foreground/active state
+      if (status === Location.PermissionStatus.GRANTED && AppState.currentState === "active") {
+        try {
+          const location = await Location.getCurrentPositionAsync({});
+          console.log("Current location:", location);
+          //   await fetch(
+          //     `${process.env.EXPO_PUBLIC_ORIGIN}/v1/user/update/${loggedInUser?.$id}`,
+          //     {
+          //       method: "PUT",
+          //       headers: {
+          //         "Content-Type": "application/json",
+          //       },
+          //       body: JSON.stringify({
+          //         cordinates: [`${location.coords.latitude}`,`${location.coords.longitude}`],
+          //       }),
+          //     },
+          //   );
+        } catch (locationError) {
+          // Silently handle location fetch errors when in background
+          console.warn("Could not fetch location (app may be in background):", locationError);
+        }
+      }
+      
       return status;
     } catch (error) {
       console.error("Error checking location permission:", error);
@@ -246,19 +258,38 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
 
     initializeState();
 
-    const interval = setInterval(() => {
-      refreshPermissions();
-      console.log("Permissions and connectivity refreshed...");
-    }, 10000);
+    const startInterval = () => {
+      // Clear any existing interval before starting a new one
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      
+      intervalRef.current = setInterval(() => {
+        if (AppState.currentState === "active") {
+          refreshPermissions();
+          console.log("Permissions and connectivity refreshed...");
+        }
+      }, 10000);
+    };
+
+    // Start initial interval
+    startInterval();
 
     const subscription = AppState.addEventListener("change", (nextAppState) => {
       if (nextAppState === "active") {
+        // Immediate check when app becomes active
         checkAllPermissions();
+        console.log("App became active - running immediate permission check");
+        
+        // Reset interval to start fresh 10-second cycle
+        startInterval();
       }
     });
 
     return () => {
-      clearInterval(interval);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
       subscription.remove();
     };
   }, [getItem, checkAllPermissions, refreshPermissions]);

@@ -1,15 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
-import { StatusBar } from "expo-status-bar";
-import { useState } from "react";
+import { useNavigation } from "expo-router";
+import { useRef, useState } from "react";
 import {
-    ImageBackground,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -20,9 +20,12 @@ interface Message {
   senderId: string;
   timestamp: string;
   isSent: boolean;
+  avatar?: string;
 }
 
 export default function Chat() {
+  const navigation = useNavigation();
+  const scrollViewRef = useRef<ScrollView>(null);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -32,6 +35,7 @@ export default function Chat() {
       senderId: "admin",
       timestamp: "10:30 AM",
       isSent: false,
+      avatar: "https://i.pravatar.cc/150?img=12",
     },
     {
       id: "2",
@@ -40,6 +44,7 @@ export default function Chat() {
       senderId: "john",
       timestamp: "10:32 AM",
       isSent: false,
+      avatar: "https://i.pravatar.cc/150?img=3",
     },
     {
       id: "3",
@@ -56,6 +61,7 @@ export default function Chat() {
       senderId: "sarah",
       timestamp: "10:36 AM",
       isSent: false,
+      avatar: "https://i.pravatar.cc/150?img=5",
     },
     {
       id: "5",
@@ -89,39 +95,37 @@ export default function Chat() {
   const MessageBubble = ({ msg }: { msg: Message }) => {
     return (
       <View
-        className={`mb-3 px-4 ${
-          msg.isSent ? "items-end" : "items-start"
+        className={`mb-4 flex-row ${
+          msg.isSent ? "justify-end" : "justify-start"
         }`}
       >
         {!msg.isSent && (
-          <Text className="text-xs text-gray-500 mb-1 ml-1">{msg.sender}</Text>
+            <Image 
+                source={{ uri: msg.avatar || "https://i.pravatar.cc/150?img=8" }} 
+                className="h-8 w-8 rounded-full bg-gray-200 mr-2 mt-auto"
+            />
         )}
         <View
-          className={`max-w-[75%] rounded-lg px-3 py-2 ${
+          className={`px-4 py-3 max-w-[75%] ${
             msg.isSent
-              ? "bg-[#DCF8C6] rounded-tr-none"
-              : "bg-white rounded-tl-none"
+              ? "bg-blue-600 rounded-2xl rounded-tr-sm"
+              : "bg-gray-100 rounded-2xl rounded-tl-sm"
           }`}
-          style={{
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 1 },
-            shadowOpacity: 0.1,
-            shadowRadius: 2,
-            elevation: 2,
-          }}
         >
+          {!msg.isSent && (
+              <Text className="text-xs font-bold text-gray-500 mb-1">{msg.sender}</Text>
+          )}
           <Text
-            className={`text-[15px] ${
-              msg.isSent ? "text-[#000000]" : "text-[#000000]"
+            className={`text-[15px] leading-[22px] ${
+              msg.isSent ? "text-white" : "text-gray-800"
             }`}
-            style={{ fontFamily: "Lora-Regular" }}
           >
             {msg.text}
           </Text>
-          <View className="flex-row items-center justify-end mt-1">
+          <View className="flex-row items-center justify-end mt-1 space-x-1">
             <Text
-              className={`text-[11px] ${
-                msg.isSent ? "text-[#667781]" : "text-[#667781]"
+              className={`text-[10px] ${
+                msg.isSent ? "text-blue-200" : "text-gray-400"
               }`}
             >
               {msg.timestamp}
@@ -129,9 +133,9 @@ export default function Chat() {
             {msg.isSent && (
               <Ionicons
                 name="checkmark-done"
-                size={14}
-                color="#4FC3F7"
-                style={{ marginLeft: 4 }}
+                size={12}
+                color="#BFDBFE"
+                style={{ marginLeft: 2 }}
               />
             )}
           </View>
@@ -141,94 +145,91 @@ export default function Chat() {
   };
 
   return (
-      <SafeAreaView className="flex-1" edges={["top"]}>
-    <ImageBackground
-      source={require("../assets/images/chat-bg.png")}
-      className="flex-1"
-    //   resizeMode="cover"
-    >
-      {/* <StatusBar style="light" /> */}
-        {/* Header */}
-        <View className="bg-[#075E54] px-4 py-3 flex-row items-center justify-between">
-          <View className="flex-row items-center flex-1">
-            <TouchableOpacity className="mr-3">
-              <Ionicons name="arrow-back" size={24} color="white" />
-            </TouchableOpacity>
-            <View className="w-10 h-10 rounded-full bg-gray-300 items-center justify-center mr-3">
-              <Ionicons name="people" size={20} color="#075E54" />
-            </View>
-            <View className="flex-1">
-              <Text className="text-white text-base font-semibold">
-                Group Chat
-              </Text>
-              <Text className="text-[#B2F5EA] text-xs">
-                5 members • online
-              </Text>
-            </View>
-          </View>
-          <View className="flex-row items-center">
-            <TouchableOpacity className="mr-4">
-              <Ionicons name="videocam" size={24} color="white" />
-            </TouchableOpacity>
-            <TouchableOpacity className="mr-4">
-              <Ionicons name="call" size={24} color="white" />
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Ionicons name="ellipsis-vertical" size={24} color="white" />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Messages List */}
+      <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           className="flex-1"
-          keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+          keyboardVerticalOffset={0}
         >
-          <ScrollView
-            className="flex-1"
-            contentContainerStyle={{ paddingVertical: 10 }}
-            showsVerticalScrollIndicator={false}
-          >
-            {messages.map((msg) => (
-              <MessageBubble key={msg.id} msg={msg} />
-            ))}
-          </ScrollView>
-
-          {/* Input Area */}
-          <View className="bg-[#F0F0F0] px-2 py-2 flex-row items-center">
-            <TouchableOpacity className="mx-2">
-              <Ionicons name="add-circle" size={28} color="#075E54" />
-            </TouchableOpacity>
-            <TextInput
-              className="flex-1 bg-white rounded-full px-4 py-2 text-base max-h-20"
-              placeholder="Type a message"
-              placeholderTextColor="#999"
-              value={message}
-              onChangeText={setMessage}
-              multiline
-              style={{ fontFamily: "Lora-Regular" }}
-            />
-            {message.trim() ? (
-              <TouchableOpacity
-                onPress={handleSend}
-                className="mx-2 bg-[#075E54] rounded-full p-2"
-              >
-                <Ionicons name="send" size={20} color="white" />
-              </TouchableOpacity>
-            ) : (
-              <View className="flex-row mx-2">
-                <TouchableOpacity className="mr-2">
-                  <Ionicons name="camera" size={24} color="#075E54" />
+            {/* Header */}
+            <View className="px-4 py-3 flex-row items-center justify-between border-b border-gray-100 bg-white z-10">
+            <View className="flex-row items-center flex-1">
+                <TouchableOpacity onPress={() => navigation.goBack()} className="mr-3 p-1 -ml-1">
+                <Ionicons name="chevron-back" size={28} color="#1F2937" />
+                </TouchableOpacity>
+                <View className="relative">
+                    <Image 
+                        source={{ uri: "https://i.pravatar.cc/150?img=12" }} 
+                        className="h-10 w-10 rounded-full bg-gray-200"
+                    />
+                    <View className="absolute bottom-0 right-0 h-2.5 w-2.5 bg-green-500 rounded-full border-2 border-white" />
+                </View>
+                <View className="flex-1 ml-3">
+                <Text className="text-dark text-base font-bold font-lora">
+                    Dr. Sarah Wilson
+                </Text>
+                <Text className="text-gray-400 text-xs font-medium">
+                    Online
+                </Text>
+                </View>
+            </View>
+            <View className="flex-row items-center space-x-4 gap-4">
+                <TouchableOpacity>
+                <Ionicons name="call-outline" size={24} color="#1F2937" />
                 </TouchableOpacity>
                 <TouchableOpacity>
-                  <Ionicons name="mic" size={24} color="#075E54" />
+                <Ionicons name="videocam-outline" size={24} color="#1F2937" />
                 </TouchableOpacity>
-              </View>
-            )}
-          </View>
+            </View>
+            </View>
+
+            {/* Messages List */}
+            <ScrollView
+                ref={scrollViewRef}
+                className="flex-1 px-4"
+                contentContainerStyle={{ paddingVertical: 20 }}
+                showsVerticalScrollIndicator={false}
+                onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
+            >
+                {messages.map((msg) => (
+                <MessageBubble key={msg.id} msg={msg} />
+                ))}
+            </ScrollView>
+
+            {/* Input Area */}
+            <View className="px-4 py-3 border-t border-gray-100 bg-white flex-row items-end pb-6">
+                <TouchableOpacity className="p-2 mr-2 bg-gray-50 rounded-full">
+                <Ionicons name="add" size={24} color="#6B7280" />
+                </TouchableOpacity>
+                <View className="flex-1 bg-gray-50 rounded-2xl px-4 py-2 flex-row items-center min-h-[44px]">
+                    <TextInput
+                        className="flex-1 text-base text-dark max-h-24 pt-0"
+                        placeholder="Type a message..."
+                        placeholderTextColor="#9CA3AF"
+                        value={message}
+                        onChangeText={setMessage}
+                        multiline
+                    />
+                    <TouchableOpacity className="ml-2">
+                        <Ionicons name="happy-outline" size={24} color="#9CA3AF" />
+                    </TouchableOpacity>
+                </View>
+                {message.trim().length > 0 ? (
+                    <TouchableOpacity
+                        onPress={handleSend}
+                        className="ml-2 bg-primary rounded-full p-2.5 h-11 w-11 justify-center items-center shadow-sm"
+                    >
+                        <Ionicons name="send" size={20} color="white" style={{ marginLeft: 2 }} />
+                    </TouchableOpacity>
+                ) : (
+                    <TouchableOpacity
+                        className="ml-2 bg-gray-50 rounded-full p-2.5 h-11 w-11 justify-center items-center"
+                    >
+                        <Ionicons name="mic-outline" size={24} color="#6B7280" />
+                    </TouchableOpacity>
+                )}
+            </View>
         </KeyboardAvoidingView>
-    </ImageBackground>
       </SafeAreaView>
   );
 }
