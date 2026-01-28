@@ -129,7 +129,7 @@ export default function Index() {
                     { icon: "scan-outline", label: "Scan QR", color: "text-blue-600", bg: "bg-blue-50", route: "/qr-scanner" },
                     { icon: "calendar-outline", label: "Timetable", color: "text-purple-600", bg: "bg-purple-50", route: "/no-net" },
                     { icon: "trophy-outline", label: "Results", color: "text-yellow-600", bg: "bg-yellow-50", route: "/tap-to-mark" },
-                    { icon: "calendar-number-outline", label: "Events", color: "text-rose-600", bg: "bg-rose-50", route: "/events" },
+                    { icon: "calendar-number-outline", label: "Events", color: "text-rose-600", bg: "bg-rose-50", route: "/schedule" },
                 ].map((action, index) => (
                     <TouchableOpacity 
                         key={index} 
