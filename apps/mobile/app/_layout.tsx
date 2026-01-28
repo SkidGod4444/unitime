@@ -2,7 +2,7 @@ import QRScannerWidget from "@/components/qr.scanner.widget";
 import { LocalStoreProvider } from "@/contexts/localstore.cntxt";
 import { PermsProvider } from "@/contexts/perms.cntxt";
 import { useFonts } from "expo-font";
-import { Stack, usePathname } from "expo-router";
+import { Stack, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "./globals.css";
@@ -19,35 +19,20 @@ export default function RootLayout() {
     "Lora-SemiBoldItalic": require("../assets/fonts/Lora-SemiBoldItalic.ttf"),
   });
 
-  return <AppContent fontsLoaded={fontsLoaded} />;
+  const segments = useSegments() as string[];
+  const isQRScannerScreen = segments.includes("qr-scanner") || segments.includes("chat") || segments.includes("tap-to-mark");
 
-  function AppContent({ fontsLoaded }: { fontsLoaded: boolean }) {
-    const pathname = usePathname();
-    const isQRScannerScreen =
-      pathname.includes("qr-scanner") || pathname.includes("chat");
+  console.log("Fonts loaded:", fontsLoaded);
 
-    // useEffect(() => {
-    //   if (fontsLoaded && !loading) {
-    //     SplashScreen.hideAsync();
-    //   }
-    // }, [fontsLoaded, loading]);
-
-    // if (!fontsLoaded || loading) {
-    //   return null;
-    // }
-
-    // console.log("Theme provider initialized with theme:", theme);```````
-    console.log("Fonts loaded:", fontsLoaded);
-    return (
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <LocalStoreProvider>
-          <PermsProvider>
-            <StatusBar style={"dark"} animated />
-            <Stack screenOptions={{ headerShown: false }} />
-            {!isQRScannerScreen && <QRScannerWidget />}
-          </PermsProvider>
-        </LocalStoreProvider>
-      </GestureHandlerRootView>
-    );
-  }
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <LocalStoreProvider>
+        <PermsProvider>
+          <StatusBar style={"dark"} animated />
+          <Stack screenOptions={{ headerShown: false }} />
+          {!isQRScannerScreen && <QRScannerWidget />}
+        </PermsProvider>
+      </LocalStoreProvider>
+    </GestureHandlerRootView>
+  );
 }
