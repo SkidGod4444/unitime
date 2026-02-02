@@ -1,7 +1,7 @@
 {
   "name": "@unitime/server",
   "scripts": {
-    "dev": "bun run --hot src/index.ts"
+    "dev": "bun run --hot src/v1/index.ts"
   },
   "dependencies": {
     "hono": "^4.11.1"
