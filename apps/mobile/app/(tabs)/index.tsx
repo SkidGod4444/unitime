@@ -49,7 +49,7 @@ export default function Index() {
       >
         {/* Header Section */}
         <View className="flex-row justify-between items-center mt-4">
-          <View className="flex-row items-center gap-3">
+          <TouchableOpacity className="flex-row items-center gap-3" onPress={() => router.push("/profile")}>
             <View className="h-12 w-12 rounded-full bg-gray-200 justify-center items-center overflow-hidden">
                 <Image 
                     source={{ uri: "https://i.pravatar.cc/150?img=68" }} 
@@ -60,7 +60,7 @@ export default function Index() {
               <Text className="text-gray-500 font-medium text-sm">Welcome back,</Text>
               <Text className="text-dark font-lora font-bold text-xl">Saidev Dhal</Text>
             </View>
-          </View>
+          </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push("/notify")} className="bg-white p-2.5 rounded-full shadow-sm border border-gray-100">
             <Ionicons name="notifications-outline" size={24} color="#18181B" />
             <View className="absolute top-2 right-2.5 h-2 w-2 bg-red-500 rounded-full border border-white" />

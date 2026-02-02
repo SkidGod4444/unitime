@@ -1,10 +1,9 @@
 {
   "name": "@unitime/auth",
   "type": "module",
-  "private": true,
   "exports": {
     ".": {
-      "import": ".src/auth.ts"
+      "import": "./src/auth.ts"
     },
     "./client": {
       "import": "./src/client.ts"

@@ -1,9 +1,10 @@
 {
   "name": "@unitime/server",
   "scripts": {
-    "dev": "bun run --hot src/v1/index.ts"
+    "dev": "bun run --hot src/index.ts"
   },
   "dependencies": {
+    "@unitime/auth": "workspace:*",
     "hono": "^4.11.1"
   },
   "devDependencies": {
