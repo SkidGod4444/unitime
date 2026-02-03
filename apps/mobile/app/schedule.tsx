@@ -3,16 +3,16 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useRef, useState } from "react";
 import {
-    FlatList,
-    Modal,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View
+  FlatList,
+  Modal,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
 import Animated, {
-    FadeInDown,
-    Layout,
+  FadeInDown,
+  Layout,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -112,7 +112,7 @@ const getFirstDayOfMonth = (month: number, year: number) => {
   return new Date(year, month, 1).getDay();
 };
 
-const generateDates = (startDate: Date, days: number = 14) => {
+const generateDates = (startDate: Date, days: number = 15) => {
   const dates = [];
   for (let i = 0; i < days; i++) {
     dates.push(addDays(startDate, i));
@@ -199,7 +199,7 @@ const ClassCard = ({ session, index }: { session: ClassSession; index: number })
     >
       <View className="flex-row">
         {/* Time Column */}
-        <View className="w-20 items-end pr-3 pt-1">
+        <View className="w-20 items-end pr-5 pt-1">
           <Text className="text-gray-900 dark:text-white font-bold text-base">
             {session.startTime}
           </Text>
@@ -316,7 +316,7 @@ const CustomCalendar = ({
         <View className="flex-row flex-wrap">
             {daysResult.map((date, index) => {
                 if (!date) {
-                    return <View key={`empty-${index}`} className="w-[14.28%] h-12" />;
+                    return <View key={`empty-${index}`} className="w-[14%] h-12" />;
                 }
                 const isSelected = isSameDay(date, selectedDate);
                 // Check if date is today (optional visual cue)
@@ -325,7 +325,7 @@ const CustomCalendar = ({
                 return (
                     <TouchableOpacity
                         key={date.toISOString()}
-                        className="w-[14.28%] h-12 items-center justify-center"
+                        className="w-[14%] h-12 items-center justify-center"
                         onPress={() => onSelect(date)}
                     >
                         <View className={`w-10 h-10 items-center justify-center rounded-full ${isSelected ? "bg-black dark:bg-white" : isToday ? "bg-gray-100 dark:bg-gray-800" : ""}`}>
@@ -346,7 +346,7 @@ const CustomCalendar = ({
 
 export default function ScheduleScreen() {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [dates, setDates] = useState(generateDates(new Date(), 14));
+  const [dates, setDates] = useState(generateDates(addDays(new Date(), -15), 30));
   const [isCalendarOpen, setCalendarOpen] = useState(false);
   const flatListRef = useRef<FlatList>(null);
 
@@ -365,7 +365,7 @@ export default function ScheduleScreen() {
     // Sync Scroll
     const index = dates.findIndex((d) => isSameDay(d, selectedDate));
     if (index !== -1 && flatListRef.current) {
-        flatListRef.current.scrollToIndex({ index, animated: true, viewPosition: 0.5 });
+        flatListRef.current.scrollToIndex({ index, animated: true, viewPosition: 0.01 });
     }
   }, [selectedDate, dates]);
 
@@ -383,15 +383,13 @@ export default function ScheduleScreen() {
     // If not found or near edge, regenerate strip
     // Let's just always center the new date for better UX
     // generate 14 days, starting 3 days before selected
-    const newStartDate = addDays(date, -3);
-    setDates(generateDates(newStartDate, 14));
+    // const newStartDate = addDays(date, -3);
+    // setDates(generateDates(newStartDate, 14));
   };
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50 dark:bg-black">
-      <StatusBar style="dark" />
-      <Stack.Screen options={{ headerShown: false }} />
-      
+
       {/* Header */}
       <View>
           <Header

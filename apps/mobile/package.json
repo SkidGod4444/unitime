@@ -30,6 +30,7 @@
     "@unitime/db": "workspace:*",
     "@unitime/types": "workspace:*",
     "expo": "~54.0.30",
+    "expo-av": "~16.0.8",
     "expo-build-properties": "^1.0.10",
     "expo-camera": "^17.0.10",
     "expo-constants": "~18.0.12",

@@ -1,24 +1,54 @@
-import React, { useState, useEffect } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import { CameraView, PermissionStatus, useCameraPermissions } from "expo-camera";
+import * as Haptics from "expo-haptics";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
   Alert,
   Dimensions,
+  Linking,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { CameraView, useCameraPermissions, PermissionStatus } from "expo-camera";
-import { useRouter } from "expo-router";
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { colors } from "@/utils/constants";
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+// Size of the scanner square - rounded to prevent subpixel issues
+const PREVIEW_SIZE = Math.round(SCREEN_WIDTH * 0.75);
+// Border width needs to be large enough to cover the rest of the screen
+const BORDER_WIDTH = Math.round(SCREEN_HEIGHT / 2 + 200); 
 
 export default function QRScannerScreen() {
   const router = useRouter();
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
+  const [torchEnabled, setTorchEnabled] = useState(false);
+
+  // Animation values
+  const translateY = useSharedValue(0);
+
+  // Start scanning animation
+  useEffect(() => {
+    translateY.value = withRepeat(
+      withSequence(
+        withTiming(PREVIEW_SIZE, { duration: 1500, easing: Easing.linear }),
+        withTiming(0, { duration: 1500, easing: Easing.linear })
+      ),
+      -1,
+      true
+    );
+  }, []);
 
   // Request permission on mount if not granted
   useEffect(() => {
@@ -27,246 +57,179 @@ export default function QRScannerScreen() {
     }
   }, [permission, requestPermission]);
 
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateY: translateY.value }],
+    };
+  });
+
   const handleBarCodeScanned = ({ type, data }: { type: string; data: string }) => {
     if (scanned) return;
-    
+
     setScanned(true);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     console.log("QR Code scanned:", { type, data });
-    
-    // Handle the scanned QR code data here
+
     Alert.alert(
-      "QR Code Scanned",
-      `Data: ${data}`,
+      "QR Code Found",
+      `${data}`,
       [
         {
           text: "Scan Again",
-          onPress: () => {
-            setScanned(false);
-          },
+          onPress: () => setScanned(false),
+          style: "default",
         },
         {
-          text: "Close",
-          style: "cancel",
-          onPress: () => router.back(),
+          text: "Open",
+          onPress: () => {
+             if (data.startsWith('http')) {
+                 Linking.openURL(data).catch(err => console.error("An error occurred", err));
+             }
+             setScanned(false);
+          },
         },
       ],
-      { cancelable: true }
+      { cancelable: true, onDismiss: () => setScanned(false) }
     );
+  };
+
+  const toggleTorch = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setTorchEnabled((prev) => !prev);
   };
 
   if (!permission) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.permissionContainer}>
-          <Ionicons name="camera-outline" size={64} color={colors.accent} />
-          <Text style={styles.permissionText}>Requesting camera permission...</Text>
-        </View>
-      </SafeAreaView>
+      <View className="flex-1 bg-black">
+         <StatusBar barStyle="light-content" />
+      </View>
     );
   }
 
   if (!permission.granted) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.permissionContainer}>
-          <Ionicons name="camera-outline" size={64} color={colors.accent} />
-          <Text style={styles.permissionText}>
-            We need your permission to use the camera
+      <View className="flex-1 bg-black justify-center items-center">
+         <StatusBar barStyle="light-content" />
+        <View className="w-[85%] bg-zinc-900 rounded-3xl p-8 items-center">
+          <View className="w-20 h-20 rounded-full bg-white justify-center items-center mb-6">
+            <Ionicons name="camera" size={40} color="#000" />
+          </View>
+          <Text className="text-xl font-bold text-white mb-3 text-center">Camera Access Required</Text>
+          <Text className="text-gray-400 text-center mb-8 leading-6 text-base">
+            We need your permission to access the camera to scan QR codes for class attendance and events.
           </Text>
           <TouchableOpacity
-            style={styles.permissionButton}
+            className="bg-white py-4 px-8 rounded-2xl w-full items-center mb-4 active:opacity-80"
             onPress={requestPermission}
           >
-            <Text style={styles.permissionButtonText}>Grant Permission</Text>
+            <Text className="text-black text-base font-bold">Grant Access</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.permissionButton, styles.backButton]}
+            className="py-2"
             onPress={() => router.back()}
           >
-            <Text style={styles.permissionButtonText}>Go Back</Text>
+            <Text className="text-gray-400 text-base">Not Now</Text>
           </TouchableOpacity>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.closeButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="close" size={28} color="white" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Scan QR Code</Text>
-        <View style={styles.placeholder} />
-      </View>
-
+    <View className="flex-1 bg-black">
+      <StatusBar barStyle="light-content" networkActivityIndicatorVisible />
+      
       <CameraView
-        style={styles.camera}
+        style={{ flex: 1, position: 'absolute', top: 0, left: 0, bottom: 0, right: 0 }}
         facing="back"
+        enableTorch={torchEnabled}
         onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
         barcodeScannerSettings={{
           barcodeTypes: ["qr"],
         }}
-      >
-        <View style={styles.overlay}>
-          {/* Top overlay */}
-          <View style={styles.overlayTop} />
-          
-          {/* Middle section with scanning area */}
-          <View style={styles.overlayMiddle}>
-            <View style={styles.overlaySide} />
-            <View style={styles.scanArea}>
-              <View style={[styles.corner, styles.topLeft]} />
-              <View style={[styles.corner, styles.topRight]} />
-              <View style={[styles.corner, styles.bottomLeft]} />
-              <View style={[styles.corner, styles.bottomRight]} />
-            </View>
-            <View style={styles.overlaySide} />
+      />
+
+      {/* Mask Overlay + Focus Frame Elements */}
+      {/* 
+         The View below creates the dark mask with a clear hole in the center.
+         The children of this View are placed INSIDE the content box (the hole).
+         This ensures the corners and laser are perfectly aligned with the hole.
+      */}
+      <View className="absolute inset-0 justify-center items-center z-10 pointer-events-none">
+          <View 
+            style={{
+                width: PREVIEW_SIZE + BORDER_WIDTH * 2,
+                height: PREVIEW_SIZE + BORDER_WIDTH * 2,
+                borderWidth: BORDER_WIDTH,
+                borderColor: 'rgba(0,0,0,0.6)', 
+                borderRadius: BORDER_WIDTH + 24, 
+            }}
+            className="justify-center items-center relative"
+          >
+              {/* Note: Children here act as if they are in a container of size PREVIEW_SIZE x PREVIEW_SIZE */}
+              <View style={{ width: PREVIEW_SIZE, height: PREVIEW_SIZE }}>
+                 {/* Corners */}
+                 <View className="absolute top-0 left-0 w-10 h-10 border-t-[5px] border-l-[5px] border-white rounded-tl-3xl" />
+                 <View className="absolute top-0 right-0 w-10 h-10 border-t-[5px] border-r-[5px] border-white rounded-tr-3xl" />
+                 <View className="absolute bottom-0 left-0 w-10 h-10 border-b-[5px] border-l-[5px] border-white rounded-bl-3xl" />
+                 <View className="absolute bottom-0 right-0 w-10 h-10 border-b-[5px] border-r-[5px] border-white rounded-br-3xl" />
+                 
+                 {/* Scanning Laser */}
+                 {!scanned && (
+                     <Animated.View 
+                        style={[
+                            { 
+                                position: 'absolute', 
+                                left: 20, 
+                                right: 20, 
+                                height: 2, 
+                                backgroundColor: '#3b82f6',
+                                shadowColor: '#3b82f6',
+                                shadowOffset: {width: 0, height: 0},
+                                shadowOpacity: 1,
+                                shadowRadius: 10,
+                                borderRadius: 1
+                            }, 
+                            animatedStyle
+                        ]} 
+                     />
+                 )}
+              </View>
           </View>
+      </View>
+
+      {/* Helper Text (Separate to avoid clipping/masking weirdness if any, though overflow is visible by default) */}
+      <View className="absolute inset-0 justify-center items-center z-20 pointer-events-none">
+          {/* Offset the text to be below the frame */}
+          <Text 
+            className="text-gray-300 font-medium text-base bg-black/50 px-5 py-2.5 rounded-xl overflow-hidden" 
+            style={{ marginTop: PREVIEW_SIZE + 80 }}
+          >
+             Align QR code within the frame
+          </Text>
+      </View>
+
+      {/* Header Controls */}
+      <SafeAreaView className="absolute top-0 left-0 right-0 z-30 flex-row justify-between items-center px-5 pt-2" pointerEvents="box-none">
+          <TouchableOpacity 
+              onPress={() => router.back()} 
+              className="w-11 h-11 rounded-full bg-white/15 border border-white/10 justify-center items-center active:bg-white/25"
+          >
+              <Ionicons name="close" size={24} color="white" />
+          </TouchableOpacity>
           
-          {/* Bottom overlay */}
-          <View style={styles.overlayBottom}>
-            <Text style={styles.instructionText}>
-              Position the QR code within the frame
-            </Text>
+          <View className="px-4 py-2 bg-black/50 rounded-full">
+              <Text className="text-white text-base font-semibold">Scan Code</Text>
           </View>
-        </View>
-      </CameraView>
-    </SafeAreaView>
+
+          <TouchableOpacity 
+              onPress={toggleTorch} 
+              className={`w-11 h-11 rounded-full border border-white/10 justify-center items-center active:bg-white/25 ${torchEnabled ? 'bg-white' : 'bg-white/15'}`}
+          >
+              <Ionicons name={torchEnabled ? "flash" : "flash-off"} size={22} color={torchEnabled ? "black" : "white"} />
+          </TouchableOpacity>
+      </SafeAreaView>
+
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#000",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
-    zIndex: 10,
-  },
-  closeButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "white",
-  },
-  placeholder: {
-    width: 40,
-  },
-  camera: {
-    flex: 1,
-  },
-  overlay: {
-    flex: 1,
-    backgroundColor: "transparent",
-  },
-  overlayTop: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  overlayMiddle: {
-    flexDirection: "row",
-    height: SCREEN_WIDTH * 0.7,
-  },
-  overlaySide: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  scanArea: {
-    width: SCREEN_WIDTH * 0.7,
-    height: SCREEN_WIDTH * 0.7,
-    position: "relative",
-  },
-  corner: {
-    position: "absolute",
-    width: 30,
-    height: 30,
-    borderColor: colors.secondary,
-  },
-  topLeft: {
-    top: 0,
-    left: 0,
-    borderTopWidth: 3,
-    borderLeftWidth: 3,
-    borderTopLeftRadius: 10,
-  },
-  topRight: {
-    top: 0,
-    right: 0,
-    borderTopWidth: 3,
-    borderRightWidth: 3,
-    borderTopRightRadius: 10,
-  },
-  bottomLeft: {
-    bottom: 0,
-    left: 0,
-    borderBottomWidth: 3,
-    borderLeftWidth: 3,
-    borderBottomLeftRadius: 10,
-  },
-  bottomRight: {
-    bottom: 0,
-    right: 0,
-    borderBottomWidth: 3,
-    borderRightWidth: 3,
-    borderBottomRightRadius: 10,
-  },
-  overlayBottom: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingBottom: 50,
-  },
-  instructionText: {
-    color: "white",
-    fontSize: 16,
-    textAlign: "center",
-    paddingHorizontal: 40,
-  },
-  permissionContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 40,
-    backgroundColor: colors["dark-accent"],
-  },
-  permissionText: {
-    color: "white",
-    fontSize: 16,
-    textAlign: "center",
-    marginTop: 20,
-    marginBottom: 30,
-  },
-  permissionButton: {
-    backgroundColor: colors.secondary,
-    paddingHorizontal: 30,
-    paddingVertical: 15,
-    borderRadius: 10,
-    marginTop: 10,
-  },
-  backButton: {
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-  },
-  permissionButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-});

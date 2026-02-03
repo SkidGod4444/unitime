@@ -73,7 +73,7 @@ export default function Index() {
           <TouchableOpacity 
             onPress={toggleExpand}
             activeOpacity={0.9}
-            className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden w-full"
+            className="bg-white p-4 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden w-full"
           >
              <View className="flex-row justify-between items-start">
                  <View>
@@ -127,13 +127,12 @@ export default function Index() {
             <View className="flex-row flex-wrap justify-between gap-y-4">
                 {[
                     { icon: "scan-outline", label: "Scan QR", color: "text-blue-600", bg: "bg-blue-50", route: "/qr-scanner" },
-                    { icon: "calendar-outline", label: "Timetable", color: "text-purple-600", bg: "bg-purple-50", route: "/no-net" },
-                    { icon: "trophy-outline", label: "Results", color: "text-yellow-600", bg: "bg-yellow-50", route: "/tap-to-mark" },
-                    { icon: "calendar-number-outline", label: "Events", color: "text-rose-600", bg: "bg-rose-50", route: "/schedule" },
+                    { icon: "calendar-outline", label: "Timetable", color: "text-purple-600", bg: "bg-purple-50", route: "/schedule" },
+                    { icon: "alarm-outline", label: "Alarm", color: "text-red-600", bg: "bg-red-50", route: "/alarm" },
                 ].map((action, index) => (
                     <TouchableOpacity 
                         key={index} 
-                        className="w-[48%] bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex-row items-center gap-3"
+                        className="w-[48%] bg-white p-4 rounded-3xl border border-gray-100 shadow-sm flex-row items-center gap-3"
                         onPress={() => action.route && router.push(action.route as any)}
                     >
                         <View className={`h-10 w-10 ${action.bg} rounded-full justify-center items-center`}>
@@ -160,7 +159,7 @@ export default function Index() {
                     { time: "10:30 AM", subject: "Physics", room: "Lab 2", status: "Upcoming", color: "border-l-green-500" },
                     { time: "01:00 PM", subject: "Computer Science", room: "Lab 1", status: "Upcoming", color: "border-l-purple-500" },
                 ].map((item, index) => (
-                    <View key={index} className={`bg-white p-4 rounded-xl border-l-4 ${item.color} shadow-sm flex-row justify-between items-center border border-gray-100`}>
+                    <View key={index} className={`bg-white p-4 rounded-3xl border-l-4 ${item.color} shadow-sm flex-row justify-between items-center border border-gray-100`}>
                         <View className="flex-1">
                             <Text className="text-xs text-gray-500 font-medium mb-1">{item.time}</Text>
                             <Text className="text-base font-bold text-dark">{item.subject}</Text>
