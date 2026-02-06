@@ -20,5 +20,5 @@ type UserT = {
   $user_id: string;
   $created_at: string;
   $updated_at: string;
-}
+};
 export type { Theme, TeamT, UserT };

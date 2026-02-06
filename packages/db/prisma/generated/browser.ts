@@ -17,4 +17,33 @@ import * as Prisma from './internal/prismaNamespaceBrowser.ts'
 export { Prisma }
 export * as $Enums from './enums.ts'
 export * from './enums.ts';
-
+/**
+ * Model Courses
+ * 
+ */
+export type Courses = Prisma.CoursesModel
+/**
+ * Model User
+ * 
+ */
+export type User = Prisma.UserModel
+/**
+ * Model UserCourse
+ * 
+ */
+export type UserCourse = Prisma.UserCourseModel
+/**
+ * Model UserTimetable
+ * 
+ */
+export type UserTimetable = Prisma.UserTimetableModel
+/**
+ * Model Timetable
+ * 
+ */
+export type Timetable = Prisma.TimetableModel
+/**
+ * Model AttendanceQRSession
+ * 
+ */
+export type AttendanceQRSession = Prisma.AttendanceQRSessionModel

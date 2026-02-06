@@ -8,4 +8,10 @@
  *
  * 🟢 You can import this file directly.
  */
+export type * from './models/Courses.ts'
+export type * from './models/User.ts'
+export type * from './models/UserCourse.ts'
+export type * from './models/UserTimetable.ts'
+export type * from './models/Timetable.ts'
+export type * from './models/AttendanceQRSession.ts'
 export type * from './commonInputTypes.ts'

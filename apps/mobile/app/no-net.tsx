@@ -1,9 +1,9 @@
-import { Feather } from '@expo/vector-icons';
-import * as Network from 'expo-network';
-import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Feather } from "@expo/vector-icons";
+import * as Network from "expo-network";
+import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function NoNetScreen() {
   const router = useRouter();
@@ -13,14 +13,14 @@ export default function NoNetScreen() {
     setIsChecking(true);
     // Add a small delay for better UX so the user sees something is happening
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    
+
     try {
       const networkState = await Network.getNetworkStateAsync();
       if (networkState.isConnected && networkState.isInternetReachable) {
         if (router.canGoBack()) {
           router.back();
         } else {
-          router.replace('/');
+          router.replace("/");
         }
       } else {
         // Optional: Show a toast or just let the user try again
@@ -57,7 +57,7 @@ export default function NoNetScreen() {
           onPress={checkConnection}
           disabled={isChecking}
           className={`mt-4 px-8 py-3 rounded-xl bg-primary active:bg-primary-dark w-full max-w-[200px] flex-row justify-center items-center ${
-            isChecking ? 'opacity-70' : ''
+            isChecking ? "opacity-70" : ""
           }`}
         >
           {isChecking ? (

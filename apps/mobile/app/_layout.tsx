@@ -20,7 +20,13 @@ export default function RootLayout() {
   });
 
   const segments = useSegments() as string[];
-  const isQRScannerScreen = segments.includes("qr-scanner") || segments.includes("chat") || segments.includes("tap-to-mark") || segments.includes("schedule") || segments.includes("auth") || segments.includes("alarm");
+  const isQRScannerScreen =
+    segments.includes("qr-scanner") ||
+    segments.includes("chat") ||
+    segments.includes("tap-to-mark") ||
+    segments.includes("schedule") ||
+    segments.includes("auth") ||
+    segments.includes("alarm");
 
   console.log("Fonts loaded:", fontsLoaded);
 

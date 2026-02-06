@@ -1,11 +1,11 @@
-import { Hono } from 'hono'
+import { Hono } from "hono";
 
-const history = new Hono()
+const history = new Hono();
 
-history.get('/', (c) => {
+history.get("/", (c) => {
   return c.json({
-    message: 'History route',
-  })
-})
+    message: "History route",
+  });
+});
 
 export default history;

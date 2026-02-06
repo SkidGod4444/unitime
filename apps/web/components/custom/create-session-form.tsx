@@ -1,55 +1,58 @@
-"use client"
+"use client";
 
-import { Plus } from "lucide-react"
-import * as React from "react"
+import { Plus } from "lucide-react";
+import * as React from "react";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export interface Session {
-  id: string
-  name: string
-  date: string
-  time: string
-  description: string
+  id: string;
+  name: string;
+  date: string;
+  time: string;
+  description: string;
 }
 
 interface CreateSessionFormProps {
-  onCreate: (session: Session) => void
-  onCancel: () => void
+  onCreate: (session: Session) => void;
+  onCancel: () => void;
 }
 
-export function CreateSessionForm({ onCreate, onCancel }: CreateSessionFormProps) {
-  const [name, setName] = React.useState("")
-  const [date, setDate] = React.useState("")
-  const [time, setTime] = React.useState("")
-  const [description, setDescription] = React.useState("")
+export function CreateSessionForm({
+  onCreate,
+  onCancel,
+}: CreateSessionFormProps) {
+  const [name, setName] = React.useState("");
+  const [date, setDate] = React.useState("");
+  const [time, setTime] = React.useState("");
+  const [description, setDescription] = React.useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     const newSession: Session = {
       id: Math.random().toString(36).substr(2, 9),
       name,
       date,
       time,
       description,
-    }
-    onCreate(newSession)
+    };
+    onCreate(newSession);
     // Reset form
-    setName("")
-    setDate("")
-    setTime("")
-    setDescription("")
-  }
+    setName("");
+    setDate("");
+    setTime("");
+    setDescription("");
+  };
 
   return (
     <Card className="w-full max-w-md mx-auto">
@@ -119,5 +122,5 @@ export function CreateSessionForm({ onCreate, onCancel }: CreateSessionFormProps
         </CardFooter>
       </form>
     </Card>
-  )
+  );
 }

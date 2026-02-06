@@ -71,66 +71,94 @@ export default function History() {
       <View className="flex-1 px-5">
         {/* Header */}
         <View className="mt-4 mb-6">
-          <Text className="text-2xl font-bold text-dark font-lora">Activity History</Text>
-          <Text className="text-gray-500 text-sm">Your recent actions and logs</Text>
+          <Text className="text-2xl font-bold text-dark font-lora">
+            Activity History
+          </Text>
+          <Text className="text-gray-500 text-sm">
+            Your recent actions and logs
+          </Text>
         </View>
 
         {/* Filters */}
         <View className="mb-6">
-            <ScrollView 
-                horizontal 
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ gap: 8 }}
-            >
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: 8 }}
+          >
             {FILTERS.map((filter) => (
-                <TouchableOpacity
+              <TouchableOpacity
                 key={filter}
                 onPress={() => setActiveFilter(filter)}
                 className={`px-4 py-2 rounded-full border ${
-                    activeFilter === filter
+                  activeFilter === filter
                     ? "bg-dark border-dark"
                     : "bg-white border-gray-200"
                 }`}
-                >
+              >
                 <Text
-                    className={`font-medium text-sm ${
+                  className={`font-medium text-sm ${
                     activeFilter === filter ? "text-white" : "text-gray-600"
-                    }`}
+                  }`}
                 >
-                    {filter}
+                  {filter}
                 </Text>
-                </TouchableOpacity>
+              </TouchableOpacity>
             ))}
-            </ScrollView>
+          </ScrollView>
         </View>
 
         {/* Activity List */}
-        <ScrollView 
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 100, gap: 16 }}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 100, gap: 16 }}
         >
           {filteredData.map((item) => (
             <View
               key={item.id}
               className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex-row items-center gap-4"
             >
-              <View className={`h-12 w-12 rounded-full ${item.bg} justify-center items-center`}>
-                <Ionicons name={item.icon as any} size={24} className={item.color} style={{color: item.color === 'text-green-600' ? '#16A34A' : item.color === 'text-blue-600' ? '#2563EB' : item.color === 'text-purple-600' ? '#9333EA' : item.color === 'text-red-600' ? '#DC2626' : '#EA580C'}} />
+              <View
+                className={`h-12 w-12 rounded-full ${item.bg} justify-center items-center`}
+              >
+                <Ionicons
+                  name={item.icon as any}
+                  size={24}
+                  className={item.color}
+                  style={{
+                    color:
+                      item.color === "text-green-600"
+                        ? "#16A34A"
+                        : item.color === "text-blue-600"
+                          ? "#2563EB"
+                          : item.color === "text-purple-600"
+                            ? "#9333EA"
+                            : item.color === "text-red-600"
+                              ? "#DC2626"
+                              : "#EA580C",
+                  }}
+                />
               </View>
               <View className="flex-1">
                 <View className="flex-row justify-between items-start mb-1">
-                    <Text className="font-bold text-dark text-base">{item.title}</Text>
-                    <Text className="text-xs text-gray-400 font-medium">{item.timestamp}</Text>
+                  <Text className="font-bold text-dark text-base">
+                    {item.title}
+                  </Text>
+                  <Text className="text-xs text-gray-400 font-medium">
+                    {item.timestamp}
+                  </Text>
                 </View>
-                <Text className="text-gray-500 text-sm">{item.description}</Text>
+                <Text className="text-gray-500 text-sm">
+                  {item.description}
+                </Text>
               </View>
             </View>
           ))}
-          
+
           {filteredData.length === 0 && (
-              <View className="items-center justify-center py-10">
-                  <Text className="text-gray-400">No activity found</Text>
-              </View>
+            <View className="items-center justify-center py-10">
+              <Text className="text-gray-400">No activity found</Text>
+            </View>
           )}
         </ScrollView>
       </View>

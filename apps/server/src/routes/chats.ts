@@ -1,11 +1,11 @@
-import { Hono } from 'hono'
+import { Hono } from "hono";
 
-const chats = new Hono()
+const chats = new Hono();
 
-chats.get('/', (c) => {
+chats.get("/", (c) => {
   return c.json({
-    message: 'Chats route',
-  })
-})
+    message: "Chats route",
+  });
+});
 
 export default chats;

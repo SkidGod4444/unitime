@@ -74,11 +74,17 @@ export default function Notify() {
         {/* Header */}
         <View className="flex-row justify-between items-end mt-4 mb-6">
           <View>
-            <Text className="text-2xl font-bold text-dark font-lora">Notifications</Text>
-            <Text className="text-gray-500 text-sm">Stay updated with your classes</Text>
+            <Text className="text-2xl font-bold text-dark font-lora">
+              Notifications
+            </Text>
+            <Text className="text-gray-500 text-sm">
+              Stay updated with your classes
+            </Text>
           </View>
           <TouchableOpacity>
-            <Text className="text-primary font-medium text-sm mb-1">Mark all as read</Text>
+            <Text className="text-primary font-medium text-sm mb-1">
+              Mark all as read
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -94,34 +100,62 @@ export default function Notify() {
             </Text>
           )}
           renderItem={({ item }: { item: NotificationItem }) => (
-            <TouchableOpacity 
+            <TouchableOpacity
               className={`p-4 rounded-xl border mb-3 flex-row gap-4 ${
-                item.read 
-                    ? "bg-white border-gray-100" 
-                    : "bg-blue-50/30 border-blue-100"
+                item.read
+                  ? "bg-white border-gray-100"
+                  : "bg-blue-50/30 border-blue-100"
               }`}
             >
-              <View className={`h-12 w-12 rounded-full ${item.bg} justify-center items-center shrink-0`}>
-                <Ionicons name={item.icon as any} size={24} className={item.color} style={{color: item.color === 'text-blue-600' ? '#2563EB' : item.color === 'text-red-600' ? '#DC2626' : item.color === 'text-purple-600' ? '#9333EA' : '#EA580C'}} />
+              <View
+                className={`h-12 w-12 rounded-full ${item.bg} justify-center items-center shrink-0`}
+              >
+                <Ionicons
+                  name={item.icon as any}
+                  size={24}
+                  className={item.color}
+                  style={{
+                    color:
+                      item.color === "text-blue-600"
+                        ? "#2563EB"
+                        : item.color === "text-red-600"
+                          ? "#DC2626"
+                          : item.color === "text-purple-600"
+                            ? "#9333EA"
+                            : "#EA580C",
+                  }}
+                />
               </View>
               <View className="flex-1">
                 <View className="flex-row justify-between items-start mb-1">
-                    <Text className={`font-bold text-base ${item.read ? "text-dark" : "text-black"}`}>
-                        {item.title}
-                    </Text>
-                    <Text className="text-xs text-gray-400 font-medium shrink-0 ml-2">{item.time}</Text>
+                  <Text
+                    className={`font-bold text-base ${item.read ? "text-dark" : "text-black"}`}
+                  >
+                    {item.title}
+                  </Text>
+                  <Text className="text-xs text-gray-400 font-medium shrink-0 ml-2">
+                    {item.time}
+                  </Text>
                 </View>
-                <Text className="text-gray-500 text-sm leading-5">{item.body}</Text>
+                <Text className="text-gray-500 text-sm leading-5">
+                  {item.body}
+                </Text>
               </View>
               {!item.read && (
-                  <View className="w-2 h-2 rounded-full bg-blue-600 absolute top-4 right-4" />
+                <View className="w-2 h-2 rounded-full bg-blue-600 absolute top-4 right-4" />
               )}
             </TouchableOpacity>
           )}
           ListEmptyComponent={() => (
             <View className="items-center justify-center py-20">
-                <Ionicons name="notifications-off-outline" size={48} color="#9CA3AF" />
-                <Text className="text-gray-400 mt-4 text-center">No notifications yet</Text>
+              <Ionicons
+                name="notifications-off-outline"
+                size={48}
+                color="#9CA3AF"
+              />
+              <Text className="text-gray-400 mt-4 text-center">
+                No notifications yet
+              </Text>
             </View>
           )}
         />

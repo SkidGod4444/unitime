@@ -1,11 +1,11 @@
-import { Hono } from 'hono'
+import { Hono } from "hono";
 
-const notifications = new Hono()
+const notifications = new Hono();
 
-notifications.get('/', (c) => {
+notifications.get("/", (c) => {
   return c.json({
-    message: 'Notifications route',
-  })
-})
+    message: "Notifications route",
+  });
+});
 
 export default notifications;

@@ -1,5 +1,5 @@
 import { withAccelerate } from "@prisma/extension-accelerate";
-import { PrismaClient } from "../prisma/generated/client.js";
+import { PrismaClient } from "../prisma/generated/client";
 
 const prismaClientSingleton = () => {
   const accelerateUrl = process.env.DATABASE_URL;
@@ -18,4 +18,4 @@ declare const globalThis: {
 export const prisma = globalThis.prismaGlobal ?? prismaClientSingleton();
 
 if (process.env.NODE_ENV !== "production") globalThis.prismaGlobal = prisma;
-export * from "@prisma/client";
+export * from "../prisma/generated/client";

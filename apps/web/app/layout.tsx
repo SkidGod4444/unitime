@@ -63,14 +63,14 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${fontLora.variable} antialiased `}
       >
         <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            forcedTheme="dark"
-            enableSystem
-            disableTransitionOnChange
-          >
-            {children}
-          </ThemeProvider>
+          attribute="class"
+          defaultTheme="dark"
+          forcedTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

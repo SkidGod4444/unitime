@@ -9,7 +9,84 @@
 * 🟢 You can import this file directly.
 */
 
+export const CourseType = {
+  CORE: 'CORE',
+  OPEN_ELECTIVE: 'OPEN_ELECTIVE',
+  VOCATIONAL_ELECTIVE: 'VOCATIONAL_ELECTIVE'
+} as const
+
+export type CourseType = (typeof CourseType)[keyof typeof CourseType]
 
 
-// This file is empty because there are no enums in the schema.
-export {}
+export const CourseStatus = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE'
+} as const
+
+export type CourseStatus = (typeof CourseStatus)[keyof typeof CourseStatus]
+
+
+export const CourseSemester = {
+  FIRST_SEMESTER: 'FIRST_SEMESTER',
+  SECOND_SEMESTER: 'SECOND_SEMESTER',
+  THIRD_SEMESTER: 'THIRD_SEMESTER',
+  FOURTH_SEMESTER: 'FOURTH_SEMESTER',
+  FIFTH_SEMESTER: 'FIFTH_SEMESTER',
+  SIXTH_SEMESTER: 'SIXTH_SEMESTER',
+  SEVENTH_SEMESTER: 'SEVENTH_SEMESTER',
+  EIGHTH_SEMESTER: 'EIGHTH_SEMESTER',
+  NINTH_SEMESTER: 'NINTH_SEMESTER',
+  TENTH_SEMESTER: 'TENTH_SEMESTER'
+} as const
+
+export type CourseSemester = (typeof CourseSemester)[keyof typeof CourseSemester]
+
+
+export const CourseClassType = {
+  LECTURE: 'LECTURE',
+  LAB: 'LAB',
+  TUTORIAL: 'TUTORIAL'
+} as const
+
+export type CourseClassType = (typeof CourseClassType)[keyof typeof CourseClassType]
+
+
+export const UserRole = {
+  STUDENT: 'STUDENT',
+  PROFESSOR: 'PROFESSOR',
+  ADMIN: 'ADMIN',
+  REPRESENTATIVE: 'REPRESENTATIVE',
+  COUNSELOR: 'COUNSELOR',
+  STAFF: 'STAFF'
+} as const
+
+export type UserRole = (typeof UserRole)[keyof typeof UserRole]
+
+
+export const UserStatus = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE'
+} as const
+
+export type UserStatus = (typeof UserStatus)[keyof typeof UserStatus]
+
+
+export const CourseDay = {
+  MONDAY: 'MONDAY',
+  TUESDAY: 'TUESDAY',
+  WEDNESDAY: 'WEDNESDAY',
+  THURSDAY: 'THURSDAY',
+  FRIDAY: 'FRIDAY',
+  SATURDAY: 'SATURDAY',
+  SUNDAY: 'SUNDAY'
+} as const
+
+export type CourseDay = (typeof CourseDay)[keyof typeof CourseDay]
+
+
+export const AttendanceQRStatus = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE'
+} as const
+
+export type AttendanceQRStatus = (typeof AttendanceQRStatus)[keyof typeof AttendanceQRStatus]

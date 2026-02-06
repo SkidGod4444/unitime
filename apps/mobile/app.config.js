@@ -22,7 +22,7 @@ const getAppName = () => {
 const getAppIcon = () => {
   if (IS_DEV) return './assets/icons/logo.png';
   if (IS_PREVIEW) return './assets/icons/logo.png';
-  return './assets/icons/logo.png';
+  return './assets/icons/logo2.png';
 };
 
 

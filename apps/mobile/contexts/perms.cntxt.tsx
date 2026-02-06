@@ -52,7 +52,7 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
     useState<Notifications.PermissionStatus | null>(null);
   const [cameraPermission, setCameraPermission] =
     useState<PermissionStatus | null>(null);
-  
+
   // Use ref to track interval ID across renders and closures
   const intervalRef = useRef<NodeJS.Timeout | number | null>(null);
 
@@ -78,9 +78,12 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       const { status } = await Location.getForegroundPermissionsAsync();
       setLocationPermission(status);
-      
+
       // Only fetch location when app is in foreground/active state
-      if (status === Location.PermissionStatus.GRANTED && AppState.currentState === "active") {
+      if (
+        status === Location.PermissionStatus.GRANTED &&
+        AppState.currentState === "active"
+      ) {
         try {
           const location = await Location.getCurrentPositionAsync({});
           console.log("Current location:", location);
@@ -98,10 +101,13 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
           //   );
         } catch (locationError) {
           // Silently handle location fetch errors when in background
-          console.warn("Could not fetch location (app may be in background):", locationError);
+          console.warn(
+            "Could not fetch location (app may be in background):",
+            locationError,
+          );
         }
       }
-      
+
       return status;
     } catch (error) {
       console.error("Error checking location permission:", error);
@@ -263,7 +269,7 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
-      
+
       intervalRef.current = setInterval(() => {
         if (AppState.currentState === "active") {
           refreshPermissions();
@@ -280,7 +286,7 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
         // Immediate check when app becomes active
         checkAllPermissions();
         console.log("App became active - running immediate permission check");
-        
+
         // Reset interval to start fresh 10-second cycle
         startInterval();
       }

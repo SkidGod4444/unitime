@@ -1,11 +1,11 @@
-import { Hono } from 'hono'
+import { Hono } from "hono";
 
-const attendance = new Hono()
+const attendance = new Hono();
 
-attendance.get('/', (c) => {
+attendance.get("/", (c) => {
   return c.json({
-    message: 'Attendance route',
-  })
-})
+    message: "Attendance route",
+  });
+});
 
 export default attendance;

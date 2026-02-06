@@ -4,6 +4,17 @@
   "exports": {
     ".": "./src/index.ts"
   },
+  "scripts": {
+    "db:studio": "prisma studio",
+    "db:validate": "prisma validate",
+    "db:format": "prisma format",
+    "db:generate": "prisma generate --schema=./prisma/schema.prisma",
+    "db:push": "prisma db push",
+    "db:migrate": "bun db:validate && prisma migrate",
+    "db:dev": "prisma dev --name unitime_db",
+    "db:kill": "prisma dev stop unitime_db",
+    "db:rm": "prisma dev rm unitime_db"
+  },
   "devDependencies": {
     "@types/bun": "latest",
     "dotenv": "^17.2.3"
@@ -12,9 +23,9 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "@prisma/client": "^7.2.0",
+    "@prisma/client": "^7.3.0",
     "@prisma/extension-accelerate": "^3.0.1",
-    "prisma": "^7.2.0",
+    "prisma": "^7.3.0",
     "react-native-url-polyfill": "^3.0.0"
   }
 }

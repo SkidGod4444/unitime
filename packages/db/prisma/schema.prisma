@@ -12,3 +12,157 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum CourseType {
+  CORE
+  OPEN_ELECTIVE
+  VOCATIONAL_ELECTIVE
+}
+
+enum CourseStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum CourseSemester {
+  FIRST_SEMESTER
+  SECOND_SEMESTER
+  THIRD_SEMESTER
+  FOURTH_SEMESTER
+  FIFTH_SEMESTER
+  SIXTH_SEMESTER
+  SEVENTH_SEMESTER
+  EIGHTH_SEMESTER
+  NINTH_SEMESTER
+  TENTH_SEMESTER
+}
+
+enum CourseClassType {
+  LECTURE
+  LAB
+  TUTORIAL
+}
+
+model Courses {
+  id                  String                @id @default(uuid())
+  code                String                @unique
+  name                String
+  credit              Float                 @default(0.0)
+  description         String?
+  professorId         String?
+  type                CourseType            @default(CORE)
+  status              CourseStatus          @default(ACTIVE)
+  semester            CourseSemester        @default(FIRST_SEMESTER)
+  classType           CourseClassType       @default(LECTURE)
+  users               UserCourse[]
+  timetable           Timetable[]
+  attendanceQRSession AttendanceQRSession[]
+  createdAt           DateTime              @default(now()) @map("created_at")
+  updatedAt           DateTime              @updatedAt @map("updated_at")
+
+  @@map("courses")
+}
+
+enum UserRole {
+  STUDENT
+  PROFESSOR
+  ADMIN
+  REPRESENTATIVE
+  COUNSELOR
+  STAFF
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model User {
+  id                   String                @id @default(uuid())
+  name                 String
+  email                String                @unique
+  courses              UserCourse[]
+  timetables           UserTimetable[]
+  attendanceQRSessions AttendanceQRSession[]
+  role                 UserRole              @default(STUDENT)
+  status               UserStatus            @default(ACTIVE)
+  createdAt            DateTime              @default(now()) @map("created_at")
+  updatedAt            DateTime              @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+// Junction table for many-to-many relationship between User and Course
+model UserCourse {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  courseId   String   @map("course_id")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course     Courses  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  enrolledAt DateTime @default(now()) @map("enrolled_at")
+
+  @@unique([userId, courseId])
+  @@map("user_courses")
+}
+
+// Junction table for many-to-many relationship between User and Timetable
+model UserTimetable {
+  id          String    @id @default(uuid())
+  userId      String    @map("user_id")
+  timetableId String    @map("timetable_id")
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  timetable   Timetable @relation(fields: [timetableId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@unique([userId, timetableId])
+  @@map("user_timetable")
+}
+
+enum CourseDay {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+model Timetable {
+  id        String          @id @default(uuid())
+  courseId  String          @map("course_id")
+  course    Courses         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  day       CourseDay       @default(MONDAY)
+  startTime DateTime        @map("start_time")
+  endTime   DateTime        @map("end_time")
+  location  String?
+  users     UserTimetable[]
+  createdAt DateTime        @default(now()) @map("created_at")
+  updatedAt DateTime        @updatedAt @map("updated_at")
+
+  @@unique([courseId, day, startTime, endTime])
+  @@map("timetable")
+}
+
+enum AttendanceQRStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model AttendanceQRSession {
+  id           String             @id @default(uuid())
+  courseId     String             @map("course_id")
+  createdBy    String             @map("created_by")
+  user         User               @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  course       Courses            @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  status       AttendanceQRStatus @default(ACTIVE)
+  sessionToken String             @unique @map("session_token") // Unique token for the QR code session
+  markedUsers  String[]           @default([]) @map("marked_users") // Array of user IDs who have marked attendance
+  startTime    DateTime           @map("start_time")
+  endTime      DateTime           @map("end_time")
+  createdAt    DateTime           @default(now()) @map("created_at")
+  updatedAt    DateTime           @updatedAt @map("updated_at")
+
+  @@map("attendance_qr_sessions")
+}

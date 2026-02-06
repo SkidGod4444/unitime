@@ -1,16 +1,16 @@
-import React, { useEffect } from "react";
-import { View, Dimensions } from "react-native";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  runOnJS,
-} from "react-native-reanimated";
+import { useLocalStore } from "@/contexts/localstore.cntxt";
+import { colors } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { colors } from "@/utils/constants";
-import { useLocalStore } from "@/contexts/localstore.cntxt";
+import React, { useEffect } from "react";
+import { Dimensions, View } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import Animated, {
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const WIDGET_SIZE = 56;
@@ -82,7 +82,7 @@ export default function QRScannerWidget() {
   const tapGesture = Gesture.Tap()
     .maxDuration(250)
     .onEnd(() => {
-      'worklet';
+      "worklet";
       runOnJS(navigateToQRScanner)();
     });
 
@@ -101,15 +101,15 @@ export default function QRScannerWidget() {
       // Constrain the widget within screen bounds
       translateX.value = Math.max(
         0,
-        Math.min(SCREEN_WIDTH - WIDGET_SIZE, newX)
+        Math.min(SCREEN_WIDTH - WIDGET_SIZE, newX),
       );
       translateY.value = Math.max(
         0,
-        Math.min(SCREEN_HEIGHT - WIDGET_SIZE, newY)
+        Math.min(SCREEN_HEIGHT - WIDGET_SIZE, newY),
       );
     })
     .onEnd(() => {
-      'worklet';
+      "worklet";
       // Snap to nearest edge (left or right)
       const centerX = SCREEN_WIDTH / 2;
       const targetX =
@@ -118,12 +118,12 @@ export default function QRScannerWidget() {
           : SCREEN_WIDTH - WIDGET_SIZE; // Snap to right
 
       const finalY = translateY.value;
-      
+
       translateX.value = withSpring(targetX, {
         damping: 20,
         stiffness: 90,
       });
-      
+
       // Trigger save by setting pending save values
       pendingSaveX.value = targetX;
       pendingSaveY.value = finalY;
@@ -144,11 +144,11 @@ export default function QRScannerWidget() {
 
   return (
     <GestureDetector gesture={composedGesture}>
-      <Animated.View 
+      <Animated.View
         className="absolute w-12 h-12 z-[500]"
         style={animatedStyle}
       >
-        <View 
+        <View
           className="w-12 h-12 rounded-xl justify-center items-center shadow-md"
           style={{
             backgroundColor: colors.secondary,

@@ -1,11 +1,11 @@
-import { Hono } from 'hono'
+import { Hono } from "hono";
 
-const users = new Hono()
+const users = new Hono();
 
-users.get('/', (c) => {
+users.get("/", (c) => {
   return c.json({
-    message: 'Hello Hono!',
-  })
-})
+    message: "Hello Hono!",
+  });
+});
 
 export default users;

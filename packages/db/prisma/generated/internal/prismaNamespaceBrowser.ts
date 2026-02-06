@@ -51,7 +51,12 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
-
+  Courses: 'Courses',
+  User: 'User',
+  UserCourse: 'UserCourse',
+  UserTimetable: 'UserTimetable',
+  Timetable: 'Timetable',
+  AttendanceQRSession: 'AttendanceQRSession'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -60,12 +65,118 @@ export type ModelName = (typeof ModelName)[keyof typeof ModelName]
  * Enums
  */
 
-export const TransactionIsolationLevel = {
+export const TransactionIsolationLevel = runtime.makeStrictEnum({
   ReadUncommitted: 'ReadUncommitted',
   ReadCommitted: 'ReadCommitted',
   RepeatableRead: 'RepeatableRead',
   Serializable: 'Serializable'
-} as const
+} as const)
 
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
+
+
+export const CoursesScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  credit: 'credit',
+  description: 'description',
+  professorId: 'professorId',
+  type: 'type',
+  status: 'status',
+  semester: 'semester',
+  classType: 'classType',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CoursesScalarFieldEnum = (typeof CoursesScalarFieldEnum)[keyof typeof CoursesScalarFieldEnum]
+
+
+export const UserScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  role: 'role',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const UserCourseScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  courseId: 'courseId',
+  enrolledAt: 'enrolledAt'
+} as const
+
+export type UserCourseScalarFieldEnum = (typeof UserCourseScalarFieldEnum)[keyof typeof UserCourseScalarFieldEnum]
+
+
+export const UserTimetableScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  timetableId: 'timetableId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserTimetableScalarFieldEnum = (typeof UserTimetableScalarFieldEnum)[keyof typeof UserTimetableScalarFieldEnum]
+
+
+export const TimetableScalarFieldEnum = {
+  id: 'id',
+  courseId: 'courseId',
+  day: 'day',
+  startTime: 'startTime',
+  endTime: 'endTime',
+  location: 'location',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TimetableScalarFieldEnum = (typeof TimetableScalarFieldEnum)[keyof typeof TimetableScalarFieldEnum]
+
+
+export const AttendanceQRSessionScalarFieldEnum = {
+  id: 'id',
+  courseId: 'courseId',
+  createdBy: 'createdBy',
+  status: 'status',
+  sessionToken: 'sessionToken',
+  markedUsers: 'markedUsers',
+  startTime: 'startTime',
+  endTime: 'endTime',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AttendanceQRSessionScalarFieldEnum = (typeof AttendanceQRSessionScalarFieldEnum)[keyof typeof AttendanceQRSessionScalarFieldEnum]
+
+
+export const SortOrder = {
+  asc: 'asc',
+  desc: 'desc'
+} as const
+
+export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+} as const
+
+export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 

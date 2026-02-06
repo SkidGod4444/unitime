@@ -4,15 +4,15 @@ import {
   useMyProfileStore,
   useProjectsStore,
 } from "@prexo/store";
+import { authClient } from "@unitime/auth/client";
+import { UserT } from "@unitime/types";
 import {
   createContext,
-  useContext,
-  useState,
-  useEffect,
   ReactNode,
+  useContext,
+  useEffect,
+  useState,
 } from "react";
-import {authClient} from "@unitime/auth/client";
-import { UserT } from "@unitime/types";
 
 interface AuthContextType {
   user: UserT | null;
@@ -34,8 +34,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { myProfile, addMyProfile, removeMyProfile } = useMyProfileStore();
   const { setProjects } = useProjectsStore();
   const { removeKey } = useApiKeyStore();
-//   const [cons, setCons] = useLocalStorage("@prexo-#consoleId", "");
-//   const router = useRouter();
+  //   const [cons, setCons] = useLocalStorage("@prexo-#consoleId", "");
+  //   const router = useRouter();
 
   useEffect(() => {
     let isMounted = true;

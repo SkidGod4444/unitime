@@ -8,12 +8,9 @@ import {
   ScrollView,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
-import Animated, {
-  FadeInDown,
-  Layout,
-} from "react-native-reanimated";
+import Animated, { FadeInDown, Layout } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 // --- Types ---
@@ -71,8 +68,18 @@ const SAMPLE_CLASSES: ClassSession[] = [
 // --- Date Utilities (Native) ---
 
 const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -87,7 +94,7 @@ const formatDate = (date: Date, formatStr: string) => {
     return date.getDate().toString();
   }
   if (formatStr === "EEE, MMMM d") {
-      return `${DAY_NAMES[date.getDay()]}, ${MONTH_NAMES[date.getMonth()]} ${date.getDate()}`;
+    return `${DAY_NAMES[date.getDay()]}, ${MONTH_NAMES[date.getMonth()]} ${date.getDate()}`;
   }
   return date.toDateString();
 };
@@ -99,9 +106,11 @@ const addDays = (date: Date, days: number) => {
 };
 
 const isSameDay = (d1: Date, d2: Date) => {
-  return d1.getFullYear() === d2.getFullYear() &&
-         d1.getMonth() === d2.getMonth() &&
-         d1.getDate() === d2.getDate();
+  return (
+    d1.getFullYear() === d2.getFullYear() &&
+    d1.getMonth() === d2.getMonth() &&
+    d1.getDate() === d2.getDate()
+  );
 };
 
 const getDaysInMonth = (month: number, year: number) => {
@@ -162,11 +171,13 @@ const DateItem = ({
     <TouchableOpacity
       onPress={() => onSelect(date)}
       className={`mr-3 items-center justify-center rounded-2xl ${
-        isSelected ? "bg-black dark:bg-white" : "bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800"
+        isSelected
+          ? "bg-black dark:bg-white"
+          : "bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800"
       } shadow-sm`}
       style={{
-           width: 70,
-           height: 85,
+        width: 70,
+        height: 85,
       }}
     >
       <Text
@@ -178,19 +189,27 @@ const DateItem = ({
       </Text>
       <Text
         className={`text-xl font-bold ${
-          isSelected ? "text-white dark:text-black" : "text-gray-900 dark:text-white"
+          isSelected
+            ? "text-white dark:text-black"
+            : "text-gray-900 dark:text-white"
         }`}
       >
         {formatDate(date, "d")}
       </Text>
       {isSelected && (
-          <View className="mt-1 w-1 h-1 rounded-full bg-white dark:bg-black" />
+        <View className="mt-1 w-1 h-1 rounded-full bg-white dark:bg-black" />
       )}
     </TouchableOpacity>
   );
 };
 
-const ClassCard = ({ session, index }: { session: ClassSession; index: number }) => {
+const ClassCard = ({
+  session,
+  index,
+}: {
+  session: ClassSession;
+  index: number;
+}) => {
   return (
     <Animated.View
       entering={FadeInDown.delay(index * 100)}
@@ -205,11 +224,11 @@ const ClassCard = ({ session, index }: { session: ClassSession; index: number })
           </Text>
           <Text className="text-gray-400 text-xs">{session.endTime}</Text>
           {/* Vertical Line */}
-           <View className="absolute right-[-6px] top-8 bottom-[-20px] w-[2px] bg-gray-100 dark:bg-gray-800 rounded-full" />
-           <View
-              className="absolute right-[-10px] top-2 w-[10px] h-[10px] rounded-full border-2 border-white dark:border-black"
-              style={{ backgroundColor: session.color }}
-           />
+          <View className="absolute right-[-6px] top-8 bottom-[-20px] w-[2px] bg-gray-100 dark:bg-gray-800 rounded-full" />
+          <View
+            className="absolute right-[-10px] top-2 w-[10px] h-[10px] rounded-full border-2 border-white dark:border-black"
+            style={{ backgroundColor: session.color }}
+          />
         </View>
 
         {/* Card Content */}
@@ -220,13 +239,16 @@ const ClassCard = ({ session, index }: { session: ClassSession; index: number })
           >
             <View className="flex-row justify-between items-start mb-2">
               <View className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-md">
-                <Text style={{ color: session.color }} className="text-xs font-bold uppercase tracking-wider">
+                <Text
+                  style={{ color: session.color }}
+                  className="text-xs font-bold uppercase tracking-wider"
+                >
                   {session.courseCode} • {session.type}
                 </Text>
               </View>
               <Ionicons name="ellipsis-horizontal" size={20} color="#9ca3af" />
             </View>
-            
+
             <Text className="text-lg font-bold text-gray-900 dark:text-white mb-1">
               {session.courseName}
             </Text>
@@ -234,11 +256,15 @@ const ClassCard = ({ session, index }: { session: ClassSession; index: number })
             <View className="flex-row items-center gap-4 mt-2">
               <View className="flex-row items-center gap-1">
                 <Ionicons name="location-outline" size={14} color="#6b7280" />
-                <Text className="text-gray-500 text-sm">{session.location}</Text>
+                <Text className="text-gray-500 text-sm">
+                  {session.location}
+                </Text>
               </View>
               <View className="flex-row items-center gap-1">
                 <Ionicons name="person-outline" size={14} color="#6b7280" />
-                <Text className="text-gray-500 text-sm">{session.professor}</Text>
+                <Text className="text-gray-500 text-sm">
+                  {session.professor}
+                </Text>
               </View>
             </View>
           </View>
@@ -259,8 +285,14 @@ const CustomCalendar = ({
 }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date(selectedDate));
 
-  const daysInMonth = getDaysInMonth(currentMonth.getMonth(), currentMonth.getFullYear());
-  const firstDay = getFirstDayOfMonth(currentMonth.getMonth(), currentMonth.getFullYear());
+  const daysInMonth = getDaysInMonth(
+    currentMonth.getMonth(),
+    currentMonth.getFullYear(),
+  );
+  const firstDay = getFirstDayOfMonth(
+    currentMonth.getMonth(),
+    currentMonth.getFullYear(),
+  );
 
   const daysResult = [];
   // Empty slots for previous month
@@ -269,90 +301,104 @@ const CustomCalendar = ({
   }
   // Days of current month
   for (let i = 1; i <= daysInMonth; i++) {
-    daysResult.push(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i));
+    daysResult.push(
+      new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i),
+    );
   }
 
   const handlePrevMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
+    setCurrentMonth(
+      new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1),
+    );
   };
 
   const handleNextMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
+    setCurrentMonth(
+      new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1),
+    );
   };
 
   return (
-      <View className="p-6">
-        {/* Header */}
-        <View className="flex-row justify-between items-center mb-6">
-            <Text className="text-xl font-bold dark:text-white">Select Date</Text>
-            <TouchableOpacity onPress={onClose} className="p-1">
-                <Ionicons name="close-circle" size={28} color="#d1d5db" />
-            </TouchableOpacity>
-        </View>
+    <View className="p-6">
+      {/* Header */}
+      <View className="flex-row justify-between items-center mb-6">
+        <Text className="text-xl font-bold dark:text-white">Select Date</Text>
+        <TouchableOpacity onPress={onClose} className="p-1">
+          <Ionicons name="close-circle" size={28} color="#d1d5db" />
+        </TouchableOpacity>
+      </View>
 
-        {/* Month Navigation */}
-        <View className="flex-row justify-between items-center mb-4 px-2">
-            <TouchableOpacity onPress={handlePrevMonth} className="p-2">
-                <Ionicons name="chevron-back" size={24} color="#374151" />
-            </TouchableOpacity>
-            <Text className="text-lg font-semibold dark:text-white">
-                {formatDate(currentMonth, "MMMM yyyy")}
-            </Text>
-            <TouchableOpacity onPress={handleNextMonth} className="p-2">
-                <Ionicons name="chevron-forward" size={24} color="#374151" />
-            </TouchableOpacity>
-        </View>
+      {/* Month Navigation */}
+      <View className="flex-row justify-between items-center mb-4 px-2">
+        <TouchableOpacity onPress={handlePrevMonth} className="p-2">
+          <Ionicons name="chevron-back" size={24} color="#374151" />
+        </TouchableOpacity>
+        <Text className="text-lg font-semibold dark:text-white">
+          {formatDate(currentMonth, "MMMM yyyy")}
+        </Text>
+        <TouchableOpacity onPress={handleNextMonth} className="p-2">
+          <Ionicons name="chevron-forward" size={24} color="#374151" />
+        </TouchableOpacity>
+      </View>
 
-        {/* Days Header */}
-        <View className="flex-row justify-around mb-2">
-            {DAY_NAMES.map((day) => (
-                <Text key={day} className="text-gray-400 font-medium w-10 text-center">
-                    {day}
+      {/* Days Header */}
+      <View className="flex-row justify-around mb-2">
+        {DAY_NAMES.map((day) => (
+          <Text
+            key={day}
+            className="text-gray-400 font-medium w-10 text-center"
+          >
+            {day}
+          </Text>
+        ))}
+      </View>
+
+      {/* Grid */}
+      <View className="flex-row flex-wrap">
+        {daysResult.map((date, index) => {
+          if (!date) {
+            return <View key={`empty-${index}`} className="w-[14%] h-12" />;
+          }
+          const isSelected = isSameDay(date, selectedDate);
+          // Check if date is today (optional visual cue)
+          const isToday = isSameDay(date, new Date());
+
+          return (
+            <TouchableOpacity
+              key={date.toISOString()}
+              className="w-[14%] h-12 items-center justify-center"
+              onPress={() => onSelect(date)}
+            >
+              <View
+                className={`w-10 h-10 items-center justify-center rounded-full ${isSelected ? "bg-black dark:bg-white" : isToday ? "bg-gray-100 dark:bg-gray-800" : ""}`}
+              >
+                <Text
+                  className={`font-medium ${isSelected ? "text-white dark:text-black" : isToday ? "text-black dark:text-white font-bold" : "text-gray-900 dark:text-white"}`}
+                >
+                  {date.getDate()}
                 </Text>
-            ))}
-        </View>
-
-        {/* Grid */}
-        <View className="flex-row flex-wrap">
-            {daysResult.map((date, index) => {
-                if (!date) {
-                    return <View key={`empty-${index}`} className="w-[14%] h-12" />;
-                }
-                const isSelected = isSameDay(date, selectedDate);
-                // Check if date is today (optional visual cue)
-                const isToday = isSameDay(date, new Date());
-
-                return (
-                    <TouchableOpacity
-                        key={date.toISOString()}
-                        className="w-[14%] h-12 items-center justify-center"
-                        onPress={() => onSelect(date)}
-                    >
-                        <View className={`w-10 h-10 items-center justify-center rounded-full ${isSelected ? "bg-black dark:bg-white" : isToday ? "bg-gray-100 dark:bg-gray-800" : ""}`}>
-                            <Text className={`font-medium ${isSelected ? "text-white dark:text-black" : isToday ? "text-black dark:text-white font-bold" : "text-gray-900 dark:text-white"}`}>
-                                {date.getDate()}
-                            </Text>
-                        </View>
-                    </TouchableOpacity>
-                );
-            })}
-        </View>
+              </View>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
     </View>
   );
 };
-
 
 // --- Main Screen ---
 
 export default function ScheduleScreen() {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [dates, setDates] = useState(generateDates(addDays(new Date(), -15), 30));
+  const [dates, setDates] = useState(
+    generateDates(addDays(new Date(), -15), 30),
+  );
   const [isCalendarOpen, setCalendarOpen] = useState(false);
   const flatListRef = useRef<FlatList>(null);
 
   // Filter classes for selected date (Mock logic: just show sample classes for today/any selected date for now)
   // In a real app, you'd filter `classes.filter(c => isSameDay(c.date, selectedDate))`
-  const todaysClasses = SAMPLE_CLASSES; 
+  const todaysClasses = SAMPLE_CLASSES;
 
   // Ensure scrolling works reliably
   const getItemLayout = (data: any, index: number) => ({
@@ -365,7 +411,11 @@ export default function ScheduleScreen() {
     // Sync Scroll
     const index = dates.findIndex((d) => isSameDay(d, selectedDate));
     if (index !== -1 && flatListRef.current) {
-        flatListRef.current.scrollToIndex({ index, animated: true, viewPosition: 0.01 });
+      flatListRef.current.scrollToIndex({
+        index,
+        animated: true,
+        viewPosition: 0.01,
+      });
     }
   }, [selectedDate, dates]);
 
@@ -376,10 +426,10 @@ export default function ScheduleScreen() {
   const handleCalendarSelect = (date: Date) => {
     setSelectedDate(date);
     setCalendarOpen(false);
-    
+
     // Check if new date is visible in current strip
-    const index = dates.findIndex(d => isSameDay(d, date));
-    
+    const index = dates.findIndex((d) => isSameDay(d, date));
+
     // If not found or near edge, regenerate strip
     // Let's just always center the new date for better UX
     // generate 14 days, starting 3 days before selected
@@ -389,13 +439,12 @@ export default function ScheduleScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50 dark:bg-black">
-
       {/* Header */}
       <View>
-          <Header
-            selectedDate={selectedDate}
-            onCalendarPress={() => setCalendarOpen(true)} 
-          />
+        <Header
+          selectedDate={selectedDate}
+          onCalendarPress={() => setCalendarOpen(true)}
+        />
       </View>
 
       {/* Date Strip */}
@@ -409,8 +458,11 @@ export default function ScheduleScreen() {
           contentContainerStyle={{ paddingHorizontal: 24 }}
           getItemLayout={getItemLayout}
           onScrollToIndexFailed={(info) => {
-              // Fallback if scroll fails (e.g. data reference issues)
-              flatListRef.current?.scrollToOffset({ offset: info.averageItemLength * info.index, animated: true });
+            // Fallback if scroll fails (e.g. data reference issues)
+            flatListRef.current?.scrollToOffset({
+              offset: info.averageItemLength * info.index,
+              animated: true,
+            });
           }}
           renderItem={({ item }) => (
             <DateItem
@@ -429,19 +481,20 @@ export default function ScheduleScreen() {
         contentContainerStyle={{ paddingBottom: 100 }}
       >
         <Text className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-            {isSameDay(selectedDate, new Date()) ? "Today's Schedule" : `${formatDate(selectedDate, "EEE, MMMM d")}`}
+          {isSameDay(selectedDate, new Date())
+            ? "Today's Schedule"
+            : `${formatDate(selectedDate, "EEE, MMMM d")}`}
         </Text>
-        
+
         {todaysClasses.map((session, index) => (
           <ClassCard key={session.id} session={session} index={index} />
         ))}
-        
+
         {/* Start of Empty/End State */}
         <View className="items-center py-10 opacity-50">
-            <Ionicons name="bed-outline" size={48} color="#9ca3af" />
-            <Text className="text-gray-400 mt-2">No more classes</Text>
+          <Ionicons name="bed-outline" size={48} color="#9ca3af" />
+          <Text className="text-gray-400 mt-2">No more classes</Text>
         </View>
-
       </ScrollView>
 
       {/* Calendar Modal Overlay */}
@@ -451,26 +504,25 @@ export default function ScheduleScreen() {
         transparent={true}
         onRequestClose={() => setCalendarOpen(false)}
       >
-        <TouchableOpacity 
-            className="flex-1 bg-black/50 justify-center items-center px-6" 
-            activeOpacity={1} 
-            onPress={() => setCalendarOpen(false)}
+        <TouchableOpacity
+          className="flex-1 bg-black/50 justify-center items-center px-6"
+          activeOpacity={1}
+          onPress={() => setCalendarOpen(false)}
         >
-            <TouchableOpacity 
-                activeOpacity={1} 
-                onPress={(e) => e.stopPropagation()}
-                className="w-full bg-white dark:bg-gray-900 rounded-3xl overflow-hidden shadow-2xl"
-                style={{ zIndex: 10, maxHeight: '70%' }}
-            >
-               <CustomCalendar 
-                    selectedDate={selectedDate} 
-                    onSelect={handleCalendarSelect} 
-                    onClose={() => setCalendarOpen(false)} 
-               />
-            </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={(e) => e.stopPropagation()}
+            className="w-full bg-white dark:bg-gray-900 rounded-3xl overflow-hidden shadow-2xl"
+            style={{ zIndex: 10, maxHeight: "70%" }}
+          >
+            <CustomCalendar
+              selectedDate={selectedDate}
+              onSelect={handleCalendarSelect}
+              onClose={() => setCalendarOpen(false)}
+            />
+          </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
-
     </SafeAreaView>
   );
 }
