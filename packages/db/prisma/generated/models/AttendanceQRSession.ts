@@ -29,7 +29,6 @@ export type AttendanceQRSessionMinAggregateOutputType = {
   courseId: string | null
   createdBy: string | null
   status: $Enums.AttendanceQRStatus | null
-  sessionToken: string | null
   startTime: Date | null
   endTime: Date | null
   createdAt: Date | null
@@ -41,7 +40,6 @@ export type AttendanceQRSessionMaxAggregateOutputType = {
   courseId: string | null
   createdBy: string | null
   status: $Enums.AttendanceQRStatus | null
-  sessionToken: string | null
   startTime: Date | null
   endTime: Date | null
   createdAt: Date | null
@@ -53,7 +51,6 @@ export type AttendanceQRSessionCountAggregateOutputType = {
   courseId: number
   createdBy: number
   status: number
-  sessionToken: number
   markedUsers: number
   startTime: number
   endTime: number
@@ -68,7 +65,6 @@ export type AttendanceQRSessionMinAggregateInputType = {
   courseId?: true
   createdBy?: true
   status?: true
-  sessionToken?: true
   startTime?: true
   endTime?: true
   createdAt?: true
@@ -80,7 +76,6 @@ export type AttendanceQRSessionMaxAggregateInputType = {
   courseId?: true
   createdBy?: true
   status?: true
-  sessionToken?: true
   startTime?: true
   endTime?: true
   createdAt?: true
@@ -92,7 +87,6 @@ export type AttendanceQRSessionCountAggregateInputType = {
   courseId?: true
   createdBy?: true
   status?: true
-  sessionToken?: true
   markedUsers?: true
   startTime?: true
   endTime?: true
@@ -178,7 +172,6 @@ export type AttendanceQRSessionGroupByOutputType = {
   courseId: string
   createdBy: string
   status: $Enums.AttendanceQRStatus
-  sessionToken: string
   markedUsers: string[]
   startTime: Date
   endTime: Date
@@ -212,7 +205,6 @@ export type AttendanceQRSessionWhereInput = {
   courseId?: Prisma.StringFilter<"AttendanceQRSession"> | string
   createdBy?: Prisma.StringFilter<"AttendanceQRSession"> | string
   status?: Prisma.EnumAttendanceQRStatusFilter<"AttendanceQRSession"> | $Enums.AttendanceQRStatus
-  sessionToken?: Prisma.StringFilter<"AttendanceQRSession"> | string
   markedUsers?: Prisma.StringNullableListFilter<"AttendanceQRSession">
   startTime?: Prisma.DateTimeFilter<"AttendanceQRSession"> | Date | string
   endTime?: Prisma.DateTimeFilter<"AttendanceQRSession"> | Date | string
@@ -227,7 +219,6 @@ export type AttendanceQRSessionOrderByWithRelationInput = {
   courseId?: Prisma.SortOrder
   createdBy?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  sessionToken?: Prisma.SortOrder
   markedUsers?: Prisma.SortOrder
   startTime?: Prisma.SortOrder
   endTime?: Prisma.SortOrder
@@ -239,7 +230,6 @@ export type AttendanceQRSessionOrderByWithRelationInput = {
 
 export type AttendanceQRSessionWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  sessionToken?: string
   AND?: Prisma.AttendanceQRSessionWhereInput | Prisma.AttendanceQRSessionWhereInput[]
   OR?: Prisma.AttendanceQRSessionWhereInput[]
   NOT?: Prisma.AttendanceQRSessionWhereInput | Prisma.AttendanceQRSessionWhereInput[]
@@ -253,14 +243,13 @@ export type AttendanceQRSessionWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"AttendanceQRSession"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   course?: Prisma.XOR<Prisma.CoursesScalarRelationFilter, Prisma.CoursesWhereInput>
-}, "id" | "sessionToken">
+}, "id">
 
 export type AttendanceQRSessionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   courseId?: Prisma.SortOrder
   createdBy?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  sessionToken?: Prisma.SortOrder
   markedUsers?: Prisma.SortOrder
   startTime?: Prisma.SortOrder
   endTime?: Prisma.SortOrder
@@ -279,7 +268,6 @@ export type AttendanceQRSessionScalarWhereWithAggregatesInput = {
   courseId?: Prisma.StringWithAggregatesFilter<"AttendanceQRSession"> | string
   createdBy?: Prisma.StringWithAggregatesFilter<"AttendanceQRSession"> | string
   status?: Prisma.EnumAttendanceQRStatusWithAggregatesFilter<"AttendanceQRSession"> | $Enums.AttendanceQRStatus
-  sessionToken?: Prisma.StringWithAggregatesFilter<"AttendanceQRSession"> | string
   markedUsers?: Prisma.StringNullableListFilter<"AttendanceQRSession">
   startTime?: Prisma.DateTimeWithAggregatesFilter<"AttendanceQRSession"> | Date | string
   endTime?: Prisma.DateTimeWithAggregatesFilter<"AttendanceQRSession"> | Date | string
@@ -290,7 +278,6 @@ export type AttendanceQRSessionScalarWhereWithAggregatesInput = {
 export type AttendanceQRSessionCreateInput = {
   id?: string
   status?: $Enums.AttendanceQRStatus
-  sessionToken: string
   markedUsers?: Prisma.AttendanceQRSessionCreatemarkedUsersInput | string[]
   startTime: Date | string
   endTime: Date | string
@@ -305,7 +292,6 @@ export type AttendanceQRSessionUncheckedCreateInput = {
   courseId: string
   createdBy: string
   status?: $Enums.AttendanceQRStatus
-  sessionToken: string
   markedUsers?: Prisma.AttendanceQRSessionCreatemarkedUsersInput | string[]
   startTime: Date | string
   endTime: Date | string
@@ -316,7 +302,6 @@ export type AttendanceQRSessionUncheckedCreateInput = {
 export type AttendanceQRSessionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAttendanceQRStatusFieldUpdateOperationsInput | $Enums.AttendanceQRStatus
-  sessionToken?: Prisma.StringFieldUpdateOperationsInput | string
   markedUsers?: Prisma.AttendanceQRSessionUpdatemarkedUsersInput | string[]
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -331,7 +316,6 @@ export type AttendanceQRSessionUncheckedUpdateInput = {
   courseId?: Prisma.StringFieldUpdateOperationsInput | string
   createdBy?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAttendanceQRStatusFieldUpdateOperationsInput | $Enums.AttendanceQRStatus
-  sessionToken?: Prisma.StringFieldUpdateOperationsInput | string
   markedUsers?: Prisma.AttendanceQRSessionUpdatemarkedUsersInput | string[]
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -344,7 +328,6 @@ export type AttendanceQRSessionCreateManyInput = {
   courseId: string
   createdBy: string
   status?: $Enums.AttendanceQRStatus
-  sessionToken: string
   markedUsers?: Prisma.AttendanceQRSessionCreatemarkedUsersInput | string[]
   startTime: Date | string
   endTime: Date | string
@@ -355,7 +338,6 @@ export type AttendanceQRSessionCreateManyInput = {
 export type AttendanceQRSessionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAttendanceQRStatusFieldUpdateOperationsInput | $Enums.AttendanceQRStatus
-  sessionToken?: Prisma.StringFieldUpdateOperationsInput | string
   markedUsers?: Prisma.AttendanceQRSessionUpdatemarkedUsersInput | string[]
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -368,7 +350,6 @@ export type AttendanceQRSessionUncheckedUpdateManyInput = {
   courseId?: Prisma.StringFieldUpdateOperationsInput | string
   createdBy?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAttendanceQRStatusFieldUpdateOperationsInput | $Enums.AttendanceQRStatus
-  sessionToken?: Prisma.StringFieldUpdateOperationsInput | string
   markedUsers?: Prisma.AttendanceQRSessionUpdatemarkedUsersInput | string[]
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -399,7 +380,6 @@ export type AttendanceQRSessionCountOrderByAggregateInput = {
   courseId?: Prisma.SortOrder
   createdBy?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  sessionToken?: Prisma.SortOrder
   markedUsers?: Prisma.SortOrder
   startTime?: Prisma.SortOrder
   endTime?: Prisma.SortOrder
@@ -412,7 +392,6 @@ export type AttendanceQRSessionMaxOrderByAggregateInput = {
   courseId?: Prisma.SortOrder
   createdBy?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  sessionToken?: Prisma.SortOrder
   startTime?: Prisma.SortOrder
   endTime?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -424,7 +403,6 @@ export type AttendanceQRSessionMinOrderByAggregateInput = {
   courseId?: Prisma.SortOrder
   createdBy?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  sessionToken?: Prisma.SortOrder
   startTime?: Prisma.SortOrder
   endTime?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -531,7 +509,6 @@ export type AttendanceQRSessionUpdatemarkedUsersInput = {
 export type AttendanceQRSessionCreateWithoutCourseInput = {
   id?: string
   status?: $Enums.AttendanceQRStatus
-  sessionToken: string
   markedUsers?: Prisma.AttendanceQRSessionCreatemarkedUsersInput | string[]
   startTime: Date | string
   endTime: Date | string
@@ -544,7 +521,6 @@ export type AttendanceQRSessionUncheckedCreateWithoutCourseInput = {
   id?: string
   createdBy: string
   status?: $Enums.AttendanceQRStatus
-  sessionToken: string
   markedUsers?: Prisma.AttendanceQRSessionCreatemarkedUsersInput | string[]
   startTime: Date | string
   endTime: Date | string
@@ -586,7 +562,6 @@ export type AttendanceQRSessionScalarWhereInput = {
   courseId?: Prisma.StringFilter<"AttendanceQRSession"> | string
   createdBy?: Prisma.StringFilter<"AttendanceQRSession"> | string
   status?: Prisma.EnumAttendanceQRStatusFilter<"AttendanceQRSession"> | $Enums.AttendanceQRStatus
-  sessionToken?: Prisma.StringFilter<"AttendanceQRSession"> | string
   markedUsers?: Prisma.StringNullableListFilter<"AttendanceQRSession">
   startTime?: Prisma.DateTimeFilter<"AttendanceQRSession"> | Date | string
   endTime?: Prisma.DateTimeFilter<"AttendanceQRSession"> | Date | string
@@ -597,7 +572,6 @@ export type AttendanceQRSessionScalarWhereInput = {
 export type AttendanceQRSessionCreateWithoutUserInput = {
   id?: string
   status?: $Enums.AttendanceQRStatus
-  sessionToken: string
   markedUsers?: Prisma.AttendanceQRSessionCreatemarkedUsersInput | string[]
   startTime: Date | string
   endTime: Date | string
@@ -610,7 +584,6 @@ export type AttendanceQRSessionUncheckedCreateWithoutUserInput = {
   id?: string
   courseId: string
   status?: $Enums.AttendanceQRStatus
-  sessionToken: string
   markedUsers?: Prisma.AttendanceQRSessionCreatemarkedUsersInput | string[]
   startTime: Date | string
   endTime: Date | string
@@ -648,7 +621,6 @@ export type AttendanceQRSessionCreateManyCourseInput = {
   id?: string
   createdBy: string
   status?: $Enums.AttendanceQRStatus
-  sessionToken: string
   markedUsers?: Prisma.AttendanceQRSessionCreatemarkedUsersInput | string[]
   startTime: Date | string
   endTime: Date | string
@@ -659,7 +631,6 @@ export type AttendanceQRSessionCreateManyCourseInput = {
 export type AttendanceQRSessionUpdateWithoutCourseInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAttendanceQRStatusFieldUpdateOperationsInput | $Enums.AttendanceQRStatus
-  sessionToken?: Prisma.StringFieldUpdateOperationsInput | string
   markedUsers?: Prisma.AttendanceQRSessionUpdatemarkedUsersInput | string[]
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -672,7 +643,6 @@ export type AttendanceQRSessionUncheckedUpdateWithoutCourseInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   createdBy?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAttendanceQRStatusFieldUpdateOperationsInput | $Enums.AttendanceQRStatus
-  sessionToken?: Prisma.StringFieldUpdateOperationsInput | string
   markedUsers?: Prisma.AttendanceQRSessionUpdatemarkedUsersInput | string[]
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -684,7 +654,6 @@ export type AttendanceQRSessionUncheckedUpdateManyWithoutCourseInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   createdBy?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAttendanceQRStatusFieldUpdateOperationsInput | $Enums.AttendanceQRStatus
-  sessionToken?: Prisma.StringFieldUpdateOperationsInput | string
   markedUsers?: Prisma.AttendanceQRSessionUpdatemarkedUsersInput | string[]
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -696,7 +665,6 @@ export type AttendanceQRSessionCreateManyUserInput = {
   id?: string
   courseId: string
   status?: $Enums.AttendanceQRStatus
-  sessionToken: string
   markedUsers?: Prisma.AttendanceQRSessionCreatemarkedUsersInput | string[]
   startTime: Date | string
   endTime: Date | string
@@ -707,7 +675,6 @@ export type AttendanceQRSessionCreateManyUserInput = {
 export type AttendanceQRSessionUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAttendanceQRStatusFieldUpdateOperationsInput | $Enums.AttendanceQRStatus
-  sessionToken?: Prisma.StringFieldUpdateOperationsInput | string
   markedUsers?: Prisma.AttendanceQRSessionUpdatemarkedUsersInput | string[]
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -720,7 +687,6 @@ export type AttendanceQRSessionUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   courseId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAttendanceQRStatusFieldUpdateOperationsInput | $Enums.AttendanceQRStatus
-  sessionToken?: Prisma.StringFieldUpdateOperationsInput | string
   markedUsers?: Prisma.AttendanceQRSessionUpdatemarkedUsersInput | string[]
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -732,7 +698,6 @@ export type AttendanceQRSessionUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   courseId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumAttendanceQRStatusFieldUpdateOperationsInput | $Enums.AttendanceQRStatus
-  sessionToken?: Prisma.StringFieldUpdateOperationsInput | string
   markedUsers?: Prisma.AttendanceQRSessionUpdatemarkedUsersInput | string[]
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -747,7 +712,6 @@ export type AttendanceQRSessionSelect<ExtArgs extends runtime.Types.Extensions.I
   courseId?: boolean
   createdBy?: boolean
   status?: boolean
-  sessionToken?: boolean
   markedUsers?: boolean
   startTime?: boolean
   endTime?: boolean
@@ -762,7 +726,6 @@ export type AttendanceQRSessionSelectCreateManyAndReturn<ExtArgs extends runtime
   courseId?: boolean
   createdBy?: boolean
   status?: boolean
-  sessionToken?: boolean
   markedUsers?: boolean
   startTime?: boolean
   endTime?: boolean
@@ -777,7 +740,6 @@ export type AttendanceQRSessionSelectUpdateManyAndReturn<ExtArgs extends runtime
   courseId?: boolean
   createdBy?: boolean
   status?: boolean
-  sessionToken?: boolean
   markedUsers?: boolean
   startTime?: boolean
   endTime?: boolean
@@ -792,7 +754,6 @@ export type AttendanceQRSessionSelectScalar = {
   courseId?: boolean
   createdBy?: boolean
   status?: boolean
-  sessionToken?: boolean
   markedUsers?: boolean
   startTime?: boolean
   endTime?: boolean
@@ -800,7 +761,7 @@ export type AttendanceQRSessionSelectScalar = {
   updatedAt?: boolean
 }
 
-export type AttendanceQRSessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "courseId" | "createdBy" | "status" | "sessionToken" | "markedUsers" | "startTime" | "endTime" | "createdAt" | "updatedAt", ExtArgs["result"]["attendanceQRSession"]>
+export type AttendanceQRSessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "courseId" | "createdBy" | "status" | "markedUsers" | "startTime" | "endTime" | "createdAt" | "updatedAt", ExtArgs["result"]["attendanceQRSession"]>
 export type AttendanceQRSessionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   course?: boolean | Prisma.CoursesDefaultArgs<ExtArgs>
@@ -825,7 +786,6 @@ export type $AttendanceQRSessionPayload<ExtArgs extends runtime.Types.Extensions
     courseId: string
     createdBy: string
     status: $Enums.AttendanceQRStatus
-    sessionToken: string
     markedUsers: string[]
     startTime: Date
     endTime: Date
@@ -1260,7 +1220,6 @@ export interface AttendanceQRSessionFieldRefs {
   readonly courseId: Prisma.FieldRef<"AttendanceQRSession", 'String'>
   readonly createdBy: Prisma.FieldRef<"AttendanceQRSession", 'String'>
   readonly status: Prisma.FieldRef<"AttendanceQRSession", 'AttendanceQRStatus'>
-  readonly sessionToken: Prisma.FieldRef<"AttendanceQRSession", 'String'>
   readonly markedUsers: Prisma.FieldRef<"AttendanceQRSession", 'String[]'>
   readonly startTime: Prisma.FieldRef<"AttendanceQRSession", 'DateTime'>
   readonly endTime: Prisma.FieldRef<"AttendanceQRSession", 'DateTime'>

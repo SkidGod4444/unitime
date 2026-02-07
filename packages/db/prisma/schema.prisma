@@ -84,6 +84,7 @@ model User {
   courses              UserCourse[]
   timetables           UserTimetable[]
   attendanceQRSessions AttendanceQRSession[]
+  attendances          AttendanceLogs[]
   role                 UserRole              @default(STUDENT)
   status               UserStatus            @default(ACTIVE)
   createdAt            DateTime              @default(now()) @map("created_at")
@@ -151,18 +152,37 @@ enum AttendanceQRStatus {
 }
 
 model AttendanceQRSession {
-  id           String             @id @default(uuid())
-  courseId     String             @map("course_id")
-  createdBy    String             @map("created_by")
-  user         User               @relation(fields: [createdBy], references: [id], onDelete: Cascade)
-  course       Courses            @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  status       AttendanceQRStatus @default(ACTIVE)
-  sessionToken String             @unique @map("session_token") // Unique token for the QR code session
-  markedUsers  String[]           @default([]) @map("marked_users") // Array of user IDs who have marked attendance
-  startTime    DateTime           @map("start_time")
-  endTime      DateTime           @map("end_time")
-  createdAt    DateTime           @default(now()) @map("created_at")
-  updatedAt    DateTime           @updatedAt @map("updated_at")
+  id          String             @id @default(uuid())
+  courseId    String             @map("course_id")
+  createdBy   String             @map("created_by")
+  user        User               @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  course      Courses            @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  status      AttendanceQRStatus @default(ACTIVE)
+  markedUsers String[]           @default([]) @map("marked_users") // Array of user IDs who have marked attendance
+  startTime   DateTime           @map("start_time")
+  endTime     DateTime           @map("end_time")
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
 
   @@map("attendance_qr_sessions")
+}
+
+enum AttendanceSessionType {
+  QR_SESSION
+  MANUAL_SESSION
+  TAP_SESSION
+}
+
+model AttendanceLogs {
+  id          String                @id @default(uuid())
+  sessionId   String                @map("session_id")
+  sessionType AttendanceSessionType @default(QR_SESSION) @map("session_type")
+  userId      String                @map("user_id")
+  markedAt    DateTime              @default(now()) @map("marked_at")
+  user        User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime              @default(now()) @map("created_at")
+  updatedAt   DateTime              @updatedAt @map("updated_at")
+
+  @@unique([sessionId, userId])
+  @@map("attendance_logs")
 }

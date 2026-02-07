@@ -47,3 +47,8 @@ export type Timetable = Prisma.TimetableModel
  * 
  */
 export type AttendanceQRSession = Prisma.AttendanceQRSessionModel
+/**
+ * Model AttendanceLogs
+ * 
+ */
+export type AttendanceLogs = Prisma.AttendanceLogsModel

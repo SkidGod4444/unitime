@@ -90,3 +90,12 @@ export const AttendanceQRStatus = {
 } as const
 
 export type AttendanceQRStatus = (typeof AttendanceQRStatus)[keyof typeof AttendanceQRStatus]
+
+
+export const AttendanceSessionType = {
+  QR_SESSION: 'QR_SESSION',
+  MANUAL_SESSION: 'MANUAL_SESSION',
+  TAP_SESSION: 'TAP_SESSION'
+} as const
+
+export type AttendanceSessionType = (typeof AttendanceSessionType)[keyof typeof AttendanceSessionType]

@@ -389,7 +389,8 @@ export const ModelName = {
   UserCourse: 'UserCourse',
   UserTimetable: 'UserTimetable',
   Timetable: 'Timetable',
-  AttendanceQRSession: 'AttendanceQRSession'
+  AttendanceQRSession: 'AttendanceQRSession',
+  AttendanceLogs: 'AttendanceLogs'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -405,7 +406,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "courses" | "user" | "userCourse" | "userTimetable" | "timetable" | "attendanceQRSession"
+    modelProps: "courses" | "user" | "userCourse" | "userTimetable" | "timetable" | "attendanceQRSession" | "attendanceLogs"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -853,6 +854,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AttendanceLogs: {
+      payload: Prisma.$AttendanceLogsPayload<ExtArgs>
+      fields: Prisma.AttendanceLogsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AttendanceLogsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendanceLogsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AttendanceLogsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendanceLogsPayload>
+        }
+        findFirst: {
+          args: Prisma.AttendanceLogsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendanceLogsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AttendanceLogsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendanceLogsPayload>
+        }
+        findMany: {
+          args: Prisma.AttendanceLogsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendanceLogsPayload>[]
+        }
+        create: {
+          args: Prisma.AttendanceLogsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendanceLogsPayload>
+        }
+        createMany: {
+          args: Prisma.AttendanceLogsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AttendanceLogsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendanceLogsPayload>[]
+        }
+        delete: {
+          args: Prisma.AttendanceLogsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendanceLogsPayload>
+        }
+        update: {
+          args: Prisma.AttendanceLogsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendanceLogsPayload>
+        }
+        deleteMany: {
+          args: Prisma.AttendanceLogsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AttendanceLogsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AttendanceLogsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendanceLogsPayload>[]
+        }
+        upsert: {
+          args: Prisma.AttendanceLogsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendanceLogsPayload>
+        }
+        aggregate: {
+          args: Prisma.AttendanceLogsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAttendanceLogs>
+        }
+        groupBy: {
+          args: Prisma.AttendanceLogsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AttendanceLogsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AttendanceLogsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AttendanceLogsCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -963,7 +1038,6 @@ export const AttendanceQRSessionScalarFieldEnum = {
   courseId: 'courseId',
   createdBy: 'createdBy',
   status: 'status',
-  sessionToken: 'sessionToken',
   markedUsers: 'markedUsers',
   startTime: 'startTime',
   endTime: 'endTime',
@@ -972,6 +1046,19 @@ export const AttendanceQRSessionScalarFieldEnum = {
 } as const
 
 export type AttendanceQRSessionScalarFieldEnum = (typeof AttendanceQRSessionScalarFieldEnum)[keyof typeof AttendanceQRSessionScalarFieldEnum]
+
+
+export const AttendanceLogsScalarFieldEnum = {
+  id: 'id',
+  sessionId: 'sessionId',
+  sessionType: 'sessionType',
+  userId: 'userId',
+  markedAt: 'markedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AttendanceLogsScalarFieldEnum = (typeof AttendanceLogsScalarFieldEnum)[keyof typeof AttendanceLogsScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1159,6 +1246,20 @@ export type ListEnumAttendanceQRStatusFieldRefInput<$PrismaModel> = FieldRefInpu
 
 
 /**
+ * Reference to a field of type 'AttendanceSessionType'
+ */
+export type EnumAttendanceSessionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AttendanceSessionType'>
+    
+
+
+/**
+ * Reference to a field of type 'AttendanceSessionType[]'
+ */
+export type ListEnumAttendanceSessionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AttendanceSessionType[]'>
+    
+
+
+/**
  * Reference to a field of type 'Int'
  */
 export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
@@ -1272,6 +1373,7 @@ export type GlobalOmitConfig = {
   userTimetable?: Prisma.UserTimetableOmit
   timetable?: Prisma.TimetableOmit
   attendanceQRSession?: Prisma.AttendanceQRSessionOmit
+  attendanceLogs?: Prisma.AttendanceLogsOmit
 }
 
 /* Types for Logging */

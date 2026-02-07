@@ -56,7 +56,8 @@ export const ModelName = {
   UserCourse: 'UserCourse',
   UserTimetable: 'UserTimetable',
   Timetable: 'Timetable',
-  AttendanceQRSession: 'AttendanceQRSession'
+  AttendanceQRSession: 'AttendanceQRSession',
+  AttendanceLogs: 'AttendanceLogs'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -146,7 +147,6 @@ export const AttendanceQRSessionScalarFieldEnum = {
   courseId: 'courseId',
   createdBy: 'createdBy',
   status: 'status',
-  sessionToken: 'sessionToken',
   markedUsers: 'markedUsers',
   startTime: 'startTime',
   endTime: 'endTime',
@@ -155,6 +155,19 @@ export const AttendanceQRSessionScalarFieldEnum = {
 } as const
 
 export type AttendanceQRSessionScalarFieldEnum = (typeof AttendanceQRSessionScalarFieldEnum)[keyof typeof AttendanceQRSessionScalarFieldEnum]
+
+
+export const AttendanceLogsScalarFieldEnum = {
+  id: 'id',
+  sessionId: 'sessionId',
+  sessionType: 'sessionType',
+  userId: 'userId',
+  markedAt: 'markedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AttendanceLogsScalarFieldEnum = (typeof AttendanceLogsScalarFieldEnum)[keyof typeof AttendanceLogsScalarFieldEnum]
 
 
 export const SortOrder = {
