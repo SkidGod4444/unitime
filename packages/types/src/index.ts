@@ -13,12 +13,17 @@ type TeamT = {
 };
 
 type UserT = {
-  name: string;
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
   email: string;
-  password: string;
-  email_verification: boolean;
-  $user_id: string;
-  $created_at: string;
-  $updated_at: string;
+  emailVerified: boolean;
+  name: string;
+  image?: string | null;
+  banned?: boolean | null;
+  role?: string | null;
+  banReason?: string | null;
+  banExpires?: Date | null;
 };
-export type { Theme, TeamT, UserT };
+export type { TeamT, Theme, UserT };
+

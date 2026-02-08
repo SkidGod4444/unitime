@@ -1,23 +1,35 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { handle } from "hono/vercel";
 import { logger } from "hono/logger";
-import attendance from "../src/routes/attendance";
-import courses from "../src/routes/courses";
-import history from "../src/routes/history";
-import notifications from "../src/routes/notifications";
-import timetable from "../src/routes/timetable";
-import users from "../src/routes/users";
+import { handle } from "hono/vercel";
+import attendance from "./routes/attendance";
+import courses from "./routes/courses";
+import history from "./routes/history";
+import notifications from "./routes/notifications";
+import timetable from "./routes/timetable";
+import users from "./routes/users";
+import { auth } from "@unitime/auth";
 
 export const runtime = "edge";
 const app = new Hono().basePath("/v1");
 app.use(logger());
-const allowedOrigins = ["http://localhost:3000"];
+
+// Allow localhost and local network IPs for mobile development
+const isAllowedOrigin = (origin: string): boolean => {
+  const allowedPatterns = [
+    "http://localhost:3000",
+    /^http:\/\/192\.168\.\d{1,3}\.\d{1,3}:\d+$/,
+    /^http:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+$/,
+  ];
+  return allowedPatterns.some((pattern) =>
+    typeof pattern === "string" ? pattern === origin : pattern.test(origin)
+  );
+};
 
 app.use(
   "*",
   cors({
-    origin: allowedOrigins,
+    origin: (origin) => (isAllowedOrigin(origin) ? origin : ""),
     allowMethods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS", "PUT"],
     allowHeaders: ["Content-Type", "Authorization"],
     exposeHeaders: ["Content-Length"],
@@ -25,6 +37,10 @@ app.use(
     credentials: true,
   }),
 );
+
+app.all("/auth/**", async (c) => {
+  return await auth.handler(c.req.raw);
+});
 
 app.route("/users", users);
 app.route("/attendance", attendance);

@@ -31,7 +31,6 @@ timetable.get("/:userId", async (c) => {
   );
 });
 
-
 timetable.get("/", async (c) => {
   const timetables = await prisma.timetable.findMany({
     include: {

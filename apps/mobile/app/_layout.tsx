@@ -6,6 +6,7 @@ import { Stack, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "./globals.css";
+import { AuthProvider } from "@/contexts/auth.cntxt";
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -33,11 +34,13 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <LocalStoreProvider>
+        <AuthProvider>
         <PermsProvider>
           <StatusBar style={"dark"} animated />
           <Stack screenOptions={{ headerShown: false }} />
           {!isQRScannerScreen && <QRScannerWidget />}
         </PermsProvider>
+        </AuthProvider>
       </LocalStoreProvider>
     </GestureHandlerRootView>
   );

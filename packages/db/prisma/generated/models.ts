@@ -10,6 +10,13 @@
  */
 export type * from './models/Courses.ts'
 export type * from './models/User.ts'
+export type * from './models/Session.ts'
+export type * from './models/Account.ts'
+export type * from './models/Verification.ts'
+export type * from './models/Passkey.ts'
+export type * from './models/Organization.ts'
+export type * from './models/Member.ts'
+export type * from './models/Invitation.ts'
 export type * from './models/UserCourse.ts'
 export type * from './models/UserTimetable.ts'
 export type * from './models/Timetable.ts'

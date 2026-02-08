@@ -71,6 +71,12 @@ export default ({ config }) => ({
       },
     ],
     [
+      "expo-local-authentication",
+      {
+        faceIDPermission: "Allow $(PRODUCT_NAME) to use Face ID."
+      }
+    ],
+    [
       'expo-font',
       {
         fonts: [
@@ -132,6 +138,7 @@ export default ({ config }) => ({
       NSLocationAlwaysUsageDescription: 'Allow this app to always access your location.',
       NSLocationAlwaysAndWhenInUseUsageDescription: 'Allow this app to access your location.',
       NSCameraUsageDescription: 'Allow this app to access your camera to scan QR codes.',
+      NSFaceIDUsageDescription: 'Allow this app to use Face ID for authentication.',
     },
     entitlements: {
       'com.apple.developer.networking.wifi-info': true,
@@ -146,7 +153,7 @@ export default ({ config }) => ({
     package: getUniqueIdentifier(),
     googleServicesFile: "./google-services.json",
     adaptiveIcon: {
-      foregroundImage: './assets/icons/logo.png',
+      foregroundImage: getAppIcon(),
       backgroundColor: '#000000',
     },
     permissions: [

@@ -1,9 +1,9 @@
 "use client";
-import {
-  useApiKeyStore,
-  useMyProfileStore,
-  useProjectsStore,
-} from "@prexo/store";
+// import {
+//   useApiKeyStore,
+//   useMyProfileStore,
+//   useProjectsStore,
+// } from "@prexo/store";
 import { authClient } from "@unitime/auth/client";
 import { UserT } from "@unitime/types";
 import {
@@ -29,11 +29,11 @@ const landingPage =
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<UserType | null>(null);
+  const [user, setUser] = useState<UserT | null>(null);
   const [loading, setLoading] = useState(true);
-  const { myProfile, addMyProfile, removeMyProfile } = useMyProfileStore();
-  const { setProjects } = useProjectsStore();
-  const { removeKey } = useApiKeyStore();
+  // const { myProfile, addMyProfile, removeMyProfile } = useMyProfileStore();
+  // const { setProjects } = useProjectsStore();
+  // const { removeKey } = useApiKeyStore();
   //   const [cons, setCons] = useLocalStorage("@prexo-#consoleId", "");
   //   const router = useRouter();
 
@@ -43,6 +43,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading(true);
       try {
         const session = await authClient.getSession();
+        console.log("Session data:", session);
         // Defensive: ensure session.data and session.data.user are defined
         const sessionUser = session?.data?.user ?? null;
 
@@ -50,22 +51,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setUser(sessionUser);
           console.log(sessionUser);
           // Defensive: ensure myProfile is defined and has id
-          if (myProfile && myProfile.id === sessionUser.id) {
-            return;
-          }
-          addMyProfile(sessionUser);
+          // if (myProfile && myProfile.id === sessionUser.id) {
+          //   return;
+          // }
+          // addMyProfile(sessionUser);
           console.log("User fetched:", sessionUser);
         } else {
           setUser(null);
 
-          if (myProfile && myProfile.id) {
-            removeMyProfile(myProfile.id);
-            setProjects([]);
-            removeKey();
-            setCons("");
-            console.log("consoleId reset!", cons);
-            console.log("Stores cleared!");
-          }
+          // if (myProfile && myProfile.id) {
+          //   removeMyProfile(myProfile.id);
+          //   setProjects([]);
+          //   removeKey();
+          //   setCons("");
+          //   console.log("consoleId reset!", cons);
+          //   console.log("Stores cleared!");
+          // }
           console.log("No user found in session.");
         }
       } catch (error) {
@@ -79,13 +80,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       isMounted = false;
     };
   }, [
-    addMyProfile,
-    myProfile,
-    removeMyProfile,
-    removeKey,
-    setCons,
-    setProjects,
-    cons,
+    // addMyProfile,
+    // myProfile,
+    // removeMyProfile,
+    // removeKey,
+    // setCons,
+    // setProjects,
+    // cons,
   ]);
 
   // Add logout logic here, inbuilt removeMyProfile
@@ -93,11 +94,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await authClient.signOut();
       setUser(null);
-      if (myProfile && myProfile.id) {
-        removeMyProfile(myProfile.id);
-        console.log("User profile removed on logout:", myProfile.id);
-      }
-      router.push(landingPage);
+      // if (myProfile && myProfile.id) {
+      //   removeMyProfile(myProfile.id);
+      //   console.log("User profile removed on logout:", myProfile.id);
+      // }
+      // router.push(landingPage);
       console.log("User logged out.");
     } catch (error) {
       console.error("Error during logout:", error);

@@ -16,8 +16,8 @@ attendance.post("/qr/session/create", async (c) => {
       createdBy: creatorId,
       startTime,
       endTime,
-    }
-  })
+    },
+  });
   if (!qrSession.id) {
     return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
   }
@@ -42,7 +42,12 @@ attendance.post("/qr/session/verify", async (c) => {
     return c.json({ error: "Invalid or expired QR" }, 400);
   }
   const [sessionId] = qrString.split("|");
-  console.log("Verifying attendance for session:", sessionId, "student:", userId);
+  console.log(
+    "Verifying attendance for session:",
+    sessionId,
+    "student:",
+    userId,
+  );
   const session = await prisma.attendanceQRSession.findUnique({
     where: { id: sessionId },
   });
@@ -93,9 +98,8 @@ attendance.get("/qr/session/:id", async (c) => {
   const qr = generateQRToken(sessionId);
   console.log("Generated QR for session:", sessionId, "qrString:", qr.qrString);
   return c.json({
-    qrString: qr.qrString
+    qrString: qr.qrString,
   });
 });
-
 
 export default attendance;

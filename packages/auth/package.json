@@ -16,7 +16,10 @@
     "typescript": "^5"
   },
   "dependencies": {
+    "@better-auth/expo": "^1.4.18",
     "@better-auth/passkey": "^1.4.9",
-    "better-auth": "^1.4.9"
+    "@unitime/db": "workspace:*",
+    "better-auth": "^1.4.9",
+    "expo-secure-store": "^15.0.8"
   }
 }

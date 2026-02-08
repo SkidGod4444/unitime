@@ -14,7 +14,7 @@ export function generateQRToken(sessionId: string) {
 
   return {
     qrString: `${sessionId}|${timeWindow}|${signature}`,
-    timeWindow
+    timeWindow,
   };
 }
 

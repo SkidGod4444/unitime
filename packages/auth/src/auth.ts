@@ -1,14 +1,30 @@
-import { betterAuth } from "better-auth";
+import { expo } from "@better-auth/expo";
 import { passkey } from "@better-auth/passkey";
+import { prisma } from "@unitime/db";
+import { betterAuth } from "better-auth";
+import { prismaAdapter } from "better-auth/adapters/prisma";
 import {
-  admin,
-  organization,
-  lastLoginMethod,
-  haveIBeenPwned,
-  emailOTP,
+    admin,
+    emailOTP,
+    haveIBeenPwned,
+    lastLoginMethod,
+    organization,
 } from "better-auth/plugins";
 
 export const auth = betterAuth({
+  database: prismaAdapter(prisma, {
+    provider: "postgresql",
+  }),
+  trustedOrigins: [
+    "unitime://*",
+    // Development mode - Expo's exp:// scheme
+    ...(process.env.NODE_ENV === "development"
+      ? [
+          "exp://", // Trust all Expo URLs (prefix matching)
+          "exp://**", // Trust all Expo URLs (wildcard matching)
+        ]
+      : []),
+  ],
   advanced: {
     cookiePrefix: "@unitime_auth",
   },
@@ -52,6 +68,7 @@ export const auth = betterAuth({
     max: 100, // max requests in the window
   },
   plugins: [
+    expo(),
     passkey(),
     admin(),
     organization(),

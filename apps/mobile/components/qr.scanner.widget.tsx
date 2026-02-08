@@ -1,9 +1,10 @@
 import { useLocalStore } from "@/contexts/localstore.cntxt";
 import { colors } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
+import * as LocalAuthentication from "expo-local-authentication";
 import { useRouter } from "expo-router";
 import React, { useEffect } from "react";
-import { Dimensions, View } from "react-native";
+import { Alert, Dimensions, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   runOnJS,
@@ -74,8 +75,73 @@ export default function QRScannerWidget() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const navigateToQRScanner = () => {
-    router.push("/qr-scanner");
+  // Authenticate using biometrics before accessing QR scanner
+  const authenticateBeforeScanning = async (): Promise<boolean> => {
+    try {
+      // Check if device has biometric hardware
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
+      if (!hasHardware) {
+        Alert.alert(
+          "Biometric Authentication Unavailable",
+          "Your device does not support biometric authentication. Proceeding to QR scanner.",
+          [{ text: "OK" }]
+        );
+        return true; // Allow access anyway
+      }
+
+      // Check if biometrics are enrolled
+      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+      if (!isEnrolled) {
+        Alert.alert(
+          "No Biometrics Enrolled",
+          "Please set up Face ID, Touch ID, or fingerprint authentication in your device settings to use this feature. Proceeding to QR scanner.",
+          [{ text: "OK" }]
+        );
+        return true; // Allow access anyway
+      }
+
+      // Attempt authentication
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: "Authenticate to access QR Scanner",
+        cancelLabel: "Cancel",
+        disableDeviceFallback: true, // Force biometric-only, no passcode fallback
+      });
+
+      if (result.success) {
+        return true;
+      } else {
+        // Authentication failed or cancelled
+        if (result.error === "user_cancel") {
+          // User cancelled, no need to show alert
+          return false;
+        } else if (result.error === "system_cancel") {
+          // System cancelled (e.g., app went to background)
+          return false;
+        } else {
+          Alert.alert(
+            "Authentication Failed",
+            "Could not authenticate. Please try again.",
+            [{ text: "OK" }]
+          );
+          return false;
+        }
+      }
+    } catch (error) {
+      console.error("Authentication error:", error);
+      Alert.alert(
+        "Authentication Error",
+        "An error occurred during authentication. Proceeding to QR scanner.",
+        [{ text: "OK" }]
+      );
+      return true; // Allow access on error to prevent blocking user
+    }
+  };
+
+  const navigateToQRScanner = async () => {
+    const authenticated = await authenticateBeforeScanning();
+    if (authenticated) {
+      router.push("/qr-scanner");
+    }
   };
 
   // Tap gesture - handles quick taps/clicks
