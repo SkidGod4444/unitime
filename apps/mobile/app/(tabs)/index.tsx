@@ -193,7 +193,7 @@ export default function Index() {
                 label: "Auth",
                 color: "text-green-600",
                 bg: "bg-green-50",
-                route: "/auth",
+                route: "/loader",
               },
             ].map((action, index) => (
               <TouchableOpacity

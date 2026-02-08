@@ -5,7 +5,9 @@
 //   useProjectsStore,
 // } from "@prexo/store";
 import { authClient } from "@unitime/auth/client";
+import { useRoutes } from "@/contexts/routes.cntxt";
 import { UserT } from "@unitime/types";
+import { useRouter } from "expo-router";
 import {
   createContext,
   ReactNode,
@@ -35,15 +37,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // const { setProjects } = useProjectsStore();
   // const { removeKey } = useApiKeyStore();
   //   const [cons, setCons] = useLocalStorage("@prexo-#consoleId", "");
-  //   const router = useRouter();
+    const router = useRouter();
+    const { showLoader, hideLoader } = useRoutes();
 
   useEffect(() => {
     let isMounted = true;
     async function getData() {
       setLoading(true);
+      showLoader();
       try {
         const session = await authClient.getSession();
-        console.log("Session data:", session);
+        // console.log("Session data:", session);
         // Defensive: ensure session.data and session.data.user are defined
         const sessionUser = session?.data?.user ?? null;
 
@@ -55,10 +59,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           //   return;
           // }
           // addMyProfile(sessionUser);
+          hideLoader();
           console.log("User fetched:", sessionUser);
         } else {
           setUser(null);
-
+          router.replace("/auth");
           // if (myProfile && myProfile.id) {
           //   removeMyProfile(myProfile.id);
           //   setProjects([]);
@@ -67,6 +72,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           //   console.log("consoleId reset!", cons);
           //   console.log("Stores cleared!");
           // }
+          hideLoader();
           console.log("No user found in session.");
         }
       } catch (error) {

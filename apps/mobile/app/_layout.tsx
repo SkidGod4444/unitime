@@ -1,12 +1,14 @@
 import QRScannerWidget from "@/components/qr.scanner.widget";
+import { AuthProvider } from "@/contexts/auth.cntxt";
 import { LocalStoreProvider } from "@/contexts/localstore.cntxt";
 import { PermsProvider } from "@/contexts/perms.cntxt";
+import { RoutesProvider } from "@/contexts/routes.cntxt";
 import { useFonts } from "expo-font";
 import { Stack, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "./globals.css";
-import { AuthProvider } from "@/contexts/auth.cntxt";
+import Loader from "./loader";
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -27,20 +29,24 @@ export default function RootLayout() {
     segments.includes("tap-to-mark") ||
     segments.includes("schedule") ||
     segments.includes("auth") ||
-    segments.includes("alarm");
+    segments.includes("alarm") ||
+    segments.includes("loader");
 
   console.log("Fonts loaded:", fontsLoaded);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <LocalStoreProvider>
+          <RoutesProvider>
         <AuthProvider>
-        <PermsProvider>
-          <StatusBar style={"dark"} animated />
-          <Stack screenOptions={{ headerShown: false }} />
-          {!isQRScannerScreen && <QRScannerWidget />}
-        </PermsProvider>
+            <PermsProvider>
+              <StatusBar style={"dark"} animated />
+              <Stack screenOptions={{ headerShown: false }} />
+              {!isQRScannerScreen && <QRScannerWidget />}
+              <Loader />
+            </PermsProvider>
         </AuthProvider>
+          </RoutesProvider>
       </LocalStoreProvider>
     </GestureHandlerRootView>
   );
