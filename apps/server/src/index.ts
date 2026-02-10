@@ -9,10 +9,13 @@ import notifications from "./routes/notifications";
 import timetable from "./routes/timetable";
 import users from "./routes/users";
 import { auth } from "@unitime/auth";
+import { rateLimitHandler } from "../middleware/ratelimit";
 
 export const runtime = "edge";
 const app = new Hono().basePath("/v1");
+
 app.use(logger());
+app.use(rateLimitHandler);
 
 // Allow localhost and local network IPs for mobile development
 const isAllowedOrigin = (origin: string): boolean => {

@@ -6,6 +6,8 @@
   "dependencies": {
     "@unitime/auth": "workspace:*",
     "@unitime/db": "workspace:*",
+    "@unitime/cache": "workspace:*",
+    "@upstash/ratelimit": "^2.0.8",
     "hono": "^4.11.1"
   },
   "devDependencies": {

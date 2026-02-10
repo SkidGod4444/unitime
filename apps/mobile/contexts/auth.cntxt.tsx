@@ -24,12 +24,6 @@ interface AuthContextType {
   setUser: (user: UserT | null) => void;
   logout: () => Promise<void>;
 }
-
-const landingPage =
-  process.env.NODE_ENV === "production"
-    ? "https://prexoai.xyz"
-    : "http://localhost:3000";
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
