@@ -1,9 +1,9 @@
-import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import {
   KeyboardAvoidingView,
+  Linking,
   Platform,
   ScrollView,
   Text,
@@ -32,107 +32,113 @@ export default function Auth() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
-        <ScrollView
-          contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
-          showsVerticalScrollIndicator={false}
-          className="px-6"
-        >
-          {/* Header / Logo */}
-          <View className="items-center mb-10">
-            <View className="h-20 w-20 bg-blue-50 rounded-2xl items-center justify-center mb-6 shadow-sm border border-blue-100">
-              <Ionicons name="school" size={40} color="#2563EB" />
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+          {/* Hero Section */}
+          <View className="flex-1 justify-center items-center px-8 pt-14 pb-6">
+            
+            {/* Decorative Pills */}
+            <View className="flex-row items-center gap-3 mb-6">
+              <View className="bg-blue-50 rounded-full px-4 py-2 border border-blue-100">
+                <Text className="text-blue-600 font-lato-bold text-xs">Attendance</Text>
+              </View>
+              <View className="bg-purple-50 rounded-full px-4 py-2 border border-purple-100">
+                <Text className="text-purple-600 font-lato-bold text-xs">Calendar</Text>
+              </View>
+              <View className="bg-emerald-50 rounded-full px-4 py-2 border border-emerald-100">
+                <Text className="text-emerald-600 font-lato-bold text-xs">Classes</Text>
+              </View>
             </View>
-            <Text className="text-3xl font-bold text-dark font-lora text-center mb-2">
-              {isLogin ? "Welcome Back" : "Create Account"}
-            </Text>
-            <Text className="text-gray-500 text-center text-base">
-              {isLogin
-                ? "Sign in to continue to UniTime"
-                : "Join us and manage your studies"}
+
+            {/* Tagline */}
+            <Text className="text-base text-center font-lora text-gray-400 leading-6 mx-auto">
+              Effortless class management, seamlessly organized—with UNiTIME.
             </Text>
           </View>
 
-          {/* Form */}
-          <View className="gap-5 mb-8">
-            {/* Email Input */}
-            <View>
-              <Text className="text-sm font-bold text-gray-700 mb-2 ml-1">
-                Email Address
+          {/* Form Card */}
+          <View className="mx-5 mb-10 bg-gray-50/80 rounded-3xl p-4 shadow-2xl shadow-black/10 border border-gray-200/90">
+            {/* Email */}
+            <View className="mb-5">
+              <Text className="text-gray-800 font-lora font-bold mb-2 text-base tracking-wide">
+                Email
               </Text>
-              <View className="flex-row items-center bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 focus:border-blue-500 transition-colors">
-                <Ionicons name="mail-outline" size={20} color="#9CA3AF" />
-                <TextInput
-                  className="flex-1 ml-3 text-base text-dark"
-                  placeholder="student@university.edu"
-                  placeholderTextColor="#9CA3AF"
-                  autoCapitalize="none"
-                  keyboardType="email-address"
-                  value={email}
-                  onChangeText={setEmail}
-                />
-              </View>
+              <TextInput
+                className="bg-white/90 text-black px-4 py-4 rounded-xl font-lato-regular text-base border border-blue-300"
+                placeholder="student@university.edu"
+                placeholderTextColor="#b0b0b0"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                value={email}
+                onChangeText={setEmail}
+              />
             </View>
 
-            {/* Password Input */}
-            <View>
-              <Text className="text-sm font-bold text-gray-700 mb-2 ml-1">
+            {/* Password */}
+            <View className="mb-6">
+              <Text className="text-gray-800 font-lora font-bold mb-2 text-base tracking-wide">
                 Password
               </Text>
-              <View className="flex-row items-center bg-gray-50 border border-gray-200 rounded-xl px-4 py-3.5 focus:border-blue-500">
-                <Ionicons
-                  name="lock-closed-outline"
-                  size={20}
-                  color="#9CA3AF"
-                />
-                <TextInput
-                  className="flex-1 ml-3 text-base text-dark"
-                  placeholder="••••••••"
-                  placeholderTextColor="#9CA3AF"
-                  secureTextEntry={!showPassword}
-                  value={password}
-                  onChangeText={setPassword}
-                />
-                <TouchableOpacity
-                  onPress={() => setShowPassword(!showPassword)}
-                >
-                  <Ionicons
-                    name={showPassword ? "eye-off-outline" : "eye-outline"}
-                    size={20}
-                    color="#9CA3AF"
-                  />
-                </TouchableOpacity>
-              </View>
+              <TextInput
+                className="bg-white/90 text-black px-4 py-4 rounded-xl font-lato-regular text-base border border-blue-300"
+                placeholder="••••••••"
+                placeholderTextColor="#b0b0b0"
+                secureTextEntry={!showPassword}
+                value={password}
+                onChangeText={setPassword}
+              />
               {isLogin && (
                 <TouchableOpacity className="self-end mt-2">
-                  <Text className="text-blue-600 font-medium text-sm">
+                  <Text className="text-blue-600 font-lato-bold text-sm">
                     Forgot Password?
                   </Text>
                 </TouchableOpacity>
               )}
             </View>
-          </View>
 
-          {/* Actions */}
-          <TouchableOpacity
-            className="bg-primary rounded-xl py-4 shadow-lg shadow-blue-200 mb-6 active:opacity-90 transition-opacity"
-            onPress={handleAuth}
-          >
-            <Text className="text-white text-center font-bold text-base">
-              {isLogin ? "Sign In" : "Sign Up"}
-            </Text>
-          </TouchableOpacity>
+            {/* Submit Button */}
+            <TouchableOpacity
+              activeOpacity={0.85}
+              className="mb-5 rounded-xl py-4 bg-blue-600 shadow-lg shadow-blue-500/20"
+              onPress={handleAuth}
+            >
+              <View className="flex-row items-center justify-center">
+                <Text className="font-lato-bold text-lg text-center text-white">
+                  {isLogin ? "Sign In" : "Sign Up"}
+                </Text>
+              </View>
+            </TouchableOpacity>
 
-          <View className="flex-row justify-center items-center">
-            <Text className="text-gray-500 text-sm">
-              {isLogin
-                ? "Don't have an account? "
-                : "Already have an account? "}
-            </Text>
-            <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
-              <Text className="text-blue-600 font-bold text-sm">
-                {isLogin ? "Sign Up" : "Sign In"}
+            {/* Toggle Login/Signup */}
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => setIsLogin(!isLogin)}
+            >
+              <Text className="text-blue-700 font-lato-bold text-center underline text-base">
+                {isLogin
+                  ? "Don't have an account? Sign Up"
+                  : "Already have an account? Sign In"}
               </Text>
             </TouchableOpacity>
+          </View>
+
+          {/* Footer */}
+          <View className="flex-row items-center justify-center mb-10 px-16 mt-auto">
+            <Text className="text-gray-400 font-lato-regular text-base text-center">
+              By continuing, you agree to our{" "}
+              <Text
+                className="text-gray-500 font-lato-bold text-base text-center underline"
+                onPress={() => Linking.openURL("https://l.devwtf.in/unitime")}
+              >
+                Terms of Service
+              </Text>{" "}
+              and{" "}
+              <Text
+                className="text-gray-500 underline font-lato-bold text-base text-center"
+                onPress={() => Linking.openURL("https://l.devwtf.in/unitime")}
+              >
+                Privacy Policy
+              </Text>
+            </Text>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

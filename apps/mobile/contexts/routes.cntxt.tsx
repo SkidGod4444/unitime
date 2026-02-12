@@ -1,8 +1,9 @@
 "use client";
-import { useRouter } from "expo-router";
+import { router } from "expo-router";
 import {
     createContext,
     ReactNode,
+    useCallback,
     useContext,
     useState
 } from "react";
@@ -18,28 +19,33 @@ const RoutesContext = createContext<RoutesContextType | undefined>(undefined);
 
 export const RoutesProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   // Show loader by setting state to true
-  const showLoader = () => {
+  const showLoader = useCallback(() => {
     setIsLoading(true);
-  };
+  }, []);
 
   // Hide loader and either navigate to custom path or go back
-  const hideLoader = (path?: string) => {
+  const hideLoader = useCallback((path?: string) => {
     setIsLoading(false);
     if (path) {
-      // If a custom path is provided, navigate to it
-      router.replace(path as any);
+      try {
+        router.replace(path as any);
+      } catch (e) {
+        console.warn("[Routes] Navigation failed:", e);
+      }
     } else {
-      // If no path provided, go back or to home
-      if (router.canGoBack()) {
-        router.back();
-      } else {
-        router.replace("/"); // Fallback to home if no history
+      try {
+        if (router.canGoBack()) {
+          router.back();
+        } else {
+          router.replace("/");
+        }
+      } catch (e) {
+        console.warn("[Routes] Navigation failed:", e);
       }
     }
-  };
+  }, []);
 
   return (
     <RoutesContext.Provider

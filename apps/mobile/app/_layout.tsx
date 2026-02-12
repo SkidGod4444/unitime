@@ -23,7 +23,7 @@ export default function RootLayout() {
   });
 
   const segments = useSegments() as string[];
-  const isQRScannerScreen =
+  const isHiddenScreen =
     segments.includes("qr-scanner") ||
     segments.includes("chat") ||
     segments.includes("tap-to-mark") ||
@@ -37,16 +37,16 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <LocalStoreProvider>
-          <RoutesProvider>
-        <AuthProvider>
+        <RoutesProvider>
+          <AuthProvider>
             <PermsProvider>
               <StatusBar style={"dark"} animated />
               <Stack screenOptions={{ headerShown: false }} />
-              {!isQRScannerScreen && <QRScannerWidget />}
+              {!isHiddenScreen && <QRScannerWidget />}
               <Loader />
             </PermsProvider>
-        </AuthProvider>
-          </RoutesProvider>
+          </AuthProvider>
+        </RoutesProvider>
       </LocalStoreProvider>
     </GestureHandlerRootView>
   );

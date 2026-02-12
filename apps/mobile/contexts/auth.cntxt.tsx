@@ -1,21 +1,16 @@
 "use client";
-// import {
-//   useApiKeyStore,
-//   useMyProfileStore,
-//   useProjectsStore,
-// } from "@prexo/store";
 import { useRoutes } from "@/contexts/routes.cntxt";
 import { authClient } from "@unitime/auth/client";
 import { UserT } from "@unitime/types";
-import { usePathname, useRouter } from "expo-router";
+import { router, useSegments } from "expo-router";
 import {
-  createContext,
-  ReactNode,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
+    createContext,
+    ReactNode,
+    useCallback,
+    useContext,
+    useEffect,
+    useRef,
+    useState,
 } from "react";
 
 interface AuthContextType {
@@ -29,18 +24,20 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<UserT | null>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
-  const pathname = usePathname();
-  const { setIsLoading } = useRoutes(); // Only use setIsLoading, not showLoader/hideLoader
+  const segments = useSegments();
+  const { setIsLoading } = useRoutes();
 
   // Refs to prevent duplicate checks
   const isInitialMount = useRef(true);
   const isChecking = useRef(false);
-  const previousPath = useRef<string | null>(null);
-  const currentPath = useRef<string | null>(pathname); // Track current path
+  const hasRedirected = useRef(false);
+  const previousSegments = useRef<string[]>([]);
 
-  // Reusable auth check function
-  const checkAuth = useCallback(async (showLoading = true) => {
+  // Derive current path from segments
+  const currentPath = segments.length > 0 ? `/${segments.join("/")}` : "/";
+
+  // Reusable auth check function — accepts currentSegments to avoid stale closures
+  const checkAuth = useCallback(async (currentSegments: string[], showLoading = true) => {
     // Prevent concurrent checks
     if (isChecking.current) {
       console.log("[Auth] Check already in progress, skipping");
@@ -51,7 +48,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     if (showLoading) {
       setLoading(true);
-      setIsLoading(true); // Show loader overlay
+      setIsLoading(true);
     }
     try {
       const session = await authClient.getSession();
@@ -59,15 +56,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (sessionUser) {
         setUser(sessionUser);
+        hasRedirected.current = false;
         console.log("[Auth Check] User authenticated:", sessionUser.email);
       } else {
         setUser(null);
-        // Only redirect to auth if not already on auth page
-        const current = currentPath.current;
-        console.log("[Auth Check] Current path:", current);
-        if (current !== "/auth") {
-          router.replace("/auth" as any);
-          console.log("[Auth Check] No user, redirecting to /auth");
+        // Check if we're already on auth page using the passed-in segments
+        const isOnAuthPage = currentSegments.includes("auth");
+        console.log("[Auth Check] On auth page:", isOnAuthPage);
+        if (!isOnAuthPage && !hasRedirected.current) {
+          hasRedirected.current = true;
+          try {
+            router.replace("/auth" as any);
+            console.log("[Auth Check] No user, redirecting to /auth");
+          } catch (navError) {
+            hasRedirected.current = false;
+            console.warn("[Auth Check] Navigation failed (likely not ready):", navError);
+          }
         } else {
           console.log("[Auth Check] Already on /auth, skipping redirect");
         }
@@ -77,43 +81,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       if (showLoading) {
         setLoading(false);
-        setIsLoading(false); // Hide loader overlay
+        setIsLoading(false);
       }
       isChecking.current = false;
     }
-  }, [router, setIsLoading]);
-
-  // Keep currentPath ref in sync with pathname
-  useEffect(() => {
-    currentPath.current = pathname;
-  }, [pathname]);
+  }, [setIsLoading]);
 
   // Initial mount check - run only once
   useEffect(() => {
     console.log("[Auth] Initial mount - checking auth");
-    checkAuth(true);
+    checkAuth(segments, true);
     isInitialMount.current = false;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty deps - only run once!
+  }, []);
 
   // Route change monitoring - skip initial mount
   useEffect(() => {
-    // Skip on initial mount
     if (isInitialMount.current) {
-      previousPath.current = pathname;
+      previousSegments.current = [...segments];
       return;
     }
 
-    // Skip if path hasn't actually changed
-    if (pathname === previousPath.current) {
+    // Skip if segments haven't actually changed
+    const segStr = segments.join("/");
+    const prevStr = previousSegments.current.join("/");
+    if (segStr === prevStr) {
       return;
     }
 
-    previousPath.current = pathname;
-    console.log("[Auth] Route changed to:", pathname);
-    checkAuth(true);
+    previousSegments.current = [...segments];
+    console.log("[Auth] Route changed to:", currentPath);
+
+    // Don't re-check auth if we just redirected to the auth page
+    if (segments.includes("auth")) {
+      console.log("[Auth] On auth page, skipping re-check");
+      setLoading(false);
+      setIsLoading(false);
+      return;
+    }
+
+    checkAuth(segments, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]); // Only pathname in deps
+  }, [segments]);
 
   // Interval monitoring (every 10 seconds) - silent checks
   useEffect(() => {
@@ -121,7 +130,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const interval = setInterval(() => {
       console.log("[Auth] Background interval check");
       if (!isChecking.current) {
-        checkAuth(false);
+        checkAuth(previousSegments.current, false);
       }
     }, 10000);
 
@@ -130,18 +139,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       clearInterval(interval);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty deps - set up once!
+  }, []);
 
-  // Add logout logic here, inbuilt removeMyProfile
   const logout = async () => {
     try {
       await authClient.signOut();
       setUser(null);
-      // if (myProfile && myProfile.id) {
-      //   removeMyProfile(myProfile.id);
-      //   console.log("User profile removed on logout:", myProfile.id);
-      // }
-      // router.push(landingPage);
       console.log("User logged out.");
     } catch (error) {
       console.error("Error during logout:", error);
