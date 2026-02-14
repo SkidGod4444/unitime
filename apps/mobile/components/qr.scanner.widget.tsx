@@ -84,7 +84,7 @@ export default function QRScannerWidget() {
         Alert.alert(
           "Biometric Authentication Unavailable",
           "Your device does not support biometric authentication. Proceeding to QR scanner.",
-          [{ text: "OK" }]
+          [{ text: "OK" }],
         );
         return true; // Allow access anyway
       }
@@ -95,7 +95,7 @@ export default function QRScannerWidget() {
         Alert.alert(
           "No Biometrics Enrolled",
           "Please set up Face ID, Touch ID, or fingerprint authentication in your device settings to use this feature. Proceeding to QR scanner.",
-          [{ text: "OK" }]
+          [{ text: "OK" }],
         );
         return true; // Allow access anyway
       }
@@ -121,7 +121,7 @@ export default function QRScannerWidget() {
           Alert.alert(
             "Authentication Failed",
             "Could not authenticate. Please try again.",
-            [{ text: "OK" }]
+            [{ text: "OK" }],
           );
           return false;
         }
@@ -131,7 +131,7 @@ export default function QRScannerWidget() {
       Alert.alert(
         "Authentication Error",
         "An error occurred during authentication. Proceeding to QR scanner.",
-        [{ text: "OK" }]
+        [{ text: "OK" }],
       );
       return true; // Allow access on error to prevent blocking user
     }

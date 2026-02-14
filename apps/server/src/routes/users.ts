@@ -15,15 +15,17 @@ users.get("/:id", async (c) => {
   const user = prisma.user.findUnique({
     where: { id },
   });
-  if(!user) {
+  if (!user) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
   }
-  return c.json({
-    success: true,
-    status_code: 200,
-    user,
-  },
-  200,);
+  return c.json(
+    {
+      success: true,
+      status_code: 200,
+      user,
+    },
+    200,
+  );
 });
 
 users.put("/:id", async (c) => {
@@ -33,15 +35,17 @@ users.put("/:id", async (c) => {
     where: { id },
     data: body,
   });
-  if(!user) {
+  if (!user) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
   }
-  return c.json({
-    success: true,
-    status_code: 200,
-    user,
-  },
-  200,);
+  return c.json(
+    {
+      success: true,
+      status_code: 200,
+      user,
+    },
+    200,
+  );
 });
 
 export default users;

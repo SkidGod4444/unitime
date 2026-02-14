@@ -1,3 +1,4 @@
+import { useAuth } from "@/contexts/auth.cntxt";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -15,6 +16,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function Profile() {
   const router = useRouter();
   const [isDark, setIsDark] = React.useState(false);
+  const { logout, loggedInUser } = useAuth();
 
   // Grouped menu items for cleaner code
   const menuItems = [
@@ -105,7 +107,7 @@ export default function Profile() {
           </View>
 
           <Text className="text-2xl font-bold font-lora text-dark mt-4">
-            Saidev Dhal
+          {loggedInUser?.name || "John Doe"}
           </Text>
           <Text className="text-gray-500 font-medium">
             Computer Science & Eng.
@@ -233,7 +235,10 @@ export default function Profile() {
           </View>
 
           {/* Logout Button */}
-          <TouchableOpacity className="flex-row items-center justify-center gap-2 bg-red-50 p-4 rounded-2xl border border-red-100 mt-4 active:scale-[0.99] transition-transform">
+          <TouchableOpacity
+            onPress={logout}
+            className="flex-row items-center justify-center gap-2 bg-red-50 p-4 rounded-2xl border border-red-100 mt-4 active:scale-[0.99] transition-transform"
+          >
             <Ionicons name="log-out-outline" size={20} color="#DC2626" />
             <Text className="text-red-600 font-bold text-base">Log Out</Text>
           </TouchableOpacity>

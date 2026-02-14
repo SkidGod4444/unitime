@@ -37,16 +37,16 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <LocalStoreProvider>
-        <RoutesProvider>
-          <AuthProvider>
+        <AuthProvider>
+          <RoutesProvider>
             <PermsProvider>
               <StatusBar style={"dark"} animated />
               <Stack screenOptions={{ headerShown: false }} />
               {!isHiddenScreen && <QRScannerWidget />}
               <Loader />
             </PermsProvider>
-          </AuthProvider>
-        </RoutesProvider>
+          </RoutesProvider>
+        </AuthProvider>
       </LocalStoreProvider>
     </GestureHandlerRootView>
   );

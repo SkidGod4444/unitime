@@ -1,4 +1,4 @@
-import { auth } from "@unitime/auth";
+// import { auth } from "@unitime/auth";
 import { cache } from "@unitime/cache";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Context, Next } from "hono";
@@ -24,19 +24,19 @@ const getRatelimitInstance = (limit: number) => ({
     prefix: "@unitime/ratelimit:free",
     limiter: Ratelimit.slidingWindow(limit, "5m"),
   }),
-//   pro: new Ratelimit({
-//     redis: cache,
-//     analytics: true,
-//     enableProtection: true,
-//     prefix: "@unitime/ratelimit:pro",
-//     limiter: Ratelimit.slidingWindow(limit, "10s"),
-//   }),
+  //   pro: new Ratelimit({
+  //     redis: cache,
+  //     analytics: true,
+  //     enableProtection: true,
+  //     prefix: "@unitime/ratelimit:pro",
+  //     limiter: Ratelimit.slidingWindow(limit, "10s"),
+  //   }),
 });
 
 export const rateLimitHandler = async (c: Context, next: Next) => {
   // let auth = getAuth(c);
-  const session = await auth.api.getSession({ headers: c.req.raw.headers });
-  console.log(`Ratelimiting user: ${session?.user?.id || "anonymous"}`);
+  const user = await c.get("user");
+  console.log(`Ratelimiting user: ${user.id || "anonymous"}`);
   const ip = getClientIp(c);
   const userAgent = getUserAgent(c);
 
@@ -47,8 +47,8 @@ export const rateLimitHandler = async (c: Context, next: Next) => {
   let key: string | undefined;
   let limiter: Ratelimit | undefined;
 
-  if (session?.user && session.user.id) {
-    key = session.user.id || ip || userAgent || "anonymous";
+  if (user && user.id) {
+    key = user.id || ip || userAgent || "anonymous";
     limiter = ratelimit.free;
   } else {
     // fallback for completely anonymous users
@@ -57,7 +57,7 @@ export const rateLimitHandler = async (c: Context, next: Next) => {
   }
 
   // Apply rate limit
-  const { success, pending, reason, deniedValue } = await limiter.limit(key, {
+  const { success, pending, reason, deniedValue } = await limiter.limit(key!, {
     ip,
     userAgent,
   });

@@ -8,13 +8,15 @@ import history from "./routes/history";
 import notifications from "./routes/notifications";
 import timetable from "./routes/timetable";
 import users from "./routes/users";
-import { auth } from "@unitime/auth";
+// import { auth } from "@unitime/auth";
 import { rateLimitHandler } from "../middleware/ratelimit";
+import { authMiddleware } from "../middleware/check.auth";
 
 export const runtime = "edge";
 const app = new Hono().basePath("/v1");
 
 app.use(logger());
+app.use(authMiddleware);
 app.use(rateLimitHandler);
 
 // Allow localhost and local network IPs for mobile development
@@ -25,7 +27,7 @@ const isAllowedOrigin = (origin: string): boolean => {
     /^http:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+$/,
   ];
   return allowedPatterns.some((pattern) =>
-    typeof pattern === "string" ? pattern === origin : pattern.test(origin)
+    typeof pattern === "string" ? pattern === origin : pattern.test(origin),
   );
 };
 
@@ -40,10 +42,6 @@ app.use(
     credentials: true,
   }),
 );
-
-app.all("/auth/**", async (c) => {
-  return await auth.handler(c.req.raw);
-});
 
 app.route("/users", users);
 app.route("/attendance", attendance);

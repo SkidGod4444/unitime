@@ -1,4 +1,5 @@
 /* eslint-disable import/no-unresolved */
+import { useAuth } from "@/contexts/auth.cntxt";
 import { useLocalStore } from "@/contexts/localstore.cntxt";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -12,6 +13,7 @@ export default function Index() {
   const router = useRouter();
   const { getItem, setItem } = useLocalStore();
   const [expanded, setExpanded] = useState(true);
+  const { loggedInUser } = useAuth();
 
   // Load saved state on mount
   useEffect(() => {
@@ -67,7 +69,7 @@ export default function Index() {
                 Welcome back,
               </Text>
               <Text className="text-dark font-lora font-bold text-xl">
-                Saidev Dhal
+              {loggedInUser?.name || "John Doe"}
               </Text>
             </View>
           </TouchableOpacity>

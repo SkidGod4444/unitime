@@ -26,4 +26,3 @@ type UserT = {
   banExpires?: Date | null;
 };
 export type { TeamT, Theme, UserT };
-

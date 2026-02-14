@@ -1,168 +1,210 @@
-"use client";
-import { useRoutes } from "@/contexts/routes.cntxt";
-import { authClient } from "@unitime/auth/client";
+import { account, getUser } from "@/lib/auth";
+import { isInstitutionalEmail } from "@/utils/email.validator";
 import { UserT } from "@unitime/types";
-import { router, useSegments } from "expo-router";
-import {
-    createContext,
-    ReactNode,
-    useCallback,
-    useContext,
-    useEffect,
-    useRef,
-    useState,
+import { router } from "expo-router";
+import React, {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
 } from "react";
+import { ID } from "react-native-appwrite";
 
-interface AuthContextType {
-  user: UserT | null;
+type AuthContextType = {
+  isAuthenticated: boolean;
   loading: boolean;
-  setUser: (user: UserT | null) => void;
+  loggedInUser: UserT | null;
+  setLoggedInUser: (user: UserT | null) => void;
+  error: string;
+  setError: (error: string) => void;
+  login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
-}
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+};
+
+const AuthContext = createContext<AuthContextType>({
+  isAuthenticated: false,
+  loading: true,
+  loggedInUser: null,
+  setLoggedInUser: () => {},
+  error: "",
+  setError: () => {},
+  login: async () => {},
+  register: async () => {},
+  logout: async () => {},
+});
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<UserT | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
-  const segments = useSegments();
-  const { setIsLoading } = useRoutes();
+  const [loggedInUser, setLoggedInUser] = useState<UserT | null>(null);
+  const [error, setError] = useState("");
+  // const origin = Constants.expoConfig?.extra?.ORIGIN || 'http://localhost:3001';
+  const origin = "https://i-present-api.vercel.app";
 
-  // Refs to prevent duplicate checks
-  const isInitialMount = useRef(true);
-  const isChecking = useRef(false);
-  const hasRedirected = useRef(false);
-  const previousSegments = useRef<string[]>([]);
-
-  // Derive current path from segments
-  const currentPath = segments.length > 0 ? `/${segments.join("/")}` : "/";
-
-  // Reusable auth check function — accepts currentSegments to avoid stale closures
-  const checkAuth = useCallback(async (currentSegments: string[], showLoading = true) => {
-    // Prevent concurrent checks
-    if (isChecking.current) {
-      console.log("[Auth] Check already in progress, skipping");
-      return;
+  async function fetchDbUser(email: string): Promise<UserT | null> {
+    try {
+      const response = await fetch(`${origin}/v1/user/all`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json();
+      if (data.status === 200 && Array.isArray(data.data)) {
+        const dbUser = data.data.find((u: any) => u.emailAddress === email);
+        return dbUser as UserT;
+      }
+      return null;
+    } catch (err) {
+      console.error("Failed to fetch DB user:", err);
+      return null;
     }
+  }
 
-    isChecking.current = true;
-
-    if (showLoading) {
+  async function login(email: string, password: string) {
+    try {
       setLoading(true);
-      setIsLoading(true);
+      setError("");
+      await account.createEmailPasswordSession({ email, password });
+      const user = await getUser();
+
+      if (user) {
+        // const dbUser = await fetchDbUser(user.email);
+        // if (dbUser) {
+        //   setLoggedInUser(dbUser);
+        // }
+        setIsAuthenticated(true);
+        router.replace("/(tabs)");
+      } else {
+        throw new Error("Failed to get user details");
+      }
+    } catch (err: any) {
+      setError(err.message || "Failed to login");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function register(email: string, password: string, name: string) {
+    if (!isInstitutionalEmail(email)) {
+      throw new Error("Please use your institutional email address.");
     }
     try {
-      const session = await authClient.getSession();
-      const sessionUser = session?.data?.user ?? null;
+      setLoading(true);
+      setError("");
+      const userId = ID.unique();
+      await account.create({ userId, email, password, name });
+      await login(email, password);
 
-      if (sessionUser) {
-        setUser(sessionUser);
-        hasRedirected.current = false;
-        console.log("[Auth Check] User authenticated:", sessionUser.email);
-      } else {
-        setUser(null);
-        // Check if we're already on auth page using the passed-in segments
-        const isOnAuthPage = currentSegments.includes("auth");
-        console.log("[Auth Check] On auth page:", isOnAuthPage);
-        if (!isOnAuthPage && !hasRedirected.current) {
-          hasRedirected.current = true;
-          try {
-            router.replace("/auth" as any);
-            console.log("[Auth Check] No user, redirecting to /auth");
-          } catch (navError) {
-            hasRedirected.current = false;
-            console.warn("[Auth Check] Navigation failed (likely not ready):", navError);
+      // Update user preferences
+      try {
+        const response = await account.updatePrefs({
+          prefs: {
+            defaultTheme: "dark",
+            isOnboarded: false,
+          },
+        });
+        console.log("Preferences updated:", response);
+      } catch (prefError) {
+        console.log("Failed to update preferences:", prefError);
+      }
+
+      // router.replace("/onboarding");
+    } catch (err: any) {
+      setError(err.message || "Failed to register");
+      setLoading(false);
+    }
+  }
+
+  async function logout() {
+    try {
+      setLoading(true);
+      setError("");
+      await account.deleteSession("current");
+      await fetch(`${origin}/v1/user/update/${loggedInUser?.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          pushToken: [],
+        }),
+      });
+      setLoggedInUser(null);
+      setIsAuthenticated(false);
+      router.replace("/auth");
+    } catch (err: any) {
+      setError(err.message || "Failed to logout");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const validateSession = async () => {
+      try {
+        const user = await getUser();
+
+        if (!isMounted) return;
+
+        // Ensure user exists AND has an email (not a guest/anonymous session)
+        if (user && user.email) {
+          const dbUser = await fetchDbUser(user.email);
+          if (isMounted) {
+            setLoggedInUser(dbUser);
+            setIsAuthenticated(true);
           }
         } else {
-          console.log("[Auth Check] Already on /auth, skipping redirect");
+          if (isMounted) {
+            setIsAuthenticated(false);
+            setLoggedInUser(null);
+            // Optional: If we want to clear the invalid/guest session
+            if (user) {
+              await account
+                .deleteSession({ sessionId: "current" })
+                .catch(() => {});
+            }
+          }
         }
+      } catch (err: any) {
+        if (isMounted) {
+          setIsAuthenticated(false);
+          setLoggedInUser(null);
+        }
+        console.error("Session validation failed:", err);
+      } finally {
+        if (isMounted) setLoading(false);
       }
-    } catch (error) {
-      console.error("[Auth Check] Error:", error);
-    } finally {
-      if (showLoading) {
-        setLoading(false);
-        setIsLoading(false);
-      }
-      isChecking.current = false;
-    }
-  }, [setIsLoading]);
+    };
 
-  // Initial mount check - run only once
-  useEffect(() => {
-    console.log("[Auth] Initial mount - checking auth");
-    checkAuth(segments, true);
-    isInitialMount.current = false;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Route change monitoring - skip initial mount
-  useEffect(() => {
-    if (isInitialMount.current) {
-      previousSegments.current = [...segments];
-      return;
-    }
-
-    // Skip if segments haven't actually changed
-    const segStr = segments.join("/");
-    const prevStr = previousSegments.current.join("/");
-    if (segStr === prevStr) {
-      return;
-    }
-
-    previousSegments.current = [...segments];
-    console.log("[Auth] Route changed to:", currentPath);
-
-    // Don't re-check auth if we just redirected to the auth page
-    if (segments.includes("auth")) {
-      console.log("[Auth] On auth page, skipping re-check");
-      setLoading(false);
-      setIsLoading(false);
-      return;
-    }
-
-    checkAuth(segments, true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [segments]);
-
-  // Interval monitoring (every 10 seconds) - silent checks
-  useEffect(() => {
-    console.log("[Auth] Starting 10-second interval checks");
-    const interval = setInterval(() => {
-      console.log("[Auth] Background interval check");
-      if (!isChecking.current) {
-        checkAuth(previousSegments.current, false);
-      }
-    }, 10000);
+    validateSession();
 
     return () => {
-      console.log("[Auth] Clearing interval checks");
-      clearInterval(interval);
+      isMounted = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const logout = async () => {
-    try {
-      await authClient.signOut();
-      setUser(null);
-      console.log("User logged out.");
-    } catch (error) {
-      console.error("Error during logout:", error);
-    }
-  };
-
   return (
-    <AuthContext.Provider value={{ user, loading, setUser, logout }}>
+    <AuthContext.Provider
+      value={{
+        isAuthenticated,
+        loading,
+        loggedInUser,
+        setLoggedInUser,
+        error,
+        setError,
+        login,
+        register,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Custom hook to use the user context
-export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within a AuthProvider");
-  }
-  return context;
-};
+export const useAuth = () => useContext(AuthContext);
