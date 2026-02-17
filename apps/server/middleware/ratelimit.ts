@@ -40,7 +40,7 @@ export const rateLimitHandler = async (c: Context, next: Next) => {
   const ip = getClientIp(c);
   const userAgent = getUserAgent(c);
 
-  const limit = Bun.env.NODE_ENV === "production" ? 60 : 100;
+  const limit = process.env.NODE_ENV === "production" ? 60 : 100;
   const ratelimit = getRatelimitInstance(limit);
 
   // Determine rate limit context
