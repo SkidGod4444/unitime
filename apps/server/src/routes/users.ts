@@ -10,6 +10,27 @@ users.get("/me", (c) => {
   });
 });
 
+users.get("/", async (c) => {
+  const email = c.req.query("email");
+  if (!email) {
+    return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
+  }
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+  if (!user) {
+    return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
+  }
+  return c.json(
+    {
+      success: true,
+      status_code: 200,
+      user,
+    },
+    200,
+  );
+});
+
 users.get("/:id", async (c) => {
   const id = c.req.param("id");
   const user = prisma.user.findUnique({
@@ -27,6 +48,7 @@ users.get("/:id", async (c) => {
     200,
   );
 });
+
 
 users.put("/:id", async (c) => {
   const id = c.req.param("id");

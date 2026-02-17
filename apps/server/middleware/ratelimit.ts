@@ -34,9 +34,9 @@ const getRatelimitInstance = (limit: number) => ({
 });
 
 export const rateLimitHandler = async (c: Context, next: Next) => {
-  // let auth = getAuth(c);
-  const user = await c.get("user");
-  console.log(`Ratelimiting user: ${user.id || "anonymous"}`);
+  // Try to get user from context (set by auth middleware if enabled)
+  const me = c.get("user") as { $id?: string } | null | undefined;
+  console.log(`Ratelimiting user: ${me?.$id || "anonymous"}`);
   const ip = getClientIp(c);
   const userAgent = getUserAgent(c);
 
@@ -47,8 +47,8 @@ export const rateLimitHandler = async (c: Context, next: Next) => {
   let key: string | undefined;
   let limiter: Ratelimit | undefined;
 
-  if (user && user.id) {
-    key = user.id || ip || userAgent || "anonymous";
+  if (me && me.$id) {
+    key = me.$id || ip || userAgent || "anonymous";
     limiter = ratelimit.free;
   } else {
     // fallback for completely anonymous users

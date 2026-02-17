@@ -40,23 +40,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [loggedInUser, setLoggedInUser] = useState<UserT | null>(null);
   const [error, setError] = useState("");
-  // const origin = Constants.expoConfig?.extra?.ORIGIN || 'http://localhost:3001';
-  const origin = "https://i-present-api.vercel.app";
+  const [jwt, setJwt] = useState<string | null>(null);
+  const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3001";
 
-  async function fetchDbUser(email: string): Promise<UserT | null> {
+  async function fetchDbUser(email: string, token?: string | null): Promise<UserT | null> {
     try {
-      const response = await fetch(`${origin}/v1/user/all`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      const data = await response.json();
-      if (data.status === 200 && Array.isArray(data.data)) {
-        const dbUser = data.data.find((u: any) => u.emailAddress === email);
-        return dbUser as UserT;
+      const authToken = token ?? jwt;
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (authToken) {
+        headers["Authorization"] = `Bearer ${authToken}`;
       }
-      return null;
+      const response = await fetch(`${origin}/users?email=${email}`, {
+        method: "GET",
+        headers,
+      });
+      if (!response.ok) {
+        const text = await response.text();
+        console.error("DB user fetch failed:", response.status, text);
+        return null;
+      }
+      const data = await response.json();
+      console.log("DB user fetch response:", data);
+      if (data.user) {
+        return data.user as UserT;
+      } else {
+        return null;
+      }
     } catch (err) {
       console.error("Failed to fetch DB user:", err);
       return null;
@@ -71,10 +82,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const user = await getUser();
 
       if (user) {
-        // const dbUser = await fetchDbUser(user.email);
-        // if (dbUser) {
-        //   setLoggedInUser(dbUser);
-        // }
+        // Generate JWT for authenticating with our backend server
+        const jwtResponse = await account.createJWT();
+        setJwt(jwtResponse.jwt);
+
+        const dbUser = await fetchDbUser(user.email, jwtResponse.jwt);
+        if (dbUser) {
+          setLoggedInUser(dbUser);
+        }
         setIsAuthenticated(true);
         router.replace("/(tabs)");
       } else {
@@ -122,16 +137,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       setLoading(true);
       setError("");
-      await account.deleteSession("current");
-      await fetch(`${origin}/v1/user/update/${loggedInUser?.id}`, {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (jwt) {
+        headers["Authorization"] = `Bearer ${jwt}`;
+      }
+      await fetch(`${origin}/user/update/${loggedInUser?.id}`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify({
           pushToken: [],
         }),
       });
+      await account.deleteSession("current");
+      setJwt(null);
       setLoggedInUser(null);
       setIsAuthenticated(false);
       router.replace("/auth");
@@ -153,7 +173,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         // Ensure user exists AND has an email (not a guest/anonymous session)
         if (user && user.email) {
-          const dbUser = await fetchDbUser(user.email);
+          // Generate a fresh JWT for the existing session
+          const jwtResponse = await account.createJWT();
+          if (isMounted) {
+            setJwt(jwtResponse.jwt);
+          }
+
+          const dbUser = await fetchDbUser(user.email, jwtResponse.jwt);
           if (isMounted) {
             setLoggedInUser(dbUser);
             setIsAuthenticated(true);

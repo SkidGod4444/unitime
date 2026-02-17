@@ -1,4 +1,4 @@
-import { Client, Databases, Users, Functions } from "node-appwrite";
+import { Client, Databases, Users, Functions, Account } from "node-appwrite";
 
 const client = new Client()
   .setEndpoint(process.env.APPWRITE_ENDPOINT as string)
@@ -8,5 +8,6 @@ const client = new Client()
 // Export initialized services
 export const appwriteClient = client;
 export const databases = new Databases(client);
+export const account = new Account(client);
 export const users = new Users(client);
 export const functions = new Functions(client);
