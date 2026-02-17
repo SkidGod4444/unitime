@@ -1,6 +1,6 @@
 import crypto from "crypto";
 
-const SECRET = Bun.env.QR_SECRET!;
+const SECRET = process.env.QR_SECRET!;
 
 export function generateQRToken(sessionId: string) {
   const timeWindow = Math.floor(Date.now() / 15000); // 15 second window
