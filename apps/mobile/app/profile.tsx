@@ -97,7 +97,10 @@ export default function Profile() {
           <View className="relative">
             <View className="h-28 w-28 rounded-full bg-gray-100 p-1 border-2 border-primary/20">
               <Image
-                source={{ uri: loggedInUser?.image || "https://i.pravatar.cc/150?img=68" }}
+                source={{
+                  uri:
+                    loggedInUser?.image || "https://i.pravatar.cc/150?img=68",
+                }}
                 className="h-full w-full rounded-full"
               />
             </View>
@@ -107,7 +110,7 @@ export default function Profile() {
           </View>
 
           <Text className="text-2xl font-bold font-lora text-dark mt-4">
-          {loggedInUser?.name || "John Doe"}
+            {loggedInUser?.name || "John Doe"}
           </Text>
           <Text className="text-gray-500 font-medium">
             Computer Science & Eng.

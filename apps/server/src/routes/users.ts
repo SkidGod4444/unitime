@@ -49,7 +49,6 @@ users.get("/:id", async (c) => {
   );
 });
 
-
 users.put("/:id", async (c) => {
   const id = c.req.param("id");
   const body = await c.req.json();

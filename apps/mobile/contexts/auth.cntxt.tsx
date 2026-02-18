@@ -43,7 +43,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [jwt, setJwt] = useState<string | null>(null);
   const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3001";
 
-  async function fetchDbUser(email: string, token?: string | null): Promise<UserT | null> {
+  async function fetchDbUser(
+    email: string,
+    token?: string | null,
+  ): Promise<UserT | null> {
     try {
       const authToken = token ?? jwt;
       const headers: Record<string, string> = {

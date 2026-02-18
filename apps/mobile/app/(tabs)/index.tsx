@@ -69,7 +69,7 @@ export default function Index() {
                 Welcome back,
               </Text>
               <Text className="text-dark font-lora font-bold text-xl">
-              {loggedInUser?.name || "John Doe"}
+                {loggedInUser?.name || "John Doe"}
               </Text>
             </View>
           </TouchableOpacity>

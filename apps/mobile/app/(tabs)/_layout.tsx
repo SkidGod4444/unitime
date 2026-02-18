@@ -1,8 +1,9 @@
-import React from "react";
-import { Tabs } from "expo-router";
-import { View, Platform, Pressable } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { colors } from "@/utils/constants";
+import { Ionicons } from "@expo/vector-icons";
+import { Tabs } from "expo-router";
+import React from "react";
+import { Platform, Pressable, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const TabBarIcons = ({
   focused,
@@ -39,6 +40,12 @@ const NoEffectTabButton = ({ children, onPress }: any) => {
 };
 
 export default function TabsLayout() {
+  const insets = useSafeAreaInsets();
+
+  // On Android, insets.bottom > 0 means the device has system button navigation
+  // (back, home, recent apps). We add extra margin to avoid overlap.
+  const androidBottomMargin = insets.bottom > 0 ? insets.bottom + 5 : 15;
+
   return (
     <Tabs
       initialRouteName="index"
@@ -53,7 +60,7 @@ export default function TabsLayout() {
           borderWidth: 2,
           paddingTop: 0,
           borderRadius: 20,
-          marginBottom: Platform.OS === "ios" ? 35 : 15,
+          marginBottom: Platform.OS === "ios" ? 35 : androidBottomMargin,
           marginHorizontal: 15,
           display: "flex",
           alignItems: "center",

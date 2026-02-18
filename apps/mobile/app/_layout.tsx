@@ -1,3 +1,4 @@
+import ProfileCompletionPopup from "@/components/profile-completion-popup";
 import QRScannerWidget from "@/components/qr.scanner.widget";
 import { AuthProvider } from "@/contexts/auth.cntxt";
 import { LocalStoreProvider } from "@/contexts/localstore.cntxt";
@@ -7,10 +8,14 @@ import { useFonts } from "expo-font";
 import { Stack, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import "./globals.css";
 import Loader from "./loader";
 
-export default function RootLayout() {
+function AppContent() {
   const [fontsLoaded] = useFonts({
     "Lora-Regular": require("../assets/fonts/Lora-Regular.ttf"),
     "Lora-Bold": require("../assets/fonts/Lora-Bold.ttf"),
@@ -22,7 +27,9 @@ export default function RootLayout() {
     "Lora-SemiBoldItalic": require("../assets/fonts/Lora-SemiBoldItalic.ttf"),
   });
 
+  const insets = useSafeAreaInsets();
   const segments = useSegments() as string[];
+
   const isHiddenScreen =
     segments.includes("qr-scanner") ||
     segments.includes("chat") ||
@@ -30,6 +37,7 @@ export default function RootLayout() {
     segments.includes("schedule") ||
     segments.includes("auth") ||
     segments.includes("alarm") ||
+    segments.includes("student-profile-form") || // Hide banner on the form itself
     segments.includes("loader");
 
   console.log("Fonts loaded:", fontsLoaded);
@@ -41,6 +49,10 @@ export default function RootLayout() {
           <RoutesProvider>
             <PermsProvider>
               <StatusBar style={"dark"} animated />
+              <StatusBar style={"dark"} animated />
+
+              {!isHiddenScreen && <ProfileCompletionPopup />}
+
               <Stack screenOptions={{ headerShown: false }} />
               {!isHiddenScreen && <QRScannerWidget />}
               <Loader />
@@ -49,5 +61,13 @@ export default function RootLayout() {
         </AuthProvider>
       </LocalStoreProvider>
     </GestureHandlerRootView>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <SafeAreaProvider>
+      <AppContent />
+    </SafeAreaProvider>
   );
 }
