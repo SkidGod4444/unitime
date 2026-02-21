@@ -134,11 +134,11 @@ export default function StudentProfileForm() {
               <View className="relative shadow-xl shadow-blue-100">
                 <View className="h-36 w-36 rounded-full bg-white border-4 border-white overflow-hidden items-center justify-center">
                   <Image
-                    source={{
-                      uri:
-                        loggedInUser?.image ||
-                        "https://i.pravatar.cc/150?img=68",
-                    }}
+                    source={
+                      loggedInUser?.image
+                        ? { uri: loggedInUser.image }
+                        : require("../assets/images/pfp-face.png")
+                    }
                     className="h-full w-full rounded-full"
                   />
                 </View>

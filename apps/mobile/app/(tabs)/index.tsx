@@ -1,10 +1,10 @@
-/* eslint-disable import/no-unresolved */
 import { useAuth } from "@/contexts/auth.cntxt";
 import { useLocalStore } from "@/contexts/localstore.cntxt";
 import { Ionicons } from "@expo/vector-icons";
+import * as LocalAuthentication from "expo-local-authentication";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const ATTENDANCE_EXPANDED_KEY = "@attendance-card-expanded";
@@ -30,6 +30,55 @@ export default function Index() {
     const newState = !expanded;
     setExpanded(newState);
     setItem(ATTENDANCE_EXPANDED_KEY, newState.toString());
+  };
+
+  // Biometric auth before entering admin panel.
+  // Falls back to device PIN/password if fingerprint is not enrolled
+  // (unlike QR scanner which is biometric-only).
+  const authenticateForAdmin = async (): Promise<boolean> => {
+    try {
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
+      if (!hasHardware) {
+        // No biometric hardware — allow with device passcode
+        const result = await LocalAuthentication.authenticateAsync({
+          promptMessage: "Authenticate to access Admin Panel",
+          cancelLabel: "Cancel",
+          disableDeviceFallback: false,
+        });
+        return result.success;
+      }
+
+      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: "Authenticate to access Admin Panel",
+        cancelLabel: "Cancel",
+        // If enrolled: prefer biometrics but allow device PIN as fallback.
+        // If not enrolled: device PIN/password is the only option.
+        disableDeviceFallback: false,
+      });
+
+      if (result.success) return true;
+
+      if (result.error !== "user_cancel" && result.error !== "system_cancel") {
+        Alert.alert(
+          "Authentication Failed",
+          isEnrolled
+            ? "Biometric authentication failed. Please try again."
+            : "Device authentication failed. Please try again.",
+          [{ text: "OK" }]
+        );
+      }
+      return false;
+    } catch (error) {
+      console.error("Admin auth error:", error);
+      // Allow on unexpected error to avoid blocking
+      return true;
+    }
+  };
+
+  const handleAdminPress = async () => {
+    const authenticated = await authenticateForAdmin();
+    if (authenticated) router.push("/admin");
   };
 
   const subjectAttendance = [
@@ -58,11 +107,15 @@ export default function Index() {
             className="flex-row items-center gap-3"
             onPress={() => router.push("/profile")}
           >
-            <View className="h-12 w-12 rounded-full bg-gray-200 justify-center items-center overflow-hidden">
-              <Image
-                source={{ uri: "https://i.pravatar.cc/150?img=68" }}
-                className="h-full w-full"
-              />
+            <View className="h-14 w-14 rounded-full bg-gray-200 justify-center items-center overflow-hidden">
+            <Image
+                    source={
+                      loggedInUser?.image
+                        ? { uri: loggedInUser.image }
+                        : require("../../assets/images/pfp-face.png")
+                    }
+                    className="h-full w-full rounded-full"
+                  />
             </View>
             <View>
               <Text className="text-gray-500 font-medium text-sm">
@@ -73,13 +126,14 @@ export default function Index() {
               </Text>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => router.push("/notify")}
-            className="bg-white p-2.5 rounded-full shadow-sm border border-gray-100"
-          >
-            <Ionicons name="notifications-outline" size={24} color="#18181B" />
-            <View className="absolute top-2 right-2.5 h-2 w-2 bg-red-500 rounded-full border border-white" />
-          </TouchableOpacity>
+          {loggedInUser && loggedInUser.role === "ADMIN" && (
+            <TouchableOpacity
+              onPress={handleAdminPress}
+              className="bg-white p-2.5 rounded-full shadow-sm border border-gray-100"
+            >
+              <Ionicons name="settings-outline" size={24} color="#18181B" />
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Status Overview Cards */}
@@ -192,10 +246,10 @@ export default function Index() {
               },
               {
                 icon: "chatbox-outline",
-                label: "Auth",
+                label: "TTM",
                 color: "text-green-600",
                 bg: "bg-green-50",
-                route: "/loader",
+                route: "/tap-to-mark",
               },
             ].map((action, index) => (
               <TouchableOpacity
@@ -229,6 +283,64 @@ export default function Index() {
             ))}
           </View>
         </View>
+
+
+        {/* Admin/CR/Teacher Actions Grid */}
+        {loggedInUser && (loggedInUser.role === "REPRESENTATIVE" || loggedInUser.role === "ADMIN" || loggedInUser.role === "PROFESSOR") && (
+          <View>
+          <Text className="text-lg font-bold text-dark mb-4 font-lora">
+            Manage Attendance
+          </Text>
+          <View className="flex-row flex-wrap justify-between gap-y-4">
+            {[
+              {
+                icon: "timer-outline",
+                label: "Session",
+                color: "text-blue-600",
+                bg: "bg-blue-50",
+                route: "/attendance-session-form",
+              },
+              {
+                icon: "time-outline",
+                label: "History",
+                color: "text-purple-600",
+                bg: "bg-purple-50",
+                route: "/attendance-session-history",
+              }
+            ].map((action, index) => (
+              <TouchableOpacity
+                key={index}
+                className="w-[48%] bg-white p-4 rounded-3xl border border-gray-100 shadow-sm flex-row items-center gap-3"
+                onPress={() => action.route && router.push(action.route as any)}
+              >
+                <View
+                  className={`h-10 w-10 ${action.bg} rounded-full justify-center items-center`}
+                >
+                  <Ionicons
+                    name={action.icon as any}
+                    size={20}
+                    className={action.color}
+                    style={{
+                      color:
+                        action.color === "text-blue-600"
+                          ? "#2563EB"
+                          : action.color === "text-purple-600"
+                            ? "#9333EA"
+                            : action.color === "text-yellow-600"
+                              ? "#CA8A04"
+                              : "#E11D48",
+                    }}
+                  />
+                </View>
+                <Text className="font-semibold text-gray-700">
+                  {action.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+        )}
+
 
         {/* Today's Schedule */}
         <View>

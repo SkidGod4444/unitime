@@ -151,14 +151,14 @@ export default function TapToMarkScreen() {
                   <Feather name="check" size={80} color="white" />
                 </Animated.View>
               ) : (
-                <View className="items-center">
+                <View className="items-center w-full px-6">
                   <Ionicons
                     name="finger-print"
                     size={64}
                     color="white"
                     className="opacity-90"
                   />
-                  <Text className="text-white font-semibold text-xl mt-4">
+                  <Text className="text-white font-semibold text-xl mt-4 text-center" numberOfLines={1}>
                     {status === "loading" ? "Verifying..." : "Tap to Mark"}
                   </Text>
                   {status === "loading" && (

@@ -10,7 +10,6 @@ import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
   SafeAreaProvider,
-  useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import "./globals.css";
 import Loader from "./loader";
@@ -27,7 +26,6 @@ function AppContent() {
     "Lora-SemiBoldItalic": require("../assets/fonts/Lora-SemiBoldItalic.ttf"),
   });
 
-  const insets = useSafeAreaInsets();
   const segments = useSegments() as string[];
 
   const isHiddenScreen =
@@ -37,8 +35,11 @@ function AppContent() {
     segments.includes("schedule") ||
     segments.includes("auth") ||
     segments.includes("alarm") ||
-    segments.includes("student-profile-form") || // Hide banner on the form itself
-    segments.includes("loader");
+    segments.includes("student-profile-form") ||
+    segments.includes("attendance-session-form") ||
+    segments.includes("attendance-session-history") ||
+    segments.includes("loader") ||
+    segments.includes("admin");
 
   console.log("Fonts loaded:", fontsLoaded);
 
@@ -48,7 +49,6 @@ function AppContent() {
         <AuthProvider>
           <RoutesProvider>
             <PermsProvider>
-              <StatusBar style={"dark"} animated />
               <StatusBar style={"dark"} animated />
 
               {!isHiddenScreen && <ProfileCompletionPopup />}

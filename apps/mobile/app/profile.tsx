@@ -96,13 +96,14 @@ export default function Profile() {
         <View className="items-center mt-6 px-5">
           <View className="relative">
             <View className="h-28 w-28 rounded-full bg-gray-100 p-1 border-2 border-primary/20">
-              <Image
-                source={{
-                  uri:
-                    loggedInUser?.image || "https://i.pravatar.cc/150?img=68",
-                }}
-                className="h-full w-full rounded-full"
-              />
+            <Image
+                    source={
+                      loggedInUser?.image
+                        ? { uri: loggedInUser.image }
+                        : require("../assets/images/pfp-face.png")
+                    }
+                    className="h-full w-full rounded-full"
+                  />
             </View>
             <TouchableOpacity className="absolute bottom-0 right-0 bg-primary h-8 w-8 rounded-full items-center justify-center border-2 border-white shadow-sm">
               <Ionicons name="camera" size={16} color="white" />
