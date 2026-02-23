@@ -55,8 +55,9 @@ export default handle(app);
 
 // ✅ Bun local dev: only starts the server when run directly (bun run src/index.ts)
 // import.meta.main is false when Vercel imports this module, so this never runs on Vercel
-if (typeof Bun !== "undefined" && import.meta.main) {
+if (process.versions.bun && import.meta.main) {
   const port = process.env.PORT || 3001;
+  // @ts-ignore — Bun global is available at runtime when process.versions.bun is set
   Bun.serve({ port: Number(port), fetch: app.fetch });
   console.log(`🚀 Server running on http://localhost:${port}`);
 }
