@@ -50,7 +50,7 @@ app.route("/timetable", timetable);
 app.route("/courses", courses);
 
 // ✅ Vercel edge runtime: export a proper fetch handler, not a raw Hono app
-export const runtime = "edge";
+export const runtime = "nodejs";
 export default handle(app);
 
 // ✅ Bun local dev: only starts the server when run directly (bun run src/index.ts)
