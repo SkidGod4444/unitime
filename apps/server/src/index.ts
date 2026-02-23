@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
+import { handle } from "hono/vercel";
 import attendance from "./routes/attendance";
 import courses from "./routes/courses";
 import history from "./routes/history";
@@ -48,4 +49,14 @@ app.route("/notifications", notifications);
 app.route("/timetable", timetable);
 app.route("/courses", courses);
 
-export default app;
+// ✅ Vercel edge runtime: export a proper fetch handler, not a raw Hono app
+export const runtime = "edge";
+export default handle(app);
+
+// ✅ Bun local dev: only starts the server when run directly (bun run src/index.ts)
+// import.meta.main is false when Vercel imports this module, so this never runs on Vercel
+if (typeof Bun !== "undefined" && import.meta.main) {
+  const port = process.env.PORT || 3001;
+  Bun.serve({ port: Number(port), fetch: app.fetch });
+  console.log(`🚀 Server running on http://localhost:${port}`);
+}
