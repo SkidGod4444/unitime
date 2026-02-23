@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useRef, useState } from "react";
 import {
+  Alert,
   FlatList,
   Modal,
   ScrollView,
@@ -235,7 +236,7 @@ const ClassCard = ({
             className="p-4 rounded-3xl bg-white dark:bg-gray-900 shadow-sm border-l-4 active:scale-95 transition-transform"
             style={{ borderLeftColor: session.color }}
           >
-            <View className="flex-row justify-between items-start mb-2">
+            <View className="flex-row justify-between items-center mb-2">
               <View className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-md">
                 <Text
                   style={{ color: session.color }}
@@ -244,7 +245,27 @@ const ClassCard = ({
                   {session.courseCode} • {session.type}
                 </Text>
               </View>
-              <Ionicons name="ellipsis-horizontal" size={20} color="#9ca3af" />
+              <TouchableOpacity
+                onPress={() => {
+                  Alert.alert(
+                    "Set Alarm",
+                    `Do you want to set an alarm for ${session.courseName} at ${session.startTime}?`,
+                    [
+                      { text: "Cancel", style: "cancel" },
+                      { 
+                        text: "Yes", 
+                        onPress: () => {
+                          console.log("Alarm set for", session.courseName);
+                          // We could pass params to /alarm or handle it locally later
+                        } 
+                      },
+                    ]
+                  );
+                }}
+                className="w-8 h-8 rounded-full items-center justify-center bg-gray-50 dark:bg-gray-800"
+              >
+                <Ionicons name="alarm-outline" size={16} color="#6b7280" />
+              </TouchableOpacity>
             </View>
 
             <Text className="text-lg font-bold text-gray-900 dark:text-white mb-1">

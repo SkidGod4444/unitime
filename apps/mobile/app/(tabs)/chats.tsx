@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useState } from "react";
 import {
+  Alert,
   FlatList,
   Image,
   ScrollView,
@@ -86,6 +87,16 @@ const ONLINE_USERS = CHATS.filter((c) => c.online || Math.random() > 0.5); // Mo
 export default function Chats() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+
+  useFocusEffect(
+    useCallback(() => {
+      Alert.alert(
+        "🚧 Coming Soon",
+        "Chats feature is currently under development. Stay tuned!",
+        [{ text: "Got it", style: "default", onPress: () => router.replace("/") }]
+      );
+    }, [router])
+  );
 
   const filteredChats = CHATS.filter(
     (chat) =>
