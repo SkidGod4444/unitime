@@ -1,7 +1,7 @@
 {
   "name": "@unitime/server",
   "scripts": {
-    "dev": "bun run --hot src/index.ts --port 3001"
+    "dev": "PORT=3001 bun run --hot src/index.ts --port 3001"
   },
   "dependencies": {
     "@unitime/cache": "workspace:*",
