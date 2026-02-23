@@ -50,18 +50,25 @@ app.route("/notifications", notifications);
 app.route("/timetable", timetable);
 app.route("/courses", courses);
 
-// For local development with Bun
-const port = process.env.PORT || 3001;
+// For Vercel deployment - this MUST be the default export
+// Vercel reads the default export as the handler function
+const handler = handle(app);
+export default handler;
 
-// Bun-specific server export
-export default {
-  port,
-  fetch: app.fetch,
-};
+// Named method exports for Vercel edge (belt-and-suspenders)
+export const GET = handler;
+export const POST = handler;
+export const PATCH = handler;
+export const DELETE = handler;
+export const PUT = handler;
 
-// For Vercel deployment - named export
-export const GET = handle(app);
-export const POST = handle(app);
-export const PATCH = handle(app);
-export const DELETE = handle(app);
-export const PUT = handle(app);
+// For local development with Bun - only runs when executed directly via Bun
+// This does NOT affect the Vercel deployment
+if (typeof Bun !== "undefined" && import.meta.main) {
+  const port = process.env.PORT || 3001;
+  Bun.serve({
+    port,
+    fetch: app.fetch,
+  });
+  console.log(`Server running on http://localhost:${port}`);
+}
