@@ -11,7 +11,6 @@ import users from "./routes/users";
 import { rateLimitHandler } from "../middleware/ratelimit";
 // import { authMiddleware } from "../middleware/check.auth";
 
-export const runtime = "edge";
 const app = new Hono().basePath("/v1");
 
 app.use(logger());
