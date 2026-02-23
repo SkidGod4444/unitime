@@ -20,7 +20,6 @@
         "@react-navigation/elements": "^2.9.5",
         "@react-navigation/native": "^7.1.28",
         "@unitime/db": "workspace:*",
-        "@unitime/flags": "workspace:*",
         "@unitime/types": "workspace:*",
         "expo": "~54.0.33",
         "expo-application": "^7.0.8",
@@ -90,7 +89,7 @@
         "node-appwrite": "^22.0.0",
       },
       "devDependencies": {
-        "@types/bun": "latest",
+        "@types/bun": "^1.3.9",
         "@types/node": "^24.0.0",
       },
     },
@@ -165,18 +164,6 @@
         "globals": "^16.5.0",
         "typescript": "^5.9.2",
         "typescript-eslint": "^8.49.0",
-      },
-    },
-    "packages/flags": {
-      "name": "@unitime/flags",
-      "dependencies": {
-        "@launchdarkly/react-native-client-sdk": "^10.12.7",
-      },
-      "devDependencies": {
-        "@types/bun": "latest",
-      },
-      "peerDependencies": {
-        "typescript": "^5",
       },
     },
     "packages/types": {
@@ -590,12 +577,6 @@
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.31", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw=="],
 
-    "@launchdarkly/js-client-sdk-common": ["@launchdarkly/js-client-sdk-common@1.18.0", "", { "dependencies": { "@launchdarkly/js-sdk-common": "2.20.0" } }, "sha512-BBH5guUAH7vvlOPBvjSBXEDPYTpoa8WNp8RphSBjZfEINFWSyC9sBnzWDf4T8XH/uVxY1nMEkpLUKzHr1X37CA=="],
-
-    "@launchdarkly/js-sdk-common": ["@launchdarkly/js-sdk-common@2.20.0", "", {}, "sha512-g1Lyi5xL7AXAP6BP8BzRcqVqIhqOSVpA5Bx8Vvj8A/4A6sIHVz2vIZluykD/bJiKg1+G9ojm+OCfdL/c0ebi0A=="],
-
-    "@launchdarkly/react-native-client-sdk": ["@launchdarkly/react-native-client-sdk@10.12.7", "", { "dependencies": { "@launchdarkly/js-client-sdk-common": "1.18.0", "@react-native-async-storage/async-storage": "^2.0.0", "base64-js": "^1.5.1" }, "peerDependencies": { "react": "*", "react-native": "*" } }, "sha512-R4tkU8aqLfSNQsUkJokTYyv3SvTnbnPy0ymo+AtPFMPRGvILPvbwKmEVOtWA8yOe5DIPSqIBR8L2TeBTXRoo2w=="],
-
     "@mrleebo/prisma-ast": ["@mrleebo/prisma-ast@0.13.1", "", { "dependencies": { "chevrotain": "^10.5.0", "lilconfig": "^2.1.0" } }, "sha512-XyroGQXcHrZdvmrGJvsA9KNeOOgGMg1Vg9OlheUsBOSKznLMDl+YChxbkboRHvtFYJEMRYmlV3uoo/njCw05iw=="],
 
     "@napi-rs/wasm-runtime": ["@napi-rs/wasm-runtime@0.2.12", "", { "dependencies": { "@emnapi/core": "^1.4.3", "@emnapi/runtime": "^1.4.3", "@tybys/wasm-util": "^0.10.0" } }, "sha512-ZVWUcfwY4E/yPitQJl481FjFo3K22D6qF0DuFH6Y/nbnE11GY5uguDxZMGXPQ8WQ0128MXQD7TnfHyK4oWoIJQ=="],
@@ -843,8 +824,6 @@
     "@unitime/cache": ["@unitime/cache@workspace:packages/cache"],
 
     "@unitime/db": ["@unitime/db@workspace:packages/db"],
-
-    "@unitime/flags": ["@unitime/flags@workspace:packages/flags"],
 
     "@unitime/mobile": ["@unitime/mobile@workspace:apps/mobile"],
 
