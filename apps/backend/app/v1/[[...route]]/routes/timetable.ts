@@ -1,6 +1,6 @@
-import { Hono } from "hono";
-import { createHonoErrorResponse, ERROR_CODES } from "../../lib/error.codes";
+import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
 import { prisma } from "@unitime/db";
+import { Hono } from "hono";
 
 const timetable = new Hono();
 

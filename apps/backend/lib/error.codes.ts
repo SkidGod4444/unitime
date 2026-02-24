@@ -464,7 +464,7 @@ export const ERROR_CODES = {
 export function createErrorResponse(
   status_code: number,
   errorCode: ErrorCode,
-  details?: string | Record<string, any>,
+  details?: string | Record<string, unknown>,
 ) {
   return {
     success: false,
@@ -487,7 +487,7 @@ export function createErrorResponse(
 export function createHonoErrorResponse(
   c: Context, // Hono Context
   errorCode: ErrorCode,
-  details?: string | Record<string, any>,
+  details?: string | Record<string, unknown>,
 ) {
   return c.json(createErrorResponse(errorCode.status_code, errorCode, details));
 }
@@ -497,13 +497,13 @@ export function createHonoErrorResponse(
  */
 export function createError(
   errorCode: ErrorCode,
-  details?: string | Record<string, any>,
+  details?: string | Record<string, unknown>,
 ) {
   const error = new Error(errorCode.message) as Error & {
     code: string;
     status_code: number;
     category: ErrorCategory;
-    details?: string | Record<string, any>;
+    details?: string | Record<string, unknown>;
   };
 
   error.code = errorCode.code;

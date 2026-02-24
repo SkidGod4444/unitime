@@ -1,7 +1,7 @@
+import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
+import { generateQRToken, verifyQRToken } from "@/lib/qr.algo";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
-import { createHonoErrorResponse, ERROR_CODES } from "../../lib/error.codes";
-import { generateQRToken, verifyQRToken } from "../../lib/qr.algo";
 
 const attendance = new Hono();
 

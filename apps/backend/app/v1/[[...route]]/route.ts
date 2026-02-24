@@ -1,16 +1,17 @@
+import { rateLimitHandler } from "@/middleware/ratelimit";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { handle } from "hono/vercel";
 import attendance from "./routes/attendance";
+import chats from "./routes/chats";
 import courses from "./routes/courses";
 import history from "./routes/history";
 import notifications from "./routes/notifications";
 import timetable from "./routes/timetable";
 import users from "./routes/users";
-// import { auth } from "@unitime/auth";
-import { rateLimitHandler } from "../middleware/ratelimit";
-// import { authMiddleware } from "../middleware/check.auth";
+
+export const runtime = "nodejs";
 
 const app = new Hono().basePath("/v1");
 
@@ -48,16 +49,11 @@ app.route("/history", history);
 app.route("/notifications", notifications);
 app.route("/timetable", timetable);
 app.route("/courses", courses);
+app.route("/chats", chats);
 
-// ✅ Vercel edge runtime: export a proper fetch handler, not a raw Hono app
-export const runtime = "nodejs";
-export default handle(app);
-
-// ✅ Bun local dev: only starts the server when run directly (bun run src/index.ts)
-// import.meta.main is false when Vercel imports this module, so this never runs on Vercel
-if (process.versions.bun && import.meta.main) {
-  const port = process.env.PORT || 3001;
-  // @ts-ignore — Bun global is available at runtime when process.versions.bun is set
-  Bun.serve({ port: Number(port), fetch: app.fetch });
-  console.log(`🚀 Server running on http://localhost:${port}`);
-}
+export const GET = handle(app);
+export const POST = handle(app);
+export const PUT = handle(app);
+export const PATCH = handle(app);
+export const DELETE = handle(app);
+export const OPTIONS = handle(app);
