@@ -10,6 +10,7 @@ import history from "./routes/history";
 import notifications from "./routes/notifications";
 import timetable from "./routes/timetable";
 import users from "./routes/users";
+import profile from "./routes/profile";
 
 export const runtime = "nodejs";
 
@@ -50,6 +51,7 @@ app.route("/notifications", notifications);
 app.route("/timetable", timetable);
 app.route("/courses", courses);
 app.route("/chats", chats);
+app.route("/profile", profile);
 
 export const GET = handle(app);
 export const POST = handle(app);
