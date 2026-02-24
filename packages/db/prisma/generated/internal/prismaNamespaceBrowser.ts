@@ -106,6 +106,9 @@ export const UserScalarFieldEnum = {
   banned: 'banned',
   banReason: 'banReason',
   banExpires: 'banExpires',
+  coordinates: 'coordinates',
+  expoPushToken: 'expoPushToken',
+  isOnboarded: 'isOnboarded',
   role: 'role',
   status: 'status'
 } as const

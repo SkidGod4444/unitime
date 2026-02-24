@@ -93,6 +93,9 @@ model User {
   attendanceQRSessions AttendanceQRSession[]
   attendances          AttendanceLogs[]
   studentProfile       StudentProfile?
+  coordinates          String?               @map("coordinates") // For geofencing, format: "latitude,longitude"
+  expoPushToken        String?               @map("expo_push_token") // For push notifications
+  isOnboarded          Boolean               @default(false) @map("is_onboarded") // To track if user has completed onboarding
   role                 UserRole              @default(STUDENT)
   status               UserStatus            @default(ACTIVE)
 

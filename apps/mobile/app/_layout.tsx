@@ -1,4 +1,5 @@
-import ProfileCompletionPopup from "@/components/profile-completion-popup";
+import BannedUserPopup from "@/components/banned.users.popup";
+import ProfileCompletionPopup from "@/components/profile.completion.popup";
 import QRScannerWidget from "@/components/qr.scanner.widget";
 import { AuthProvider } from "@/contexts/auth.cntxt";
 import { LocalStoreProvider } from "@/contexts/localstore.cntxt";
@@ -9,7 +10,7 @@ import { Stack, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
-  SafeAreaProvider,
+    SafeAreaProvider,
 } from "react-native-safe-area-context";
 import "./globals.css";
 import Loader from "./loader";
@@ -51,6 +52,7 @@ function AppContent() {
             <PermsProvider>
               <StatusBar style={"dark"} animated />
 
+              <BannedUserPopup />
               {!isHiddenScreen && <ProfileCompletionPopup />}
 
               <Stack screenOptions={{ headerShown: false }} />

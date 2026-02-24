@@ -24,5 +24,8 @@ type UserT = {
   role?: string | null;
   banReason?: string | null;
   banExpires?: Date | null;
+  coordinates?: string | null;
+  expoPushToken?: string | null;
+  isOnboarded?: boolean | null;
 };
 export type { TeamT, Theme, UserT };
