@@ -11,6 +11,7 @@ import notifications from "./routes/notifications";
 import timetable from "./routes/timetable";
 import users from "./routes/users";
 import profile from "./routes/profile";
+import orgs from "./routes/org";
 
 export const runtime = "nodejs";
 
@@ -52,6 +53,7 @@ app.route("/timetable", timetable);
 app.route("/courses", courses);
 app.route("/chats", chats);
 app.route("/profile", profile);
+app.route("/orgs", orgs);
 
 export const GET = handle(app);
 export const POST = handle(app);

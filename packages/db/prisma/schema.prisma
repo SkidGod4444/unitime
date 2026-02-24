@@ -210,6 +210,21 @@ model StudentProfile {
   semester         CourseSemester?
   createdAt        DateTime        @default(now()) @map("created_at")
   updatedAt        DateTime        @updatedAt @map("updated_at")
+  organization     Organization    @relation(fields: [organizationId], references: [id])
+  organizationId   String          @map("organization_id")
 
   @@map("student_profiles")
+}
+
+model Organization {
+  id             String           @id @default(uuid())
+  departmentName String           @map("department_name")
+  courseName     String           @map("course_name")
+  semester       CourseSemester   @map("semester")
+  section        Int              @unique @map("section")
+  students       StudentProfile[]
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
+
+  @@map("organizations")
 }

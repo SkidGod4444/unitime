@@ -50,6 +50,7 @@ profile.post("/create", async (c) => {
     course,
     yearOfStudy,
     semester,
+    organizationId,
   } = await c.req.json();
   const newProfile = await prisma.studentProfile.create({
     data: {
@@ -62,6 +63,7 @@ profile.post("/create", async (c) => {
       course,
       yearOfStudy,
       semester,
+      organizationId,
     },
   });
   if (!newProfile) {
