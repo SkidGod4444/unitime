@@ -7,6 +7,21 @@
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**"]
     },
+    "backend#build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [".next/**", "!.next/cache/**"],
+      "env": [
+        "DATABASE_URL",
+        "QR_SECRET",
+        "UPSTASH_REDIS_REST_URL",
+        "UPSTASH_REDIS_REST_TOKEN",
+        "APPWRITE_PROJECT_ID",
+        "APPWRITE_PROJECT_NAME",
+        "APPWRITE_ENDPOINT",
+        "APPWRITE_DEV_KEY"
+      ]
+    },
     "lint": {
       "dependsOn": ["^lint"]
     },
