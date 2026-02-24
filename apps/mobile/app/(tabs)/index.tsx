@@ -4,7 +4,14 @@ import { Ionicons } from "@expo/vector-icons";
 import * as LocalAuthentication from "expo-local-authentication";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Alert, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const ATTENDANCE_EXPANDED_KEY = "@attendance-card-expanded";
@@ -65,7 +72,7 @@ export default function Index() {
           isEnrolled
             ? "Biometric authentication failed. Please try again."
             : "Device authentication failed. Please try again.",
-          [{ text: "OK" }]
+          [{ text: "OK" }],
         );
       }
       return false;
@@ -108,14 +115,14 @@ export default function Index() {
             onPress={() => router.push("/profile")}
           >
             <View className="h-14 w-14 rounded-full bg-gray-200 justify-center items-center overflow-hidden">
-            <Image
-                    source={
-                      loggedInUser?.image
-                        ? { uri: loggedInUser.image }
-                        : require("../../assets/images/pfp-face.png")
-                    }
-                    className="h-full w-full rounded-full"
-                  />
+              <Image
+                source={
+                  loggedInUser?.image
+                    ? { uri: loggedInUser.image }
+                    : require("../../assets/images/pfp-face.png")
+                }
+                className="h-full w-full rounded-full"
+              />
             </View>
             <View>
               <Text className="text-gray-500 font-medium text-sm">
@@ -284,63 +291,66 @@ export default function Index() {
           </View>
         </View>
 
-
         {/* Admin/CR/Teacher Actions Grid */}
-        {loggedInUser && (loggedInUser.role === "REPRESENTATIVE" || loggedInUser.role === "ADMIN" || loggedInUser.role === "PROFESSOR") && (
-          <View>
-          <Text className="text-lg font-bold text-dark mb-4 font-lora">
-            Manage Attendance
-          </Text>
-          <View className="flex-row flex-wrap justify-between gap-y-4">
-            {[
-              {
-                icon: "timer-outline",
-                label: "Session",
-                color: "text-blue-600",
-                bg: "bg-blue-50",
-                route: "/attendance-session-form",
-              },
-              {
-                icon: "time-outline",
-                label: "History",
-                color: "text-purple-600",
-                bg: "bg-purple-50",
-                route: "/attendance-session-history",
-              }
-            ].map((action, index) => (
-              <TouchableOpacity
-                key={index}
-                className="w-[48%] bg-white p-4 rounded-3xl border border-gray-100 shadow-sm flex-row items-center gap-3"
-                onPress={() => action.route && router.push(action.route as any)}
-              >
-                <View
-                  className={`h-10 w-10 ${action.bg} rounded-full justify-center items-center`}
-                >
-                  <Ionicons
-                    name={action.icon as any}
-                    size={20}
-                    className={action.color}
-                    style={{
-                      color:
-                        action.color === "text-blue-600"
-                          ? "#2563EB"
-                          : action.color === "text-purple-600"
-                            ? "#9333EA"
-                            : action.color === "text-yellow-600"
-                              ? "#CA8A04"
-                              : "#E11D48",
-                    }}
-                  />
-                </View>
-                <Text className="font-semibold text-gray-700">
-                  {action.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-        )}
-
+        {loggedInUser &&
+          (loggedInUser.role === "REPRESENTATIVE" ||
+            loggedInUser.role === "ADMIN" ||
+            loggedInUser.role === "PROFESSOR") && (
+            <View>
+              <Text className="text-lg font-bold text-dark mb-4 font-lora">
+                Manage Attendance
+              </Text>
+              <View className="flex-row flex-wrap justify-between gap-y-4">
+                {[
+                  {
+                    icon: "timer-outline",
+                    label: "Session",
+                    color: "text-blue-600",
+                    bg: "bg-blue-50",
+                    route: "/attendance-session-form",
+                  },
+                  {
+                    icon: "time-outline",
+                    label: "History",
+                    color: "text-purple-600",
+                    bg: "bg-purple-50",
+                    route: "/attendance-session-history",
+                  },
+                ].map((action, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    className="w-[48%] bg-white p-4 rounded-3xl border border-gray-100 shadow-sm flex-row items-center gap-3"
+                    onPress={() =>
+                      action.route && router.push(action.route as any)
+                    }
+                  >
+                    <View
+                      className={`h-10 w-10 ${action.bg} rounded-full justify-center items-center`}
+                    >
+                      <Ionicons
+                        name={action.icon as any}
+                        size={20}
+                        className={action.color}
+                        style={{
+                          color:
+                            action.color === "text-blue-600"
+                              ? "#2563EB"
+                              : action.color === "text-purple-600"
+                                ? "#9333EA"
+                                : action.color === "text-yellow-600"
+                                  ? "#CA8A04"
+                                  : "#E11D48",
+                        }}
+                      />
+                    </View>
+                    <Text className="font-semibold text-gray-700">
+                      {action.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          )}
 
         {/* Today's Schedule */}
         <View>

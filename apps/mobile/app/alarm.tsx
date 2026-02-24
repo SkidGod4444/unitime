@@ -2,19 +2,19 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
-    Alert,
-    Modal,
-    ScrollView,
-    Switch,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Modal,
+  ScrollView,
+  Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import Animated, {
-    FadeInDown,
-    FadeInRight,
-    Layout,
+  FadeInDown,
+  FadeInRight,
+  Layout,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -98,7 +98,9 @@ const DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 const DAY_FULL = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const LEAD_OPTIONS = [5, 10, 15, 20, 30];
 
-const formatDisplayTime = (time: string): { h: string; m: string; period: string } => {
+const formatDisplayTime = (
+  time: string,
+): { h: string; m: string; period: string } => {
   const [hStr, mStr] = time.split(":");
   const h24 = parseInt(hStr, 10);
   const period = h24 >= 12 ? "PM" : "AM";
@@ -111,10 +113,7 @@ const formatDays = (days: number[]) => {
   if (days.length === 0) return "No days";
   const sorted = [...days].sort((a, b) => a - b);
   // Weekdays only
-  if (
-    sorted.length === 5 &&
-    sorted.every((d) => d >= 1 && d <= 5)
-  )
+  if (sorted.length === 5 && sorted.every((d) => d >= 1 && d <= 5))
     return "Weekdays";
   return sorted.map((d) => DAY_FULL[d]).join(", ");
 };
@@ -175,7 +174,10 @@ const AlarmCard = ({
                 {period}
               </Text>
             </View>
-            <Text className="text-sm font-semibold text-gray-700 mb-0.5" numberOfLines={1}>
+            <Text
+              className="text-sm font-semibold text-gray-700 mb-0.5"
+              numberOfLines={1}
+            >
               {alarm.label}
             </Text>
             <View className="flex-row items-center gap-2">
@@ -240,7 +242,10 @@ const SuggestionCard = ({
             {item.courseCode}
           </Text>
         </View>
-        <Text className="text-base font-bold text-gray-900 mb-0.5" numberOfLines={1}>
+        <Text
+          className="text-base font-bold text-gray-900 mb-0.5"
+          numberOfLines={1}
+        >
           {item.courseName}
         </Text>
         <Text className="text-sm text-gray-500 mb-3">
@@ -291,8 +296,12 @@ const EditModal = ({
   const [minute, setMinute] = React.useState(
     alarm?.time ? parseInt(alarm.time.split(":")[1], 10) : 0,
   );
-  const [days, setDays] = React.useState<number[]>(alarm?.days ?? [1, 2, 3, 4, 5]);
-  const [leadMinutes, setLeadMinutes] = React.useState(alarm?.leadMinutes ?? 15);
+  const [days, setDays] = React.useState<number[]>(
+    alarm?.days ?? [1, 2, 3, 4, 5],
+  );
+  const [leadMinutes, setLeadMinutes] = React.useState(
+    alarm?.leadMinutes ?? 15,
+  );
   const [color, setColor] = React.useState(alarm?.color ?? COLORS[0]);
 
   // Reset when alarm prop changes
@@ -310,8 +319,7 @@ const EditModal = ({
       prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d],
     );
 
-  const adjustHour = (delta: number) =>
-    setHour((h) => (h + delta + 24) % 24);
+  const adjustHour = (delta: number) => setHour((h) => (h + delta + 24) % 24);
 
   const adjustMinute = (delta: number) =>
     setMinute((m) => (m + delta + 60) % 60);
@@ -385,7 +393,9 @@ const EditModal = ({
                     </TouchableOpacity>
                   </View>
 
-                  <Text className="text-6xl font-bold text-gray-300 mb-1">:</Text>
+                  <Text className="text-6xl font-bold text-gray-300 mb-1">
+                    :
+                  </Text>
 
                   {/* Minute */}
                   <View className="items-center">
@@ -598,7 +608,11 @@ export default function AlarmScreen() {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 120, paddingHorizontal: 20, gap: 28 }}
+        contentContainerStyle={{
+          paddingBottom: 120,
+          paddingHorizontal: 20,
+          gap: 28,
+        }}
       >
         {/* ── Summary banner ── */}
         <Animated.View
@@ -624,9 +638,7 @@ export default function AlarmScreen() {
               className="flex-row items-center gap-1 bg-white/20 px-3 py-1.5 rounded-full"
             >
               <Ionicons name="play-circle-outline" size={14} color="#ffffff" />
-              <Text className="text-white text-xs font-semibold">
-                Preview
-              </Text>
+              <Text className="text-white text-xs font-semibold">Preview</Text>
             </TouchableOpacity>
           </View>
         </Animated.View>
@@ -667,9 +679,7 @@ export default function AlarmScreen() {
             <Text className="text-base font-bold text-gray-900">
               Your Alarms
             </Text>
-            <Text className="text-xs text-gray-400">
-              Long-press to delete
-            </Text>
+            <Text className="text-xs text-gray-400">Long-press to delete</Text>
           </View>
 
           {alarms.length === 0 ? (
@@ -702,7 +712,11 @@ export default function AlarmScreen() {
         {/* ── Tips card ── */}
         <View className="bg-indigo-50 rounded-3xl p-5 flex-row items-start gap-4">
           <View className="w-10 h-10 bg-indigo-100 rounded-full items-center justify-center mt-0.5">
-            <Ionicons name="information-circle-outline" size={22} color="#6366f1" />
+            <Ionicons
+              name="information-circle-outline"
+              size={22}
+              color="#6366f1"
+            />
           </View>
           <View className="flex-1">
             <Text className="text-indigo-900 font-bold text-sm mb-1">

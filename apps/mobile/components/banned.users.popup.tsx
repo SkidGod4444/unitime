@@ -3,16 +3,17 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Linking from "expo-linking";
 import React, { useEffect, useState } from "react";
 import {
-    Alert,
-    BackHandler,
-    Modal,
-    Platform,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  BackHandler,
+  Modal,
+  Platform,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
-const SUPPORT_SERVER_URL = "https://unitime-backend.vercel.app/v1/users?email=saidev.25scse1680001@galgotiasuniversity.ac.in"; // 🔗 Replace with your actual support link
+const SUPPORT_SERVER_URL =
+  "https://unitime-backend.vercel.app/v1/users?email=saidev.25scse1680001@galgotiasuniversity.ac.in"; // 🔗 Replace with your actual support link
 
 export default function BannedUserPopup() {
   const { loggedInUser } = useAuth();
@@ -127,7 +128,9 @@ export default function BannedUserPopup() {
               <Text className="text-xs font-semibold text-red-400 uppercase tracking-wider mb-1">
                 Reason
               </Text>
-              <Text className="text-red-700 text-sm leading-5">{banReason}</Text>
+              <Text className="text-red-700 text-sm leading-5">
+                {banReason}
+              </Text>
             </View>
           ) : null}
 

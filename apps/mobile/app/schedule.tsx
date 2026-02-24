@@ -252,14 +252,14 @@ const ClassCard = ({
                     `Do you want to set an alarm for ${session.courseName} at ${session.startTime}?`,
                     [
                       { text: "Cancel", style: "cancel" },
-                      { 
-                        text: "Yes", 
+                      {
+                        text: "Yes",
                         onPress: () => {
                           console.log("Alarm set for", session.courseName);
                           // We could pass params to /alarm or handle it locally later
-                        } 
+                        },
                       },
-                    ]
+                    ],
                   );
                 }}
                 className="w-8 h-8 rounded-full items-center justify-center bg-gray-50 dark:bg-gray-800"

@@ -93,9 +93,15 @@ export default function Chats() {
       Alert.alert(
         "🚧 Coming Soon",
         "Chats feature is currently under development. Stay tuned!",
-        [{ text: "Got it", style: "default", onPress: () => router.replace("/") }]
+        [
+          {
+            text: "Got it",
+            style: "default",
+            onPress: () => router.replace("/"),
+          },
+        ],
       );
-    }, [router])
+    }, [router]),
   );
 
   const filteredChats = CHATS.filter(

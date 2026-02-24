@@ -158,7 +158,10 @@ export default function TapToMarkScreen() {
                     color="white"
                     className="opacity-90"
                   />
-                  <Text className="text-white font-semibold text-xl mt-4 text-center" numberOfLines={1}>
+                  <Text
+                    className="text-white font-semibold text-xl mt-4 text-center"
+                    numberOfLines={1}
+                  >
                     {status === "loading" ? "Verifying..." : "Tap to Mark"}
                   </Text>
                   {status === "loading" && (

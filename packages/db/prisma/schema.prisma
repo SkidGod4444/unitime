@@ -200,8 +200,8 @@ model AttendanceLogs {
 model StudentProfile {
   admissionNumber  String          @id @unique
   enrollmentNumber String?         @unique
-  studentId        String?         @unique
   studentEmail     String?         @unique
+  contactNumber    String?         @unique
   userId           String          @unique @map("user_id")
   user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   department       String

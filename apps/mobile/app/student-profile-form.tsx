@@ -23,6 +23,7 @@ export default function StudentProfileForm() {
 
   const [name, setName] = useState(loggedInUser?.name || "");
   const [email, setEmail] = useState(loggedInUser?.email || "");
+  const [whatsappNumber, setWhatsappNumber] = useState("");
   const [enrollmentId, setEnrollmentId] = useState("");
   const [admissionId, setAdmissiontId] = useState("");
   const [yearOfAdmission, setYearOfAdmission] = useState("2025");
@@ -250,6 +251,41 @@ export default function StudentProfileForm() {
                 </View>
               </View>
 
+              {/* WhatsApp Number Input */}
+              <View>
+                <Text
+                  numberOfLines={1}
+                  className="text-xs font-bold text-gray-500 mb-2 ml-1 uppercase tracking-wide w-full"
+                >
+                  WhatsApp Number*
+                </Text>
+                <View className="flex-row items-center border border-gray-200 rounded-2xl px-4 py-3.5 bg-white focus:border-green-500">
+                  <Ionicons
+                    name="logo-whatsapp"
+                    size={20}
+                    color="#22C55E"
+                    style={{ marginRight: 12 }}
+                  />
+                  <TextInput
+                    value={whatsappNumber}
+                    onChangeText={setWhatsappNumber}
+                    placeholder="e.g. +91 98765 43210"
+                    placeholderTextColor="#9CA3AF"
+                    selectionColor="#22C55E"
+                    cursorColor="#22C55E"
+                    scrollEnabled={true}
+                    multiline={false}
+                    numberOfLines={1}
+                    keyboardType="phone-pad"
+                    className="flex-1 text-base text-gray-900 font-semibold py-0 min-h-[20px]"
+                    style={{ includeFontPadding: false }}
+                  />
+                </View>
+                <Text className="text-xs text-gray-400 mt-1.5 ml-1">
+                  Include your country code (e.g. +1, +91, +44)
+                </Text>
+              </View>
+
               {/* Email Input */}
               <View>
                 <Text
@@ -468,11 +504,12 @@ export default function StudentProfileForm() {
                 </View>
               </View>
 
-            <View className="my-4 px-2 bg-blue-700 rounded-2xl p-2 text-center">
-              <Text className="text-sm text-white text-center">
-                Please ensure all your profile details are correct before saving. Fields marked with * are required.
-              </Text>
-            </View>
+              <View className="my-4 px-2 bg-blue-700 rounded-2xl p-2 text-center">
+                <Text className="text-sm text-white text-center">
+                  Please ensure all your profile details are correct before
+                  saving. Fields marked with * are required.
+                </Text>
+              </View>
             </View>
           </View>
         </ScrollView>
