@@ -69,4 +69,23 @@ users.put("/:id", async (c) => {
   );
 });
 
+users.patch("/:id/onboard", async (c) => {
+  const id = c.req.param("id");
+  const user = await prisma.user.update({
+    where: { id },
+    data: { isOnboarded: true },
+  });
+  if (!user) {
+    return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
+  }
+  return c.json(
+    {
+      success: true,
+      status_code: 200,
+      user,
+    },
+    200,
+  );
+});
+
 export default users;

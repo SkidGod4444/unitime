@@ -1,9 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Audio } from "expo-av";
+import { setAudioModeAsync, useAudioPlayer } from "expo-audio";
 import * as Haptics from "expo-haptics";
 import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect } from "react";
 import {
   BackHandler,
   Dimensions,
@@ -68,69 +68,43 @@ const SlideToDismiss = ({ onDismiss }: { onDismiss: () => void }) => {
   const isDismissed = useSharedValue(false);
 
   // --- Audio Logic ---
-  // Use a ref so the cleanup function always has access to the sound object,
-  // even if the component unmounts before the async createAsync resolves.
-  const soundRef = useRef<Audio.Sound | null>(null);
-
-  const stopAndUnload = useCallback(async () => {
-    Vibration.cancel();
-    if (soundRef.current) {
-      try {
-        await soundRef.current.stopAsync();
-        await soundRef.current.unloadAsync();
-      } catch (err) {
-        console.log("Error unloading sound", err);
-      }
-      soundRef.current = null;
-    }
-  }, []);
+  // useAudioPlayer auto-releases the player when the component unmounts.
+  const player = useAudioPlayer(
+    require("@/assets/sounds/mixkit-digital-clock-digital-alarm-buzzer-992.wav"),
+  );
 
   useEffect(() => {
-    let unmounted = false;
-
-    const playAlarmSound = async () => {
+    const startAlarm = async () => {
       try {
-        await Audio.setAudioModeAsync({
-          allowsRecordingIOS: false,
-          staysActiveInBackground: true,
-          playsInSilentModeIOS: true,
-          shouldDuckAndroid: true,
-          playThroughEarpieceAndroid: false,
+        await setAudioModeAsync({
+          playsInSilentMode: true,
+          shouldPlayInBackground: true,
+          interruptionMode: "duckOthers",
         });
-
-        const { sound: playbackObject } = await Audio.Sound.createAsync(
-          require("@/assets/sounds/mixkit-digital-clock-digital-alarm-buzzer-992.wav"),
-          { isLooping: true, shouldPlay: true },
-        );
-
-        if (unmounted) {
-          // Page was already left before sound finished loading – unload immediately
-          await playbackObject.unloadAsync();
-        } else {
-          soundRef.current = playbackObject;
-        }
+        player.loop = true;
+        player.play();
       } catch (error) {
         console.error("Failed to play alarm sound", error);
       }
     };
 
-    playAlarmSound();
+    startAlarm();
 
-    // Start vibration pattern: Vibrate 500ms, wait 1000ms, repeat
+    // Start vibration pattern: 100ms pause, 500ms vibrate, 500ms pause, repeat
     Vibration.vibrate([100, 500, 500], true);
 
     return () => {
-      unmounted = true;
-      // Always stop sound on unmount (works regardless of async timing)
-      stopAndUnload();
+      Vibration.cancel();
+      player.pause();
     };
-  }, [stopAndUnload]);
+  }, [player]);
 
-  // Cleanup sound when slide-dismissing
-  const handleDismiss = useCallback(async () => {
-    await stopAndUnload();
+  // Stop sound + vibration when slide-dismissing
+  const handleDismiss = useCallback(() => {
+    Vibration.cancel();
+    player.pause();
     onDismiss();
-  }, [stopAndUnload, onDismiss]);
+  }, [player, onDismiss]);
 
   const pan = Gesture.Pan()
     .onUpdate((event) => {

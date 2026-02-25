@@ -94,20 +94,20 @@ export const RoutesProvider = ({ children }: { children: ReactNode }) => {
     }
 
     // Only check onboarding if user is authenticated and at root route
-    if (pathname === "/") {
-      account
-        .getPrefs()
-        .then((prefs) => {
-          console.log("User preferences:", prefs);
-          if (prefs?.isOnboarded === "false") {
-            console.log("User not onboarded — redirecting to /onboarding");
-            // router.replace("/onboarding");
-          }
-        })
-        .catch((err) => {
-          console.error("Error fetching user preferences:", err);
-        });
-    }
+    // if (pathname === "/") {
+    //   account
+    //     .getPrefs()
+    //     .then((prefs) => {
+    //       console.log("User preferences:", prefs);
+    //       if (prefs?.isOnboarded === "false") {
+    //         console.log("User not onboarded — redirecting to /onboarding");
+    //         // router.replace("/onboarding");
+    //       }
+    //     })
+    //     .catch((err) => {
+    //       console.error("Error fetching user preferences:", err);
+    //     });
+    // }
   }, [
     pathname,
     isAuthenticated,
