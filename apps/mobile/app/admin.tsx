@@ -6,6 +6,7 @@ import {
   FlatList,
   Modal,
   Pressable,
+  RefreshControl,
   ScrollView,
   Text,
   TextInput,
@@ -13,6 +14,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useRefresh } from "../hooks/use-refresh";
 import { useUsersStore } from "../lib/store";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -241,14 +243,17 @@ function RolesTab({ onAddUserPress }: { onAddUserPress: () => void }) {
         renderItem={({ item: user }) => {
           const colors = ROLE_COLORS[user.role];
           return (
-            <View className="bg-white rounded-2xl p-4 mb-3 border border-gray-100 shadow-sm">
+            <Pressable
+              onPress={() => setRoleModal(user)}
+              className="bg-white rounded-2xl p-4 mb-3 border border-gray-100 shadow-sm active:opacity-70"
+            >
               <View className="flex-row items-center justify-between">
                 <View className="flex-1">
                   <Text className="text-base font-bold text-gray-900">
                     {user.name}
                   </Text>
-                  <Text className="text-xs text-gray-500 mt-0.5">
-                    {user.email}
+                  <Text className="text-sm text-gray-500 mt-0.5">
+                    {user.id}
                   </Text>
                   <View
                     className={`self-start mt-2 px-2.5 py-0.5 rounded-full ${colors.bg}`}
@@ -258,12 +263,14 @@ function RolesTab({ onAddUserPress }: { onAddUserPress: () => void }) {
                     </Text>
                   </View>
                 </View>
-                <RowActions
-                  onEdit={() => setRoleModal(user)}
-                  onDelete={() => handleDelete(user)}
-                />
+                <TouchableOpacity
+                  onPress={() => handleDelete(user)}
+                  className="p-2 bg-red-50 rounded-lg"
+                >
+                  <Ionicons name="trash-outline" size={16} color="#dc2626" />
+                </TouchableOpacity>
               </View>
-            </View>
+            </Pressable>
           );
         }}
       />
@@ -281,10 +288,10 @@ function RolesTab({ onAddUserPress }: { onAddUserPress: () => void }) {
         >
           <View className="bg-white rounded-t-3xl p-6">
             <Text className="text-lg font-bold text-gray-900 mb-1">
-              Change Role
+              Change Role for
             </Text>
             <Text className="text-sm text-gray-500 mb-4">
-              {roleModal?.name}
+              {roleModal?.name} - {roleModal?.id}
             </Text>
             {ALL_ROLES.map((role) => {
               const colors = ROLE_COLORS[role];
@@ -808,6 +815,7 @@ export default function AdminPage() {
   };
 
   const { users: storeUsers } = useUsersStore();
+  const { refresh, refreshing } = useRefresh();
 
   const handleAddUser = (user: User) => {
     // In a real app: call API to promote the student, then update store
@@ -854,6 +862,9 @@ export default function AdminPage() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={refresh} />
+        }
       >
         {/* Header */}
         <View className="px-4 pt-4 mb-4">

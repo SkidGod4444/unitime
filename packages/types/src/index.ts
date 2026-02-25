@@ -28,4 +28,20 @@ type UserT = {
   expoPushToken?: string | null;
   isOnboarded?: boolean | null;
 };
-export type { TeamT, Theme, UserT };
+
+type ProfileT = {
+  admissionNumber: string;
+  enrollmentNumber?: string | null;
+  studentEmail?: string | null;
+  contactNumber?: string | null;
+  userId: string;
+  department: string;
+  course: string;
+  yearOfStudy: number;
+  semester: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  organizationId: string;
+};
+
+export type { TeamT, Theme, UserT, ProfileT };

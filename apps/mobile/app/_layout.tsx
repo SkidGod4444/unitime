@@ -12,6 +12,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "./globals.css";
 import Loader from "./loader";
+import { StoreProvider } from "@/contexts/store.cntxt";
 
 function AppContent() {
   const [fontsLoaded] = useFonts({
@@ -47,6 +48,7 @@ function AppContent() {
       <LocalStoreProvider>
         <AuthProvider>
           <RoutesProvider>
+            <StoreProvider>
             <PermsProvider>
               <StatusBar style={"dark"} animated />
 
@@ -57,6 +59,7 @@ function AppContent() {
               {!isHiddenScreen && <QRScannerWidget />}
               <Loader />
             </PermsProvider>
+            </StoreProvider>
           </RoutesProvider>
         </AuthProvider>
       </LocalStoreProvider>

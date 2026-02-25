@@ -77,6 +77,21 @@ profile.get("/:userId", async (c) => {
   );
 });
 
+profile.get("/all", async (c) => {
+  const studentProfiles = await prisma.studentProfile.findMany();
+  if (studentProfiles.length === 0) {
+    return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
+  }
+  return c.json(
+    {
+      success: true,
+      status_code: 200,
+      profiles: studentProfiles,
+    },
+    200,
+  );
+});
+
 profile.get("/", async (c) => {
   const timetables = await prisma.studentProfile.findMany({});
   if (timetables.length === 0) {

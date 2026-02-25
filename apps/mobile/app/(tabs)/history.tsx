@@ -1,6 +1,7 @@
+import { useRefresh } from "@/hooks/use-refresh";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { RefreshControl, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const FILTERS = ["All", "Attendance", "Assignments", "System"];
@@ -60,6 +61,7 @@ const HISTORY_DATA = [
 
 export default function History() {
   const [activeFilter, setActiveFilter] = useState("All");
+  const { refresh, refreshing } = useRefresh();
 
   const filteredData =
     activeFilter === "All"
@@ -112,6 +114,9 @@ export default function History() {
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 100, gap: 16 }}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={refresh} />
+          }
         >
           {filteredData.map((item) => (
             <View

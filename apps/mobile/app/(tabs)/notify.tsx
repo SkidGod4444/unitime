@@ -1,6 +1,7 @@
+import { useRefresh } from "@/hooks/use-refresh";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { SectionList, Text, TouchableOpacity, View } from "react-native";
+import { RefreshControl, SectionList, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type NotificationItem = {
@@ -68,6 +69,7 @@ const NOTIFICATIONS = [
 ];
 
 export default function Notify() {
+  const { refresh, refreshing } = useRefresh();
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
       <View className="flex-1 px-5">
@@ -94,6 +96,9 @@ export default function Notify() {
           keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 100, gap: 16 }}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={refresh} />
+          }
           renderSectionHeader={({ section: { title } }) => (
             <Text className="text-gray-500 font-semibold text-xs uppercase tracking-wider mb-3 mt-4 bg-background pt-2">
               {title}

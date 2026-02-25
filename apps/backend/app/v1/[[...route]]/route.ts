@@ -51,7 +51,7 @@ app.route("/notifications", notifications);
 app.route("/timetable", timetable);
 app.route("/courses", courses);
 app.route("/chats", chats);
-app.route("/profile", profile);
+app.route("/profiles", profile);
 app.route("/orgs", orgs);
 
 export const GET = handle(app);

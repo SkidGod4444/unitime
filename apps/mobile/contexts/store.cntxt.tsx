@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./auth.cntxt";
-import { useUsersStore } from "@/lib/store";
+import { useProfilesStore, useUsersStore } from "@/lib/store";
 
 type StoreContextType = {
   refresh: () => Promise<void>;
@@ -17,28 +17,44 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   const { loggedInUser } = useAuth();
 
   const { setUsers } = useUsersStore();
+  const { setProfiles } = useProfilesStore();
 
-  const origin = process.env.EXPO_PUBLIC_ORIGIN;
+  const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
 
   const fetchUsers = React.useCallback(async () => {
     try {
       const response = await fetch(`${origin}/users/all`);
       const data = await response.json();
-      if (data.status === 200) {
-        setUsers(data.data);
+      // console.log("Fetched users:", data);
+      if (data.success && data.users) {
+        setUsers(data.users);
       }
     } catch (error) {
       console.error("Failed to fetch users:", error);
     }
   }, [origin, setUsers]);
 
+  const fetchProfiles = React.useCallback(async () => {
+    try {
+      const response = await fetch(`${origin}/profiles/all`);
+      const data = await response.json();
+      // console.log("Fetched profiles:", data);
+      if (data.success && data.profiles) {
+        setProfiles(data.profiles);
+      }
+    } catch (error) {
+      console.error("Failed to fetch profiles:", error);
+    }
+  }, [origin, setProfiles]);
+
     const refresh = React.useCallback(async () => {
       setLoading(true);
       await Promise.allSettled([
         fetchUsers(),
+        fetchProfiles(),
       ]);
       setLoading(false);
-    }, [fetchUsers]);
+    }, [fetchUsers, fetchProfiles]);
 
     useEffect(() => {
       if (loggedInUser) {

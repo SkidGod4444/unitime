@@ -1,5 +1,6 @@
 import { useAuth } from "@/contexts/auth.cntxt";
 import { useLocalStore } from "@/contexts/localstore.cntxt";
+import { useRefresh } from "@/hooks/use-refresh";
 import { Ionicons } from "@expo/vector-icons";
 import * as LocalAuthentication from "expo-local-authentication";
 import { useRouter } from "expo-router";
@@ -7,6 +8,7 @@ import { useEffect, useState } from "react";
 import {
   Alert,
   Image,
+  RefreshControl,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -21,6 +23,7 @@ export default function Index() {
   const { getItem, setItem } = useLocalStore();
   const [expanded, setExpanded] = useState(true);
   const { loggedInUser } = useAuth();
+  const { refresh, refreshing } = useRefresh();
 
   // Load saved state on mount
   useEffect(() => {
@@ -107,6 +110,9 @@ export default function Index() {
         className="flex-1 px-5"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100, gap: 32 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={refresh} />
+        }
       >
         {/* Header Section */}
         <View className="flex-row justify-between items-center mt-4">

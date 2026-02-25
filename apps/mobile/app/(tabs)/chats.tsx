@@ -1,3 +1,4 @@
+import { useRefresh } from "@/hooks/use-refresh";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
@@ -5,6 +6,7 @@ import {
   Alert,
   FlatList,
   Image,
+  RefreshControl,
   ScrollView,
   Text,
   TextInput,
@@ -87,6 +89,7 @@ const ONLINE_USERS = CHATS.filter((c) => c.online || Math.random() > 0.5); // Mo
 export default function Chats() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+  const { refresh, refreshing } = useRefresh();
 
   useFocusEffect(
     useCallback(() => {
@@ -143,6 +146,9 @@ export default function Chats() {
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 100 }}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={refresh} />
+            }
             ListHeaderComponent={
               <View className="mb-2">
                 {/* Search Bar */}
