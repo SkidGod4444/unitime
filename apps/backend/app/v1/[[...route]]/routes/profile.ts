@@ -4,6 +4,60 @@ import { Hono } from "hono";
 
 const profile = new Hono();
 
+profile.post("/create", async (c) => {
+  let body;
+  try {
+    body = await c.req.json();
+
+    if (
+      !body.admissionNumber ||
+      !body.enrollmentNumber ||
+      !body.studentEmail ||
+      !body.contactNumber ||
+      !body.userId ||
+      !body.department ||
+      !body.course ||
+      !body.yearOfStudy ||
+      !body.semester ||
+      !body.organizationId
+    ) {
+      return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT);
+    }
+  } catch (error) {
+    console.error("Error parsing JSON:", error);
+    return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT);
+  }
+
+  try {
+    const newProfile = await prisma.studentProfile.create({
+      data: {
+        admissionNumber: body.admissionNumber,
+        enrollmentNumber: body.enrollmentNumber,
+        studentEmail: body.studentEmail,
+        contactNumber: body.contactNumber,
+        userId: body.userId,
+        department: body.department,
+        course: body.course,
+        yearOfStudy: body.yearOfStudy,
+        semester: body.semester,
+        organizationId: body.organizationId,
+      },
+    });
+
+    return c.json(
+      {
+        success: true,
+        status_code: 200,
+        profile: newProfile,
+      },
+      200,
+    );
+  } catch (error) {
+    console.error("Error creating profile:", error);
+    return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
+  }
+});
+
 profile.get("/:userId", async (c) => {
   const userId = c.req.param("userId");
   const timetables = await prisma.studentProfile.findMany({
@@ -34,46 +88,6 @@ profile.get("/", async (c) => {
       success: true,
       status_code: 200,
       timetables,
-    },
-    200,
-  );
-});
-
-profile.post("/create", async (c) => {
-  const {
-    admissionNumber,
-    enrollmentNumber,
-    studentEmail,
-    contactNumber,
-    userId,
-    department,
-    course,
-    yearOfStudy,
-    semester,
-    organizationId,
-  } = await c.req.json();
-  const newProfile = await prisma.studentProfile.create({
-    data: {
-      admissionNumber,
-      enrollmentNumber,
-      studentEmail,
-      contactNumber,
-      userId,
-      department,
-      course,
-      yearOfStudy,
-      semester,
-      organizationId,
-    },
-  });
-  if (!newProfile) {
-    return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
-  }
-  return c.json(
-    {
-      success: true,
-      status_code: 200,
-      profile: newProfile,
     },
     200,
   );
