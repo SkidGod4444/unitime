@@ -232,7 +232,7 @@ export function AlarmsProvider({
       return;
     }
     try {
-      const res = await fetch(`${origin}/v1/alarms/${userId}`);
+      const res = await fetch(`${origin}/alarms/${userId}`);
       if (!res.ok) {
         setAlarms([]);
         return;
@@ -256,12 +256,16 @@ export function AlarmsProvider({
     async (input: CreateAlarmInput): Promise<Alarm | null> => {
       if (!userId) return null;
       try {
-        const res = await fetch(`${origin}/v1/alarms`, {
+        const res = await fetch(`${origin}/alarms`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ...input, userId }),
         });
-        if (!res.ok) throw new Error("Create failed");
+        if (!res.ok) {
+          const text = await res.text();
+          console.error(`[AlarmsCtx] createAlarm ${res.status}:`, text);
+          throw new Error(`Create failed: ${res.status}`);
+        }
         const data = await res.json();
         const alarm: Alarm = data.alarm;
         setAlarms((prev) => [...prev, alarm]);
@@ -279,12 +283,16 @@ export function AlarmsProvider({
   const updateAlarm = useCallback(
     async (id: string, input: UpdateAlarmInput): Promise<Alarm | null> => {
       try {
-        const res = await fetch(`${origin}/v1/alarms/${id}`, {
+        const res = await fetch(`${origin}/alarms/${id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(input),
         });
-        if (!res.ok) throw new Error("Update failed");
+        if (!res.ok) {
+          const text = await res.text();
+          console.error(`[AlarmsCtx] updateAlarm ${res.status}:`, text);
+          throw new Error(`Update failed: ${res.status}`);
+        }
         const data = await res.json();
         const updated: Alarm = data.alarm;
         setAlarms((prev) => prev.map((a) => (a.id === id ? updated : a)));
@@ -306,7 +314,7 @@ export function AlarmsProvider({
   const deleteAlarm = useCallback(
     async (id: string): Promise<void> => {
       try {
-        const res = await fetch(`${origin}/v1/alarms/${id}`, {
+        const res = await fetch(`${origin}/alarms/${id}`, {
           method: "DELETE",
         });
         if (!res.ok) throw new Error("Delete failed");

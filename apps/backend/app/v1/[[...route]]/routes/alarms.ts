@@ -72,8 +72,9 @@ alarms.post("/", async (c) => {
       },
       201,
     );
-  } catch (error) {
-    console.error("Error creating alarm:", error);
+  } catch (error: unknown) {
+    const e = error as { code?: string; meta?: unknown; message?: string };
+    console.error("Error creating alarm — code:", e?.code, "meta:", JSON.stringify(e?.meta), "msg:", e?.message);
     return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
   }
 });
