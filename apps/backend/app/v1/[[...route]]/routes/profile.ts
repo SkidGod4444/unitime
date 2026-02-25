@@ -4,6 +4,7 @@ import { Hono } from "hono";
 
 const profile = new Hono();
 
+
 profile.post("/create", async (c) => {
   let body;
   try {
@@ -57,6 +58,22 @@ profile.post("/create", async (c) => {
   }
 });
 
+profile.get("/all", async (c) => {
+  const studentProfiles = await prisma.studentProfile.findMany();
+  console.log("Fetched student profiles:", studentProfiles);
+  if (studentProfiles.length === 0) {
+    return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
+  }
+  return c.json(
+    {
+      success: true,
+      status_code: 200,
+      profiles: studentProfiles,
+    },
+    200,
+  );
+});
+
 profile.get("/:userId", async (c) => {
   const userId = c.req.param("userId");
   const timetables = await prisma.studentProfile.findMany({
@@ -77,34 +94,5 @@ profile.get("/:userId", async (c) => {
   );
 });
 
-profile.get("/all", async (c) => {
-  const studentProfiles = await prisma.studentProfile.findMany();
-  if (studentProfiles.length === 0) {
-    return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
-  }
-  return c.json(
-    {
-      success: true,
-      status_code: 200,
-      profiles: studentProfiles,
-    },
-    200,
-  );
-});
-
-profile.get("/", async (c) => {
-  const timetables = await prisma.studentProfile.findMany({});
-  if (timetables.length === 0) {
-    return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
-  }
-  return c.json(
-    {
-      success: true,
-      status_code: 200,
-      timetables,
-    },
-    200,
-  );
-});
 
 export default profile;

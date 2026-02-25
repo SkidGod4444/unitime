@@ -38,7 +38,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const response = await fetch(`${origin}/profiles/all`);
       const data = await response.json();
-      // console.log("Fetched profiles:", data);
+      console.log("Fetched profiles:", data);
       if (data.success && data.profiles) {
         setProfiles(data.profiles);
       }

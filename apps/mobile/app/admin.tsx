@@ -15,13 +15,13 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRefresh } from "../hooks/use-refresh";
-import { useUsersStore } from "../lib/store";
+import { useProfilesStore, useUsersStore } from "../lib/store";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Role = "ADMIN" | "PROFESSOR" | "REPRESENTATIVE" | "STUDENT";
 
-type User = { id: string; name: string; email: string; role: Role };
+type User = { id: string; name: string; email: string; role: Role; admissionNumber?: string | null };
 type ClassItem = {
   id: string;
   name: string;
@@ -194,20 +194,25 @@ const ALL_ROLES: Role[] = ["ADMIN", "PROFESSOR", "REPRESENTATIVE", "STUDENT"];
 
 function RolesTab({ onAddUserPress }: { onAddUserPress: () => void }) {
   const { users: storeUsers, removeUser } = useUsersStore();
+  const { profiles } = useProfilesStore();
   const [roleModal, setRoleModal] = useState<User | null>(null);
 
-  // Only show non-STUDENT users in the Roles tab
+  // Only show non-STUDENT users in the Roles tab, joined with their profile
   const nonStudentUsers = useMemo(
     () =>
       storeUsers
         .filter((u) => u.role !== "STUDENT")
-        .map((u) => ({
-          id: u.id,
-          name: u.name ?? "",
-          email: u.email,
-          role: (u.role ?? "STUDENT") as Role,
-        })),
-    [storeUsers],
+        .map((u) => {
+          const profile = profiles.find((p) => p.userId === u.id);
+          return {
+            id: u.id,
+            name: u.name ?? "",
+            email: u.email,
+            role: (u.role ?? "STUDENT") as Role,
+            admissionNumber: profile?.admissionNumber ?? null,
+          };
+        }),
+    [storeUsers, profiles],
   );
 
   const changeRole = (userId: string, role: Role) => {
@@ -253,7 +258,7 @@ function RolesTab({ onAddUserPress }: { onAddUserPress: () => void }) {
                     {user.name}
                   </Text>
                   <Text className="text-sm text-gray-500 mt-0.5">
-                    {user.id}
+                    {user.admissionNumber ?? user.id}
                   </Text>
                   <View
                     className={`self-start mt-2 px-2.5 py-0.5 rounded-full ${colors.bg}`}
@@ -291,7 +296,7 @@ function RolesTab({ onAddUserPress }: { onAddUserPress: () => void }) {
               Change Role for
             </Text>
             <Text className="text-sm text-gray-500 mb-4">
-              {roleModal?.name} - {roleModal?.id}
+              {roleModal?.name} - {roleModal?.admissionNumber ?? roleModal?.id}
             </Text>
             {ALL_ROLES.map((role) => {
               const colors = ROLE_COLORS[role];
