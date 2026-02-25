@@ -95,14 +95,22 @@ const SlideToDismiss = ({ onDismiss }: { onDismiss: () => void }) => {
 
     return () => {
       Vibration.cancel();
-      player.pause();
+      try {
+        player.pause();
+      } catch {
+        // useAudioPlayer auto-releases: we can ignore the "already released" error
+      }
     };
   }, [player]);
 
   // Stop sound + vibration when slide-dismissing
   const handleDismiss = useCallback(() => {
     Vibration.cancel();
-    player.pause();
+    try {
+      player.pause();
+    } catch {
+      // Ignore if released
+    }
     onDismiss();
   }, [player, onDismiss]);
 

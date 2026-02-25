@@ -98,40 +98,71 @@ export default function Profile() {
         contentContainerStyle={{ paddingBottom: 40 }}
       >
         {/* Profile Card */}
-        <View className="items-center mt-6 px-5">
-          <View className="relative">
-            <View className="h-28 w-28 rounded-full bg-gray-100 p-1 border-2 border-primary/20">
-              <Image
-                source={
-                  loggedInUser?.image
-                    ? { uri: loggedInUser.image }
-                    : require("../assets/images/pfp-face.png")
-                }
-                className="h-full w-full rounded-full"
-              />
+        <View className="mx-5 mt-5 rounded-3xl overflow-hidden border border-gray-100 shadow-sm bg-white">
+          {/* Top Banner */}
+          <View className="h-20 bg-primary/10 w-full" />
+
+          {/* Avatar overlapping the banner */}
+          <View className="items-center -mt-12 pb-5 px-5">
+            <View className="relative">
+              <View className="h-24 w-24 rounded-full bg-white p-1.5 border-2 border-white shadow-md">
+                <Image
+                  source={
+                    loggedInUser?.image
+                      ? { uri: loggedInUser.image }
+                      : require("../assets/images/pfp-face.png")
+                  }
+                  className="h-full w-full rounded-full"
+                />
+              </View>
+              <TouchableOpacity className="absolute bottom-0 right-0 bg-primary h-7 w-7 rounded-full items-center justify-center border-2 border-white shadow-sm">
+                <Ionicons name="camera" size={14} color="white" />
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity className="absolute bottom-0 right-0 bg-primary h-8 w-8 rounded-full items-center justify-center border-2 border-white shadow-sm">
-              <Ionicons name="camera" size={16} color="white" />
-            </TouchableOpacity>
-          </View>
 
-          <Text className="text-2xl font-bold font-lora text-dark mt-4">
-            {loggedInUser?.name || "John Doe"}
-          </Text>
-          <Text className="text-gray-500 font-medium">
-            {myProfile?.department || "N/A"}
-          </Text>
-          <Text className="text-gray-500 font-medium">
-            {myProfile?.course || "N/A"}
-          </Text>
+            {/* Name */}
+            <Text className="text-xl font-bold font-lora text-dark mt-3">
+              {loggedInUser?.name || "John Doe"}
+            </Text>
+            <Text className="text-sm text-gray-400 mt-0.5">
+              {loggedInUser?.email}
+            </Text>
 
-          <Text className="text-gray-500 font-medium">
-            {myOrg?.section || "N/A"}
-          </Text>
+            {/* Admission number pill */}
+            <View className="flex-row items-center gap-1.5 mt-2.5 bg-primary/10 px-4 py-1.5 rounded-full">
+              <Ionicons name="id-card-outline" size={13} color="#2563EB" />
+              <Text className="text-primary font-bold text-xs tracking-wider">
+                ID: {myProfile?.admissionNumber ?? "—"}
+              </Text>
+            </View>
 
-          <View className="flex-row items-center gap-2 mt-2 bg-blue-50 px-3 py-1 rounded-full">
-            <Ionicons name="id-card-outline" size={14} color="#2563EB" />
-            <Text className="text-primary font-bold text-xs">ID: {myProfile?.admissionNumber}</Text>
+            {/* Info rows — column layout so long text wraps properly */}
+            <View className="w-full mt-5 rounded-2xl overflow-hidden border border-gray-100">
+              {[
+                { icon: "business-outline", label: "Department", value: myProfile?.department || "N/A", color: "#2563EB", bg: "#EFF6FF" },
+                { icon: "book-outline",     label: "Course",     value: myProfile?.course || "N/A",      color: "#7C3AED", bg: "#F5F3FF" },
+                { icon: "people-outline",   label: "Section",    value: myOrg?.section ? `Sec: ${myOrg.section}` : "N/A",          color: "#059669", bg: "#ECFDF5" },
+              ].map((row, i, arr) => (
+                <View
+                  key={row.label}
+                  className={`flex-row items-center justify-start px-4 py-3 bg-white ${i !== arr.length - 1 ? "border-b border-gray-100" : ""}`}
+                >
+                  <View
+                    className="h-8 w-8 rounded-full items-center justify-center shrink-0"
+                    style={{ backgroundColor: row.bg }}
+                  >
+                    <Ionicons name={row.icon as any} size={15} color={row.color} />
+                  </View>
+                  <Text
+                    className="text-sm font-bold text-gray-800 flex-shrink ml-3"
+                    numberOfLines={1}
+                  >
+                    {row.value}
+                  </Text>
+                </View>
+              ))}
+            </View>
+
           </View>
         </View>
 
@@ -191,7 +222,7 @@ export default function Profile() {
 
         {/* Menu Items */}
         <View className="mt-8 px-5 gap-6">
-          {menuItems.map((section, sectionIndex) => (
+          {/* {menuItems.map((section, sectionIndex) => (
             <View key={sectionIndex}>
               <Text className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-3 ml-1">
                 {section.title}
@@ -225,7 +256,7 @@ export default function Profile() {
                 ))}
               </View>
             </View>
-          ))}
+          ))} */}
 
           {/* Dark Mode Toggle */}
           <View>

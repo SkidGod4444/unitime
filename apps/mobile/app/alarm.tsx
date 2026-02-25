@@ -593,7 +593,7 @@ export default function AlarmScreen() {
               Class Alarms
             </Text>
             <Text className="text-2xl font-bold text-gray-900">
-              Alarm Manager
+              Alarms
             </Text>
           </View>
         </View>
