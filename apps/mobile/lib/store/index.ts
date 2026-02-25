@@ -37,7 +37,7 @@ export const useUsersStore = create<UsersState>()(
       addUser: (user) => set((state) => ({ users: [...state.users, user] })),
       removeUser: (userId) =>
         set((state) => ({
-          users: state.users.filter((user) => user.$user_id !== userId),
+          users: state.users.filter((user) => user.id !== userId),
         })),
     }),
     {

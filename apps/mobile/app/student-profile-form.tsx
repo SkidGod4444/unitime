@@ -22,7 +22,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function StudentProfileForm() {
   const router = useRouter();
-  const { loggedInUser, setLoggedInUser } = useAuth();
+  const { loggedInUser } = useAuth();
   const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3001";
 
   // Form state
@@ -69,16 +69,10 @@ export default function StudentProfileForm() {
   ];
 
   const sem = [
-    "Semister 1",
-    "Semister 2",
-    "Semister 3",
-    "Semister 4",
-    "Semister 5",
-    "Semister 6",
-    "Semister 7",
-    "Semister 8",
-    "Semister 9",
-    "Semister 10",
+    "FIRST_SEMESTER",
+    "SECOND_SEMESTER",
+    "THIRD_SEMESTER",
+  
   ];
 
   // ---------------------------------------------------------------------------
@@ -121,7 +115,7 @@ export default function StudentProfileForm() {
     setLoading(true);
 
     try {
-      const response = await fetch(`${origin}/v1/profile/create`, {
+      const response = await fetch(`${origin}/profile/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -153,7 +147,7 @@ export default function StudentProfileForm() {
 
       // Mark the user as onboarded on the backend
       if (loggedInUser?.id) {
-        await fetch(`${origin}/v1/users/${loggedInUser.id}/onboard`, {
+        await fetch(`${origin}/users/${loggedInUser.id}/onboard`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
         });
@@ -165,7 +159,10 @@ export default function StudentProfileForm() {
       // }
 
       Alert.alert("Success", "Profile saved successfully!");
-      router.replace("/profile");
+      router.replace("/(tabs)");
+      setTimeout(() => {
+        router.reload();
+      }, 2000);
     } catch (error: any) {
       console.error("Profile save failed:", error);
       Alert.alert("Error", error?.message || "Failed to save profile. Please try again.");

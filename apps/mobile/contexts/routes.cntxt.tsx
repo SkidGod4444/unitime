@@ -1,5 +1,4 @@
 "use client";
-import { account } from "@/lib/auth";
 import { usePathname, useRouter } from "expo-router";
 import React, {
   createContext,

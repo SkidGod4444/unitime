@@ -25,6 +25,8 @@
   "dependencies": {
     "@prisma/client": "^7.3.0",
     "@prisma/extension-accelerate": "^3.0.1",
+    "@prisma/extension-optimize": "^2.0.1",
+    "@prisma/instrumentation": "^6",
     "prisma": "^7.3.0",
     "react-native-url-polyfill": "^3.0.0"
   }

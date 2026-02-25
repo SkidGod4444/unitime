@@ -1,7 +1,6 @@
 import { rateLimitHandler } from "@/middleware/ratelimit";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { logger } from "hono/logger";
 import { handle } from "hono/vercel";
 import attendance from "./routes/attendance";
 import chats from "./routes/chats";
@@ -17,7 +16,7 @@ export const runtime = "nodejs";
 
 const app = new Hono().basePath("/v1");
 
-app.use(logger());
+// app.use(logger());
 // app.use(authMiddleware);
 app.use(rateLimitHandler);
 

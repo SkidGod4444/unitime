@@ -1,13 +1,49 @@
+import { account } from "@/lib/auth";
 import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
 
 const users = new Hono();
 
-users.get("/me", (c) => {
-  return c.json({
-    message: "Hello Hono!",
-  });
+users.get("/me", async (c) => {
+  try {
+    const me = await account.get();
+    const user = await prisma.user.findUnique({
+      where: { email: me.email },
+    });
+
+    if (!user) {
+      return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
+    }
+
+    return c.json({
+      success: true,
+      status_code: 200,
+      user,
+    }, 200);
+  } catch (error) {
+    console.error("Error fetching user details:", error);
+    return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
+  }
+});
+
+users.get("/all", async (c) => {
+  try {
+    const users = await prisma.user.findMany();
+
+    if (users.length === 0) {
+      return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
+    }
+
+    return c.json({
+      success: true,
+      status_code: 200,
+      users,
+    }, 200);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
+  }
 });
 
 users.get("/", async (c) => {
@@ -49,7 +85,7 @@ users.get("/:id", async (c) => {
   );
 });
 
-users.put("/:id", async (c) => {
+users.put("/:id/update", async (c) => {
   const id = c.req.param("id");
   const body = await c.req.json();
   const user = await prisma.user.update({

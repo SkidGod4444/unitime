@@ -11,7 +11,6 @@ profile.post("/create", async (c) => {
 
     if (
       !body.admissionNumber ||
-      !body.enrollmentNumber ||
       !body.studentEmail ||
       !body.contactNumber ||
       !body.userId ||
@@ -32,7 +31,7 @@ profile.post("/create", async (c) => {
     const newProfile = await prisma.studentProfile.create({
       data: {
         admissionNumber: body.admissionNumber,
-        enrollmentNumber: body.enrollmentNumber,
+        enrollmentNumber: body.enrollmentNumber || null,
         studentEmail: body.studentEmail,
         contactNumber: body.contactNumber,
         userId: body.userId,
@@ -43,7 +42,7 @@ profile.post("/create", async (c) => {
         organizationId: body.organizationId,
       },
     });
-
+    console.log("Profile created successfully:", newProfile);
     return c.json(
       {
         success: true,

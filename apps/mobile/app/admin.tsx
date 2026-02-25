@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useUsersStore } from "../lib/store";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -44,37 +45,6 @@ type Attendance = {
 };
 
 // ─── Dummy Data ───────────────────────────────────────────────────────────────
-
-const USERS: User[] = [
-  { id: "u1", name: "Alice Smith", email: "alice@uni.edu", role: "ADMIN" },
-  { id: "u2", name: "Bob Johnson", email: "bob@uni.edu", role: "PROFESSOR" },
-  {
-    id: "u3",
-    name: "Charlie Brown",
-    email: "charlie@uni.edu",
-    role: "REPRESENTATIVE",
-  },
-  { id: "u4", name: "Diana Prince", email: "diana@uni.edu", role: "STUDENT" },
-  { id: "u5", name: "Evan Davis", email: "evan@uni.edu", role: "STUDENT" },
-  {
-    id: "u6",
-    name: "Fiona Gallagher",
-    email: "fiona@uni.edu",
-    role: "PROFESSOR",
-  },
-];
-
-// Users not yet assigned a role — shown in the Add User picker
-const UNASSIGNED_POOL: Omit<User, "role">[] = [
-  { id: "np1", name: "Henry Ford", email: "henry@uni.edu" },
-  { id: "np2", name: "Isabella Turner", email: "isabella@uni.edu" },
-  { id: "np3", name: "James Wilson", email: "james@uni.edu" },
-  { id: "np4", name: "Karen Page", email: "karen@uni.edu" },
-  { id: "np5", name: "Leo Martinez", email: "leo@uni.edu" },
-  { id: "np6", name: "Mia Chen", email: "mia@uni.edu" },
-  { id: "np7", name: "Nathan Drake", email: "nathan@uni.edu" },
-  { id: "np8", name: "Olivia Scott", email: "olivia@uni.edu" },
-];
 
 const CLASSES: ClassItem[] = [
   { id: "c1", name: "B.Tech CSE", section: "A", strength: 62, year: 2 },
@@ -221,14 +191,25 @@ const RowActions = ({
 const ALL_ROLES: Role[] = ["ADMIN", "PROFESSOR", "REPRESENTATIVE", "STUDENT"];
 
 function RolesTab({ onAddUserPress }: { onAddUserPress: () => void }) {
-  const [users, setUsers] = useState(USERS);
+  const { users: storeUsers, removeUser } = useUsersStore();
   const [roleModal, setRoleModal] = useState<User | null>(null);
 
-  // expose setter so parent can push new users in
-  RolesTab._addUser = (user: User) => setUsers((p) => [...p, user]);
+  // Only show non-STUDENT users in the Roles tab
+  const nonStudentUsers = useMemo(
+    () =>
+      storeUsers
+        .filter((u) => u.role !== "STUDENT")
+        .map((u) => ({
+          id: u.id,
+          name: u.name ?? "",
+          email: u.email,
+          role: (u.role ?? "STUDENT") as Role,
+        })),
+    [storeUsers],
+  );
 
   const changeRole = (userId: string, role: Role) => {
-    setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, role } : u)));
+    // Role change handled locally via modal; in a real app you'd call the API
     setRoleModal(null);
   };
 
@@ -238,7 +219,7 @@ function RolesTab({ onAddUserPress }: { onAddUserPress: () => void }) {
       {
         text: "Remove",
         style: "destructive",
-        onPress: () => setUsers((p) => p.filter((u) => u.id !== user.id)),
+        onPress: () => removeUser(user.id),
       },
     ]);
   };
@@ -246,9 +227,17 @@ function RolesTab({ onAddUserPress }: { onAddUserPress: () => void }) {
   return (
     <>
       <FlatList
-        data={users}
+        data={nonStudentUsers}
         keyExtractor={(u) => u.id}
         scrollEnabled={false}
+        ListEmptyComponent={
+          <View className="items-center py-10">
+            <Ionicons name="people-outline" size={40} color="#d1d5db" />
+            <Text className="text-gray-400 mt-2 text-sm">
+              No users with roles found.
+            </Text>
+          </View>
+        }
         renderItem={({ item: user }) => {
           const colors = ROLE_COLORS[user.role];
           return (
@@ -331,8 +320,6 @@ function RolesTab({ onAddUserPress }: { onAddUserPress: () => void }) {
     </>
   );
 }
-// Static ref so parent can call addUser without prop-drilling
-RolesTab._addUser = (_user: User) => {};
 
 // ─── Add User Modal ───────────────────────────────────────────────────────────
 
@@ -345,18 +332,28 @@ function AddUserModal({
   onClose: () => void;
   onAdd: (user: User) => void;
 }) {
+  const { users: storeUsers } = useUsersStore();
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Omit<User, "role"> | null>(null);
   const [pickedRole, setPickedRole] = useState<Role>("STUDENT");
 
+  // Show only STUDENT users from the store in the Add User picker
+  const studentUsers = useMemo(
+    () =>
+      storeUsers
+        .filter((u) => u.role === "STUDENT")
+        .map((u) => ({ id: u.id, name: u.name ?? "", email: u.email })),
+    [storeUsers],
+  );
+
   const filtered = useMemo(
     () =>
-      UNASSIGNED_POOL.filter(
+      studentUsers.filter(
         (u) =>
           u.name.toLowerCase().includes(search.toLowerCase()) ||
           u.email.toLowerCase().includes(search.toLowerCase()),
       ),
-    [search],
+    [search, studentUsers],
   );
 
   const handleAdd = () => {
@@ -432,6 +429,17 @@ function AddUserModal({
           <Text className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
             {filtered.length} user{filtered.length !== 1 ? "s" : ""} found
           </Text>
+
+          {filtered.length === 0 && (
+            <View className="items-center py-10">
+              <Ionicons name="person-add-outline" size={40} color="#d1d5db" />
+              <Text className="text-gray-400 mt-2 text-sm text-center">
+                {studentUsers.length === 0
+                  ? "No users in the system yet."
+                  : "No users match your search."}
+              </Text>
+            </View>
+          )}
 
           {filtered.map((user) => {
             const isSelected = selected?.id === user.id;
@@ -790,6 +798,7 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<TabKey>("roles");
   const [addUserVisible, setAddUserVisible] = useState(false);
 
+
   const handleAdd = () => {
     if (activeTab === "roles") {
       setAddUserVisible(true);
@@ -798,14 +807,17 @@ export default function AdminPage() {
     }
   };
 
+  const { users: storeUsers } = useUsersStore();
+
   const handleAddUser = (user: User) => {
-    RolesTab._addUser(user);
+    // In a real app: call API to promote the student, then update store
+    setAddUserVisible(false);
   };
 
   const STAT_CARDS = [
     {
       label: "Users",
-      value: USERS.length,
+      value: storeUsers.length,
       icon: "people-outline",
       color: "#4f46e5",
     },

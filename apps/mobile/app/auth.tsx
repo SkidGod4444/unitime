@@ -1,6 +1,5 @@
 import { useAuth } from "@/contexts/auth.cntxt";
 import { isInstitutionalEmail } from "@/utils/email.validator";
-import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import { Linking, Text, TextInput, TouchableOpacity, View } from "react-native";
