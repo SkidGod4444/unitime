@@ -1,4 +1,5 @@
 import { useAuth } from "@/contexts/auth.cntxt";
+import { useOrgsStore, useProfilesStore } from "@/lib/store";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -17,6 +18,10 @@ export default function Profile() {
   const router = useRouter();
   const [isDark, setIsDark] = React.useState(false);
   const { logout, loggedInUser } = useAuth();
+  const { profiles } = useProfilesStore();
+  const { orgs } = useOrgsStore();
+  const myProfile = profiles.find((p) => p.userId === loggedInUser?.id);
+  const myOrg = orgs.find((o) => o.id === myProfile?.organizationId);
 
   // Grouped menu items for cleaner code
   const menuItems = [
@@ -114,12 +119,19 @@ export default function Profile() {
             {loggedInUser?.name || "John Doe"}
           </Text>
           <Text className="text-gray-500 font-medium">
-            Computer Science & Eng.
+            {myProfile?.department || "N/A"}
+          </Text>
+          <Text className="text-gray-500 font-medium">
+            {myProfile?.course || "N/A"}
+          </Text>
+
+          <Text className="text-gray-500 font-medium">
+            {myOrg?.section || "N/A"}
           </Text>
 
           <View className="flex-row items-center gap-2 mt-2 bg-blue-50 px-3 py-1 rounded-full">
             <Ionicons name="id-card-outline" size={14} color="#2563EB" />
-            <Text className="text-primary font-bold text-xs">ID: 21010158</Text>
+            <Text className="text-primary font-bold text-xs">ID: {myProfile?.admissionNumber}</Text>
           </View>
         </View>
 

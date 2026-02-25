@@ -4,7 +4,7 @@ import { Hono } from "hono";
 
 const orgs = new Hono();
 
-orgs.get("/", async (c) => {
+orgs.get("/all", async (c) => {
   const orgss = await prisma.organization.findMany();
   if (orgss.length === 0) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);

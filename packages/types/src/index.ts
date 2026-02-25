@@ -44,4 +44,15 @@ type ProfileT = {
   organizationId: string;
 };
 
-export type { TeamT, Theme, UserT, ProfileT };
+type OrgT = {
+  id: string;
+  departmentName: string;
+  courseName: string;
+  semester: string;
+  section: number;
+  students: ProfileT[];
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type { TeamT, Theme, UserT, ProfileT, OrgT };

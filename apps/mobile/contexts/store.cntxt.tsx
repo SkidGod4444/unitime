@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./auth.cntxt";
-import { useProfilesStore, useUsersStore } from "@/lib/store";
+import { useOrgsStore, useProfilesStore, useUsersStore } from "@/lib/store";
 
 type StoreContextType = {
   refresh: () => Promise<void>;
@@ -18,6 +18,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
 
   const { setUsers } = useUsersStore();
   const { setProfiles } = useProfilesStore();
+  const { setOrgs } = useOrgsStore();
 
   const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -38,7 +39,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const response = await fetch(`${origin}/profiles/all`);
       const data = await response.json();
-      console.log("Fetched profiles:", data);
+      // console.log("Fetched profiles:", data);
       if (data.success && data.profiles) {
         setProfiles(data.profiles);
       }
@@ -47,14 +48,28 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [origin, setProfiles]);
 
+  const fetchOrgs = React.useCallback(async () => {
+    try {
+      const response = await fetch(`${origin}/orgs/all`);
+      const data = await response.json();
+      // console.log("Fetched orgs:", data);
+      if (data.success && data.orgs) {
+        setOrgs(data.orgs);
+      }
+    } catch (error) {
+      console.error("Failed to fetch orgs:", error);
+    }
+  }, [origin, setOrgs]);
+
     const refresh = React.useCallback(async () => {
       setLoading(true);
       await Promise.allSettled([
         fetchUsers(),
         fetchProfiles(),
+        fetchOrgs(),
       ]);
       setLoading(false);
-    }, [fetchUsers, fetchProfiles]);
+    }, [fetchUsers, fetchProfiles, fetchOrgs]);
 
     useEffect(() => {
       if (loggedInUser) {

@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { ProfileT, Theme, UserT } from "@unitime/types";
+import { OrgT, ProfileT, Theme, UserT } from "@unitime/types";
 
 type ThemeState = {
   theme: Theme;
@@ -67,6 +67,32 @@ export const useProfilesStore = create<ProfilesState>()(
     }),
     {
       name: "profiles-store",
+      storage: createJSONStorage(() => AsyncStorage),
+    },
+  ),
+);
+
+
+type OrgsState = {
+  orgs: OrgT[];
+  addOrg: (org: OrgT) => void;
+  removeOrg: (org_id: string) => void;
+  setOrgs: (orgs: OrgT[]) => void;
+};
+
+export const useOrgsStore = create<OrgsState>()(
+  persist(
+    (set) => ({
+      orgs: [],
+      setOrgs: (orgs) => set({ orgs }),
+      addOrg: (org) => set((state) => ({ orgs: [...state.orgs, org] })),
+      removeOrg: (orgId) =>
+        set((state) => ({
+          orgs: state.orgs.filter((org) => org.id !== orgId),
+        })),
+    }),
+    {
+      name: "orgs-store",
       storage: createJSONStorage(() => AsyncStorage),
     },
   ),
