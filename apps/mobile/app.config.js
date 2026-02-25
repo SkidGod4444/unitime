@@ -38,6 +38,7 @@ export default ({ config }) => ({
   newArchEnabled: true,
   deepLinking: true,
   plugins: [
+    '@vall370/expo-alarm',
     'expo-audio',
     'expo-localization',
     'expo-quick-actions',
@@ -166,7 +167,11 @@ export default ({ config }) => ({
         "FOREGROUND_SERVICE_NOTIFICATION",
         "FOREGROUND_SERVICE_BACKGROUND_AUDIO",
         "CAMERA",
-        "RECORD_AUDIO"
+        "RECORD_AUDIO",
+        "SCHEDULE_EXACT_ALARM",
+        "USE_EXACT_ALARM",
+        "WAKE_LOCK",
+        "RECEIVE_BOOT_COMPLETED"
       ],
     // config: {
     //   googleMaps: {

@@ -392,7 +392,8 @@ export const ModelName = {
   AttendanceQRSession: 'AttendanceQRSession',
   AttendanceLogs: 'AttendanceLogs',
   StudentProfile: 'StudentProfile',
-  Organization: 'Organization'
+  Organization: 'Organization',
+  Alarm: 'Alarm'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -408,7 +409,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "courses" | "user" | "userCourse" | "userTimetable" | "timetable" | "attendanceQRSession" | "attendanceLogs" | "studentProfile" | "organization"
+    modelProps: "courses" | "user" | "userCourse" | "userTimetable" | "timetable" | "attendanceQRSession" | "attendanceLogs" | "studentProfile" | "organization" | "alarm"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1078,6 +1079,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Alarm: {
+      payload: Prisma.$AlarmPayload<ExtArgs>
+      fields: Prisma.AlarmFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AlarmFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlarmPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AlarmFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlarmPayload>
+        }
+        findFirst: {
+          args: Prisma.AlarmFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlarmPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AlarmFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlarmPayload>
+        }
+        findMany: {
+          args: Prisma.AlarmFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlarmPayload>[]
+        }
+        create: {
+          args: Prisma.AlarmCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlarmPayload>
+        }
+        createMany: {
+          args: Prisma.AlarmCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AlarmCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlarmPayload>[]
+        }
+        delete: {
+          args: Prisma.AlarmDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlarmPayload>
+        }
+        update: {
+          args: Prisma.AlarmUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlarmPayload>
+        }
+        deleteMany: {
+          args: Prisma.AlarmDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AlarmUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AlarmUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlarmPayload>[]
+        }
+        upsert: {
+          args: Prisma.AlarmUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AlarmPayload>
+        }
+        aggregate: {
+          args: Prisma.AlarmAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAlarm>
+        }
+        groupBy: {
+          args: Prisma.AlarmGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AlarmGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AlarmCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AlarmCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1248,6 +1323,23 @@ export const OrganizationScalarFieldEnum = {
 } as const
 
 export type OrganizationScalarFieldEnum = (typeof OrganizationScalarFieldEnum)[keyof typeof OrganizationScalarFieldEnum]
+
+
+export const AlarmScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  label: 'label',
+  courseCode: 'courseCode',
+  color: 'color',
+  time: 'time',
+  days: 'days',
+  leadMinutes: 'leadMinutes',
+  enabled: 'enabled',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AlarmScalarFieldEnum = (typeof AlarmScalarFieldEnum)[keyof typeof AlarmScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1572,6 +1664,7 @@ export type GlobalOmitConfig = {
   attendanceLogs?: Prisma.AttendanceLogsOmit
   studentProfile?: Prisma.StudentProfileOmit
   organization?: Prisma.OrganizationOmit
+  alarm?: Prisma.AlarmOmit
 }
 
 /* Types for Logging */

@@ -62,3 +62,8 @@ export type StudentProfile = Prisma.StudentProfileModel
  * 
  */
 export type Organization = Prisma.OrganizationModel
+/**
+ * Model Alarm
+ * 
+ */
+export type Alarm = Prisma.AlarmModel

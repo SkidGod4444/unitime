@@ -1,18 +1,33 @@
 import BannedUserPopup from "@/components/banned.users.popup";
 import ProfileCompletionPopup from "@/components/profile.completion.popup";
 import QRScannerWidget from "@/components/qr.scanner.widget";
-import { AuthProvider } from "@/contexts/auth.cntxt";
+import { AlarmsProvider } from "@/contexts/alarms.cntxt";
+import { AuthProvider, useAuth } from "@/contexts/auth.cntxt";
 import { LocalStoreProvider } from "@/contexts/localstore.cntxt";
 import { PermsProvider } from "@/contexts/perms.cntxt";
 import { RoutesProvider } from "@/contexts/routes.cntxt";
+import { StoreProvider } from "@/contexts/store.cntxt";
 import { useFonts } from "expo-font";
 import { Stack, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { ReactNode } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "./globals.css";
 import Loader from "./loader";
-import { StoreProvider } from "@/contexts/store.cntxt";
+
+/**
+ * Inner wrapper that reads the logged-in user from AuthContext and passes
+ * the userId to AlarmsProvider. Must be rendered inside <AuthProvider>.
+ */
+function AlarmsInnerProvider({ children }: { children: ReactNode }) {
+  const { loggedInUser } = useAuth();
+  return (
+    <AlarmsProvider userId={loggedInUser?.id ?? null}>
+      {children}
+    </AlarmsProvider>
+  );
+}
 
 function AppContent() {
   const [fontsLoaded] = useFonts({
@@ -49,16 +64,18 @@ function AppContent() {
         <AuthProvider>
           <RoutesProvider>
             <StoreProvider>
-            <PermsProvider>
-              <StatusBar style={"dark"} animated />
+              <AlarmsInnerProvider>
+                <PermsProvider>
+                  <StatusBar style={"dark"} animated />
 
-              <BannedUserPopup />
-              {!isHiddenScreen && <ProfileCompletionPopup />}
+                  <BannedUserPopup />
+                  {!isHiddenScreen && <ProfileCompletionPopup />}
 
-              <Stack screenOptions={{ headerShown: false }} />
-              {!isHiddenScreen && <QRScannerWidget />}
-              <Loader />
-            </PermsProvider>
+                  <Stack screenOptions={{ headerShown: false }} />
+                  {!isHiddenScreen && <QRScannerWidget />}
+                  <Loader />
+                </PermsProvider>
+              </AlarmsInnerProvider>
             </StoreProvider>
           </RoutesProvider>
         </AuthProvider>

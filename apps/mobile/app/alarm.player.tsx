@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { setAudioModeAsync, useAudioPlayer } from "expo-audio";
 import * as Haptics from "expo-haptics";
-import { Stack, useRouter } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useCallback, useEffect } from "react";
 import {
@@ -29,46 +29,45 @@ import Animated, {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { scheduleOnRN } from "react-native-worklets";
 
-// --- Types & Mock Data ---
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
 
 type ClassSession = {
-  id: string;
   courseCode: string;
-  courseName: string;
-  startTime: string;
-  endTime: string;
-  location: string;
-  professor: string;
-  type: "Lecture" | "Lab" | "Tutorial";
+  label: string;
+  time: string;
+  leadMinutes: number;
   color: string;
 };
 
-// Mock data for the upcoming class
-const UPCOMING_CLASS: ClassSession = {
-  id: "1",
-  courseCode: "CS101",
-  courseName: "Intro to Computer Science",
-  startTime: "09:00",
-  endTime: "10:30",
-  location: "Hall A",
-  professor: "Dr. Smith",
-  type: "Lecture",
-  color: "#818cf8", // Indigo-400
-};
-
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const SLIDE_WIDTH = SCREEN_WIDTH - 48; // padding horizontally
+const SLIDE_WIDTH = SCREEN_WIDTH - 48;
 const BUTTON_SIZE = 56;
-const SLIDE_RANGE = SLIDE_WIDTH - BUTTON_SIZE - 8; // 8px padding inside slider
+const SLIDE_RANGE = SLIDE_WIDTH - BUTTON_SIZE - 8;
 
-// --- Components ---
+// ---------------------------------------------------------------------------
+// Format the class start time nicely
+// ---------------------------------------------------------------------------
+
+function formatClassTime(time: string | undefined): string {
+  if (!time) return "--:--";
+  const [h, m] = time.split(":");
+  const h24 = parseInt(h, 10);
+  const period = h24 >= 12 ? "PM" : "AM";
+  const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+  return `${String(h12).padStart(2, "0")}:${m} ${period}`;
+}
+
+// ---------------------------------------------------------------------------
+// SlideToDismiss component
+// ---------------------------------------------------------------------------
 
 const SlideToDismiss = ({ onDismiss }: { onDismiss: () => void }) => {
   const translateX = useSharedValue(0);
   const isDismissed = useSharedValue(false);
 
   // --- Audio Logic ---
-  // useAudioPlayer auto-releases the player when the component unmounts.
   const player = useAudioPlayer(
     require("@/assets/sounds/mixkit-digital-clock-digital-alarm-buzzer-992.wav"),
   );
@@ -89,8 +88,6 @@ const SlideToDismiss = ({ onDismiss }: { onDismiss: () => void }) => {
     };
 
     startAlarm();
-
-    // Start vibration pattern: 100ms pause, 500ms vibrate, 500ms pause, repeat
     Vibration.vibrate([100, 500, 500], true);
 
     return () => {
@@ -98,12 +95,11 @@ const SlideToDismiss = ({ onDismiss }: { onDismiss: () => void }) => {
       try {
         player.pause();
       } catch {
-        // useAudioPlayer auto-releases: we can ignore the "already released" error
+        // If the player was already released by expo-audio, ignore.
       }
     };
   }, [player]);
 
-  // Stop sound + vibration when slide-dismissing
   const handleDismiss = useCallback(() => {
     Vibration.cancel();
     try {
@@ -118,7 +114,6 @@ const SlideToDismiss = ({ onDismiss }: { onDismiss: () => void }) => {
     .onUpdate((event) => {
       "worklet";
       if (isDismissed.value) return;
-
       const nextPos = Math.max(0, Math.min(event.translationX, SLIDE_RANGE));
       translateX.value = nextPos;
     })
@@ -132,7 +127,7 @@ const SlideToDismiss = ({ onDismiss }: { onDismiss: () => void }) => {
           Haptics.notificationAsync,
           Haptics.NotificationFeedbackType.Success,
         );
-        scheduleOnRN(handleDismiss); // Call our new wrapper
+        scheduleOnRN(handleDismiss);
       } else {
         translateX.value = withSpring(0);
       }
@@ -155,7 +150,7 @@ const SlideToDismiss = ({ onDismiss }: { onDismiss: () => void }) => {
     opacity: interpolate(
       translateX.value,
       [0, SLIDE_RANGE],
-      [0.8, 1], // Becomes solid as you slide
+      [0.8, 1],
       Extrapolation.CLAMP,
     ),
   }));
@@ -186,22 +181,41 @@ const SlideToDismiss = ({ onDismiss }: { onDismiss: () => void }) => {
   );
 };
 
-export default function AlarmScreen() {
+// ---------------------------------------------------------------------------
+// Main Alarm Player Screen
+// ---------------------------------------------------------------------------
+
+export default function AlarmPlayerScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{
+    alarmId?: string;
+    label?: string;
+    courseCode?: string;
+    color?: string;
+    time?: string;
+    leadMinutes?: string;
+  }>();
   const [currentTime, setCurrentTime] = React.useState(new Date());
 
+  // Build the session data from params (fall back to placeholders)
+  const session: ClassSession = {
+    courseCode: params.courseCode ?? "CLASS",
+    label: params.label ?? "Upcoming Class",
+    time: params.time ?? "",
+    leadMinutes: parseInt(params.leadMinutes ?? "15", 10),
+    color: params.color ?? "#6366f1",
+  };
+
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  // Block Android hardware back button – only the slide gesture dismisses this page
+  // Block Android hardware back button
   useEffect(() => {
     const subscription = BackHandler.addEventListener(
       "hardwareBackPress",
-      () => true, // returning true prevents the default back action
+      () => true,
     );
     return () => subscription.remove();
   }, []);
@@ -214,14 +228,11 @@ export default function AlarmScreen() {
     }
   };
 
-  const handleSnooze = () => {
-    console.log("Snoozed");
-    handleDismiss();
-  };
+  const handleSnooze = () => handleDismiss();
 
   return (
     <GestureHandlerRootView className="flex-1">
-      {/* Disable iOS swipe-back gesture for this screen only */}
+      {/* Disable iOS swipe-back gesture */}
       <Stack.Screen options={{ gestureEnabled: false }} />
       <SafeAreaView className="flex-1 bg-white px-6 justify-between">
         <StatusBar style="dark" />
@@ -250,56 +261,70 @@ export default function AlarmScreen() {
         {/* --- Middle Section: Class Card --- */}
         <Animated.View
           entering={FadeInDown.delay(300).springify()}
-          className="w-full bg-white rounded-3xl p-6 border-2 border-gray-100 shadow-xl shadow-indigo-100/50"
+          className="w-full bg-white rounded-3xl p-6 border-2 shadow-xl"
+          style={{ borderColor: session.color + "33" }}
         >
           <View className="flex-row items-center mb-6">
-            <View className="h-10 w-10 rounded-full bg-indigo-100 items-center justify-center mr-4">
-              <Ionicons name="school-outline" size={20} color="#3730a3" />
+            <View
+              className="h-10 w-10 rounded-full items-center justify-center mr-4"
+              style={{ backgroundColor: session.color + "22" }}
+            >
+              <Ionicons name="school-outline" size={20} color={session.color} />
             </View>
-            <View>
-              <Text className="text-indigo-800 font-bold tracking-wider text-xs uppercase mb-1">
-                Starting in 10 min
+            <View className="flex-1">
+              <Text
+                className="font-bold tracking-wider text-xs uppercase mb-1"
+                style={{ color: session.color }}
+              >
+                {session.leadMinutes > 0
+                  ? `Starting in ${session.leadMinutes} min`
+                  : "Starting now"}
               </Text>
-              <Text className="text-black text-2xl font-bold leading-tight">
-                {UPCOMING_CLASS.courseName}
+              <Text
+                className="text-black text-2xl font-bold leading-tight"
+                numberOfLines={2}
+              >
+                {session.label}
               </Text>
             </View>
           </View>
 
           <View className="space-y-4">
+            {/* Course code */}
             <View className="flex-row items-center">
               <Ionicons
-                name="time-outline"
+                name="book-outline"
                 size={20}
                 color="#1f2937"
                 style={{ width: 30 }}
               />
-              <Text className="text-gray-900 text-base font-semibold">
-                {UPCOMING_CLASS.startTime} - {UPCOMING_CLASS.endTime}
-              </Text>
+              <View
+                className="px-2 py-0.5 rounded-full"
+                style={{ backgroundColor: session.color + "22" }}
+              >
+                <Text
+                  className="text-xs font-bold uppercase tracking-wide"
+                  style={{ color: session.color }}
+                >
+                  {session.courseCode}
+                </Text>
+              </View>
             </View>
-            <View className="flex-row items-center">
-              <Ionicons
-                name="location-outline"
-                size={20}
-                color="#1f2937"
-                style={{ width: 30 }}
-              />
-              <Text className="text-gray-900 text-base font-semibold">
-                {UPCOMING_CLASS.location}
-              </Text>
-            </View>
-            <View className="flex-row items-center">
-              <Ionicons
-                name="person-outline"
-                size={20}
-                color="#1f2937"
-                style={{ width: 30 }}
-              />
-              <Text className="text-gray-900 text-base font-semibold">
-                {UPCOMING_CLASS.professor}
-              </Text>
-            </View>
+
+            {/* Time */}
+            {session.time ? (
+              <View className="flex-row items-center">
+                <Ionicons
+                  name="time-outline"
+                  size={20}
+                  color="#1f2937"
+                  style={{ width: 30 }}
+                />
+                <Text className="text-gray-900 text-base font-semibold">
+                  {formatClassTime(session.time)}
+                </Text>
+              </View>
+            ) : null}
           </View>
         </Animated.View>
 

@@ -2,15 +2,16 @@ import { rateLimitHandler } from "@/middleware/ratelimit";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { handle } from "hono/vercel";
+import alarms from "./routes/alarms";
 import attendance from "./routes/attendance";
 import chats from "./routes/chats";
 import courses from "./routes/courses";
 import history from "./routes/history";
 import notifications from "./routes/notifications";
+import orgs from "./routes/org";
+import profile from "./routes/profile";
 import timetable from "./routes/timetable";
 import users from "./routes/users";
-import profile from "./routes/profile";
-import orgs from "./routes/org";
 
 export const runtime = "nodejs";
 
@@ -53,6 +54,7 @@ app.route("/courses", courses);
 app.route("/chats", chats);
 app.route("/profiles", profile);
 app.route("/orgs", orgs);
+app.route("/alarms", alarms);
 
 export const GET = handle(app);
 export const POST = handle(app);

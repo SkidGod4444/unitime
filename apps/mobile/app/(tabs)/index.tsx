@@ -237,13 +237,6 @@ export default function Index() {
           <View className="flex-row flex-wrap justify-between gap-y-4">
             {[
               {
-                icon: "scan-outline",
-                label: "Scan QR",
-                color: "text-blue-600",
-                bg: "bg-blue-50",
-                route: "/qr-scanner",
-              },
-              {
                 icon: "calendar-outline",
                 label: "Timetable",
                 color: "text-purple-600",
@@ -256,13 +249,6 @@ export default function Index() {
                 color: "text-red-600",
                 bg: "bg-red-50",
                 route: "/alarm",
-              },
-              {
-                icon: "chatbox-outline",
-                label: "TTM",
-                color: "text-green-600",
-                bg: "bg-green-50",
-                route: "/tap-to-mark",
               },
             ].map((action, index) => (
               <TouchableOpacity
@@ -364,7 +350,7 @@ export default function Index() {
             <Text className="text-lg font-bold text-dark font-lora">
               Today&apos;s Schedule
             </Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push("/schedule")} className="px-3 py-1 rounded-full border border-primary">
               <Text className="text-primary text-sm font-medium">See All</Text>
             </TouchableOpacity>
           </View>

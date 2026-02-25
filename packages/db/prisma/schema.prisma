@@ -93,6 +93,7 @@ model User {
   attendanceQRSessions AttendanceQRSession[]
   attendances          AttendanceLogs[]
   studentProfile       StudentProfile?
+  alarms               Alarm[]
   coordinates          String?               @map("coordinates") // For geofencing, format: "latitude,longitude"
   expoPushToken        String?               @map("expo_push_token") // For push notifications
   isOnboarded          Boolean               @default(false) @map("is_onboarded") // To track if user has completed onboarding
@@ -227,4 +228,21 @@ model Organization {
   updatedAt      DateTime         @updatedAt @map("updated_at")
 
   @@map("organizations")
+}
+
+model Alarm {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label       String
+  courseCode  String   @map("course_code")
+  color       String   @default("#6366f1")
+  time        String   // "HH:MM" 24-hour
+  days        Int[]    // 0=Sun…6=Sat
+  leadMinutes Int      @default(15) @map("lead_minutes")
+  enabled     Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("alarms")
 }

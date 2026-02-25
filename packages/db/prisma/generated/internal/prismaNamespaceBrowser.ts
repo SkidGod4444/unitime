@@ -59,7 +59,8 @@ export const ModelName = {
   AttendanceQRSession: 'AttendanceQRSession',
   AttendanceLogs: 'AttendanceLogs',
   StudentProfile: 'StudentProfile',
-  Organization: 'Organization'
+  Organization: 'Organization',
+  Alarm: 'Alarm'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -209,6 +210,23 @@ export const OrganizationScalarFieldEnum = {
 } as const
 
 export type OrganizationScalarFieldEnum = (typeof OrganizationScalarFieldEnum)[keyof typeof OrganizationScalarFieldEnum]
+
+
+export const AlarmScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  label: 'label',
+  courseCode: 'courseCode',
+  color: 'color',
+  time: 'time',
+  days: 'days',
+  leadMinutes: 'leadMinutes',
+  enabled: 'enabled',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AlarmScalarFieldEnum = (typeof AlarmScalarFieldEnum)[keyof typeof AlarmScalarFieldEnum]
 
 
 export const SortOrder = {

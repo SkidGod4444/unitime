@@ -1,7 +1,9 @@
+import { Alarm, useAlarms } from "@/contexts/alarms.cntxt";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Modal,
   ScrollView,
@@ -19,84 +21,22 @@ import Animated, {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 // ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-type Alarm = {
-  id: string;
-  label: string;
-  time: string; // "HH:MM" 24-hour
-  days: number[]; // 0 = Sun … 6 = Sat
-  leadMinutes: number; // how many minutes before class
-  enabled: boolean;
-  color: string;
-  courseCode: string;
-};
-
-// ---------------------------------------------------------------------------
-// Mock data – will be replaced by real timetable data from API
-// ---------------------------------------------------------------------------
-
-const SAMPLE_ALARMS: Alarm[] = [
-  {
-    id: "1",
-    label: "Intro to Computer Science",
-    time: "08:45",
-    days: [1, 3, 5],
-    leadMinutes: 15,
-    enabled: true,
-    color: "#6366f1",
-    courseCode: "CS101",
-  },
-  {
-    id: "2",
-    label: "Linear Algebra",
-    time: "10:45",
-    days: [2, 4],
-    leadMinutes: 15,
-    enabled: true,
-    color: "#ec4899",
-    courseCode: "MATH202",
-  },
-  {
-    id: "3",
-    label: "Physics Lab",
-    time: "13:45",
-    days: [1, 5],
-    leadMinutes: 15,
-    enabled: false,
-    color: "#10b981",
-    courseCode: "PHY101",
-  },
-];
-
-// Upcoming classes that haven't had an alarm created yet
-const SUGGESTED_CLASSES = [
-  {
-    id: "s1",
-    courseCode: "ENG201",
-    courseName: "Technical Writing",
-    time: "08:00",
-    days: [1, 3],
-    color: "#f59e0b",
-  },
-  {
-    id: "s2",
-    courseCode: "CS301",
-    courseName: "Data Structures",
-    time: "14:00",
-    days: [2, 4, 5],
-    color: "#3b82f6",
-  },
-];
-
-// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
 const DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 const DAY_FULL = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const LEAD_OPTIONS = [5, 10, 15, 20, 30];
+const COLORS = [
+  "#6366f1",
+  "#ec4899",
+  "#10b981",
+  "#f59e0b",
+  "#3b82f6",
+  "#ef4444",
+  "#8b5cf6",
+  "#14b8a6",
+];
 
 const formatDisplayTime = (
   time: string,
@@ -112,13 +52,10 @@ const formatDays = (days: number[]) => {
   if (days.length === 7) return "Every day";
   if (days.length === 0) return "No days";
   const sorted = [...days].sort((a, b) => a - b);
-  // Weekdays only
   if (sorted.length === 5 && sorted.every((d) => d >= 1 && d <= 5))
     return "Weekdays";
   return sorted.map((d) => DAY_FULL[d]).join(", ");
 };
-
-const generateId = () => Math.random().toString(36).slice(2, 9);
 
 // ---------------------------------------------------------------------------
 // AlarmCard
@@ -212,132 +149,101 @@ const AlarmCard = ({
 };
 
 // ---------------------------------------------------------------------------
-// SuggestionCard
-// ---------------------------------------------------------------------------
-
-const SuggestionCard = ({
-  item,
-  onAdd,
-}: {
-  item: (typeof SUGGESTED_CLASSES)[0];
-  onAdd: (item: (typeof SUGGESTED_CLASSES)[0]) => void;
-}) => {
-  const { h, m, period } = formatDisplayTime(item.time);
-
-  return (
-    <View
-      className="mr-3 bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden"
-      style={{ width: 180 }}
-    >
-      <View style={{ height: 3, backgroundColor: item.color }} />
-      <View className="p-4">
-        <View
-          className="px-2 py-0.5 rounded-full self-start mb-2"
-          style={{ backgroundColor: item.color + "22" }}
-        >
-          <Text
-            className="text-[10px] font-bold uppercase tracking-wider"
-            style={{ color: item.color }}
-          >
-            {item.courseCode}
-          </Text>
-        </View>
-        <Text
-          className="text-base font-bold text-gray-900 mb-0.5"
-          numberOfLines={1}
-        >
-          {item.courseName}
-        </Text>
-        <Text className="text-sm text-gray-500 mb-3">
-          {h}:{m} {period} · {formatDays(item.days)}
-        </Text>
-        <TouchableOpacity
-          onPress={() => onAdd(item)}
-          className="rounded-xl py-1.5 items-center"
-          style={{ backgroundColor: item.color }}
-        >
-          <Text className="text-white text-xs font-bold">+ Add Alarm</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-};
-
-// ---------------------------------------------------------------------------
 // EditModal (Add / Edit alarm)
 // ---------------------------------------------------------------------------
 
-const COLORS = [
-  "#6366f1",
-  "#ec4899",
-  "#10b981",
-  "#f59e0b",
-  "#3b82f6",
-  "#ef4444",
-  "#8b5cf6",
-  "#14b8a6",
-];
+type AlarmDraft = {
+  id?: string;
+  label: string;
+  courseCode: string;
+  color: string;
+  time: string;
+  days: number[];
+  leadMinutes: number;
+  enabled: boolean;
+};
 
 const EditModal = ({
   visible,
-  alarm,
+  draft,
+  saving,
   onSave,
   onClose,
 }: {
   visible: boolean;
-  alarm: Partial<Alarm> | null;
-  onSave: (a: Alarm) => void;
+  draft: AlarmDraft | null;
+  saving: boolean;
+  onSave: (d: AlarmDraft) => void;
   onClose: () => void;
 }) => {
-  const [label, setLabel] = React.useState(alarm?.label ?? "");
-  const [hour, setHour] = React.useState(
-    alarm?.time ? parseInt(alarm.time.split(":")[0], 10) : 8,
-  );
+  const [label, setLabel] = React.useState(draft?.label ?? "");
+
+  // Parse incoming 24h time into 12h + period
+  const parseDraftTime = (time?: string) => {
+    const h24 = time ? parseInt(time.split(":")[0], 10) : 8;
+    return {
+      hour12: h24 === 0 ? 12 : h24 > 12 ? h24 - 12 : h24,
+      period: (h24 >= 12 ? "PM" : "AM") as "AM" | "PM",
+    };
+  };
+
+  const initial = parseDraftTime(draft?.time);
+  const [hour, setHour] = React.useState(initial.hour12);
+  const [period, setPeriod] = React.useState<"AM" | "PM">(initial.period);
   const [minute, setMinute] = React.useState(
-    alarm?.time ? parseInt(alarm.time.split(":")[1], 10) : 0,
+    draft?.time ? parseInt(draft.time.split(":")[1], 10) : 0,
   );
   const [days, setDays] = React.useState<number[]>(
-    alarm?.days ?? [1, 2, 3, 4, 5],
+    draft?.days ?? [1, 2, 3, 4, 5],
   );
   const [leadMinutes, setLeadMinutes] = React.useState(
-    alarm?.leadMinutes ?? 15,
+    draft?.leadMinutes ?? 15,
   );
-  const [color, setColor] = React.useState(alarm?.color ?? COLORS[0]);
+  const [color, setColor] = React.useState(draft?.color ?? COLORS[0]);
 
-  // Reset when alarm prop changes
   React.useEffect(() => {
-    setLabel(alarm?.label ?? "");
-    setHour(alarm?.time ? parseInt(alarm.time.split(":")[0], 10) : 8);
-    setMinute(alarm?.time ? parseInt(alarm.time.split(":")[1], 10) : 0);
-    setDays(alarm?.days ?? [1, 2, 3, 4, 5]);
-    setLeadMinutes(alarm?.leadMinutes ?? 15);
-    setColor(alarm?.color ?? COLORS[0]);
-  }, [alarm]);
+    setLabel(draft?.label ?? "");
+    const p = parseDraftTime(draft?.time);
+    setHour(p.hour12);
+    setPeriod(p.period);
+    setMinute(draft?.time ? parseInt(draft.time.split(":")[1], 10) : 0);
+    setDays(draft?.days ?? [1, 2, 3, 4, 5]);
+    setLeadMinutes(draft?.leadMinutes ?? 15);
+    setColor(draft?.color ?? COLORS[0]);
+  }, [draft]);
 
   const toggleDay = (d: number) =>
     setDays((prev) =>
       prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d],
     );
 
-  const adjustHour = (delta: number) => setHour((h) => (h + delta + 24) % 24);
-
+  // 12-hour cycle: 1 → 2 → … → 12 → 1
+  const adjustHour = (delta: number) =>
+    setHour((h) => ((h - 1 + delta + 12) % 12) + 1);
   const adjustMinute = (delta: number) =>
     setMinute((m) => (m + delta + 60) % 60);
+  const togglePeriod = () =>
+    setPeriod((p) => (p === "AM" ? "PM" : "AM"));
 
   const handleSave = () => {
     if (!label.trim()) {
       Alert.alert("Label required", "Please enter a name for this alarm.");
       return;
     }
+    // Convert 12h → 24h for storage
+    const h24 =
+      period === "AM"
+        ? hour === 12 ? 0 : hour
+        : hour === 12 ? 12 : hour + 12;
     onSave({
-      id: alarm?.id ?? generateId(),
+      id: draft?.id,
       label: label.trim(),
-      time: `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`,
+      time: `${String(h24).padStart(2, "0")}:${String(minute).padStart(2, "0")}`,
       days,
       leadMinutes,
-      enabled: alarm?.enabled ?? true,
+      enabled: draft?.enabled ?? true,
       color,
-      courseCode: alarm?.courseCode ?? "CUSTOM",
+      courseCode: draft?.courseCode ?? "CUSTOM",
     });
   };
 
@@ -368,7 +274,7 @@ const EditModal = ({
             <View className="px-6 pt-2 pb-4">
               {/* Title */}
               <Text className="text-2xl font-bold text-gray-900 mb-6">
-                {alarm?.id ? "Edit Alarm" : "New Alarm"}
+                {draft?.id ? "Edit Alarm" : "New Alarm"}
               </Text>
 
               {/* Time picker */}
@@ -416,9 +322,17 @@ const EditModal = ({
                     </TouchableOpacity>
                   </View>
                 </View>
-                <Text className="text-gray-400 text-sm mt-2">
-                  {hour >= 12 ? "PM" : "AM"} · 24-hour
-                </Text>
+
+                {/* AM / PM toggle */}
+                <TouchableOpacity
+                  onPress={togglePeriod}
+                  className="mt-4 px-8 py-2.5 rounded-2xl border-2"
+                  style={{ borderColor: color }}
+                >
+                  <Text className="text-2xl font-bold" style={{ color }}>
+                    {period}
+                  </Text>
+                </TouchableOpacity>
               </View>
 
               {/* Label */}
@@ -509,12 +423,17 @@ const EditModal = ({
               {/* Save */}
               <TouchableOpacity
                 onPress={handleSave}
+                disabled={saving}
                 className="w-full py-4 rounded-2xl items-center"
-                style={{ backgroundColor: color }}
+                style={{ backgroundColor: color, opacity: saving ? 0.7 : 1 }}
               >
-                <Text className="text-white font-bold text-base">
-                  Save Alarm
-                </Text>
+                {saving ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text className="text-white font-bold text-base">
+                    Save Alarm
+                  </Text>
+                )}
               </TouchableOpacity>
             </View>
           </ScrollView>
@@ -530,50 +449,71 @@ const EditModal = ({
 
 export default function AlarmScreen() {
   const router = useRouter();
-  const [alarms, setAlarms] = useState<Alarm[]>(SAMPLE_ALARMS);
-  const [editTarget, setEditTarget] = useState<Partial<Alarm> | null>(null);
+  const { alarms, loading, createAlarm, updateAlarm, deleteAlarm, toggleAlarm } =
+    useAlarms();
+  const [draft, setDraft] = useState<AlarmDraft | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const activeCount = alarms.filter((a) => a.enabled).length;
 
-  const handleToggle = useCallback((id: string) => {
-    setAlarms((prev) =>
-      prev.map((a) => (a.id === id ? { ...a, enabled: !a.enabled } : a)),
-    );
-  }, []);
+  const handleToggle = useCallback(
+    (id: string) => {
+      toggleAlarm(id);
+    },
+    [toggleAlarm],
+  );
 
   const handleEdit = (alarm: Alarm) => {
-    setEditTarget(alarm);
+    setDraft({
+      id: alarm.id,
+      label: alarm.label,
+      courseCode: alarm.courseCode,
+      color: alarm.color,
+      time: alarm.time,
+      days: alarm.days,
+      leadMinutes: alarm.leadMinutes,
+      enabled: alarm.enabled,
+    });
     setModalVisible(true);
   };
 
-  const handleDelete = useCallback((id: string) => {
-    setAlarms((prev) => prev.filter((a) => a.id !== id));
-  }, []);
+  const handleDelete = useCallback(
+    (id: string) => {
+      deleteAlarm(id);
+    },
+    [deleteAlarm],
+  );
 
-  const handleSave = (alarm: Alarm) => {
-    setAlarms((prev) => {
-      const exists = prev.find((a) => a.id === alarm.id);
-      if (exists) return prev.map((a) => (a.id === alarm.id ? alarm : a));
-      return [alarm, ...prev];
-    });
+  const handleSave = async (d: AlarmDraft) => {
+    setSaving(true);
+    if (d.id) {
+      await updateAlarm(d.id, {
+        label: d.label,
+        courseCode: d.courseCode,
+        color: d.color,
+        time: d.time,
+        days: d.days,
+        leadMinutes: d.leadMinutes,
+        enabled: d.enabled,
+      });
+    } else {
+      await createAlarm({
+        label: d.label,
+        courseCode: d.courseCode,
+        color: d.color,
+        time: d.time,
+        days: d.days,
+        leadMinutes: d.leadMinutes,
+        enabled: d.enabled,
+      });
+    }
+    setSaving(false);
     setModalVisible(false);
   };
 
-  const handleAddFromSuggestion = (item: (typeof SUGGESTED_CLASSES)[0]) => {
-    setEditTarget({
-      label: item.courseName,
-      time: `${String(parseInt(item.time.split(":")[0], 10) - 0).padStart(2, "0")}:${item.time.split(":")[1]}`,
-      days: item.days,
-      color: item.color,
-      courseCode: item.courseCode,
-      leadMinutes: 15,
-    });
-    setModalVisible(true);
-  };
-
   const handleAddNew = () => {
-    setEditTarget(null);
+    setDraft(null);
     setModalVisible(true);
   };
 
@@ -592,9 +532,7 @@ export default function AlarmScreen() {
             <Text className="text-xs font-medium text-gray-400 uppercase tracking-wider">
               Class Alarms
             </Text>
-            <Text className="text-2xl font-bold text-gray-900">
-              Alarms
-            </Text>
+            <Text className="text-2xl font-bold text-gray-900">Alarms</Text>
           </View>
         </View>
 
@@ -643,36 +581,6 @@ export default function AlarmScreen() {
           </View>
         </Animated.View>
 
-        {/* ── Suggestions from timetable ── */}
-        {SUGGESTED_CLASSES.length > 0 && (
-          <View>
-            <View className="flex-row items-center justify-between mb-3">
-              <Text className="text-base font-bold text-gray-900">
-                From your timetable
-              </Text>
-              <View className="flex-row items-center gap-1 bg-amber-50 px-2 py-0.5 rounded-full">
-                <Ionicons name="bulb-outline" size={12} color="#f59e0b" />
-                <Text className="text-amber-600 text-xs font-semibold">
-                  Suggested
-                </Text>
-              </View>
-            </View>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingRight: 4 }}
-            >
-              {SUGGESTED_CLASSES.map((item) => (
-                <SuggestionCard
-                  key={item.id}
-                  item={item}
-                  onAdd={handleAddFromSuggestion}
-                />
-              ))}
-            </ScrollView>
-          </View>
-        )}
-
         {/* ── Alarm list ── */}
         <View>
           <View className="flex-row items-center justify-between mb-3">
@@ -682,7 +590,14 @@ export default function AlarmScreen() {
             <Text className="text-xs text-gray-400">Long-press to delete</Text>
           </View>
 
-          {alarms.length === 0 ? (
+          {loading ? (
+            <View className="items-center py-16 bg-white rounded-3xl border border-gray-100">
+              <ActivityIndicator size="large" color="#6366f1" />
+              <Text className="text-gray-400 text-sm mt-3">
+                Loading alarms…
+              </Text>
+            </View>
+          ) : alarms.length === 0 ? (
             <Animated.View
               entering={FadeInRight.springify()}
               className="items-center py-16 bg-white rounded-3xl border border-gray-100"
@@ -692,7 +607,7 @@ export default function AlarmScreen() {
                 No alarms yet
               </Text>
               <Text className="text-gray-300 text-sm mt-1 text-center px-10">
-                Tap + to create an alarm or add one from your timetable
+                Tap + to create your first class alarm
               </Text>
             </Animated.View>
           ) : (
@@ -723,9 +638,10 @@ export default function AlarmScreen() {
               How class alarms work
             </Text>
             <Text className="text-indigo-500 text-xs leading-relaxed">
-              Alarms ring at the set lead-time before your class starts. Slide
-              to dismiss the alarm screen to mark yourself as notified. Only
-              alarms for today&apos;s day of the week will ring.
+              Alarms send push notifications at the set lead-time before your
+              class starts. Tap the notification to open the alarm screen. Slide
+              to dismiss the alarm. Only enabled alarms on today&apos;s day of
+              the week will ring.
             </Text>
           </View>
         </View>
@@ -734,7 +650,8 @@ export default function AlarmScreen() {
       {/* ── Edit / Add Modal ── */}
       <EditModal
         visible={modalVisible}
-        alarm={editTarget}
+        draft={draft}
+        saving={saving}
         onSave={handleSave}
         onClose={() => setModalVisible(false)}
       />
