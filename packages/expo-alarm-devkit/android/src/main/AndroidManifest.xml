@@ -1,0 +1,41 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- All permissions injected by app.plugin.js at build time via withAndroidManifest -->
+    <!-- Listed here for local library builds / standalone use -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application>
+        <!-- Woken by AlarmManager when an alarm fires -->
+        <receiver
+            android:name="expo.modules.alarmkit.AlarmReceiver"
+            android:enabled="true"
+            android:exported="true" />
+
+        <!-- Re-schedules persisted alarms after device reboot -->
+        <receiver
+            android:name="expo.modules.alarmkit.BootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <!--
+          Full-screen transparent alarm activity.
+          showWhenLocked + turnScreenOn make it appear over the lock screen.
+        -->
+        <activity
+            android:name="expo.modules.alarmkit.AlarmActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:exported="false" />
+    </application>
+</manifest>

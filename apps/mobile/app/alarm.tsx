@@ -1,22 +1,22 @@
-import { Alarm, useAlarms } from "@/contexts/alarms.cntxt";
+import { Alarm, scheduleDemoAlarmAsync, useAlarms } from "@/contexts/alarms.cntxt";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Modal,
-  ScrollView,
-  Switch,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Modal,
+    ScrollView,
+    Switch,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import Animated, {
-  FadeInDown,
-  FadeInRight,
-  Layout,
+    FadeInDown,
+    FadeInRight,
+    Layout,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -577,6 +577,19 @@ export default function AlarmScreen() {
             >
               <Ionicons name="play-circle-outline" size={14} color="#ffffff" />
               <Text className="text-white text-xs font-semibold">Preview</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={async () => {
+                await scheduleDemoAlarmAsync();
+                Alert.alert(
+                  "Demo Alarm Set ✅",
+                  "A test alarm will ring in 30 seconds. Lock your screen or background the app to hear it.",
+                );
+              }}
+              className="flex-row items-center gap-1 bg-yellow-400/90 px-3 py-1.5 rounded-full"
+            >
+              <Ionicons name="timer-outline" size={14} color="#1a1a1a" />
+              <Text className="text-gray-900 text-xs font-semibold">Test (30s)</Text>
             </TouchableOpacity>
           </View>
         </Animated.View>

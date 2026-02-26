@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "APP_VARIANT=development expo start",
+    "run:build:dev": "bunx eas-cli@latest workflow:run create-dev-builds.yml",
     "build:prod:i": "eas build --platform ios --profile production",
     "build:prod:a": "eas build --platform android --profile production",
     "build:preview:i": "eas build --platform ios --profile preview",
@@ -28,9 +29,8 @@
     "@react-navigation/native": "^7.1.28",
     "@unitime/db": "workspace:*",
     "@unitime/types": "workspace:*",
-    "@vall370/expo-alarm": "^0.1.5",
     "expo": "~54.0.33",
-    "expo-alarm": "^0.2.2",
+    "expo-alarm-devkit": "^1.0.1",
     "expo-application": "^7.0.8",
     "expo-audio": "~1.1.1",
     "expo-av": "~16.0.8",

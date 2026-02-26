@@ -1,7 +1,8 @@
 {
     "cli": {
       "version": ">= 16.3.2",
-      "appVersionSource": "remote"
+      "appVersionSource": "remote",
+      "requireCommit": false
     },
     "build": {
       "development": {
@@ -17,8 +18,6 @@
         },
         "env": {
           "APP_VARIANT": "development"
-        //   "GOOGLE_API_KEY": "AIzaSyCal7uTDlhyNFTQf_KK4hB5VZrhYQC82XA",
-        //   "EXPO_PUBLIC_GEOAPIFY_API_KEY": "adc6ac87d4c34e22b1878e19acf6ce76"
         }
       },
       "preview": {
