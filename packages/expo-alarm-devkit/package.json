@@ -8,7 +8,7 @@
     "build": "expo-module build",
     "clean": "expo-module clean",
     "lint": "expo-module lint",
-    "prepare": "expo-module prepare"
+    "prepare": "expo-module prepare || true"
   },
   "keywords": [
     "expo",
