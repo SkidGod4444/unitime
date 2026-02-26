@@ -2,15 +2,16 @@ import { Ionicons } from "@expo/vector-icons";
 import { Stack } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import {
-  Alert,
-  FlatList,
-  Modal,
-  Pressable,
-  Text,
-  TouchableOpacity,
-  View,
+    Alert,
+    FlatList,
+    Modal,
+    Pressable,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAttendanceStore } from "../lib/store";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -30,113 +31,7 @@ type SessionRecord = {
   students: Student[];
 };
 
-// ─── Dummy Data ───────────────────────────────────────────────────────────────
-
-const CLASSES = [
-  { id: "all", name: "All Classes", sec: "" },
-  { id: "1", name: "B.Tech CSE", sec: "A" },
-  { id: "2", name: "B.Tech CSE", sec: "B" },
-  { id: "3", name: "B.Tech IT", sec: "A" },
-];
-
-const daysAgo = (n: number, hour = 10, minute = 0) => {
-  const d = new Date();
-  d.setDate(d.getDate() - n);
-  d.setHours(hour, minute, 0, 0);
-  return d;
-};
-
-const makeStudents = (
-  prefix: string,
-  count: number,
-  presentUpTo: number,
-): Student[] =>
-  Array.from({ length: count }, (_, i) => ({
-    id: `${prefix}-${i + 1}`,
-    name: [
-      "Alice Smith",
-      "Bob Johnson",
-      "Charlie Brown",
-      "Diana Prince",
-      "Evan Davis",
-      "Fiona Gallagher",
-      "George Miller",
-      "Hannah White",
-      "Ivan Cruz",
-      "Julia Nair",
-    ][i % 10],
-    rollNo: `${prefix}${String(i + 1).padStart(3, "0")}`,
-    status: (i < presentUpTo ? "present" : "absent") as Status,
-  }));
-
-const SESSIONS: SessionRecord[] = [
-  {
-    id: "s1",
-    courseCode: "CS201",
-    courseName: "Data Structures",
-    classId: "1",
-    className: "B.Tech CSE",
-    section: "A",
-    date: daysAgo(0, 9, 0),
-    durationMin: 10,
-    students: makeStudents("CS20", 12, 10),
-  },
-  {
-    id: "s2",
-    courseCode: "CS301",
-    courseName: "Operating Systems",
-    classId: "2",
-    className: "B.Tech CSE",
-    section: "B",
-    date: daysAgo(0, 11, 30),
-    durationMin: 5,
-    students: makeStudents("CS30", 10, 7),
-  },
-  {
-    id: "s3",
-    courseCode: "CS401",
-    courseName: "Computer Networks",
-    classId: "3",
-    className: "B.Tech IT",
-    section: "A",
-    date: daysAgo(1, 14, 0),
-    durationMin: 15,
-    students: makeStudents("IT40", 8, 8),
-  },
-  {
-    id: "s4",
-    courseCode: "CS201",
-    courseName: "Data Structures",
-    classId: "1",
-    className: "B.Tech CSE",
-    section: "A",
-    date: daysAgo(1, 9, 0),
-    durationMin: 10,
-    students: makeStudents("CS20", 12, 9),
-  },
-  {
-    id: "s5",
-    courseCode: "CS401",
-    courseName: "Computer Networks",
-    classId: "2",
-    className: "B.Tech CSE",
-    section: "B",
-    date: daysAgo(2, 10, 0),
-    durationMin: 5,
-    students: makeStudents("CS40", 10, 8),
-  },
-  {
-    id: "s6",
-    courseCode: "CS301",
-    courseName: "Operating Systems",
-    classId: "3",
-    className: "B.Tech IT",
-    section: "A",
-    date: daysAgo(3, 15, 30),
-    durationMin: 15,
-    students: makeStudents("IT30", 9, 9),
-  },
-];
+// ─── Dummy Data (Removed in favor of API) ───────────────────────────────────────────────────────────────
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -472,21 +367,45 @@ SessionCard.displayName = "SessionCard";
 export default function AttendanceSessionHistory() {
   const [selectedClassId, setSelectedClassId] = useState("all");
   const [isDropdownOpen, setDropdownOpen] = useState(false);
+  const { sessions: apiSessions, updateSessionAttendance } = useAttendanceStore();
 
-  // sessions state so edits reflect back on cards
-  const [sessions, setSessions] = useState<SessionRecord[]>(SESSIONS);
+  // Maps backend session to UI format
+  const mappedSessions = useMemo(() => {
+    return apiSessions.map((s: any) => ({
+      id: s.id,
+      courseCode: s.course?.code || "UNK",
+      courseName: s.course?.name || "Unknown Course",
+      classId: "unknown", // To be replaced when Orgs/Schools are integrated
+      className: "Course Class",
+      section: "N/A",
+      date: new Date(s.createdAt),
+      durationMin: Math.round((new Date(s.endTime).getTime() - new Date(s.startTime).getTime()) / 60000),
+      students: s.logs.map((log: any) => ({
+        id: log.studentId,
+        name: log.student?.name || "Unknown Student",
+        rollNo: log.studentId.substring(0, 6),
+        status: (log.status || "present").toLowerCase() as Status
+      }))
+    }));
+  }, [apiSessions]);
+
+  const CLASSES = [
+    { id: "all", name: "All Classes", sec: "" },
+    // Derived dynamically if needed
+  ];
+
+  const selectedClass = CLASSES.find((c) => c.id === selectedClassId) || CLASSES[0];
+
   const [editingSession, setEditingSession] = useState<SessionRecord | null>(
     null,
   );
 
-  const selectedClass = CLASSES.find((c) => c.id === selectedClassId)!;
-
   const filtered = useMemo(
     () =>
       selectedClassId === "all"
-        ? sessions
-        : sessions.filter((s) => s.classId === selectedClassId),
-    [selectedClassId, sessions],
+        ? mappedSessions
+        : mappedSessions.filter((s) => s.classId === selectedClassId),
+    [selectedClassId, mappedSessions],
   );
 
   const handleEditPress = useCallback((session: SessionRecord) => {
@@ -513,14 +432,15 @@ export default function AttendanceSessionHistory() {
   }, []);
 
   const handleSaveEdits = useCallback(
-    (sessionId: string, updatedStudents: Student[]) => {
-      setSessions((prev) =>
-        prev.map((s) =>
-          s.id === sessionId ? { ...s, students: updatedStudents } : s,
-        ),
-      );
+    async (sessionId: string, updatedStudents: Student[]) => {
+      // Map to backend format { studentId, status }
+      const updates = updatedStudents.map(s => ({
+        id: s.id, // Backend currently accepts { id, status } per `attendance.ts` api interface
+        status: s.status ? s.status : null 
+      }));
+      await updateSessionAttendance(sessionId, updates);
     },
-    [],
+    [updateSessionAttendance],
   );
 
   return (

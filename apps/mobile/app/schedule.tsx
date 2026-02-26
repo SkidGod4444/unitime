@@ -516,12 +516,6 @@ export default function ScheduleScreen() {
             <ClassCard key={session.id} session={session} index={index} />
           ))
         )}
-
-        {/* Start of Empty/End State */}
-        <View className="items-center py-10 opacity-50">
-          <Ionicons name="bed-outline" size={48} color="#9ca3af" />
-          <Text className="text-gray-400 mt-2">No more classes</Text>
-        </View>
       </ScrollView>
 
       {/* Calendar Modal Overlay */}

@@ -69,6 +69,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (data.user) {
         return data.user as UserT;
       } else {
+        // const res = await fetch(`${origin}/users`, { 
+        // create user TODO
         return null;
       }
     } catch (err) {

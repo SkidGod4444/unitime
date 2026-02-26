@@ -9,9 +9,11 @@ import { useEffect, useState } from "react";
 import {
     Alert,
     Image,
+    Modal,
     RefreshControl,
     ScrollView,
     Text,
+    TextInput,
     TouchableOpacity,
     View,
 } from "react-native";
@@ -23,6 +25,8 @@ export default function Index() {
   const router = useRouter();
   const { getItem, setItem } = useLocalStore();
   const [expanded, setExpanded] = useState(true);
+  const [feedbackVisible, setFeedbackVisible] = useState(false);
+  const [feedbackText, setFeedbackText] = useState("");
   const { loggedInUser } = useAuth();
   const { refresh, refreshing } = useRefresh();
 
@@ -156,12 +160,19 @@ export default function Index() {
               </Text>
             </View>
           </TouchableOpacity>
-          {loggedInUser && loggedInUser.role === "ADMIN" && (
+          {loggedInUser && loggedInUser.role === "ADMIN" ? (
             <TouchableOpacity
               onPress={handleAdminPress}
               className="bg-white p-2.5 rounded-full shadow-sm border border-gray-100"
             >
               <Ionicons name="settings-outline" size={24} color="#18181B" />
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              onPress={() => setFeedbackVisible(true)}
+              className="bg-white p-2.5 rounded-full shadow-sm border border-gray-100"
+            >
+              <Ionicons name="heart-outline" size={24} color="#F33A6A" />
             </TouchableOpacity>
           )}
         </View>
@@ -412,6 +423,87 @@ export default function Index() {
           </View>
         </View>
       </ScrollView>
+
+      {/* Feedback Modal */}
+      <Modal
+        visible={feedbackVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setFeedbackVisible(false)}
+        statusBarTranslucent
+      >
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={() => setFeedbackVisible(false)}
+          className="flex-1 bg-black/75 justify-end sm:justify-center"
+        >
+          <TouchableOpacity activeOpacity={1} onPress={() => {}}>
+            <View className="bg-white w-full max-w-[420px] self-center rounded-t-[32px] sm:rounded-[24px] sm:m-6 p-8 pb-10 items-center shadow-2xl">
+              {/* Handle bar */}
+              <View className="w-12 h-1.5 bg-gray-200 rounded-full mb-6 sm:hidden" />
+
+              {/* Icon */}
+              <View className="h-20 w-20 bg-pink-50 rounded-full items-center justify-center mb-5 border-[6px] border-pink-100">
+                <Ionicons name="heart" size={36} color="#F33A6A" />
+              </View>
+
+              {/* Title */}
+              <Text className="text-2xl font-bold text-gray-900 font-lora text-center mb-2">
+                Send Feedback
+              </Text>
+
+              {/* Subtitle */}
+              <Text className="text-gray-500 text-center mb-5 leading-6 px-2">
+                We&apos;d love to hear from you! Share your thoughts to help us improve.
+              </Text>
+
+              {/* Text Input */}
+              <View className="w-full mb-5">
+                <TextInput
+                  className="bg-gray-50 border border-gray-200 rounded-2xl p-4 text-gray-900 min-h-[120px] text-base"
+                  placeholder="Tell us what you think..."
+                  placeholderTextColor="#9CA3AF"
+                  multiline
+                  textAlignVertical="top"
+                  value={feedbackText}
+                  onChangeText={setFeedbackText}
+                />
+              </View>
+
+              {/* Action buttons */}
+              <View className="w-full gap-3">
+                <TouchableOpacity
+                  activeOpacity={0.85}
+                  className="bg-blue-600 w-full py-3.5 rounded-2xl flex-row items-center justify-center shadow-lg shadow-blue-200 active:scale-[0.98] gap-2"
+                  onPress={() => {
+                    Alert.alert("Thank You!", "Your feedback has been submitted.");
+                    setFeedbackVisible(false);
+                    setFeedbackText("");
+                  }}
+                >
+                  {/* <Ionicons name="send" size={16} color="#fff" /> */}
+                  <Text numberOfLines={1} className="text-white font-bold text-base text-center flex-shrink">
+                    Submit Feedback
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  activeOpacity={0.85}
+                  className="bg-gray-100 w-full py-3.5 rounded-2xl items-center justify-center active:scale-[0.98]"
+                  onPress={() => {
+                    setFeedbackVisible(false);
+                    setFeedbackText("");
+                  }}
+                >
+                  <Text numberOfLines={1} className="text-gray-600 font-bold text-base text-center">
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 }

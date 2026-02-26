@@ -25,6 +25,7 @@ export const useThemeStore = create<ThemeState>()(
 type UsersState = {
   users: UserT[];
   addUser: (user: UserT) => void;
+  updateUser: (id: string, updates: Partial<UserT>) => void;
   removeUser: (user_id: string) => void;
   setUsers: (users: UserT[]) => void;
 };
@@ -35,6 +36,12 @@ export const useUsersStore = create<UsersState>()(
       users: [],
       setUsers: (users) => set({ users }),
       addUser: (user) => set((state) => ({ users: [...state.users, user] })),
+      updateUser: (id, updates) =>
+        set((state) => ({
+          users: state.users.map((user) =>
+            user.id === id ? { ...user, ...updates } : user,
+          ),
+        })),
       removeUser: (userId) =>
         set((state) => ({
           users: state.users.filter((user) => user.id !== userId),

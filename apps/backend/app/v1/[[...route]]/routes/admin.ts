@@ -34,4 +34,34 @@ admin.patch("/users/:id/role", async (c) => {
   }
 });
 
+admin.patch("/users/:id/status", async (c) => {
+  const id = c.req.param("id");
+  let body: { status: "ACTIVE" | "INACTIVE" };
+  
+  try {
+    body = await c.req.json();
+    if (!body.status) {
+      return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT);
+    }
+  } catch {
+    return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT);
+  }
+
+  try {
+    const user = await prisma.user.update({
+      where: { id },
+      data: { status: body.status },
+    });
+    
+    return c.json({
+      success: true,
+      status_code: 200,
+      user,
+    });
+  } catch (error) {
+    console.error("Error updating user status:", error);
+    return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
+  }
+});
+
 export default admin;

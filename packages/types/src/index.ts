@@ -27,6 +27,7 @@ type UserT = {
   coordinates?: string | null;
   expoPushToken?: string | null;
   isOnboarded?: boolean | null;
+  status?: "ACTIVE" | "INACTIVE" | null;
 };
 
 type ProfileT = {
@@ -55,4 +56,5 @@ type OrgT = {
   updatedAt: Date;
 };
 
-export type { TeamT, Theme, UserT, ProfileT, OrgT };
+export type { OrgT, ProfileT, TeamT, Theme, UserT };
+
