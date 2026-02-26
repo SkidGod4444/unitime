@@ -104,4 +104,23 @@ courses.put("/:id", async (c) => {
   );
 });
 
+courses.delete("/:id", async (c) => {
+  const id = c.req.param("id");
+  try {
+    await prisma.courses.delete({
+      where: { id },
+    });
+    return c.json(
+      {
+        success: true,
+        status_code: 200,
+        message: "Course deleted successfully",
+      },
+      200,
+    );
+  } catch {
+    return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
+  }
+});
+
 export default courses;

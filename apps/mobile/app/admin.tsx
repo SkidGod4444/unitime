@@ -565,20 +565,40 @@ function AddCourseModal({
   visible,
   onClose,
   onAdd,
+  initialData,
 }: {
   visible: boolean;
   onClose: () => void;
   onAdd: (data: any) => void;
+  initialData?: any;
 }) {
   const { users } = useUsersStore();
   const professors = users.filter((u) => u.role === "PROFESSOR");
 
-  const [name, setName] = useState("");
-  const [code, setCode] = useState("");
-  const [description, setDescription] = useState("");
-  const [creditStr, setCreditStr] = useState("");
-  const [classType, setClassType] = useState("LECTURE");
-  const [professorId, setProfessorId] = useState("");
+  const [name, setName] = useState(initialData?.name || "");
+  const [code, setCode] = useState(initialData?.code || "");
+  const [description, setDescription] = useState(initialData?.description || "");
+  const [creditStr, setCreditStr] = useState(initialData?.credit?.toString() || "");
+  const [classType, setClassType] = useState(initialData?.classType || "LECTURE");
+  const [professorId, setProfessorId] = useState(initialData?.professorId || "");
+
+  React.useEffect(() => {
+    if (initialData) {
+      setName(initialData.name);
+      setCode(initialData.code);
+      setDescription(initialData.description || "");
+      setCreditStr(initialData.credit?.toString() || "");
+      setClassType(initialData.classType || "LECTURE");
+      setProfessorId(initialData.professorId || "");
+    } else {
+      setName("");
+      setCode("");
+      setDescription("");
+      setCreditStr("");
+      setClassType("LECTURE");
+      setProfessorId("");
+    }
+  }, [initialData, visible]);
 
   const handleSave = () => {
     const cred = parseFloat(creditStr);
@@ -587,7 +607,6 @@ function AddCourseModal({
       return;
     }
     onAdd({ name, code, description, credit: cred, classType, professorId });
-    setName(""); setCode(""); setDescription(""); setCreditStr(""); setClassType("LECTURE"); setProfessorId("");
     onClose();
   };
 
@@ -598,7 +617,7 @@ function AddCourseModal({
           <TouchableOpacity onPress={onClose} className="p-1">
             <Ionicons name="close" size={22} color="#6b7280" />
           </TouchableOpacity>
-          <Text className="text-base font-bold text-gray-900">Add Course</Text>
+          <Text className="text-base font-bold text-gray-900">{initialData ? "Edit Course" : "Add Course"}</Text>
           <TouchableOpacity onPress={handleSave} className="px-4 py-1.5 rounded-lg bg-indigo-600">
             <Text className="font-bold text-sm text-white">Save</Text>
           </TouchableOpacity>
@@ -757,7 +776,19 @@ function ProfessorsTab() {
 // ─── Courses Tab ──────────────────────────────────────────────────────────────
 
 function CoursesTab() {
-  const { courses } = useCoursesStore();
+  const { courses, deleteCourse } = useCoursesStore();
+  const [editingCourse, setEditingCourse] = useState<any>(null);
+  const { updateCourse } = useCoursesStore();
+
+  const handleEditSave = async (courseData: any) => {
+    try {
+      await updateCourse(editingCourse.id, courseData);
+      setEditingCourse(null);
+      Alert.alert("Success", "Course updated successfully!");
+    } catch (e: any) {
+      Alert.alert("Error", e.message || "Failed to update course");
+    }
+  };
 
   const handleDelete = (c: any) => {
     Alert.alert("Delete Course", `Delete ${c.code} – ${c.name}?`, [
@@ -765,64 +796,72 @@ function CoursesTab() {
       {
         text: "Delete",
         style: "destructive",
-        // Needs API integration to actually delete it
-        onPress: () => {
-           Alert.alert("Notice", "Feature not implemented for admin dashboard yet");
+        onPress: async () => {
+           try {
+             await deleteCourse(c.id);
+             Alert.alert("Success", "Course deleted successfully!");
+           } catch (e: any) {
+             Alert.alert("Error", e.message || "Failed to delete course");
+           }
         },
       },
     ]);
   };
 
   return (
-    <FlatList
-      data={courses}
-      keyExtractor={(c) => c.id}
-      scrollEnabled={false}
-      renderItem={({ item: course }) => (
-        <View className="bg-white rounded-2xl p-4 mb-3 border border-gray-100 shadow-sm">
-          <View className="flex-row items-center justify-between">
-            <View className="flex-1">
-              <View className="flex-row items-center gap-x-2">
-                <View className="bg-indigo-600 px-2 py-0.5 rounded-md">
-                  <Text className="text-white text-xs font-bold">
-                    {course.code}
+    <>
+      <FlatList
+        data={courses}
+        keyExtractor={(c) => c.id}
+        scrollEnabled={false}
+        renderItem={({ item: course }) => (
+          <View className="bg-white rounded-2xl p-4 mb-3 border border-gray-100 shadow-sm">
+            <View className="flex-row items-center justify-between">
+              <View className="flex-1">
+                <View className="flex-row items-center gap-x-2">
+                  <View className="bg-indigo-600 px-2 py-0.5 rounded-md">
+                    <Text className="text-white text-xs font-bold">
+                      {course.code}
+                    </Text>
+                  </View>
+                  <Text
+                    className="text-base font-bold text-gray-900 flex-1"
+                    numberOfLines={1}
+                  >
+                    {course.name}
                   </Text>
                 </View>
-                <Text
-                  className="text-base font-bold text-gray-900 flex-1"
-                  numberOfLines={1}
-                >
-                  {course.name}
-                </Text>
+                <View className="flex-row gap-x-3 mt-1.5">
+                  <View className="flex-row items-center gap-x-1">
+                    <Ionicons name="star-outline" size={13} color="#6b7280" />
+                    <Text className="text-xs text-gray-500">
+                      {course.credit || "N/A"} credits
+                    </Text>
+                  </View>
+                  <View className="flex-row items-center gap-x-1">
+                    <Ionicons name="person-outline" size={13} color="#6b7280" />
+                    <Text className="text-xs text-gray-500">
+                      Faculty ID: {course.professorId}
+                    </Text>
+                  </View>
+                </View>
               </View>
-              <View className="flex-row gap-x-3 mt-1.5">
-                <View className="flex-row items-center gap-x-1">
-                  <Ionicons name="star-outline" size={13} color="#6b7280" />
-                  <Text className="text-xs text-gray-500">
-                    {course.credit || "N/A"} credits
-                  </Text>
-                </View>
-                <View className="flex-row items-center gap-x-1">
-                  <Ionicons name="person-outline" size={13} color="#6b7280" />
-                  <Text className="text-xs text-gray-500">
-                    Faculty ID: {course.professorId}
-                  </Text>
-                </View>
-              </View>
+              <RowActions
+                onEdit={() => setEditingCourse(course)}
+                onDelete={() => handleDelete(course)}
+              />
             </View>
-            <RowActions
-              onEdit={() =>
-                Alert.alert(
-                  "Edit Course",
-                  `Editing ${course.code} – ${course.name}`,
-                )
-              }
-              onDelete={() => handleDelete(course)}
-            />
           </View>
-        </View>
-      )}
-    />
+        )}
+      />
+      {/* Edit Course Modal */}
+      <AddCourseModal
+        visible={!!editingCourse}
+        onClose={() => setEditingCourse(null)}
+        onAdd={handleEditSave}
+        initialData={editingCourse}
+      />
+    </>
   );
 }
 
