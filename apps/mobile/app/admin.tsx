@@ -14,6 +14,7 @@ import {
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuth } from "../contexts/auth.cntxt";
 import { useRefresh } from "../hooks/use-refresh";
 import { useCoursesStore, useOrgsStore, useProfilesStore, useUsersStore } from "../lib/store";
 
@@ -558,6 +559,91 @@ function AddUserModal({
   );
 }
 
+// ─── Add Course Modal ────────────────────────────────────────────────────────
+
+function AddCourseModal({
+  visible,
+  onClose,
+  onAdd,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  onAdd: (data: any) => void;
+}) {
+  const { users } = useUsersStore();
+  const professors = users.filter((u) => u.role === "PROFESSOR");
+
+  const [name, setName] = useState("");
+  const [code, setCode] = useState("");
+  const [description, setDescription] = useState("");
+  const [creditStr, setCreditStr] = useState("");
+  const [classType, setClassType] = useState("LECTURE");
+  const [professorId, setProfessorId] = useState("");
+
+  const handleSave = () => {
+    const cred = parseFloat(creditStr);
+    if (!name || !code || isNaN(cred) || !professorId) {
+      Alert.alert("Error", "Please fill all required fields correctly.");
+      return;
+    }
+    onAdd({ name, code, description, credit: cred, classType, professorId });
+    setName(""); setCode(""); setDescription(""); setCreditStr(""); setClassType("LECTURE"); setProfessorId("");
+    onClose();
+  };
+
+  return (
+    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
+      <SafeAreaView className="flex-1 bg-gray-50">
+        <View className="flex-row items-center justify-between px-4 py-3 bg-white border-b border-gray-100">
+          <TouchableOpacity onPress={onClose} className="p-1">
+            <Ionicons name="close" size={22} color="#6b7280" />
+          </TouchableOpacity>
+          <Text className="text-base font-bold text-gray-900">Add Course</Text>
+          <TouchableOpacity onPress={handleSave} className="px-4 py-1.5 rounded-lg bg-indigo-600">
+            <Text className="font-bold text-sm text-white">Save</Text>
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView className="flex-1 px-4 pt-4" keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+          <Text className="text-xs font-semibold text-gray-500 uppercase mb-2">Course Code</Text>
+          <TextInput value={code} onChangeText={setCode} placeholder="e.g. CS101" className="bg-white border border-gray-200 rounded-xl px-4 py-3 mb-4 text-gray-800" />
+
+          <Text className="text-xs font-semibold text-gray-500 uppercase mb-2">Course Name</Text>
+          <TextInput value={name} onChangeText={setName} placeholder="e.g. Data Structures" className="bg-white border border-gray-200 rounded-xl px-4 py-3 mb-4 text-gray-800" />
+
+          <Text className="text-xs font-semibold text-gray-500 uppercase mb-2">Description</Text>
+          <TextInput value={description} onChangeText={setDescription} placeholder="Optional description" className="bg-white border border-gray-200 rounded-xl px-4 py-3 mb-4 text-gray-800" />
+
+          <Text className="text-xs font-semibold text-gray-500 uppercase mb-2">Credits</Text>
+          <TextInput value={creditStr} onChangeText={setCreditStr} placeholder="e.g. 3.0" keyboardType="numeric" className="bg-white border border-gray-200 rounded-xl px-4 py-3 mb-4 text-gray-800" />
+
+          <Text className="text-xs font-semibold text-gray-500 uppercase mb-2">Class Type</Text>
+          <View className="flex-row gap-x-2 mb-4">
+            {["LECTURE", "LAB", "TUTORIAL"].map((type) => (
+              <Pressable key={type} onPress={() => setClassType(type)} className={`flex-1 items-center justify-center py-2.5 rounded-lg border ${classType === type ? "bg-indigo-50 border-indigo-300" : "bg-white border-gray-200"}`}>
+                <Text className={`text-sm font-semibold ${classType === type ? "text-indigo-700" : "text-gray-600"}`}>{type}</Text>
+              </Pressable>
+            ))}
+          </View>
+
+          <Text className="text-xs font-semibold text-gray-500 uppercase mb-2">Professor</Text>
+          {professors.length === 0 ? (
+            <Text className="text-sm text-gray-500 mb-4">No professors available. Please add a professor first.</Text>
+          ) : (
+            professors.map((prof) => (
+              <Pressable key={prof.id} onPress={() => setProfessorId(prof.id)} className={`flex-row items-center justify-between p-4 rounded-xl border mb-2 ${professorId === prof.id ? "bg-indigo-50 border-indigo-300" : "bg-white border-gray-200"}`}>
+                <Text className={`font-semibold ${professorId === prof.id ? "text-indigo-700" : "text-gray-700"}`}>{prof.name}</Text>
+                {professorId === prof.id && <Ionicons name="checkmark-circle" size={20} color="#4f46e5" />}
+              </Pressable>
+            ))
+          )}
+          <View className="h-10" />
+        </ScrollView>
+      </SafeAreaView>
+    </Modal>
+  );
+}
+
 // ─── Classes Tab ──────────────────────────────────────────────────────────────
 
 function ClassesTab() {
@@ -824,11 +910,28 @@ const TAB_ADD_LABELS: Record<TabKey, string> = {
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<TabKey>("roles");
   const [addUserVisible, setAddUserVisible] = useState(false);
+  const [addCourseVisible, setAddCourseVisible] = useState(false);
+  const { loggedInUser } = useAuth();
+  const { createCourse } = useCoursesStore();
 
+  const handleAddCourse = async (courseData: any) => {
+    try {
+      await createCourse({
+        ...courseData,
+        userId: loggedInUser?.id || "",
+      });
+      setAddCourseVisible(false);
+      Alert.alert("Success", "Course added successfully!");
+    } catch (e: any) {
+      Alert.alert("Error", e.message || "Failed to add course");
+    }
+  };
 
   const handleAdd = () => {
     if (activeTab === "roles") {
       setAddUserVisible(true);
+    } else if (activeTab === "courses") {
+      setAddCourseVisible(true);
     } else {
       Alert.alert("Add", TAB_ADD_LABELS[activeTab]);
     }
@@ -998,6 +1101,13 @@ export default function AdminPage() {
         visible={addUserVisible}
         onClose={() => setAddUserVisible(false)}
         onAdd={handleAddUser}
+      />
+
+      {/* Add Course Modal */}
+      <AddCourseModal
+        visible={addCourseVisible}
+        onClose={() => setAddCourseVisible(false)}
+        onAdd={handleAddCourse}
       />
     </SafeAreaView>
   );
