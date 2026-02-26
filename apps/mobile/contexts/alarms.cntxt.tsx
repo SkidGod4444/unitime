@@ -1,31 +1,20 @@
 /**
  * alarms.cntxt.tsx
  *
- * Manages alarm CRUD against the backend and schedules real native alarms
- * using expo-alarm-devkit — a custom module with:
- *   • Android: AlarmManager + FullScreenIntent + AlarmActivity over lock screen
- *   • iOS: UNUserNotificationCenter with critical interruption level
- *
- * Alarm flow:
- *   Foreground  → alarmTriggered JS event → router.push /alarm.player
- *   Background  → AlarmActivity (Android) or notification tap (iOS)
- *               → app re-launches with ALARM_KIT_* intent extras
- *               → useEffect reads extras → router.push /alarm.player
+ * Manages alarm CRUD against the backend API.
+ * Native alarm scheduling is stubbed out — the alarm screen shows a
+ * "coming soon" notice while the feature is under development.
  */
 
-import type { AlarmRequest } from "expo-alarm-devkit";
-import ExpoAlarmKit from "expo-alarm-devkit";
-import { router } from "expo-router";
 import React, {
   createContext,
   ReactNode,
   useCallback,
   useContext,
   useEffect,
-  useRef,
   useState,
 } from "react";
-import { Alert, Platform } from "react-native";
+import { Alert } from "react-native";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -64,139 +53,6 @@ type AlarmsContextType = {
 };
 
 // ---------------------------------------------------------------------------
-// Scheduling helpers
-// ---------------------------------------------------------------------------
-
-/** Unique native identifier tied to a DB alarm */
-const nativeId = (alarmId: string) => `unitime-alarm-${alarmId}`;
-
-/**
- * Computes the next fire time for an alarm (class start - leadMinutes).
- * Day-of-week check is done on the class start day to avoid midnight rollback.
- */
-function nextFireDate(alarm: Alarm): Date | null {
-  const [hStr, mStr] = alarm.time.split(":");
-  const classHour = parseInt(hStr, 10);
-  const classMinute = parseInt(mStr, 10);
-  if (!alarm.days.length) return null;
-
-  const now = new Date();
-  for (let offset = 0; offset <= 7; offset++) {
-    const classStart = new Date(now);
-    classStart.setDate(now.getDate() + offset);
-    classStart.setHours(classHour, classMinute, 0, 0);
-
-    const dow = classStart.getDay();
-    if (!alarm.days.includes(dow)) continue;
-
-    const fireTime = new Date(classStart.getTime() - alarm.leadMinutes * 60_000);
-    if (fireTime.getTime() > now.getTime()) {
-      return fireTime;
-    }
-  }
-  return null;
-}
-
-async function scheduleNativeAlarm(alarm: Alarm) {
-  if (!ExpoAlarmKit) return;
-  try {
-    if (!ExpoAlarmKit.isSupported()) return;
-    const date = nextFireDate(alarm);
-    if (!date) return;
-
-    await ExpoAlarmKit.cancelAlarmAsync(nativeId(alarm.id)).catch(() => {});
-
-    const request: AlarmRequest = {
-      identifier: nativeId(alarm.id),
-      title: "⏰ Class Alarm",
-      body: `${alarm.label} starts in ${alarm.leadMinutes} min`,
-      date: date.getTime(), // epoch ms — number, not Date
-      repeating: false,
-    };
-    await ExpoAlarmKit.scheduleAlarmAsync(request);
-  } catch (err) {
-    console.warn("[AlarmsCtx] scheduleNativeAlarm failed:", err);
-  }
-}
-
-async function cancelNativeAlarm(alarmId: string) {
-  if (!ExpoAlarmKit) return;
-  try {
-    if (!ExpoAlarmKit.isSupported()) return;
-    await ExpoAlarmKit.cancelAlarmAsync(nativeId(alarmId));
-  } catch (err) {
-    console.warn("[AlarmsCtx] cancelNativeAlarm failed:", err);
-  }
-}
-
-/**
- * Schedules a demo native alarm that fires in ~30 seconds.
- * Useful for quickly verifying the alarm player flow.
- */
-export async function scheduleDemoAlarmAsync(): Promise<void> {
-  if (!ExpoAlarmKit) {
-    console.warn("[AlarmsCtx] scheduleDemoAlarmAsync: native module not available (rebuild required).");
-    return;
-  }
-  try {
-    if (!ExpoAlarmKit.isSupported()) {
-      console.warn("[AlarmsCtx] scheduleDemoAlarmAsync: not supported.");
-      return;
-    }
-    const fireTime = Date.now() + 30_000;
-    await ExpoAlarmKit.cancelAlarmAsync("unitime-demo").catch(() => {});
-    await ExpoAlarmKit.scheduleAlarmAsync({
-      identifier: "unitime-demo",
-      title: "⏰ Demo Alarm",
-      body: "Demo class starts in 15 min — tap to dismiss",
-      date: fireTime,
-      repeating: false,
-    });
-    console.log(
-      "[AlarmsCtx] Demo alarm scheduled for:",
-      new Date(fireTime).toLocaleTimeString(),
-    );
-  } catch (err) {
-    console.warn("[AlarmsCtx] scheduleDemoAlarmAsync failed:", err);
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Helper — navigate to alarm player with the right params
-// ---------------------------------------------------------------------------
-
-function navigateToAlarmPlayer(
-  identifier: string,
-  alarmsRef: React.MutableRefObject<Alarm[]>,
-) {
-  const triggered = alarmsRef.current.find(
-    (a) => nativeId(a.id) === identifier,
-  );
-  const isDemo = identifier === "unitime-demo";
-
-  router.push({
-    pathname: "/alarm.player",
-    params: triggered
-      ? {
-          alarmId: triggered.id,
-          label: triggered.label,
-          courseCode: triggered.courseCode,
-          color: triggered.color,
-          time: triggered.time,
-          leadMinutes: String(triggered.leadMinutes),
-        }
-      : isDemo
-        ? {
-            label: "Demo Class Alarm",
-            courseCode: "DEMO",
-            color: "#f59e0b",
-            leadMinutes: "15",
-          }
-        : {},
-  });
-}
-
-// ---------------------------------------------------------------------------
 // Context
 // ---------------------------------------------------------------------------
 
@@ -225,70 +81,6 @@ export function AlarmsProvider({
   const [loading, setLoading] = useState(true);
 
   const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3001";
-
-  // Keep a ref so the listener closures always see the latest alarms list
-  const alarmsRef = useRef(alarms);
-  useEffect(() => {
-    alarmsRef.current = alarms;
-  }, [alarms]);
-
-  // ── Request permissions on mount ─────────────────────────────────────────
-  useEffect(() => {
-    if (!ExpoAlarmKit) return;
-    (async () => {
-      try {
-        if (ExpoAlarmKit.isSupported()) {
-          await ExpoAlarmKit.requestPermissionsAsync();
-        }
-      } catch (err) {
-        console.warn("[AlarmsCtx] requestPermissionsAsync failed:", err);
-      }
-    })();
-  }, []);
-
-  // ── Listen for alarmTriggered (foreground JS event) ──────────────────────
-  useEffect(() => {
-    let sub: { remove: () => void } | null = null;
-    try {
-      sub = ExpoAlarmKit.addListener(
-        "alarmTriggered",
-        (payload: { identifier?: string }) => {
-          if (!payload.identifier) return;
-          navigateToAlarmPlayer(payload.identifier, alarmsRef);
-        },
-      );
-    } catch (err) {
-      console.warn("[AlarmsCtx] addListener(alarmTriggered) failed:", err);
-    }
-    return () => {
-      sub?.remove();
-    };
-  }, []);
-
-  // ── Android: handle AlarmActivity re-launch via intent extras ────────────
-  //
-  // AlarmActivity starts the RN app with ALARM_KIT_IDENTIFIER extra in the
-  // launch intent. We detect it here on mount (and on resume via AppState if
-  // needed). Only runs on Android.
-  useEffect(() => {
-    if (Platform.OS !== "android") return;
-    try {
-      // expo-modules-core exposes the initial intent extras at module load time
-      // via the global `__expo_module_initial_props__` or via the NativeModule.
-      // We read them from the NativeModule's initialProps if available.
-       
-      const initialProps = (global as any).__initialProps ?? {};
-      const identifier: string | undefined =
-        initialProps["ALARM_KIT_IDENTIFIER"];
-      if (identifier) {
-        // Small delay so the router is ready
-        setTimeout(() => navigateToAlarmPlayer(identifier, alarmsRef), 400);
-      }
-    } catch {
-      // Not available in all build configurations
-    }
-   
-  }, []);
 
   // ── Fetch alarms from server ─────────────────────────────────────────────
 
@@ -336,7 +128,6 @@ export function AlarmsProvider({
         const data = await res.json();
         const alarm: Alarm = data.alarm;
         setAlarms((prev) => [...prev, alarm]);
-        if (alarm.enabled) await scheduleNativeAlarm(alarm);
         return alarm;
       } catch (err) {
         console.error("[AlarmsCtx] createAlarm error:", err);
@@ -363,11 +154,6 @@ export function AlarmsProvider({
         const data = await res.json();
         const updated: Alarm = data.alarm;
         setAlarms((prev) => prev.map((a) => (a.id === id ? updated : a)));
-        if (updated.enabled) {
-          await scheduleNativeAlarm(updated);
-        } else {
-          await cancelNativeAlarm(id);
-        }
         return updated;
       } catch (err) {
         console.error("[AlarmsCtx] updateAlarm error:", err);
@@ -386,7 +172,6 @@ export function AlarmsProvider({
         });
         if (!res.ok) throw new Error("Delete failed");
         setAlarms((prev) => prev.filter((a) => a.id !== id));
-        await cancelNativeAlarm(id);
       } catch (err) {
         console.error("[AlarmsCtx] deleteAlarm error:", err);
         Alert.alert("Error", "Failed to delete alarm. Please try again.");

@@ -38,7 +38,6 @@ export default ({ config }) => ({
   newArchEnabled: true,
   deepLinking: true,
   plugins: [
-    'expo-alarm-devkit',
     'expo-audio',
     'expo-localization',
     'expo-quick-actions',
