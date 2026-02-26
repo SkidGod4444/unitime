@@ -1,6 +1,6 @@
+import { useAttendanceStore, useCoursesStore, useOrgsStore, useProfilesStore, useTimetableStore, useUsersStore } from "@/lib/store";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./auth.cntxt";
-import { useOrgsStore, useProfilesStore, useUsersStore } from "@/lib/store";
 
 type StoreContextType = {
   refresh: () => Promise<void>;
@@ -19,6 +19,10 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   const { setUsers } = useUsersStore();
   const { setProfiles } = useProfilesStore();
   const { setOrgs } = useOrgsStore();
+  
+  const { fetchTimetable } = useTimetableStore();
+  const { fetchSummary, fetchSessions } = useAttendanceStore();
+  const { fetchCourses } = useCoursesStore();
 
   const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -67,9 +71,13 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
         fetchUsers(),
         fetchProfiles(),
         fetchOrgs(),
+        fetchCourses(),
+        ...(loggedInUser?.id ? [fetchTimetable(loggedInUser.id)] : []),
+        ...(loggedInUser?.id ? [fetchSummary(loggedInUser.id)] : []),
+        ...(loggedInUser?.id && loggedInUser.role === "PROFESSOR" ? [fetchSessions(loggedInUser.id)] : []),
       ]);
       setLoading(false);
-    }, [fetchUsers, fetchProfiles, fetchOrgs]);
+    }, [fetchUsers, fetchProfiles, fetchOrgs, fetchCourses, fetchTimetable, fetchSummary, fetchSessions, loggedInUser?.id, loggedInUser?.role]);
 
     useEffect(() => {
       if (loggedInUser) {
@@ -78,11 +86,16 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (loggedInUser) {
         const interval = setInterval(async () => {
-          console.log("Refreshing attendance data...");
-          // Prevent overlapping fetches
-          // await fetchAttendance();
+          console.log("Refreshing secondary data (attendance/timetable)...");
+          if (loggedInUser.id) {
+            fetchSummary(loggedInUser.id);
+            fetchTimetable(loggedInUser.id);
+            if (loggedInUser.role === "PROFESSOR") {
+              fetchSessions(loggedInUser.id);
+            }
+          }
+        }, 30 * 1000); // Wait 30s instead of 10s for intensive DB calls
 
-        }, 10 * 1000); // Refresh every 10 seconds
 
         return () => clearInterval(interval);
       }

@@ -1,18 +1,19 @@
 import { useAuth } from "@/contexts/auth.cntxt";
 import { useLocalStore } from "@/contexts/localstore.cntxt";
 import { useRefresh } from "@/hooks/use-refresh";
+import { useAttendanceStore, useTimetableStore } from "@/lib/store";
 import { Ionicons } from "@expo/vector-icons";
 import * as LocalAuthentication from "expo-local-authentication";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  Alert,
-  Image,
-  RefreshControl,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
+    Alert,
+    Image,
+    RefreshControl,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -91,18 +92,34 @@ export default function Index() {
     if (authenticated) router.push("/admin");
   };
 
-  const subjectAttendance = [
-    { subject: "Mathematics", percentage: 92, attended: 18, total: 20 },
-    { subject: "Physics", percentage: 78, attended: 14, total: 18 },
-    { subject: "Chemistry", percentage: 85, attended: 17, total: 20 },
-    { subject: "Computer Science", percentage: 95, attended: 19, total: 20 },
-    { subject: "English", percentage: 88, attended: 22, total: 25 },
-  ];
+  const { summary } = useAttendanceStore();
+  const { timetables, loading } = useTimetableStore();
 
-  const overall = Math.round(
-    subjectAttendance.reduce((acc, curr) => acc + curr.percentage, 0) /
-      subjectAttendance.length,
-  );
+  const overall =
+    summary.length > 0
+      ? Math.round(
+          summary.reduce((acc, curr) => acc + curr.percentage, 0) /
+            summary.length,
+        )
+      : 100;
+
+  // Map first 3 timetable items for quick dashboard view
+  const todaysSchedule = timetables.slice(0, 3).map((t, index) => {
+    const start = new Date(t.startTime);
+    const startH = start.getHours() % 12 || 12;
+    const startM = start.getMinutes().toString().padStart(2, "0");
+    const startAmPm = start.getHours() >= 12 ? "PM" : "AM";
+    const colors = ["border-l-blue-500", "border-l-green-500", "border-l-purple-500", "border-l-yellow-500"];
+    
+    return {
+      id: t.id,
+      time: `${startH}:${startM} ${startAmPm}`,
+      subject: t.course?.name || "Unknown",
+      room: t.location || "TBA",
+      status: "Upcoming",
+      color: colors[index % colors.length],
+    };
+  });
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
@@ -194,9 +211,9 @@ export default function Index() {
               Target: 75% • You are doing great!
             </Text>
 
-            {expanded && (
+            {expanded && summary.length > 0 && (
               <View className="mt-4 pt-4 border-t border-gray-100 gap-3">
-                {subjectAttendance.map((item, index) => (
+                {summary.map((item, index) => (
                   <View
                     key={index}
                     className="flex-row items-center justify-between"
@@ -204,7 +221,7 @@ export default function Index() {
                     <View className="flex-1 mr-4">
                       <View className="flex-row justify-between mb-1">
                         <Text className="text-sm font-semibold text-gray-700">
-                          {item.subject}
+                          {item.courseName}
                         </Text>
                         <Text
                           className={`text-xs font-bold ${item.percentage >= 75 ? "text-green-600" : "text-red-500"}`}
@@ -356,56 +373,42 @@ export default function Index() {
           </View>
 
           <View className="gap-4">
-            {[
-              {
-                time: "09:00 AM",
-                subject: "Mathematics",
-                room: "Room 302",
-                status: "Upcoming",
-                color: "border-l-blue-500",
-              },
-              {
-                time: "10:30 AM",
-                subject: "Physics",
-                room: "Lab 2",
-                status: "Upcoming",
-                color: "border-l-green-500",
-              },
-              {
-                time: "01:00 PM",
-                subject: "Computer Science",
-                room: "Lab 1",
-                status: "Upcoming",
-                color: "border-l-purple-500",
-              },
-            ].map((item, index) => (
-              <View
-                key={index}
-                className={`bg-white p-4 rounded-3xl border-l-4 ${item.color} shadow-sm flex-row justify-between items-center border border-gray-100`}
-              >
-                <View className="flex-1">
-                  <Text className="text-xs text-gray-500 font-medium mb-1">
-                    {item.time}
-                  </Text>
-                  <Text className="text-base font-bold text-dark">
-                    {item.subject}
-                  </Text>
-                  <View className="flex-row items-center mt-1 gap-1">
-                    <Ionicons
-                      name="location-outline"
-                      size={12}
-                      color="#6B7280"
-                    />
-                    <Text className="text-xs text-gray-500">{item.room}</Text>
+            {loading ? (
+               <Text className="text-center text-gray-500 py-4">Loading schedule...</Text>
+            ) : todaysSchedule.length === 0 ? (
+               <View className="bg-gray-50 rounded-2xl p-6 items-center justify-center border border-gray-100 border-dashed">
+                 <Text className="text-gray-500 font-medium my-2">No classes today!</Text>
+               </View>
+            ) : (
+              todaysSchedule.map((item) => (
+                <View
+                  key={item.id}
+                  className={`bg-white p-4 rounded-3xl border-l-4 ${item.color} shadow-sm flex-row justify-between items-center border border-gray-100`}
+                >
+                  <View className="flex-1">
+                    <Text className="text-xs text-gray-500 font-medium mb-1">
+                      {item.time}
+                    </Text>
+                    <Text className="text-base font-bold text-dark">
+                      {item.subject}
+                    </Text>
+                    <View className="flex-row items-center mt-1 gap-1">
+                      <Ionicons
+                        name="location-outline"
+                        size={12}
+                        color="#6B7280"
+                      />
+                      <Text className="text-xs text-gray-500">{item.room}</Text>
+                    </View>
+                  </View>
+                  <View className="bg-gray-50 px-3 py-1 rounded-full">
+                    <Text className="text-xs font-medium text-gray-600">
+                      {item.status}
+                    </Text>
                   </View>
                 </View>
-                <View className="bg-gray-50 px-3 py-1 rounded-full">
-                  <Text className="text-xs font-medium text-gray-600">
-                    {item.status}
-                  </Text>
-                </View>
-              </View>
-            ))}
+              ))
+            )}
           </View>
         </View>
       </ScrollView>

@@ -1,68 +1,19 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  Alert,
-  FlatList,
-  Modal,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
+    Alert,
+    FlatList,
+    Modal,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import Animated, { FadeInDown, Layout } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// --- Types ---
-
-type ClassSession = {
-  id: string;
-  courseCode: string;
-  courseName: string;
-  startTime: string;
-  endTime: string;
-  location: string;
-  professor: string;
-  type: "Lecture" | "Lab" | "Tutorial";
-  color: string;
-};
-
-// --- Dummy Data ---
-
-const SAMPLE_CLASSES: ClassSession[] = [
-  {
-    id: "1",
-    courseCode: "CS101",
-    courseName: "Intro to Computer Science",
-    startTime: "09:00",
-    endTime: "10:30",
-    location: "Hall A",
-    professor: "Dr. Smith",
-    type: "Lecture",
-    color: "#6366f1", // Indigo
-  },
-  {
-    id: "2",
-    courseCode: "MATH202",
-    courseName: "Linear Algebra",
-    startTime: "11:00",
-    endTime: "12:30",
-    location: "Room 304",
-    professor: "Prof. Johnson",
-    type: "Lecture",
-    color: "#ec4899", // Pink
-  },
-  {
-    id: "3",
-    courseCode: "PHY101",
-    courseName: "Physics Lab",
-    startTime: "14:00",
-    endTime: "16:00",
-    location: "Lab 2",
-    professor: "Dr. Brown",
-    type: "Lab",
-    color: "#10b981", // Emerald
-  },
-];
+import { useAuth } from "@/contexts/auth.cntxt";
+import { useTimetableStore } from "@/lib/store";
 
 // --- Date Utilities (Native) ---
 
@@ -206,7 +157,7 @@ const ClassCard = ({
   session,
   index,
 }: {
-  session: ClassSession;
+  session: any;
   index: number;
 }) => {
   return (
@@ -405,8 +356,6 @@ const CustomCalendar = ({
   );
 };
 
-// --- Main Screen ---
-
 export default function ScheduleScreen() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [dates, setDates] = useState(
@@ -414,10 +363,30 @@ export default function ScheduleScreen() {
   );
   const [isCalendarOpen, setCalendarOpen] = useState(false);
   const flatListRef = useRef<FlatList>(null);
+  
+  const { loggedInUser } = useAuth();
+  const { timetables, loading, fetchTimetable } = useTimetableStore();
 
-  // Filter classes for selected date (Mock logic: just show sample classes for today/any selected date for now)
-  // In a real app, you'd filter `classes.filter(c => isSameDay(c.date, selectedDate))`
-  const todaysClasses = SAMPLE_CLASSES;
+  const getDayName = (date: Date) => {
+    return DAY_NAMES[date.getDay()].toUpperCase();
+  };
+
+  useEffect(() => {
+    if (loggedInUser?.id) {
+       // get the day of the week (e.g. MONDAY)
+       const dayMap: Record<string, string> = {
+         "SUN": "SUNDAY",
+         "MON": "MONDAY",
+         "TUE": "TUESDAY",
+         "WED": "WEDNESDAY",
+         "THU": "THURSDAY",
+         "FRI": "FRIDAY",
+         "SAT": "SATURDAY"
+       };
+       const dayStr = dayMap[getDayName(selectedDate)];
+       fetchTimetable(loggedInUser.id, dayStr);
+    }
+  }, [selectedDate, loggedInUser?.id]);
 
   // Ensure scrolling works reliably
   const getItemLayout = (data: any, index: number) => ({
@@ -441,13 +410,41 @@ export default function ScheduleScreen() {
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
   };
+  
+  const formattedClasses = timetables.map((t: any, idx: number) => {
+    const start = new Date(t.startTime);
+    const end = new Date(t.endTime);
+    // basic color palette cycling
+    const colors = ["#6366f1", "#ec4899", "#10b981", "#f59e0b", "#8b5cf6"];
+    
+    // pad hours/mins to "HH:MM"
+    const startH = start.getHours() % 12 || 12;
+    const startM = start.getMinutes().toString().padStart(2, "0");
+    const startAmPm = start.getHours() >= 12 ? "PM" : "AM";
+    
+    const endH = end.getHours() % 12 || 12;
+    const endM = end.getMinutes().toString().padStart(2, "0");
+    const endAmPm = end.getHours() >= 12 ? "PM" : "AM";
+    
+    return {
+      id: t.id,
+      courseCode: t.course?.code || "UNK",
+      courseName: t.course?.name || "Unknown Course",
+      startTime: `${startH}:${startM} ${startAmPm}`,
+      endTime: `${endH}:${endM} ${endAmPm}`,
+      location: t.location || "TBD",
+      professor: "Dr. Faculty", // Add professor to timetable response later if needed
+      type: t.course?.classType || "Lecture",
+      color: colors[idx % colors.length],
+    };
+  });
 
   const handleCalendarSelect = (date: Date) => {
     setSelectedDate(date);
     setCalendarOpen(false);
 
     // Check if new date is visible in current strip
-    const index = dates.findIndex((d) => isSameDay(d, date));
+    // const index = dates.findIndex((d) => isSameDay(d, date));
 
     // If not found or near edge, regenerate strip
     // Let's just always center the new date for better UX
@@ -505,9 +502,20 @@ export default function ScheduleScreen() {
             : `${formatDate(selectedDate, "EEE, MMMM d")}`}
         </Text>
 
-        {todaysClasses.map((session, index) => (
-          <ClassCard key={session.id} session={session} index={index} />
-        ))}
+        {loading ? (
+          <View className="items-center py-10">
+            <Text className="text-gray-500">Loading schedule...</Text>
+          </View>
+        ) : formattedClasses.length === 0 ? (
+          <View className="items-center py-10 opacity-50">
+            <Ionicons name="calendar-outline" size={48} color="#9ca3af" />
+            <Text className="text-gray-400 mt-2">No classes scheduled</Text>
+          </View>
+        ) : (
+          formattedClasses.map((session: any, index: number) => (
+            <ClassCard key={session.id} session={session} index={index} />
+          ))
+        )}
 
         {/* Start of Empty/End State */}
         <View className="items-center py-10 opacity-50">

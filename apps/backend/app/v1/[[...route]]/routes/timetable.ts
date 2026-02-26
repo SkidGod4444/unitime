@@ -6,8 +6,10 @@ const timetable = new Hono();
 
 timetable.get("/:userId", async (c) => {
   const userId = c.req.param("userId");
+  const day = c.req.query("day") as any;
   const timetables = await prisma.timetable.findMany({
     where: {
+      ...(day && { day }),
       users: {
         some: {
           userId,
@@ -15,6 +17,7 @@ timetable.get("/:userId", async (c) => {
       },
     },
     include: {
+      course: true,
       users: true,
     },
   });

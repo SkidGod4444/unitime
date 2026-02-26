@@ -1,0 +1,132 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
+
+export type AttendanceSummary = {
+  courseId: string;
+  courseName: string;
+  courseCode: string;
+  attended: number;
+  total: number;
+  percentage: number;
+};
+
+export type AttendanceSession = {
+  id: string;
+  date: string;
+  courseCode: string;
+  courseName: string;
+  classId: string;
+  className: string;
+  section: string;
+  durationMin: number;
+  students: {
+     id: string;
+     name: string;
+     rollNo: string;
+     status: "present" | "absent";
+  }[];
+};
+
+type AttendanceState = {
+  // Summary for student home view
+  summary: AttendanceSummary[];
+  setSummary: (summary: AttendanceSummary[]) => void;
+  fetchSummary: (userId: string) => Promise<void>;
+  summaryLoading: boolean;
+
+  // Sessions for professor admin view
+  sessions: AttendanceSession[];
+  setSessions: (sessions: AttendanceSession[]) => void;
+  fetchSessions: (creatorId: string) => Promise<void>;
+  sessionsLoading: boolean;
+
+  // Mutation
+  updateSessionAttendance: (sessionId: string, updates: { id: string; status: "present" | "absent" | null }[]) => Promise<boolean>;
+};
+
+export const useAttendanceStore = create<AttendanceState>()(
+  persist(
+    (set, get) => ({
+      summary: [],
+      summaryLoading: false,
+      sessions: [],
+      sessionsLoading: false,
+      
+      setSummary: (summary) => set({ summary }),
+      setSessions: (sessions) => set({ sessions }),
+
+      fetchSummary: async (userId) => {
+        set({ summaryLoading: true });
+        try {
+          const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+          const res = await fetch(`${origin}/attendance/summary/${userId}`);
+          const data = await res.json();
+          if (res.ok && data.success) {
+            set({ summary: data.summary });
+          }
+        } catch (error) {
+          console.error("Error fetching attendance summary:", error);
+        } finally {
+          set({ summaryLoading: false });
+        }
+      },
+
+      fetchSessions: async (creatorId) => {
+        set({ sessionsLoading: true });
+        try {
+          const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+          const res = await fetch(`${origin}/attendance/sessions?creatorId=${creatorId}`);
+          const data = await res.json();
+          if (res.ok && data.success) {
+            set({ sessions: data.sessions });
+          }
+        } catch (error) {
+           console.error("Error fetching attendance sessions:", error);
+        } finally {
+          set({ sessionsLoading: false });
+        }
+      },
+
+      updateSessionAttendance: async (sessionId, updates) => {
+         try {
+           const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+           const res = await fetch(`${origin}/attendance/sessions/${sessionId}/students`, {
+             method: "PATCH",
+             headers: { "Content-Type": "application/json" },
+             body: JSON.stringify({ students: updates })
+           });
+           const data = await res.json();
+           
+           if (res.ok && data.success) {
+             // Optimistic cache update locally
+             const currentSessions = get().sessions;
+             const updatedSessions = currentSessions.map(s => {
+               if (s.id === sessionId) {
+                 const newStudents = s.students.map(stu => {
+                   const update = updates.find(u => u.id === stu.id);
+                   if (update && update.status) {
+                     return { ...stu, status: update.status };
+                   }
+                   return stu;
+                 });
+                 return { ...s, students: newStudents };
+               }
+               return s;
+             });
+             set({ sessions: updatedSessions });
+             return true;
+           }
+           return false;
+         } catch (error) {
+           console.error("Error updating session attendance:", error);
+           return false;
+         }
+      }
+    }),
+    {
+      name: "attendance-store",
+      storage: createJSONStorage(() => AsyncStorage),
+    },
+  ),
+);

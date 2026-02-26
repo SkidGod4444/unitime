@@ -2,20 +2,20 @@ import { Ionicons } from "@expo/vector-icons";
 import { Stack } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
-  Alert,
-  FlatList,
-  Modal,
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    FlatList,
+    Modal,
+    Pressable,
+    RefreshControl,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRefresh } from "../hooks/use-refresh";
-import { useProfilesStore, useUsersStore } from "../lib/store";
+import { useCoursesStore, useOrgsStore, useProfilesStore, useUsersStore } from "../lib/store";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -215,9 +215,23 @@ function RolesTab({ onAddUserPress }: { onAddUserPress: () => void }) {
     [storeUsers, profiles],
   );
 
-  const changeRole = (userId: string, role: Role) => {
-    // Role change handled locally via modal; in a real app you'd call the API
-    setRoleModal(null);
+  const changeRole = async (userId: string, targetRole: Role) => {
+    try {
+      const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
+      const res = await fetch(`${origin}/admin/users/${userId}/role`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: targetRole }),
+      });
+      if (!res.ok) throw new Error("Failed to change role");
+      // Optionally trigger a store refresh here by calling fetchUsers() 
+      // but modifying the store locally provides a snappier experience:
+      // useUsersStore.getState().setUsers(...)
+      setRoleModal(null);
+      Alert.alert("Success", "Role updated successfully!");
+    } catch {
+      Alert.alert("Error", "Could not change role. Please try again.");
+    }
   };
 
   const handleDelete = (user: User) => {
@@ -547,53 +561,53 @@ function AddUserModal({
 // ─── Classes Tab ──────────────────────────────────────────────────────────────
 
 function ClassesTab() {
-  const [classes, setClasses] = useState(CLASSES);
+  const { orgs, removeOrg } = useOrgsStore();
 
-  const handleDelete = (cls: ClassItem) => {
-    Alert.alert("Delete Class", `Delete ${cls.name} – Sec ${cls.section}?`, [
+  const handleDelete = (org: any) => {
+    Alert.alert("Delete Class", `Delete ${org.name}?`, [
       { text: "Cancel", style: "cancel" },
       {
         text: "Delete",
         style: "destructive",
-        onPress: () => setClasses((p) => p.filter((c) => c.id !== cls.id)),
+        onPress: () => removeOrg(org.id),
       },
     ]);
   };
 
   return (
     <FlatList
-      data={classes}
+      data={orgs}
       keyExtractor={(c) => c.id}
       scrollEnabled={false}
-      renderItem={({ item: cls }) => (
+      renderItem={({ item: org }) => (
         <View className="bg-white rounded-2xl p-4 mb-3 border border-gray-100 shadow-sm">
           <View className="flex-row items-center justify-between">
             <View className="flex-1">
               <Text className="text-base font-bold text-gray-900">
-                {cls.name} – Sec {cls.section}
+                {(org as any).alias || (org as any).name || "Unnamed Org"}
               </Text>
               <View className="flex-row gap-x-3 mt-1.5">
                 <View className="flex-row items-center gap-x-1">
                   <Ionicons name="people-outline" size={13} color="#6b7280" />
                   <Text className="text-xs text-gray-500">
-                    {cls.strength} students
+                    ID: {org.id.split('-')[0]}...
                   </Text>
                 </View>
                 <View className="flex-row items-center gap-x-1">
-                  <Ionicons name="layers-outline" size={13} color="#6b7280" />
-                  <Text className="text-xs text-gray-500">Year {cls.year}</Text>
+                  <Ionicons name="pie-chart-outline" size={13} color="#6b7280" />
+                  <Text className="text-xs text-gray-500">Active</Text>
                 </View>
               </View>
             </View>
-            <RowActions
-              onEdit={() =>
-                Alert.alert(
-                  "Edit Class",
-                  `Editing ${cls.name} – Sec ${cls.section}`,
-                )
-              }
-              onDelete={() => handleDelete(cls)}
-            />
+              <RowActions
+                onEdit={() =>
+                  Alert.alert(
+                    "Edit Class",
+                    `Editing ${(org as any).alias || (org as any).name || "Unnamed Org"}`,
+                  )
+                }
+                onDelete={() => handleDelete(org)}
+              />
           </View>
         </View>
       )}
@@ -604,15 +618,16 @@ function ClassesTab() {
 // ─── Professors Tab ───────────────────────────────────────────────────────────
 
 function ProfessorsTab() {
-  const [profs, setProfs] = useState(PROFESSORS);
+  const { users, removeUser } = useUsersStore();
+  const profs = users.filter((u) => u.role === "PROFESSOR");
 
-  const handleDelete = (p: Professor) => {
+  const handleDelete = (p: any) => {
     Alert.alert("Remove Professor", `Remove ${p.name}?`, [
       { text: "Cancel", style: "cancel" },
       {
         text: "Remove",
         style: "destructive",
-        onPress: () => setProfs((prev) => prev.filter((x) => x.id !== p.id)),
+        onPress: () => removeUser(p.id),
       },
     ]);
   };
@@ -635,9 +650,6 @@ function ProfessorsTab() {
                 <Text className="text-base font-bold text-gray-900">
                   {prof.name}
                 </Text>
-                <Text className="text-xs text-gray-500 mt-0.5">
-                  {prof.subject}
-                </Text>
                 <Text className="text-xs text-indigo-500 mt-0.5">
                   {prof.email}
                 </Text>
@@ -659,15 +671,18 @@ function ProfessorsTab() {
 // ─── Courses Tab ──────────────────────────────────────────────────────────────
 
 function CoursesTab() {
-  const [courses, setCourses] = useState(COURSES);
+  const { courses } = useCoursesStore();
 
-  const handleDelete = (c: Course) => {
+  const handleDelete = (c: any) => {
     Alert.alert("Delete Course", `Delete ${c.code} – ${c.name}?`, [
       { text: "Cancel", style: "cancel" },
       {
         text: "Delete",
         style: "destructive",
-        onPress: () => setCourses((p) => p.filter((x) => x.id !== c.id)),
+        // Needs API integration to actually delete it
+        onPress: () => {
+           Alert.alert("Notice", "Feature not implemented for admin dashboard yet");
+        },
       },
     ]);
   };
@@ -698,13 +713,13 @@ function CoursesTab() {
                 <View className="flex-row items-center gap-x-1">
                   <Ionicons name="star-outline" size={13} color="#6b7280" />
                   <Text className="text-xs text-gray-500">
-                    {course.credits} credits
+                    {course.credit || "N/A"} credits
                   </Text>
                 </View>
                 <View className="flex-row items-center gap-x-1">
                   <Ionicons name="person-outline" size={13} color="#6b7280" />
                   <Text className="text-xs text-gray-500">
-                    {course.professor}
+                    Faculty ID: {course.professorId}
                   </Text>
                 </View>
               </View>
