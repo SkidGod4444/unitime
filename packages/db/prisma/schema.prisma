@@ -59,6 +59,8 @@ model Courses {
   attendanceQRSession AttendanceQRSession[]
   createdAt           DateTime              @default(now()) @map("created_at")
   updatedAt           DateTime              @updatedAt @map("updated_at")
+  organizationId      String?               @map("organization_id")
+  organization        Organization?         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@map("courses")
 }
@@ -224,6 +226,7 @@ model Organization {
   semester       CourseSemester   @map("semester")
   section        Int              @unique @map("section")
   students       StudentProfile[]
+  courses        Courses[]
   createdAt      DateTime         @default(now()) @map("created_at")
   updatedAt      DateTime         @updatedAt @map("updated_at")
 

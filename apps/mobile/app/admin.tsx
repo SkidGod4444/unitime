@@ -194,15 +194,15 @@ const RowActions = ({
 const ALL_ROLES: Role[] = ["ADMIN", "PROFESSOR", "REPRESENTATIVE", "STUDENT"];
 
 function RolesTab({ onAddUserPress }: { onAddUserPress: () => void }) {
-  const { users: storeUsers, removeUser } = useUsersStore();
+  const { users: storeUsers, updateUser } = useUsersStore();
   const { profiles } = useProfilesStore();
   const [roleModal, setRoleModal] = useState<User | null>(null);
 
-  // Only show non-STUDENT users in the Roles tab, joined with their profile
+  // Only show non-STUDENT users that are ACTIVE in the Roles tab, joined with their profile
   const nonStudentUsers = useMemo(
     () =>
       storeUsers
-        .filter((u) => u.role !== "STUDENT")
+        .filter((u) => u.role !== "STUDENT" && u.status !== "INACTIVE")
         .map((u) => {
           const profile = profiles.find((p) => p.userId === u.id);
           return {
@@ -236,12 +236,27 @@ function RolesTab({ onAddUserPress }: { onAddUserPress: () => void }) {
   };
 
   const handleDelete = (user: User) => {
-    Alert.alert("Remove User", `Remove ${user.name} from the system?`, [
+    Alert.alert("Deactivate User", `Deactivate ${user.name}? They will lose admin access and be marked inactive.`, [
       { text: "Cancel", style: "cancel" },
       {
-        text: "Remove",
+        text: "Deactivate",
         style: "destructive",
-        onPress: () => removeUser(user.id),
+        onPress: async () => {
+          try {
+            const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
+            const res = await fetch(`${origin}/admin/users/${user.id}/status`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ status: "INACTIVE" }),
+            });
+            if (!res.ok) throw new Error("Failed to deactivate user");
+            
+            updateUser(user.id, { status: "INACTIVE" });
+            Alert.alert("Success", "User deactivated successfully.");
+          } catch (error) {
+            Alert.alert("Error", "Could not deactivate user. Please try again.");
+          }
+        },
       },
     ]);
   };
@@ -574,6 +589,7 @@ function AddCourseModal({
 }) {
   const { users } = useUsersStore();
   const professors = users.filter((u) => u.role === "PROFESSOR");
+  const { orgs } = useOrgsStore();
 
   const [name, setName] = useState(initialData?.name || "");
   const [code, setCode] = useState(initialData?.code || "");
@@ -581,6 +597,7 @@ function AddCourseModal({
   const [creditStr, setCreditStr] = useState(initialData?.credit?.toString() || "");
   const [classType, setClassType] = useState(initialData?.classType || "LECTURE");
   const [professorId, setProfessorId] = useState(initialData?.professorId || "");
+  const [organizationId, setOrganizationId] = useState(initialData?.organizationId || "");
 
   React.useEffect(() => {
     if (initialData) {
@@ -590,6 +607,7 @@ function AddCourseModal({
       setCreditStr(initialData.credit?.toString() || "");
       setClassType(initialData.classType || "LECTURE");
       setProfessorId(initialData.professorId || "");
+      setOrganizationId(initialData.organizationId || "");
     } else {
       setName("");
       setCode("");
@@ -597,16 +615,17 @@ function AddCourseModal({
       setCreditStr("");
       setClassType("LECTURE");
       setProfessorId("");
+      setOrganizationId("");
     }
   }, [initialData, visible]);
 
   const handleSave = () => {
     const cred = parseFloat(creditStr);
-    if (!name || !code || isNaN(cred) || !professorId) {
+    if (!name || !code || isNaN(cred) || !professorId || !organizationId) {
       Alert.alert("Error", "Please fill all required fields correctly.");
       return;
     }
-    onAdd({ name, code, description, credit: cred, classType, professorId });
+    onAdd({ name, code, description, credit: cred, classType, professorId, organizationId });
     onClose();
   };
 
@@ -653,6 +672,18 @@ function AddCourseModal({
               <Pressable key={prof.id} onPress={() => setProfessorId(prof.id)} className={`flex-row items-center justify-between p-4 rounded-xl border mb-2 ${professorId === prof.id ? "bg-indigo-50 border-indigo-300" : "bg-white border-gray-200"}`}>
                 <Text className={`font-semibold ${professorId === prof.id ? "text-indigo-700" : "text-gray-700"}`}>{prof.name}</Text>
                 {professorId === prof.id && <Ionicons name="checkmark-circle" size={20} color="#4f46e5" />}
+              </Pressable>
+            ))
+          )}
+
+          <Text className="text-xs font-semibold text-gray-500 uppercase mt-2 mb-2">Organization/Class</Text>
+          {orgs.length === 0 ? (
+            <Text className="text-sm text-gray-500 mb-4">No classes available. Please add a class first.</Text>
+          ) : (
+            orgs.map((org) => (
+              <Pressable key={org.id} onPress={() => setOrganizationId(org.id)} className={`flex-row items-center justify-between p-4 rounded-xl border mb-2 ${organizationId === org.id ? "bg-indigo-50 border-indigo-300" : "bg-white border-gray-200"}`}>
+                <Text className={`font-semibold ${organizationId === org.id ? "text-indigo-700" : "text-gray-700"}`}>{org.courseName} – Sem {org.semester} ({org.departmentName})</Text>
+                {organizationId === org.id && <Ionicons name="checkmark-circle" size={20} color="#4f46e5" />}
               </Pressable>
             ))
           )}

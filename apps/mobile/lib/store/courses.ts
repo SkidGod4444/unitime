@@ -8,8 +8,8 @@ type CoursesState = {
   setCourses: (courses: Course[]) => void;
   loading: boolean;
   fetchCourses: () => Promise<void>;
-  createCourse: (data: Omit<Course, "id"> & { classType: string; professorId: string; userId: string; description?: string }) => Promise<void>;
-  updateCourse: (id: string, data: Partial<Omit<Course, "id"> & { classType: string; professorId: string; description?: string }>) => Promise<void>;
+  createCourse: (data: Omit<Course, "id"> & { classType: string; professorId: string; organizationId: string; userId: string; description?: string }) => Promise<void>;
+  updateCourse: (id: string, data: Partial<Omit<Course, "id"> & { classType: string; professorId: string; organizationId: string; description?: string }>) => Promise<void>;
   deleteCourse: (id: string) => Promise<void>;
 };
 
