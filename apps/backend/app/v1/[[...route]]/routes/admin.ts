@@ -69,4 +69,89 @@ admin.patch("/users/:id/status", async (c) => {
   }
 });
 
+admin.get("/enrollments/pending", async (c) => {
+  const organizationId = c.req.query("organizationId");
+
+  try {
+    const enrollments = await prisma.userCourse.findMany({
+      where: {
+        status: "PENDING",
+        ...(organizationId ? { course: { organizationId } } : {}),
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            studentProfile: {
+              select: {
+                admissionNumber: true,
+              }
+            }
+          }
+        },
+        course: {
+          select: {
+            id: true,
+            name: true,
+            code: true,
+            organization: {
+              select: {
+                departmentName: true,
+                courseName: true,
+                section: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: {
+        enrolledAt: "desc"
+      }
+    });
+
+    return c.json({
+      success: true,
+      status_code: 200,
+      enrollments,
+    });
+  } catch (error) {
+    console.error("Error fetching pending enrollments:", error);
+    return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
+  }
+});
+
+admin.patch("/enrollments/:id/status", async (c) => {
+  const enrollmentId = c.req.param("id");
+  let body: { status: "APPROVED" | "REJECTED" };
+
+  try {
+    body = await c.req.json();
+    if (!body.status || !["APPROVED", "REJECTED"].includes(body.status)) {
+      return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT);
+    }
+  } catch {
+    return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT);
+  }
+
+  try {
+    const enrollment = await prisma.userCourse.update({
+      where: { id: enrollmentId },
+      data: { status: body.status },
+    });
+
+    await invalidateCache(`course:${enrollment.courseId}`, "courses:all", "enrollments:pending");
+
+    return c.json({
+      success: true,
+      status_code: 200,
+      enrollment,
+    });
+  } catch (error) {
+    console.error("Error updating enrollment status:", error);
+    return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
+  }
+});
+
 export default admin;

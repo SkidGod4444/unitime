@@ -7,15 +7,15 @@ import * as LocalAuthentication from "expo-local-authentication";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  Alert,
-  Image,
-  Modal,
-  RefreshControl,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    Image,
+    Modal,
+    RefreshControl,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -275,6 +275,15 @@ export default function Index() {
                 color: "text-purple-600",
                 bg: "bg-purple-50",
                 route: "/schedule",
+                visible: true,
+              },
+              {
+                icon: "book-outline",
+                label: "My Courses",
+                color: "text-green-600",
+                bg: "bg-green-50",
+                route: "/my-courses",
+                visible: true,
               },
               {
                 icon: "alarm-outline",
@@ -282,37 +291,42 @@ export default function Index() {
                 color: "text-red-600",
                 bg: "bg-red-50",
                 route: "/alarm",
+                visible: true,
               },
-            ].map((action, index) => (
-              <TouchableOpacity
-                key={index}
-                className="w-[48%] bg-white p-4 rounded-3xl border border-gray-100 shadow-sm flex-row items-center gap-3"
-                onPress={() => action.route && router.push(action.route as any)}
-              >
-                <View
-                  className={`h-10 w-10 ${action.bg} rounded-full justify-center items-center`}
+            ]
+              .filter((action) => action.visible)
+              .map((action, index) => (
+                <TouchableOpacity
+                  key={index}
+                  className="w-[48%] bg-white p-4 rounded-3xl border border-gray-100 shadow-sm flex-row items-center gap-3"
+                  onPress={() => action.route && router.push(action.route as any)}
                 >
-                  <Ionicons
-                    name={action.icon as any}
-                    size={20}
-                    className={action.color}
-                    style={{
-                      color:
-                        action.color === "text-blue-600"
-                          ? "#2563EB"
-                          : action.color === "text-purple-600"
-                            ? "#9333EA"
-                            : action.color === "text-yellow-600"
-                              ? "#CA8A04"
-                              : "#E11D48",
-                    }}
-                  />
-                </View>
-                <Text className="font-semibold text-gray-700">
-                  {action.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <View
+                    className={`h-10 w-10 ${action.bg} rounded-full justify-center items-center`}
+                  >
+                    <Ionicons
+                      name={action.icon as any}
+                      size={20}
+                      className={action.color}
+                      style={{
+                        color:
+                          action.color === "text-blue-600"
+                            ? "#2563EB"
+                            : action.color === "text-purple-600"
+                              ? "#9333EA"
+                              : action.color === "text-yellow-600"
+                                ? "#D97706"
+                                : action.color === "text-green-600"
+                                  ? "#10B981"
+                                  : "#E11D48",
+                      }}
+                    />
+                  </View>
+                  <Text className="font-semibold text-gray-700">
+                    {action.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
           </View>
         </View>
 
@@ -340,6 +354,66 @@ export default function Index() {
                     color: "text-purple-600",
                     bg: "bg-purple-50",
                     route: "/attendance-session-history",
+                  },
+                ].map((action, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    className="w-[48%] bg-white p-4 rounded-3xl border border-gray-100 shadow-sm flex-row items-center gap-3"
+                    onPress={() =>
+                      action.route && router.push(action.route as any)
+                    }
+                  >
+                    <View
+                      className={`h-10 w-10 ${action.bg} rounded-full justify-center items-center`}
+                    >
+                      <Ionicons
+                        name={action.icon as any}
+                        size={20}
+                        className={action.color}
+                        style={{
+                          color:
+                            action.color === "text-blue-600"
+                              ? "#2563EB"
+                              : action.color === "text-purple-600"
+                                ? "#9333EA"
+                                : action.color === "text-yellow-600"
+                                  ? "#CA8A04"
+                                  : "#E11D48",
+                        }}
+                      />
+                    </View>
+                    <Text className="font-semibold text-gray-700">
+                      {action.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          )}
+
+          {/* CR Actions Grid */}
+        {loggedInUser &&
+          (loggedInUser.role === "REPRESENTATIVE" ||
+            loggedInUser.role === "ADMIN") && (
+            <View>
+              <Text className="text-lg font-bold text-dark mb-4 font-lora">
+                Manage Courses
+              </Text>
+              <View className="flex-row flex-wrap justify-between gap-y-4">
+                {[
+                  {
+                    icon: "people-circle-outline",
+                    label: "Requests",
+                    color: "text-amber-600",
+                    bg: "bg-amber-50",
+                    route: "/manage-requests",
+                  },
+                  {
+                    icon: "book-outline",
+                    label: "Courses",
+                    color: "text-green-600",
+                    bg: "bg-green-50",
+                    route: "/manage-org-courses",
                   },
                 ].map((action, index) => (
                   <TouchableOpacity

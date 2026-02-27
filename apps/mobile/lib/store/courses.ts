@@ -14,7 +14,8 @@ type CoursesState = {
       professorId: string | null;
       organizationId: string;
       userId: string;
-      description?: string;
+      description?: string | null;
+      enrollmentEnabled?: boolean;
     },
   ) => Promise<void>;
   updateCourse: (
@@ -23,8 +24,9 @@ type CoursesState = {
       Omit<Course, "id"> & {
         classType: string;
         professorId: string | null;
-        organizationId: string;
-        description?: string;
+        organizationId: string | null;
+        description?: string | null;
+        enrollmentEnabled?: boolean;
       }
     >,
   ) => Promise<void>;

@@ -8,6 +8,7 @@ import {
     Pressable,
     RefreshControl,
     ScrollView,
+    Switch,
     Text,
     TextInput,
     TouchableOpacity,
@@ -565,6 +566,9 @@ function AddCourseModal({
   const [organizationId, setOrganizationId] = useState(
     initialData?.organizationId || "",
   );
+  const [enrollmentEnabled, setEnrollmentEnabled] = useState<boolean>(
+    initialData?.enrollmentEnabled ?? true,
+  );
 
   React.useEffect(() => {
     if (initialData) {
@@ -575,6 +579,7 @@ function AddCourseModal({
       setClassType(initialData.classType || "LECTURE");
       setProfessorId(initialData.professorId || "");
       setOrganizationId(initialData.organizationId || "");
+      setEnrollmentEnabled(initialData.enrollmentEnabled ?? true);
     } else {
       setName("");
       setCode("");
@@ -583,6 +588,7 @@ function AddCourseModal({
       setClassType("LECTURE");
       setProfessorId(null);
       setOrganizationId("");
+      setEnrollmentEnabled(true);
     }
   }, [initialData, visible]);
 
@@ -600,6 +606,7 @@ function AddCourseModal({
       classType,
       professorId: professorId || null,
       organizationId,
+      enrollmentEnabled,
     });
     onClose();
   };
@@ -750,6 +757,23 @@ function AddCourseModal({
               </Pressable>
             ))
           )}
+
+          <View className="flex-row items-center justify-between mt-4 mb-4 bg-white p-4 rounded-xl border border-gray-100">
+            <View className="flex-1">
+              <Text className="text-base font-semibold text-gray-800">
+                Enable Enrollment
+              </Text>
+              <Text className="text-xs text-gray-500 mt-1">
+                Allow students to enroll in this course.
+              </Text>
+            </View>
+            <Switch
+              value={enrollmentEnabled}
+              onValueChange={setEnrollmentEnabled}
+              trackColor={{ false: "#d1d5db", true: "#c7d2fe" }}
+              thumbColor={enrollmentEnabled ? "#4f46e5" : "#f3f4f6"}
+            />
+          </View>
           <View className="h-10" />
         </ScrollView>
       </SafeAreaView>

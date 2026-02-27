@@ -6,6 +6,7 @@ import {
     useTimetableStore,
     useUsersStore,
 } from "@/lib/store";
+import { useEnrollmentStore } from "@/lib/store/enrollment";
 import { Ionicons } from "@expo/vector-icons";
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { Alert, Modal, Platform, StyleSheet, Text, ToastAndroid, TouchableOpacity, View } from "react-native";
@@ -34,6 +35,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   const { fetchTimetable } = useTimetableStore();
   const { fetchSummary, fetchSessions } = useAttendanceStore();
   const { fetchCourses } = useCoursesStore();
+  const { fetchEnrollments } = useEnrollmentStore();
 
   const refresh = React.useCallback(async () => {
     // Throttle manual refreshes to max 1 per 10 seconds
@@ -61,6 +63,20 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
         ? [fetchSessions(loggedInUser.id)]
         : []),
     ]);
+
+    // Fetch enrollments if applicable (depends on profiles resolving first)
+    if (loggedInUser?.role === 'ADMIN' || loggedInUser?.role === 'REPRESENTATIVE') {
+      const uProfiles = useProfilesStore.getState().profiles;
+      const userProfile = uProfiles.find((p) => p.userId === loggedInUser.id);
+      const organizationId = userProfile?.organizationId || null;
+
+      if (!organizationId && loggedInUser.role === 'ADMIN') {
+         await fetchEnrollments();
+      } else if (organizationId) {
+         await fetchEnrollments(organizationId);
+      }
+    }
+
     setLoading(false);
   }, [
     fetchUsers,
@@ -70,6 +86,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     fetchTimetable,
     fetchSummary,
     fetchSessions,
+    fetchEnrollments,
     loggedInUser?.id,
     loggedInUser?.role,
   ]);

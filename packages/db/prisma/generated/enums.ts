@@ -26,6 +26,15 @@ export const CourseStatus = {
 export type CourseStatus = (typeof CourseStatus)[keyof typeof CourseStatus]
 
 
+export const CourseEnrollmentStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED'
+} as const
+
+export type CourseEnrollmentStatus = (typeof CourseEnrollmentStatus)[keyof typeof CourseEnrollmentStatus]
+
+
 export const CourseSemester = {
   FIRST_SEMESTER: 'FIRST_SEMESTER',
   SECOND_SEMESTER: 'SECOND_SEMESTER',

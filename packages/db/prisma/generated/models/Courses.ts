@@ -43,6 +43,7 @@ export type CoursesMinAggregateOutputType = {
   professorId: string | null
   type: $Enums.CourseType | null
   status: $Enums.CourseStatus | null
+  enrollmentEnabled: boolean | null
   semester: $Enums.CourseSemester | null
   classType: $Enums.CourseClassType | null
   createdAt: Date | null
@@ -59,6 +60,7 @@ export type CoursesMaxAggregateOutputType = {
   professorId: string | null
   type: $Enums.CourseType | null
   status: $Enums.CourseStatus | null
+  enrollmentEnabled: boolean | null
   semester: $Enums.CourseSemester | null
   classType: $Enums.CourseClassType | null
   createdAt: Date | null
@@ -75,6 +77,7 @@ export type CoursesCountAggregateOutputType = {
   professorId: number
   type: number
   status: number
+  enrollmentEnabled: number
   semester: number
   classType: number
   createdAt: number
@@ -101,6 +104,7 @@ export type CoursesMinAggregateInputType = {
   professorId?: true
   type?: true
   status?: true
+  enrollmentEnabled?: true
   semester?: true
   classType?: true
   createdAt?: true
@@ -117,6 +121,7 @@ export type CoursesMaxAggregateInputType = {
   professorId?: true
   type?: true
   status?: true
+  enrollmentEnabled?: true
   semester?: true
   classType?: true
   createdAt?: true
@@ -133,6 +138,7 @@ export type CoursesCountAggregateInputType = {
   professorId?: true
   type?: true
   status?: true
+  enrollmentEnabled?: true
   semester?: true
   classType?: true
   createdAt?: true
@@ -236,6 +242,7 @@ export type CoursesGroupByOutputType = {
   professorId: string | null
   type: $Enums.CourseType
   status: $Enums.CourseStatus
+  enrollmentEnabled: boolean
   semester: $Enums.CourseSemester
   classType: $Enums.CourseClassType
   createdAt: Date
@@ -275,6 +282,7 @@ export type CoursesWhereInput = {
   professorId?: Prisma.StringNullableFilter<"Courses"> | string | null
   type?: Prisma.EnumCourseTypeFilter<"Courses"> | $Enums.CourseType
   status?: Prisma.EnumCourseStatusFilter<"Courses"> | $Enums.CourseStatus
+  enrollmentEnabled?: Prisma.BoolFilter<"Courses"> | boolean
   semester?: Prisma.EnumCourseSemesterFilter<"Courses"> | $Enums.CourseSemester
   classType?: Prisma.EnumCourseClassTypeFilter<"Courses"> | $Enums.CourseClassType
   createdAt?: Prisma.DateTimeFilter<"Courses"> | Date | string
@@ -295,6 +303,7 @@ export type CoursesOrderByWithRelationInput = {
   professorId?: Prisma.SortOrderInput | Prisma.SortOrder
   type?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  enrollmentEnabled?: Prisma.SortOrder
   semester?: Prisma.SortOrder
   classType?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -318,6 +327,7 @@ export type CoursesWhereUniqueInput = Prisma.AtLeast<{
   professorId?: Prisma.StringNullableFilter<"Courses"> | string | null
   type?: Prisma.EnumCourseTypeFilter<"Courses"> | $Enums.CourseType
   status?: Prisma.EnumCourseStatusFilter<"Courses"> | $Enums.CourseStatus
+  enrollmentEnabled?: Prisma.BoolFilter<"Courses"> | boolean
   semester?: Prisma.EnumCourseSemesterFilter<"Courses"> | $Enums.CourseSemester
   classType?: Prisma.EnumCourseClassTypeFilter<"Courses"> | $Enums.CourseClassType
   createdAt?: Prisma.DateTimeFilter<"Courses"> | Date | string
@@ -338,6 +348,7 @@ export type CoursesOrderByWithAggregationInput = {
   professorId?: Prisma.SortOrderInput | Prisma.SortOrder
   type?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  enrollmentEnabled?: Prisma.SortOrder
   semester?: Prisma.SortOrder
   classType?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -362,6 +373,7 @@ export type CoursesScalarWhereWithAggregatesInput = {
   professorId?: Prisma.StringNullableWithAggregatesFilter<"Courses"> | string | null
   type?: Prisma.EnumCourseTypeWithAggregatesFilter<"Courses"> | $Enums.CourseType
   status?: Prisma.EnumCourseStatusWithAggregatesFilter<"Courses"> | $Enums.CourseStatus
+  enrollmentEnabled?: Prisma.BoolWithAggregatesFilter<"Courses"> | boolean
   semester?: Prisma.EnumCourseSemesterWithAggregatesFilter<"Courses"> | $Enums.CourseSemester
   classType?: Prisma.EnumCourseClassTypeWithAggregatesFilter<"Courses"> | $Enums.CourseClassType
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Courses"> | Date | string
@@ -378,6 +390,7 @@ export type CoursesCreateInput = {
   professorId?: string | null
   type?: $Enums.CourseType
   status?: $Enums.CourseStatus
+  enrollmentEnabled?: boolean
   semester?: $Enums.CourseSemester
   classType?: $Enums.CourseClassType
   createdAt?: Date | string
@@ -397,6 +410,7 @@ export type CoursesUncheckedCreateInput = {
   professorId?: string | null
   type?: $Enums.CourseType
   status?: $Enums.CourseStatus
+  enrollmentEnabled?: boolean
   semester?: $Enums.CourseSemester
   classType?: $Enums.CourseClassType
   createdAt?: Date | string
@@ -416,6 +430,7 @@ export type CoursesUpdateInput = {
   professorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCourseTypeFieldUpdateOperationsInput | $Enums.CourseType
   status?: Prisma.EnumCourseStatusFieldUpdateOperationsInput | $Enums.CourseStatus
+  enrollmentEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   semester?: Prisma.EnumCourseSemesterFieldUpdateOperationsInput | $Enums.CourseSemester
   classType?: Prisma.EnumCourseClassTypeFieldUpdateOperationsInput | $Enums.CourseClassType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -435,6 +450,7 @@ export type CoursesUncheckedUpdateInput = {
   professorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCourseTypeFieldUpdateOperationsInput | $Enums.CourseType
   status?: Prisma.EnumCourseStatusFieldUpdateOperationsInput | $Enums.CourseStatus
+  enrollmentEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   semester?: Prisma.EnumCourseSemesterFieldUpdateOperationsInput | $Enums.CourseSemester
   classType?: Prisma.EnumCourseClassTypeFieldUpdateOperationsInput | $Enums.CourseClassType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -454,6 +470,7 @@ export type CoursesCreateManyInput = {
   professorId?: string | null
   type?: $Enums.CourseType
   status?: $Enums.CourseStatus
+  enrollmentEnabled?: boolean
   semester?: $Enums.CourseSemester
   classType?: $Enums.CourseClassType
   createdAt?: Date | string
@@ -470,6 +487,7 @@ export type CoursesUpdateManyMutationInput = {
   professorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCourseTypeFieldUpdateOperationsInput | $Enums.CourseType
   status?: Prisma.EnumCourseStatusFieldUpdateOperationsInput | $Enums.CourseStatus
+  enrollmentEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   semester?: Prisma.EnumCourseSemesterFieldUpdateOperationsInput | $Enums.CourseSemester
   classType?: Prisma.EnumCourseClassTypeFieldUpdateOperationsInput | $Enums.CourseClassType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -485,6 +503,7 @@ export type CoursesUncheckedUpdateManyInput = {
   professorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCourseTypeFieldUpdateOperationsInput | $Enums.CourseType
   status?: Prisma.EnumCourseStatusFieldUpdateOperationsInput | $Enums.CourseStatus
+  enrollmentEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   semester?: Prisma.EnumCourseSemesterFieldUpdateOperationsInput | $Enums.CourseSemester
   classType?: Prisma.EnumCourseClassTypeFieldUpdateOperationsInput | $Enums.CourseClassType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -501,6 +520,7 @@ export type CoursesCountOrderByAggregateInput = {
   professorId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  enrollmentEnabled?: Prisma.SortOrder
   semester?: Prisma.SortOrder
   classType?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -521,6 +541,7 @@ export type CoursesMaxOrderByAggregateInput = {
   professorId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  enrollmentEnabled?: Prisma.SortOrder
   semester?: Prisma.SortOrder
   classType?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -537,6 +558,7 @@ export type CoursesMinOrderByAggregateInput = {
   professorId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  enrollmentEnabled?: Prisma.SortOrder
   semester?: Prisma.SortOrder
   classType?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -585,6 +607,10 @@ export type EnumCourseTypeFieldUpdateOperationsInput = {
 
 export type EnumCourseStatusFieldUpdateOperationsInput = {
   set?: $Enums.CourseStatus
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
 }
 
 export type EnumCourseSemesterFieldUpdateOperationsInput = {
@@ -692,6 +718,7 @@ export type CoursesCreateWithoutUsersInput = {
   professorId?: string | null
   type?: $Enums.CourseType
   status?: $Enums.CourseStatus
+  enrollmentEnabled?: boolean
   semester?: $Enums.CourseSemester
   classType?: $Enums.CourseClassType
   createdAt?: Date | string
@@ -710,6 +737,7 @@ export type CoursesUncheckedCreateWithoutUsersInput = {
   professorId?: string | null
   type?: $Enums.CourseType
   status?: $Enums.CourseStatus
+  enrollmentEnabled?: boolean
   semester?: $Enums.CourseSemester
   classType?: $Enums.CourseClassType
   createdAt?: Date | string
@@ -744,6 +772,7 @@ export type CoursesUpdateWithoutUsersInput = {
   professorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCourseTypeFieldUpdateOperationsInput | $Enums.CourseType
   status?: Prisma.EnumCourseStatusFieldUpdateOperationsInput | $Enums.CourseStatus
+  enrollmentEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   semester?: Prisma.EnumCourseSemesterFieldUpdateOperationsInput | $Enums.CourseSemester
   classType?: Prisma.EnumCourseClassTypeFieldUpdateOperationsInput | $Enums.CourseClassType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -762,6 +791,7 @@ export type CoursesUncheckedUpdateWithoutUsersInput = {
   professorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCourseTypeFieldUpdateOperationsInput | $Enums.CourseType
   status?: Prisma.EnumCourseStatusFieldUpdateOperationsInput | $Enums.CourseStatus
+  enrollmentEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   semester?: Prisma.EnumCourseSemesterFieldUpdateOperationsInput | $Enums.CourseSemester
   classType?: Prisma.EnumCourseClassTypeFieldUpdateOperationsInput | $Enums.CourseClassType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -780,6 +810,7 @@ export type CoursesCreateWithoutTimetableInput = {
   professorId?: string | null
   type?: $Enums.CourseType
   status?: $Enums.CourseStatus
+  enrollmentEnabled?: boolean
   semester?: $Enums.CourseSemester
   classType?: $Enums.CourseClassType
   createdAt?: Date | string
@@ -798,6 +829,7 @@ export type CoursesUncheckedCreateWithoutTimetableInput = {
   professorId?: string | null
   type?: $Enums.CourseType
   status?: $Enums.CourseStatus
+  enrollmentEnabled?: boolean
   semester?: $Enums.CourseSemester
   classType?: $Enums.CourseClassType
   createdAt?: Date | string
@@ -832,6 +864,7 @@ export type CoursesUpdateWithoutTimetableInput = {
   professorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCourseTypeFieldUpdateOperationsInput | $Enums.CourseType
   status?: Prisma.EnumCourseStatusFieldUpdateOperationsInput | $Enums.CourseStatus
+  enrollmentEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   semester?: Prisma.EnumCourseSemesterFieldUpdateOperationsInput | $Enums.CourseSemester
   classType?: Prisma.EnumCourseClassTypeFieldUpdateOperationsInput | $Enums.CourseClassType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -850,6 +883,7 @@ export type CoursesUncheckedUpdateWithoutTimetableInput = {
   professorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCourseTypeFieldUpdateOperationsInput | $Enums.CourseType
   status?: Prisma.EnumCourseStatusFieldUpdateOperationsInput | $Enums.CourseStatus
+  enrollmentEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   semester?: Prisma.EnumCourseSemesterFieldUpdateOperationsInput | $Enums.CourseSemester
   classType?: Prisma.EnumCourseClassTypeFieldUpdateOperationsInput | $Enums.CourseClassType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -868,6 +902,7 @@ export type CoursesCreateWithoutAttendanceQRSessionInput = {
   professorId?: string | null
   type?: $Enums.CourseType
   status?: $Enums.CourseStatus
+  enrollmentEnabled?: boolean
   semester?: $Enums.CourseSemester
   classType?: $Enums.CourseClassType
   createdAt?: Date | string
@@ -886,6 +921,7 @@ export type CoursesUncheckedCreateWithoutAttendanceQRSessionInput = {
   professorId?: string | null
   type?: $Enums.CourseType
   status?: $Enums.CourseStatus
+  enrollmentEnabled?: boolean
   semester?: $Enums.CourseSemester
   classType?: $Enums.CourseClassType
   createdAt?: Date | string
@@ -920,6 +956,7 @@ export type CoursesUpdateWithoutAttendanceQRSessionInput = {
   professorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCourseTypeFieldUpdateOperationsInput | $Enums.CourseType
   status?: Prisma.EnumCourseStatusFieldUpdateOperationsInput | $Enums.CourseStatus
+  enrollmentEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   semester?: Prisma.EnumCourseSemesterFieldUpdateOperationsInput | $Enums.CourseSemester
   classType?: Prisma.EnumCourseClassTypeFieldUpdateOperationsInput | $Enums.CourseClassType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -938,6 +975,7 @@ export type CoursesUncheckedUpdateWithoutAttendanceQRSessionInput = {
   professorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCourseTypeFieldUpdateOperationsInput | $Enums.CourseType
   status?: Prisma.EnumCourseStatusFieldUpdateOperationsInput | $Enums.CourseStatus
+  enrollmentEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   semester?: Prisma.EnumCourseSemesterFieldUpdateOperationsInput | $Enums.CourseSemester
   classType?: Prisma.EnumCourseClassTypeFieldUpdateOperationsInput | $Enums.CourseClassType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -956,6 +994,7 @@ export type CoursesCreateWithoutOrganizationInput = {
   professorId?: string | null
   type?: $Enums.CourseType
   status?: $Enums.CourseStatus
+  enrollmentEnabled?: boolean
   semester?: $Enums.CourseSemester
   classType?: $Enums.CourseClassType
   createdAt?: Date | string
@@ -974,6 +1013,7 @@ export type CoursesUncheckedCreateWithoutOrganizationInput = {
   professorId?: string | null
   type?: $Enums.CourseType
   status?: $Enums.CourseStatus
+  enrollmentEnabled?: boolean
   semester?: $Enums.CourseSemester
   classType?: $Enums.CourseClassType
   createdAt?: Date | string
@@ -1021,6 +1061,7 @@ export type CoursesScalarWhereInput = {
   professorId?: Prisma.StringNullableFilter<"Courses"> | string | null
   type?: Prisma.EnumCourseTypeFilter<"Courses"> | $Enums.CourseType
   status?: Prisma.EnumCourseStatusFilter<"Courses"> | $Enums.CourseStatus
+  enrollmentEnabled?: Prisma.BoolFilter<"Courses"> | boolean
   semester?: Prisma.EnumCourseSemesterFilter<"Courses"> | $Enums.CourseSemester
   classType?: Prisma.EnumCourseClassTypeFilter<"Courses"> | $Enums.CourseClassType
   createdAt?: Prisma.DateTimeFilter<"Courses"> | Date | string
@@ -1037,6 +1078,7 @@ export type CoursesCreateManyOrganizationInput = {
   professorId?: string | null
   type?: $Enums.CourseType
   status?: $Enums.CourseStatus
+  enrollmentEnabled?: boolean
   semester?: $Enums.CourseSemester
   classType?: $Enums.CourseClassType
   createdAt?: Date | string
@@ -1052,6 +1094,7 @@ export type CoursesUpdateWithoutOrganizationInput = {
   professorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCourseTypeFieldUpdateOperationsInput | $Enums.CourseType
   status?: Prisma.EnumCourseStatusFieldUpdateOperationsInput | $Enums.CourseStatus
+  enrollmentEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   semester?: Prisma.EnumCourseSemesterFieldUpdateOperationsInput | $Enums.CourseSemester
   classType?: Prisma.EnumCourseClassTypeFieldUpdateOperationsInput | $Enums.CourseClassType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1070,6 +1113,7 @@ export type CoursesUncheckedUpdateWithoutOrganizationInput = {
   professorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCourseTypeFieldUpdateOperationsInput | $Enums.CourseType
   status?: Prisma.EnumCourseStatusFieldUpdateOperationsInput | $Enums.CourseStatus
+  enrollmentEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   semester?: Prisma.EnumCourseSemesterFieldUpdateOperationsInput | $Enums.CourseSemester
   classType?: Prisma.EnumCourseClassTypeFieldUpdateOperationsInput | $Enums.CourseClassType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1088,6 +1132,7 @@ export type CoursesUncheckedUpdateManyWithoutOrganizationInput = {
   professorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCourseTypeFieldUpdateOperationsInput | $Enums.CourseType
   status?: Prisma.EnumCourseStatusFieldUpdateOperationsInput | $Enums.CourseStatus
+  enrollmentEnabled?: Prisma.BoolFieldUpdateOperationsInput | boolean
   semester?: Prisma.EnumCourseSemesterFieldUpdateOperationsInput | $Enums.CourseSemester
   classType?: Prisma.EnumCourseClassTypeFieldUpdateOperationsInput | $Enums.CourseClassType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1152,6 +1197,7 @@ export type CoursesSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   professorId?: boolean
   type?: boolean
   status?: boolean
+  enrollmentEnabled?: boolean
   semester?: boolean
   classType?: boolean
   createdAt?: boolean
@@ -1173,6 +1219,7 @@ export type CoursesSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   professorId?: boolean
   type?: boolean
   status?: boolean
+  enrollmentEnabled?: boolean
   semester?: boolean
   classType?: boolean
   createdAt?: boolean
@@ -1190,6 +1237,7 @@ export type CoursesSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   professorId?: boolean
   type?: boolean
   status?: boolean
+  enrollmentEnabled?: boolean
   semester?: boolean
   classType?: boolean
   createdAt?: boolean
@@ -1207,6 +1255,7 @@ export type CoursesSelectScalar = {
   professorId?: boolean
   type?: boolean
   status?: boolean
+  enrollmentEnabled?: boolean
   semester?: boolean
   classType?: boolean
   createdAt?: boolean
@@ -1214,7 +1263,7 @@ export type CoursesSelectScalar = {
   organizationId?: boolean
 }
 
-export type CoursesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "code" | "name" | "credit" | "description" | "professorId" | "type" | "status" | "semester" | "classType" | "createdAt" | "updatedAt" | "organizationId", ExtArgs["result"]["courses"]>
+export type CoursesOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "code" | "name" | "credit" | "description" | "professorId" | "type" | "status" | "enrollmentEnabled" | "semester" | "classType" | "createdAt" | "updatedAt" | "organizationId", ExtArgs["result"]["courses"]>
 export type CoursesInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   users?: boolean | Prisma.Courses$usersArgs<ExtArgs>
   timetable?: boolean | Prisma.Courses$timetableArgs<ExtArgs>
@@ -1246,6 +1295,7 @@ export type $CoursesPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     professorId: string | null
     type: $Enums.CourseType
     status: $Enums.CourseStatus
+    enrollmentEnabled: boolean
     semester: $Enums.CourseSemester
     classType: $Enums.CourseClassType
     createdAt: Date
@@ -1686,6 +1736,7 @@ export interface CoursesFieldRefs {
   readonly professorId: Prisma.FieldRef<"Courses", 'String'>
   readonly type: Prisma.FieldRef<"Courses", 'CourseType'>
   readonly status: Prisma.FieldRef<"Courses", 'CourseStatus'>
+  readonly enrollmentEnabled: Prisma.FieldRef<"Courses", 'Boolean'>
   readonly semester: Prisma.FieldRef<"Courses", 'CourseSemester'>
   readonly classType: Prisma.FieldRef<"Courses", 'CourseClassType'>
   readonly createdAt: Prisma.FieldRef<"Courses", 'DateTime'>

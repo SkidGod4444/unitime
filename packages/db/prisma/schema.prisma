@@ -24,6 +24,12 @@ enum CourseStatus {
   INACTIVE
 }
 
+enum CourseEnrollmentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 enum CourseSemester {
   FIRST_SEMESTER
   SECOND_SEMESTER
@@ -52,6 +58,7 @@ model Courses {
   professorId         String?
   type                CourseType            @default(CORE)
   status              CourseStatus          @default(ACTIVE)
+  enrollmentEnabled   Boolean               @default(true) @map("enrollment_enabled")
   semester            CourseSemester        @default(FIRST_SEMESTER)
   classType           CourseClassType       @default(LECTURE)
   users               UserCourse[]
@@ -108,12 +115,13 @@ model User {
 
 // Junction table for many-to-many relationship between User and Course
 model UserCourse {
-  id         String   @id @default(uuid())
-  userId     String   @map("user_id")
-  courseId   String   @map("course_id")
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course     Courses  @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  enrolledAt DateTime @default(now()) @map("enrolled_at")
+  id         String                 @id @default(uuid())
+  userId     String                 @map("user_id")
+  courseId   String                 @map("course_id")
+  status     CourseEnrollmentStatus @default(PENDING)
+  user       User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course     Courses                @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  enrolledAt DateTime               @default(now()) @map("enrolled_at")
 
   @@unique([userId, courseId])
   @@map("user_courses")

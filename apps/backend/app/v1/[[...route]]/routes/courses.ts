@@ -58,6 +58,7 @@ courses.post("/", async (c) => {
     professorId,
     organizationId,
     userId,
+    enrollmentEnabled,
   } = await c.req.json();
   if (
     !name ||
@@ -79,6 +80,7 @@ courses.post("/", async (c) => {
       classType,
       professorId: professorId || null,
       organizationId,
+      enrollmentEnabled: enrollmentEnabled !== undefined ? enrollmentEnabled : true,
     },
   });
   if (!course.id) {
@@ -112,6 +114,7 @@ courses.put("/:id", async (c) => {
       classType: body.classType,
       professorId: body.professorId || null,
       organizationId: body.organizationId,
+      enrollmentEnabled: body.enrollmentEnabled,
     },
   });
   if (!course.id) {
@@ -148,6 +151,72 @@ courses.delete("/:id", async (c) => {
       200,
     );
   } catch {
+    return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
+  }
+});
+
+courses.post("/:id/enroll", async (c) => {
+  const courseId = c.req.param("id");
+  const { userId } = await c.req.json();
+  
+  if (!userId) {
+    return createHonoErrorResponse(c, ERROR_CODES.MISSING_REQUIRED_FIELD);
+  }
+
+  try {
+    const course = await prisma.courses.findUnique({ where: { id: courseId } });
+    if (!course || !course.enrollmentEnabled) {
+      return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND); // Or a specific error for "enrollment disabled"
+    }
+
+    const enrollment = await prisma.userCourse.create({
+      data: {
+        userId,
+        courseId,
+        status: "PENDING",
+      }
+    });
+    
+    await invalidateCache(`course:${courseId}`, "courses:all", "enrollments:pending");
+    
+    return c.json({
+      success: true,
+      status_code: 201,
+      enrollment
+    }, 201);
+  } catch (error) {
+    console.error("Enrollment error", error);
+    return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
+  }
+});
+
+courses.delete("/:id/enroll", async (c) => {
+  const courseId = c.req.param("id");
+  const { userId } = await c.req.json();
+  
+  if (!userId) {
+    return createHonoErrorResponse(c, ERROR_CODES.MISSING_REQUIRED_FIELD);
+  }
+
+  try {
+    await prisma.userCourse.delete({
+      where: {
+        userId_courseId: {
+          userId,
+          courseId,
+        }
+      }
+    });
+    
+    await invalidateCache(`course:${courseId}`, "courses:all", "enrollments:pending");
+    
+    return c.json({
+      success: true,
+      status_code: 200,
+      message: "Successfully de-enrolled"
+    }, 200);
+  } catch (error) {
+    console.error("De-enrollment error", error);
     return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
   }
 });

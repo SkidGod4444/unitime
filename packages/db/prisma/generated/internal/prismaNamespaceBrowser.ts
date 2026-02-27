@@ -88,6 +88,7 @@ export const CoursesScalarFieldEnum = {
   professorId: 'professorId',
   type: 'type',
   status: 'status',
+  enrollmentEnabled: 'enrollmentEnabled',
   semester: 'semester',
   classType: 'classType',
   createdAt: 'createdAt',
@@ -123,6 +124,7 @@ export const UserCourseScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   courseId: 'courseId',
+  status: 'status',
   enrolledAt: 'enrolledAt'
 } as const
 

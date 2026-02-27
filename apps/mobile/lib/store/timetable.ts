@@ -15,6 +15,7 @@ export type Course = {
   semester: string;
   classType: string;
   organizationId: string | null;
+  enrollmentEnabled?: boolean;
 };
 
 export type TimetableEntry = {
