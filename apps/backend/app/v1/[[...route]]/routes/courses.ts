@@ -62,7 +62,8 @@ courses.post("/", async (c) => {
   if (
     !name ||
     !code ||
-    !credit ||
+    credit === undefined ||
+    credit === null ||
     !classType ||
     !organizationId ||
     !userId

@@ -1092,10 +1092,17 @@ function CoursesTab() {
               <View className="flex-row items-center justify-between">
                 <View className="flex-1 pr-2">
                   <View className="flex-row items-center gap-x-2">
-                    <View className="bg-indigo-600 px-2 py-0.5 rounded-md">
-                      <Text className="text-white text-xs font-bold">
-                        {course.code}
-                      </Text>
+                    <View className="flex-row items-center gap-x-1.5">
+                      <View className="bg-indigo-600 px-2 py-0.5 rounded-md">
+                        <Text className="text-white text-xs font-bold">
+                          {course.code}
+                        </Text>
+                      </View>
+                      <View className="bg-gray-100 border border-gray-200 px-2 py-0.5 rounded-md">
+                        <Text className="text-gray-600 text-[10px] font-bold uppercase tracking-wider">
+                          {course.classType}
+                        </Text>
+                      </View>
                     </View>
                     <Text
                       className="text-base font-bold text-gray-900 flex-1"
