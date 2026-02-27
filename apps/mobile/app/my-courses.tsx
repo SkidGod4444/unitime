@@ -165,28 +165,17 @@ export default function MyCoursesScreen() {
         <View className="bg-gray-50 p-3.5 rounded-2xl border border-gray-100 mb-5">
           {org ? (
              <View className="flex-row flex-wrap items-center gap-x-2 gap-y-1">
-               <View className="flex-row items-center">
-                 <Ionicons name="business-outline" size={12} color="#6b7280" />
-                 <Text className="text-xs text-gray-700 ml-1 font-medium">
-                   {org.departmentName}
-                 </Text>
-               </View>
+               <View className="flex-row items-center"><Ionicons name="business-outline" size={12} color="#6b7280" /><Text className="text-xs text-gray-700 ml-1 font-medium">{org.departmentName}</Text></View>
                <View className="w-1 h-1 rounded-full bg-gray-300" />
-               <Text className="text-xs text-gray-700 font-medium">
-                 {org.courseName}
-               </Text>
+               <Text className="text-xs text-gray-700 font-medium">{org.courseName}</Text>
                <View className="w-1 h-1 rounded-full bg-gray-300" />
-               <Text className="text-xs text-gray-700 font-medium">
-                 Sec {org.section}
-               </Text>
-               {item.credit && (
+               <Text className="text-xs text-gray-700 font-medium">Sec {org.section}</Text>
+               {!!item.credit && (
                  <>
                    <View className="w-1 h-1 rounded-full bg-gray-300" />
                    <View className="flex-row items-center gap-x-1">
                      <Ionicons name="star-outline" size={12} color="#6b7280" />
-                     <Text className="text-xs text-gray-700 font-medium">
-                       {item.credit} Credits
-                     </Text>
+                     <Text className="text-xs text-gray-700 font-medium">{item.credit} Credits</Text>
                    </View>
                  </>
                )}
@@ -242,6 +231,7 @@ export default function MyCoursesScreen() {
           headerTitleStyle: { fontFamily: "Lora-Bold", fontSize: 20 },
           headerShadowVisible: false,
           headerStyle: { backgroundColor: "#f9fafb" },
+          headerShown: true,
         }}
       />
       

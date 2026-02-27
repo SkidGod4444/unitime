@@ -199,6 +199,7 @@ export default function ManageOrgCoursesScreen() {
           headerTitleStyle: { fontFamily: "Lora-Bold", fontSize: 20 },
           headerShadowVisible: false,
           headerStyle: { backgroundColor: "#f9fafb" },
+          headerShown: true,
         }}
       />
       
