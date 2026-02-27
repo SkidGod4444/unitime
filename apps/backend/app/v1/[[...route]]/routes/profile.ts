@@ -1,3 +1,4 @@
+import { getDynamicCacheTag } from "@/lib/cache";
 import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
@@ -45,7 +46,7 @@ profile.post("/create", async (c) => {
     console.log("Profile created successfully:", newProfile);
 
     await prisma.$accelerate.invalidate({
-      tags: ["findMany_profiles", `findMany_profiles_${body.userId}`],
+      tags: ["findMany_profiles", getDynamicCacheTag("findMany_profiles", body.userId)],
     });
 
     return c.json(
@@ -91,7 +92,7 @@ profile.get("/:userId", async (c) => {
     },
     cacheStrategy: {
       ttl: 60,
-      tags: [`findMany_profiles_${userId}`],
+      tags: [getDynamicCacheTag("findMany_profiles", userId)],
     },
   });
   if (timetables.length === 0) {

@@ -1,3 +1,4 @@
+import { getDynamicCacheTag } from "@/lib/cache";
 import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
@@ -22,7 +23,7 @@ timetable.get("/:userId", async (c) => {
     },
     cacheStrategy: {
       ttl: 60,
-      tags: [`findMany_timetable_${userId}`],
+      tags: [getDynamicCacheTag("findMany_timetable", userId)],
     },
   });
   if (timetables.length === 0) {

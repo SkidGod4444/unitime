@@ -1,3 +1,4 @@
+import { getDynamicCacheTag } from "@/lib/cache";
 import { ERROR_CODES, createHonoErrorResponse } from "@/lib/error.codes";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
@@ -15,7 +16,7 @@ courses.get("/:id", async (c) => {
     },
     cacheStrategy: {
       ttl: 60,
-      tags: [`findUnique_course_${id}`],
+      tags: [getDynamicCacheTag("findUnique_course", id)],
     },
   });
   if (!course) {
@@ -127,7 +128,7 @@ courses.put("/:id", async (c) => {
   }
 
   await prisma.$accelerate.invalidate({
-    tags: ["findMany_courses", `findUnique_course_${id}`],
+    tags: ["findMany_courses", getDynamicCacheTag("findUnique_course", id)],
   });
 
   return c.json(
@@ -148,7 +149,7 @@ courses.delete("/:id", async (c) => {
     });
 
     await prisma.$accelerate.invalidate({
-      tags: ["findMany_courses", `findUnique_course_${id}`],
+      tags: ["findMany_courses", getDynamicCacheTag("findUnique_course", id)],
     });
 
     return c.json(

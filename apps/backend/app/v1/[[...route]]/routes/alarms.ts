@@ -1,3 +1,4 @@
+import { getDynamicCacheTag } from "@/lib/cache";
 import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
@@ -14,7 +15,7 @@ alarms.get("/:userId", async (c) => {
       orderBy: { createdAt: "asc" },
       cacheStrategy: {
         ttl: 60,
-        tags: [`findMany_alarms_${userId}`],
+        tags: [getDynamicCacheTag("findMany_alarms", userId)],
       },
     });
 
@@ -75,7 +76,7 @@ alarms.post("/", async (c) => {
     });
 
     await prisma.$accelerate.invalidate({
-      tags: [`findMany_alarms_${alarm.userId}`],
+      tags: [getDynamicCacheTag("findMany_alarms", alarm.userId)],
     });
 
     return c.json(
@@ -127,7 +128,7 @@ alarms.patch("/:id", async (c) => {
     });
 
     await prisma.$accelerate.invalidate({
-      tags: [`findMany_alarms_${alarm.userId}`],
+      tags: [getDynamicCacheTag("findMany_alarms", alarm.userId)],
     });
 
     return c.json(
@@ -152,7 +153,7 @@ alarms.delete("/:id", async (c) => {
     const alarm = await prisma.alarm.delete({ where: { id } });
 
     await prisma.$accelerate.invalidate({
-      tags: [`findMany_alarms_${alarm.userId}`],
+      tags: [getDynamicCacheTag("findMany_alarms", alarm.userId)],
     });
 
     return c.json(
