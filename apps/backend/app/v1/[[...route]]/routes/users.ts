@@ -124,4 +124,34 @@ users.patch("/:id/onboard", async (c) => {
   );
 });
 
+users.post("/create", async (c) => {
+  try {
+    const body = await c.req.json<{ id: string; name: string; email: string }>();
+    const { id, name, email } = body;
+
+    if (!id || !name || !email) {
+      return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
+    }
+
+    // Upsert: create only if not already present (idempotent)
+    const user = await prisma.user.upsert({
+      where: { email },
+      update: {},
+      create: { id, name, email },
+    });
+
+    return c.json(
+      {
+        success: true,
+        status_code: 201,
+        user,
+      },
+      201,
+    );
+  } catch (error) {
+    console.error("Error creating user:", error);
+    return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
+  }
+});
+
 export default users;

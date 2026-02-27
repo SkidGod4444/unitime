@@ -3,11 +3,11 @@ import { isInstitutionalEmail } from "@/utils/email.validator";
 import { UserT } from "@unitime/types";
 import { router } from "expo-router";
 import React, {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useState,
+    createContext,
+    ReactNode,
+    useContext,
+    useEffect,
+    useState,
 } from "react";
 import { ID } from "react-native-appwrite";
 
@@ -46,6 +46,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   async function fetchDbUser(
     email: string,
     token?: string | null,
+    appwriteUser?: { $id: string; name: string; email: string } | null,
   ): Promise<UserT | null> {
     try {
       const authToken = token ?? jwt;
@@ -69,8 +70,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (data.user) {
         return data.user as UserT;
       } else {
-        // const res = await fetch(`${origin}/users`, { 
-        // create user TODO
+        // User is authenticated but not in DB — create them now
+        if (appwriteUser) {
+          console.log("User not in DB, creating...");
+          const createRes = await fetch(`${origin}/users/create`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+              id: appwriteUser.$id,
+              name: appwriteUser.name,
+              email: appwriteUser.email,
+            }),
+          });
+          if (createRes.ok) {
+            const createData = await createRes.json();
+            console.log("User created in DB:", createData);
+            return createData.user as UserT;
+          } else {
+            const errText = await createRes.text();
+            console.error("Failed to create user in DB:", createRes.status, errText);
+          }
+        }
         return null;
       }
     } catch (err) {
@@ -91,7 +111,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const jwtResponse = await account.createJWT();
         setJwt(jwtResponse.jwt);
 
-        const dbUser = await fetchDbUser(user.email, jwtResponse.jwt);
+        const dbUser = await fetchDbUser(user.email, jwtResponse.jwt, user);
         if (dbUser) {
           setLoggedInUser(dbUser);
         }
@@ -184,7 +204,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setJwt(jwtResponse.jwt);
           }
 
-          const dbUser = await fetchDbUser(user.email, jwtResponse.jwt);
+          const dbUser = await fetchDbUser(user.email, jwtResponse.jwt, user);
           if (isMounted) {
             setLoggedInUser(dbUser);
             setIsAuthenticated(true);
