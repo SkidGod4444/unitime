@@ -14,6 +14,7 @@ export type Course = {
   status: string;
   semester: string;
   classType: string;
+  organizationId: string | null;
 };
 
 export type TimetableEntry = {

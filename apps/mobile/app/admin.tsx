@@ -35,14 +35,7 @@ type User = {
   admissionNumber?: string | null;
 };
 
-type Professor = { id: string; name: string; subject: string; email: string };
-type Course = {
-  id: string;
-  code: string;
-  name: string;
-  credits: number;
-  professor: string;
-};
+
 type Attendance = {
   id: string;
   course: string;
@@ -66,66 +59,6 @@ const SEMESTER_MAP: Record<string, string> = {
 };
 
 // ─── Dummy Data ───────────────────────────────────────────────────────────────
-
-
-
-const PROFESSORS: Professor[] = [
-  {
-    id: "p1",
-    name: "Dr. Bob Johnson",
-    subject: "Data Structures",
-    email: "bob@uni.edu",
-  },
-  {
-    id: "p2",
-    name: "Dr. Fiona Gallagher",
-    subject: "Computer Networks",
-    email: "fiona@uni.edu",
-  },
-  {
-    id: "p3",
-    name: "Dr. Mark Spencer",
-    subject: "Operating Systems",
-    email: "mark@uni.edu",
-  },
-  {
-    id: "p4",
-    name: "Dr. Sarah Connor",
-    subject: "DBMS",
-    email: "sarah@uni.edu",
-  },
-];
-
-const COURSES: Course[] = [
-  {
-    id: "cr1",
-    code: "CS201",
-    name: "Data Structures",
-    credits: 4,
-    professor: "Dr. Bob Johnson",
-  },
-  {
-    id: "cr2",
-    code: "CS301",
-    name: "Operating Systems",
-    credits: 3,
-    professor: "Dr. Mark Spencer",
-  },
-  {
-    id: "cr3",
-    code: "CS401",
-    name: "Computer Networks",
-    credits: 3,
-    professor: "Dr. Fiona Gallagher",
-  },
-  {
-    id: "cr4",
-    code: "CS501",
-    name: "DBMS",
-    credits: 4,
-    professor: "Dr. Sarah Connor",
-  },
-];
 
 const ATTENDANCES: Attendance[] = [
   {
@@ -802,7 +735,7 @@ function AddCourseModal({
                 <Text
                   className={`font-semibold ${organizationId === org.id ? "text-indigo-700" : "text-gray-700"}`}
                 >
-                  {org.courseName} – Sem {org.semester} ({org.departmentName})
+                  {org.courseName} – {SEMESTER_MAP[org.semester] || org.semester.replace("_SEMESTER", "")} ({org.departmentName}) Sect: {org.section}
                 </Text>
                 {organizationId === org.id && (
                   <Ionicons name="checkmark-circle" size={20} color="#4f46e5" />
@@ -1100,9 +1033,10 @@ function ProfessorsTab() {
 // ─── Courses Tab ──────────────────────────────────────────────────────────────
 
 function CoursesTab() {
-  const { courses, deleteCourse } = useCoursesStore();
+  const { courses, deleteCourse, updateCourse } = useCoursesStore();
+  const { users } = useUsersStore();
+  const { orgs } = useOrgsStore();
   const [editingCourse, setEditingCourse] = useState<any>(null);
-  const { updateCourse } = useCoursesStore();
 
   const handleEditSave = async (courseData: any) => {
     try {
@@ -1138,45 +1072,64 @@ function CoursesTab() {
         data={courses}
         keyExtractor={(c) => c.id}
         scrollEnabled={false}
-        renderItem={({ item: course }) => (
-          <View className="bg-white rounded-2xl p-4 mb-3 border border-gray-100 shadow-sm">
-            <View className="flex-row items-center justify-between">
-              <View className="flex-1">
-                <View className="flex-row items-center gap-x-2">
-                  <View className="bg-indigo-600 px-2 py-0.5 rounded-md">
-                    <Text className="text-white text-xs font-bold">
-                      {course.code}
+        renderItem={({ item: course }) => {
+          const prof = users.find((u) => u.id === course.professorId);
+          const profName = prof ? prof.name : "Unknown Faculty";
+          const org = orgs.find((o) => o.id === course.organizationId);
+          const orgName = org
+            ? `${org.courseName} - ${SEMESTER_MAP[org.semester] || org.semester.replace("_SEMESTER", "")} (${org.departmentName}) Sect: ${org.section}`
+            : "Unknown Class";
+
+          return (
+            <View className="bg-white rounded-2xl p-4 mb-3 border border-gray-100 shadow-sm">
+              <View className="flex-row items-center justify-between">
+                <View className="flex-1 pr-2">
+                  <View className="flex-row items-center gap-x-2">
+                    <View className="bg-indigo-600 px-2 py-0.5 rounded-md">
+                      <Text className="text-white text-xs font-bold">
+                        {course.code}
+                      </Text>
+                    </View>
+                    <Text
+                      className="text-base font-bold text-gray-900 flex-1"
+                      numberOfLines={1}
+                    >
+                      {course.name}
                     </Text>
                   </View>
-                  <Text
-                    className="text-base font-bold text-gray-900 flex-1"
-                    numberOfLines={1}
-                  >
-                    {course.name}
-                  </Text>
+                  
+                  <View className="mt-2 gap-y-1.5">
+                    <View className="flex-row items-center gap-x-3">
+                      <View className="flex-row items-center gap-x-1 shrink">
+                        <Ionicons name="person-outline" size={13} color="#6b7280" />
+                        <Text className="text-xs text-gray-500" numberOfLines={1}>
+                          {profName}
+                        </Text>
+                      </View>
+                      <View className="flex-row items-center gap-x-1 shrink">
+                        <Ionicons name="star-outline" size={13} color="#6b7280" />
+                        <Text className="text-xs text-gray-500">
+                          {course.credit || "N/A"} credits
+                        </Text>
+                      </View>
+                    </View>
+                    
+                    <View className="flex-row items-center gap-x-1">
+                      <Ionicons name="school-outline" size={13} color="#6b7280" />
+                      <Text className="text-xs text-gray-500" numberOfLines={1}>
+                        {orgName}
+                      </Text>
+                    </View>
+                  </View>
                 </View>
-                <View className="flex-row gap-x-3 mt-1.5">
-                  <View className="flex-row items-center gap-x-1">
-                    <Ionicons name="star-outline" size={13} color="#6b7280" />
-                    <Text className="text-xs text-gray-500">
-                      {course.credit || "N/A"} credits
-                    </Text>
-                  </View>
-                  <View className="flex-row items-center gap-x-1">
-                    <Ionicons name="person-outline" size={13} color="#6b7280" />
-                    <Text className="text-xs text-gray-500">
-                      Faculty ID: {course.professorId}
-                    </Text>
-                  </View>
-                </View>
+                <RowActions
+                  onEdit={() => setEditingCourse(course)}
+                  onDelete={() => handleDelete(course)}
+                />
               </View>
-              <RowActions
-                onEdit={() => setEditingCourse(course)}
-                onDelete={() => handleDelete(course)}
-              />
             </View>
-          </View>
-        )}
+          );
+        }}
       />
       {/* Edit Course Modal */}
       <AddCourseModal
@@ -1276,7 +1229,7 @@ export default function AdminPage() {
   const [addClassVisible, setAddClassVisible] = useState(false);
   const [addCourseVisible, setAddCourseVisible] = useState(false);
   const { loggedInUser } = useAuth();
-  const { createCourse } = useCoursesStore();
+  const { createCourse, courses } = useCoursesStore();
   const { createOrg, orgs } = useOrgsStore();
 
   const handleAddCourse = async (courseData: any) => {
@@ -1352,13 +1305,13 @@ export default function AdminPage() {
     },
     {
       label: "Professors",
-      value: PROFESSORS.length,
+      value: storeUsers.filter((u) => u.role === "PROFESSOR").length,
       icon: "person-outline",
       color: "#7c3aed",
     },
     {
       label: "Courses",
-      value: COURSES.length,
+      value: courses.length,
       icon: "book-outline",
       color: "#059669",
     },

@@ -45,7 +45,7 @@ enum CourseClassType {
 
 model Courses {
   id                  String                @id @default(uuid())
-  code                String                @unique
+  code                String
   name                String
   credit              Float                 @default(0.0)
   description         String?
