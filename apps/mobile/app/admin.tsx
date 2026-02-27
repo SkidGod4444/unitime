@@ -559,8 +559,8 @@ function AddCourseModal({
   const [classType, setClassType] = useState(
     initialData?.classType || "LECTURE",
   );
-  const [professorId, setProfessorId] = useState(
-    initialData?.professorId || "",
+  const [professorId, setProfessorId] = useState<string | null>(
+    initialData?.professorId || null,
   );
   const [organizationId, setOrganizationId] = useState(
     initialData?.organizationId || "",
@@ -581,14 +581,14 @@ function AddCourseModal({
       setDescription("");
       setCreditStr("");
       setClassType("LECTURE");
-      setProfessorId("");
+      setProfessorId(null);
       setOrganizationId("");
     }
   }, [initialData, visible]);
 
   const handleSave = () => {
     const cred = parseFloat(creditStr);
-    if (!name || !code || isNaN(cred) || !professorId || !organizationId) {
+    if (!name || !code || isNaN(cred) || !organizationId) {
       Alert.alert("Error", "Please fill all required fields correctly.");
       return;
     }
@@ -598,7 +598,7 @@ function AddCourseModal({
       description,
       credit: cred,
       classType,
-      professorId,
+      professorId: professorId || null,
       organizationId,
     });
     onClose();
@@ -692,9 +692,16 @@ function AddCourseModal({
             ))}
           </View>
 
-          <Text className="text-xs font-semibold text-gray-500 uppercase mb-2">
-            Professor
-          </Text>
+          <View className="flex-row items-center justify-between mt-4 mb-2">
+            <Text className="text-xs font-semibold text-gray-500 uppercase">
+              Professor (Optional)
+            </Text>
+            {professorId && (
+              <TouchableOpacity onPress={() => setProfessorId(null)}>
+                <Text className="text-xs font-semibold text-red-500">Unassign</Text>
+              </TouchableOpacity>
+            )}
+          </View>
           {professors.length === 0 ? (
             <Text className="text-sm text-gray-500 mb-4">
               No professors available. Please add a professor first.
@@ -703,7 +710,7 @@ function AddCourseModal({
             professors.map((prof) => (
               <Pressable
                 key={prof.id}
-                onPress={() => setProfessorId(prof.id)}
+                onPress={() => setProfessorId(prof.id === professorId ? null : prof.id)}
                 className={`flex-row items-center justify-between p-4 rounded-xl border mb-2 ${professorId === prof.id ? "bg-indigo-50 border-indigo-300" : "bg-white border-gray-200"}`}
               >
                 <Text

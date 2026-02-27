@@ -11,7 +11,7 @@ type CoursesState = {
   createCourse: (
     data: Omit<Course, "id"> & {
       classType: string;
-      professorId: string;
+      professorId: string | null;
       organizationId: string;
       userId: string;
       description?: string;
@@ -22,7 +22,7 @@ type CoursesState = {
     data: Partial<
       Omit<Course, "id"> & {
         classType: string;
-        professorId: string;
+        professorId: string | null;
         organizationId: string;
         description?: string;
       }

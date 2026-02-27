@@ -64,7 +64,6 @@ courses.post("/", async (c) => {
     !code ||
     !credit ||
     !classType ||
-    !professorId ||
     !organizationId ||
     !userId
   ) {
@@ -77,7 +76,7 @@ courses.post("/", async (c) => {
       description,
       credit,
       classType,
-      professorId,
+      professorId: professorId || null,
       organizationId,
     },
   });
@@ -110,7 +109,7 @@ courses.put("/:id", async (c) => {
       description: body.description,
       credit: body.credit,
       classType: body.classType,
-      professorId: body.professorId,
+      professorId: body.professorId || null,
       organizationId: body.organizationId,
     },
   });
