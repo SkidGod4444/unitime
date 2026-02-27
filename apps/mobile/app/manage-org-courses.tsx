@@ -2,7 +2,7 @@ import { useAuth } from "@/contexts/auth.cntxt";
 import { useOrgsStore, useProfilesStore, useUsersStore } from "@/lib/store";
 import { useCoursesStore } from "@/lib/store/courses";
 import { Ionicons } from "@expo/vector-icons";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
     ActivityIndicator,
@@ -11,6 +11,7 @@ import {
     RefreshControl,
     Switch,
     Text,
+    TouchableOpacity,
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -36,6 +37,7 @@ const SEMESTER_MAP: Record<string, string> = {
 };
 
 export default function ManageOrgCoursesScreen() {
+  const router = useRouter();
   const { loggedInUser } = useAuth();
   const { profiles, fetchProfiles } = useProfilesStore();
   const { users } = useUsersStore();
@@ -125,43 +127,67 @@ export default function ManageOrgCoursesScreen() {
     const typeColor = CLASS_TYPE_COLORS[typeLabel] || "bg-gray-100 text-gray-800";
 
     return (
-      <View className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm mb-4">
-        <View className="flex-row justify-between items-start mb-3">
-          <View className="flex-1 pr-4">
-            <Text className="text-lg font-bold text-gray-900 mb-1" numberOfLines={2}>
-              {item.name}
-            </Text>
-            <View className="flex-row items-center gap-2 mb-2">
-              <Text className="text-sm font-semibold text-indigo-600">
-                {item.code}
-              </Text>
-              <View className="w-1 h-1 rounded-full bg-gray-300" />
-              <View className={`px-2 py-0.5 rounded-md ${typeColor.split(' ')[0]}`}>
-                <Text className={`text-[10px] font-bold ${typeColor.split(' ')[1]}`}>
-                  {typeLabel}
-                </Text>
-              </View>
-              <View className="w-1 h-1 rounded-full bg-gray-300" />
-              <Text className="text-xs font-medium text-gray-500">
-                  {semesterDisplay}
-              </Text>
-            </View>
+      <View className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm mb-5">
+        <View className="flex-row items-start justify-between mb-5">
+          <View className="flex-row flex-1 mr-3">
+             <View className="h-12 w-12 bg-indigo-50 rounded-2xl justify-center items-center mr-3 mt-1">
+               <Ionicons name="book" size={22} color="#4f46e5" />
+             </View>
+             <View className="flex-1 pr-1">
+               <Text className="text-lg font-bold text-gray-900 mb-1 leading-6" numberOfLines={2}>
+                 {item.name}
+               </Text>
+               <View className="flex-row flex-wrap items-center gap-2">
+                 <Text className="text-sm font-bold text-indigo-600">
+                   {item.code}
+                 </Text>
+                 <View className="w-1 h-1 rounded-full bg-gray-300" />
+                 <View className={`px-2 py-0.5 rounded-md ${typeColor.split(' ')[0]}`}>
+                   <Text className={`text-[10px] font-bold ${typeColor.split(' ')[1]}`}>
+                     {typeLabel}
+                   </Text>
+                 </View>
+               </View>
+             </View>
           </View>
         </View>
 
-        <View className="flex-row flex-wrap gap-4 mb-4">
-          <View className="flex-row items-center gap-1.5">
-            <Ionicons name="person-outline" size={14} color="#6b7280" />
-            <Text className="text-sm font-medium text-gray-700">
-              {professor ? professor.name : "Unassigned"}
-            </Text>
-          </View>
-          <View className="flex-row items-center gap-1.5">
-            <Ionicons name="star-outline" size={14} color="#6b7280" />
-            <Text className="text-sm font-medium text-gray-700">
-              {item.credit ? `${item.credit} Credits` : "N/A"}
-            </Text>
-          </View>
+        <View className="bg-gray-50 p-4 rounded-2xl border border-gray-100 mb-5 flex-row flex-wrap justify-between items-center gap-y-3">
+            <View className="flex-row items-center w-[48%]">
+              <View className="w-7 h-7 rounded-full bg-white items-center justify-center mr-2 shadow-sm border border-gray-100">
+                <Ionicons name="person" size={12} color="#4b5563" />
+              </View>
+              <Text className="text-xs text-gray-700 font-bold flex-1" numberOfLines={1}>
+                {professor ? professor.name : 'Unassigned'}
+              </Text>
+            </View>
+            
+            <View className="flex-row items-center w-[48%] pl-2">
+              <View className="w-7 h-7 rounded-full bg-white items-center justify-center mr-2 shadow-sm border border-gray-100">
+                <Ionicons name="calendar" size={12} color="#4b5563" />
+              </View>
+              <Text className="text-xs text-gray-700 font-bold flex-1" numberOfLines={1}>
+                {semesterDisplay || 'N/A'}
+              </Text>
+            </View>
+
+            <View className="flex-row items-center w-[48%]">
+              <View className="w-7 h-7 rounded-full bg-white items-center justify-center mr-2 shadow-sm border border-gray-100">
+                <Ionicons name="grid" size={12} color="#4b5563" />
+              </View>
+              <Text className="text-xs text-gray-700 font-bold flex-1" numberOfLines={1}>
+                {org ? `Sec ${org.section}` : 'N/A'}
+              </Text>
+            </View>
+            
+            <View className="flex-row items-center w-[48%] pl-2">
+              <View className="w-7 h-7 rounded-full bg-white items-center justify-center mr-2 shadow-sm border border-gray-100">
+                <Ionicons name="star" size={12} color="#4b5563" />
+              </View>
+              <Text className="text-xs text-gray-700 font-bold flex-1" numberOfLines={1}>
+                {item.credit ? `${item.credit} Credits` : 'No Credits'}
+              </Text>
+            </View>
         </View>
 
         <View className={`p-4 rounded-2xl border flex-row justify-between items-center ${isEnrollmentOpen ? 'bg-indigo-50 border-indigo-100' : 'bg-gray-50 border-gray-100'}`}>
@@ -193,15 +219,24 @@ export default function ManageOrgCoursesScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
-      <Stack.Screen
-        options={{
-          headerTitle: "Organization Courses",
-          headerTitleStyle: { fontFamily: "Lora-Bold", fontSize: 20 },
-          headerShadowVisible: false,
-          headerStyle: { backgroundColor: "#f9fafb" },
-          headerShown: true,
-        }}
-      />
+      <Stack.Screen options={{ headerShown: false }} />
+      
+      <View className="flex-row items-center px-6 pt-2 pb-4">
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="p-3 bg-gray-100 dark:bg-gray-800 rounded-full active:opacity-70 mr-4"
+        >
+          <Ionicons name="arrow-back-outline" size={24} color="#374151" />
+        </TouchableOpacity>
+        <View className="flex-1">
+          <Text className="text-sm font-medium text-gray-500 uppercase tracking-wider">
+            Manage Settings
+          </Text>
+          <Text className="text-3xl font-bold text-gray-900 dark:text-white">
+            Class Courses
+          </Text>
+        </View>
+      </View>
       
       <FlatList
         data={filteredCourses}

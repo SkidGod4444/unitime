@@ -1,8 +1,8 @@
 import { useAuth } from "@/contexts/auth.cntxt";
 import { useStore } from "@/contexts/store.cntxt";
-import { useOrgsStore, useProfilesStore } from "@/lib/store";
+import { useCoursesStore, useOrgsStore, useProfilesStore } from "@/lib/store";
 import { Ionicons } from "@expo/vector-icons";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
     ActivityIndicator,
@@ -14,7 +14,6 @@ import {
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useCoursesStore } from "../lib/store/courses";
 import { Course } from "../lib/store/timetable";
 
 const CLASS_TYPE_COLORS: Record<string, string> = {
@@ -37,6 +36,7 @@ const SEMESTER_MAP: Record<string, string> = {
 };
 
 export default function MyCoursesScreen() {
+  const router = useRouter();
   const { loggedInUser } = useAuth();
   const { refresh } = useStore();
   const { orgs } = useOrgsStore();
@@ -52,7 +52,7 @@ export default function MyCoursesScreen() {
     try {
       setActionLoadingId(courseId);
       const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
-      const res = await fetch(`${origin}/v1/courses/${courseId}/enroll`, {
+      const res = await fetch(`${origin}/courses/${courseId}/enroll`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: loggedInUser?.id }),
@@ -82,7 +82,7 @@ export default function MyCoursesScreen() {
             try {
               setActionLoadingId(courseId);
               const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
-              const res = await fetch(`${origin}/v1/courses/${courseId}/enroll`, {
+              const res = await fetch(`${origin}/courses/${courseId}/enroll`, {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ userId: loggedInUser?.id }),
@@ -120,69 +120,81 @@ export default function MyCoursesScreen() {
     const typeColor = CLASS_TYPE_COLORS[typeLabel] || "bg-gray-100 text-gray-800";
 
     return (
-      <View className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm mb-4">
+      <View className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm mb-5">
         {/* Course Header */}
-        <View className="flex-row justify-between items-start mb-4">
-          <View className="flex-1 pr-4">
-            <Text className="text-lg font-bold text-gray-900 mb-1" numberOfLines={2}>
-              {item.name}
-            </Text>
-            <View className="flex-row items-center gap-2 mb-2">
-              <Text className="text-sm font-semibold text-indigo-600">
-                {item.code}
-              </Text>
-              <View className="w-1 h-1 rounded-full bg-gray-300" />
-              <View className={`px-2 py-0.5 rounded-md ${typeColor.split(' ')[0]}`}>
-                <Text className={`text-[10px] font-bold ${typeColor.split(' ')[1]}`}>
-                  {typeLabel}
-                </Text>
-              </View>
-              {semesterDisplay && (
-                <>
-                  <View className="w-1 h-1 rounded-full bg-gray-300" />
-                  <Text className="text-xs font-medium text-gray-500">
-                      {semesterDisplay}
-                  </Text>
-                </>
-              )}
-            </View>
+        <View className="flex-row items-start justify-between mb-5">
+          <View className="flex-row flex-1 mr-3">
+             <View className="h-12 w-12 bg-indigo-50 rounded-2xl justify-center items-center mr-3 mt-1">
+               <Ionicons name="book" size={22} color="#4f46e5" />
+             </View>
+             <View className="flex-1 pr-1">
+               <Text className="text-lg font-bold text-gray-900 mb-1 leading-6" numberOfLines={2}>
+                 {item.name}
+               </Text>
+               <View className="flex-row flex-wrap items-center gap-2">
+                 <Text className="text-sm font-bold text-indigo-600">
+                   {item.code}
+                 </Text>
+                 <View className="w-1 h-1 rounded-full bg-gray-300" />
+                 <View className={`px-2 py-0.5 rounded-md ${typeColor.split(' ')[0]}`}>
+                   <Text className={`text-[10px] font-bold ${typeColor.split(' ')[1]}`}>
+                     {typeLabel}
+                   </Text>
+                 </View>
+               </View>
+             </View>
           </View>
           
           {userEnrollment ? (
-            <View className={`px-3 py-1 rounded-full border ${userEnrollment.status === 'APPROVED' ? 'bg-green-100 border-green-200' : userEnrollment.status === 'PENDING' ? 'bg-amber-100 border-amber-200' : 'bg-red-100 border-red-200'}`}>
+            <View className={`px-2.5 py-1 rounded-lg border ${userEnrollment.status === 'APPROVED' ? 'bg-green-50 border-green-200' : userEnrollment.status === 'PENDING' ? 'bg-amber-50 border-amber-200' : 'bg-red-50 border-red-200'}`}>
               <Text className={`text-[10px] font-bold uppercase ${userEnrollment.status === 'APPROVED' ? 'text-green-700' : userEnrollment.status === 'PENDING' ? 'text-amber-700' : 'text-red-700'}`}>
                 {userEnrollment.status === 'APPROVED' ? 'Enrolled' : userEnrollment.status}
               </Text>
             </View>
           ) : (
-            <View className="bg-gray-100 border border-gray-200 px-3 py-1 rounded-full">
-              <Text className="text-[10px] font-bold text-gray-600 uppercase">Available</Text>
+            <View className="bg-gray-50 border border-gray-200 px-2.5 py-1 rounded-lg">
+              <Text className="text-[10px] font-bold text-gray-500 uppercase">Available</Text>
             </View>
           )}
         </View>
 
-        {/* Organization / Detailed Info Card */}
-        <View className="bg-gray-50 p-3.5 rounded-2xl border border-gray-100 mb-5">
-          {org ? (
-             <View className="flex-row flex-wrap items-center gap-x-2 gap-y-1">
-               <View className="flex-row items-center"><Ionicons name="business-outline" size={12} color="#6b7280" /><Text className="text-xs text-gray-700 ml-1 font-medium">{org.departmentName}</Text></View>
-               <View className="w-1 h-1 rounded-full bg-gray-300" />
-               <Text className="text-xs text-gray-700 font-medium">{org.courseName}</Text>
-               <View className="w-1 h-1 rounded-full bg-gray-300" />
-               <Text className="text-xs text-gray-700 font-medium">Sec {org.section}</Text>
-               {!!item.credit && (
-                 <>
-                   <View className="w-1 h-1 rounded-full bg-gray-300" />
-                   <View className="flex-row items-center gap-x-1">
-                     <Ionicons name="star-outline" size={12} color="#6b7280" />
-                     <Text className="text-xs text-gray-700 font-medium">{item.credit} Credits</Text>
-                   </View>
-                 </>
-               )}
-             </View>
-          ) : (
-            <Text className="text-sm text-gray-400 italic">No class organization linked.</Text>
-          )}
+        {/* Detailed Grid Info */}
+        <View className="bg-gray-50 p-4 rounded-2xl border border-gray-100 mb-5 flex-row flex-wrap justify-between items-center gap-y-3">
+            <View className="flex-row items-center w-[48%]">
+              <View className="w-7 h-7 rounded-full bg-white items-center justify-center mr-2 shadow-sm border border-gray-100">
+                <Ionicons name="business" size={12} color="#4b5563" />
+              </View>
+              <Text className="text-xs text-gray-700 font-bold flex-1" numberOfLines={1}>
+                {org ? org.departmentName : 'No Dept'}
+              </Text>
+            </View>
+            
+            <View className="flex-row items-center w-[48%] pl-2">
+              <View className="w-7 h-7 rounded-full bg-white items-center justify-center mr-2 shadow-sm border border-gray-100">
+                <Ionicons name="calendar" size={12} color="#4b5563" />
+              </View>
+              <Text className="text-xs text-gray-700 font-bold flex-1" numberOfLines={1}>
+                {semesterDisplay || 'N/A'}
+              </Text>
+            </View>
+
+            <View className="flex-row items-center w-[48%]">
+              <View className="w-7 h-7 rounded-full bg-white items-center justify-center mr-2 shadow-sm border border-gray-100">
+                <Ionicons name="grid" size={12} color="#4b5563" />
+              </View>
+              <Text className="text-xs text-gray-700 font-bold flex-1" numberOfLines={1}>
+                {org ? `Sec ${org.section}` : 'N/A'}
+              </Text>
+            </View>
+            
+            <View className="flex-row items-center w-[48%] pl-2">
+              <View className="w-7 h-7 rounded-full bg-white items-center justify-center mr-2 shadow-sm border border-gray-100">
+                <Ionicons name="star" size={12} color="#4b5563" />
+              </View>
+              <Text className="text-xs text-gray-700 font-bold flex-1" numberOfLines={1}>
+                {item.credit ? `${item.credit} Credits` : 'No Credits'}
+              </Text>
+            </View>
         </View>
 
         {/* Actions */}
@@ -225,15 +237,24 @@ export default function MyCoursesScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
-      <Stack.Screen
-        options={{
-          headerTitle: "My Courses",
-          headerTitleStyle: { fontFamily: "Lora-Bold", fontSize: 20 },
-          headerShadowVisible: false,
-          headerStyle: { backgroundColor: "#f9fafb" },
-          headerShown: true,
-        }}
-      />
+      <Stack.Screen options={{ headerShown: false }} />
+      
+      <View className="flex-row items-center px-6 pt-2 pb-4">
+        <TouchableOpacity
+          onPress={() => router.back()}
+          className="p-3 bg-gray-100 dark:bg-gray-800 rounded-full active:opacity-70 mr-4"
+        >
+          <Ionicons name="arrow-back-outline" size={24} color="#374151" />
+        </TouchableOpacity>
+        <View className="flex-1">
+          <Text className="text-sm font-medium text-gray-500 uppercase tracking-wider">
+            Explore & Enroll
+          </Text>
+          <Text className="text-3xl font-bold text-gray-900 dark:text-white">
+            My Courses
+          </Text>
+        </View>
+      </View>
       
       {loading ? (
         <View className="flex-1 justify-center items-center">
