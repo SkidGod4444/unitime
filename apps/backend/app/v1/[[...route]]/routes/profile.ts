@@ -4,7 +4,6 @@ import { Hono } from "hono";
 
 const profile = new Hono();
 
-
 profile.post("/create", async (c) => {
   let body;
   try {
@@ -93,6 +92,5 @@ profile.get("/:userId", async (c) => {
     200,
   );
 });
-
 
 export default profile;

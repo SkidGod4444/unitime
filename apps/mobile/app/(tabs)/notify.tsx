@@ -1,7 +1,13 @@
 import { useRefresh } from "@/hooks/use-refresh";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { RefreshControl, SectionList, Text, TouchableOpacity, View } from "react-native";
+import {
+  RefreshControl,
+  SectionList,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type NotificationItem = {

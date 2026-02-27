@@ -8,8 +8,26 @@ type CoursesState = {
   setCourses: (courses: Course[]) => void;
   loading: boolean;
   fetchCourses: () => Promise<void>;
-  createCourse: (data: Omit<Course, "id"> & { classType: string; professorId: string; organizationId: string; userId: string; description?: string }) => Promise<void>;
-  updateCourse: (id: string, data: Partial<Omit<Course, "id"> & { classType: string; professorId: string; organizationId: string; description?: string }>) => Promise<void>;
+  createCourse: (
+    data: Omit<Course, "id"> & {
+      classType: string;
+      professorId: string;
+      organizationId: string;
+      userId: string;
+      description?: string;
+    },
+  ) => Promise<void>;
+  updateCourse: (
+    id: string,
+    data: Partial<
+      Omit<Course, "id"> & {
+        classType: string;
+        professorId: string;
+        organizationId: string;
+        description?: string;
+      }
+    >,
+  ) => Promise<void>;
   deleteCourse: (id: string) => Promise<void>;
 };
 
@@ -22,7 +40,8 @@ export const useCoursesStore = create<CoursesState>()(
       fetchCourses: async () => {
         set({ loading: true });
         try {
-          const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+          const origin =
+            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
           const res = await fetch(`${origin}/courses`);
           const data = await res.json();
           if (res.ok && data.success) {
@@ -31,14 +50,15 @@ export const useCoursesStore = create<CoursesState>()(
             set({ courses: [] });
           }
         } catch (error) {
-           console.error("Error fetching courses:", error);
+          console.error("Error fetching courses:", error);
         } finally {
           set({ loading: false });
         }
       },
       createCourse: async (courseData) => {
         try {
-          const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+          const origin =
+            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
           const res = await fetch(`${origin}/courses`, {
             method: "POST",
             headers: {
@@ -60,7 +80,8 @@ export const useCoursesStore = create<CoursesState>()(
       },
       updateCourse: async (id, courseData) => {
         try {
-          const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+          const origin =
+            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
           const res = await fetch(`${origin}/courses/${id}`, {
             method: "PUT",
             headers: {
@@ -81,7 +102,8 @@ export const useCoursesStore = create<CoursesState>()(
       },
       deleteCourse: async (id) => {
         try {
-          const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+          const origin =
+            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
           const res = await fetch(`${origin}/courses/${id}`, {
             method: "DELETE",
           });
@@ -95,7 +117,7 @@ export const useCoursesStore = create<CoursesState>()(
           console.error("Error deleting course:", error);
           throw error;
         }
-      }
+      },
     }),
     {
       name: "courses-store",

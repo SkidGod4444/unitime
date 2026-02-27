@@ -1,7 +1,13 @@
 import { useRefresh } from "@/hooks/use-refresh";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
-import { RefreshControl, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  RefreshControl,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const FILTERS = ["All", "Attendance", "Assignments", "System"];

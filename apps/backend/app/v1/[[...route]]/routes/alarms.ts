@@ -43,7 +43,13 @@ alarms.post("/", async (c) => {
 
   try {
     body = await c.req.json();
-    if (!body.userId || !body.label || !body.courseCode || !body.time || !body.days) {
+    if (
+      !body.userId ||
+      !body.label ||
+      !body.courseCode ||
+      !body.time ||
+      !body.days
+    ) {
       return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT);
     }
   } catch {
@@ -74,7 +80,14 @@ alarms.post("/", async (c) => {
     );
   } catch (error: unknown) {
     const e = error as { code?: string; meta?: unknown; message?: string };
-    console.error("Error creating alarm — code:", e?.code, "meta:", JSON.stringify(e?.meta), "msg:", e?.message);
+    console.error(
+      "Error creating alarm — code:",
+      e?.code,
+      "meta:",
+      JSON.stringify(e?.meta),
+      "msg:",
+      e?.message,
+    );
     return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
   }
 });

@@ -16,20 +16,25 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../contexts/auth.cntxt";
 import { useRefresh } from "../hooks/use-refresh";
-import { useCoursesStore, useOrgsStore, useProfilesStore, useUsersStore } from "../lib/store";
+import {
+    useCoursesStore,
+    useOrgsStore,
+    useProfilesStore,
+    useUsersStore,
+} from "../lib/store";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Role = "ADMIN" | "PROFESSOR" | "REPRESENTATIVE" | "STUDENT";
 
-type User = { id: string; name: string; email: string; role: Role; admissionNumber?: string | null };
-type ClassItem = {
+type User = {
   id: string;
   name: string;
-  section: string;
-  strength: number;
-  year: number;
+  email: string;
+  role: Role;
+  admissionNumber?: string | null;
 };
+
 type Professor = { id: string; name: string; subject: string; email: string };
 type Course = {
   id: string;
@@ -47,14 +52,22 @@ type Attendance = {
   total: number;
 };
 
+const SEMESTER_MAP: Record<string, string> = {
+  FIRST_SEMESTER: "Sem I",
+  SECOND_SEMESTER: "Sem II",
+  THIRD_SEMESTER: "Sem III",
+  FOURTH_SEMESTER: "Sem IV",
+  FIFTH_SEMESTER: "Sem V",
+  SIXTH_SEMESTER: "Sem VI",
+  SEVENTH_SEMESTER: "Sem VII",
+  EIGHTH_SEMESTER: "Sem VIII",
+  NINTH_SEMESTER: "Sem IX",
+  TENTH_SEMESTER: "Sem X",
+};
+
 // ─── Dummy Data ───────────────────────────────────────────────────────────────
 
-const CLASSES: ClassItem[] = [
-  { id: "c1", name: "B.Tech CSE", section: "A", strength: 62, year: 2 },
-  { id: "c2", name: "B.Tech CSE", section: "B", strength: 58, year: 2 },
-  { id: "c3", name: "B.Tech IT", section: "A", strength: 55, year: 3 },
-  { id: "c4", name: "B.Tech ECE", section: "A", strength: 60, year: 1 },
-];
+
 
 const PROFESSORS: Professor[] = [
   {
@@ -225,7 +238,7 @@ function RolesTab({ onAddUserPress }: { onAddUserPress: () => void }) {
         body: JSON.stringify({ role: targetRole }),
       });
       if (!res.ok) throw new Error("Failed to change role");
-      // Optionally trigger a store refresh here by calling fetchUsers() 
+      // Optionally trigger a store refresh here by calling fetchUsers()
       // but modifying the store locally provides a snappier experience:
       // useUsersStore.getState().setUsers(...)
       setRoleModal(null);
@@ -236,29 +249,40 @@ function RolesTab({ onAddUserPress }: { onAddUserPress: () => void }) {
   };
 
   const handleDelete = (user: User) => {
-    Alert.alert("Deactivate User", `Deactivate ${user.name}? They will lose admin access and be marked inactive.`, [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Deactivate",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
-            const res = await fetch(`${origin}/admin/users/${user.id}/status`, {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ status: "INACTIVE" }),
-            });
-            if (!res.ok) throw new Error("Failed to deactivate user");
-            
-            updateUser(user.id, { status: "INACTIVE" });
-            Alert.alert("Success", "User deactivated successfully.");
-          } catch (error) {
-            Alert.alert("Error", "Could not deactivate user. Please try again.");
-          }
+    Alert.alert(
+      "Deactivate User",
+      `Deactivate ${user.name}? They will lose admin access and be marked inactive.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Deactivate",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const origin =
+                process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
+              const res = await fetch(
+                `${origin}/admin/users/${user.id}/status`,
+                {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ status: "INACTIVE" }),
+                },
+              );
+              if (!res.ok) throw new Error("Failed to deactivate user");
+
+              updateUser(user.id, { status: "INACTIVE" });
+              Alert.alert("Success", "User deactivated successfully.");
+            } catch {
+              Alert.alert(
+                "Error",
+                "Could not deactivate user. Please try again.",
+              );
+            }
+          },
         },
-      },
-    ]);
+      ],
+    );
   };
 
   return (
@@ -593,11 +617,21 @@ function AddCourseModal({
 
   const [name, setName] = useState(initialData?.name || "");
   const [code, setCode] = useState(initialData?.code || "");
-  const [description, setDescription] = useState(initialData?.description || "");
-  const [creditStr, setCreditStr] = useState(initialData?.credit?.toString() || "");
-  const [classType, setClassType] = useState(initialData?.classType || "LECTURE");
-  const [professorId, setProfessorId] = useState(initialData?.professorId || "");
-  const [organizationId, setOrganizationId] = useState(initialData?.organizationId || "");
+  const [description, setDescription] = useState(
+    initialData?.description || "",
+  );
+  const [creditStr, setCreditStr] = useState(
+    initialData?.credit?.toString() || "",
+  );
+  const [classType, setClassType] = useState(
+    initialData?.classType || "LECTURE",
+  );
+  const [professorId, setProfessorId] = useState(
+    initialData?.professorId || "",
+  );
+  const [organizationId, setOrganizationId] = useState(
+    initialData?.organizationId || "",
+  );
 
   React.useEffect(() => {
     if (initialData) {
@@ -625,65 +659,154 @@ function AddCourseModal({
       Alert.alert("Error", "Please fill all required fields correctly.");
       return;
     }
-    onAdd({ name, code, description, credit: cred, classType, professorId, organizationId });
+    onAdd({
+      name,
+      code,
+      description,
+      credit: cred,
+      classType,
+      professorId,
+      organizationId,
+    });
     onClose();
   };
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
+    >
       <SafeAreaView className="flex-1 bg-gray-50">
         <View className="flex-row items-center justify-between px-4 py-3 bg-white border-b border-gray-100">
           <TouchableOpacity onPress={onClose} className="p-1">
             <Ionicons name="close" size={22} color="#6b7280" />
           </TouchableOpacity>
-          <Text className="text-base font-bold text-gray-900">{initialData ? "Edit Course" : "Add Course"}</Text>
-          <TouchableOpacity onPress={handleSave} className="px-4 py-1.5 rounded-lg bg-indigo-600">
+          <Text className="text-base font-bold text-gray-900">
+            {initialData ? "Edit Course" : "Add Course"}
+          </Text>
+          <TouchableOpacity
+            onPress={handleSave}
+            className="px-4 py-1.5 rounded-lg bg-indigo-600"
+          >
             <Text className="font-bold text-sm text-white">Save</Text>
           </TouchableOpacity>
         </View>
 
-        <ScrollView className="flex-1 px-4 pt-4" keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-          <Text className="text-xs font-semibold text-gray-500 uppercase mb-2">Course Code</Text>
-          <TextInput value={code} onChangeText={setCode} placeholder="e.g. CS101" className="bg-white border border-gray-200 rounded-xl px-4 py-3 mb-4 text-gray-800" />
+        <ScrollView
+          className="flex-1 px-4 pt-4"
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <Text className="text-xs font-semibold text-gray-500 uppercase mb-2">
+            Course Code
+          </Text>
+          <TextInput
+            value={code}
+            onChangeText={setCode}
+            placeholder="e.g. CS101"
+            className="bg-white border border-gray-200 rounded-xl px-4 py-3 mb-4 text-gray-800"
+          />
 
-          <Text className="text-xs font-semibold text-gray-500 uppercase mb-2">Course Name</Text>
-          <TextInput value={name} onChangeText={setName} placeholder="e.g. Data Structures" className="bg-white border border-gray-200 rounded-xl px-4 py-3 mb-4 text-gray-800" />
+          <Text className="text-xs font-semibold text-gray-500 uppercase mb-2">
+            Course Name
+          </Text>
+          <TextInput
+            value={name}
+            onChangeText={setName}
+            placeholder="e.g. Data Structures"
+            className="bg-white border border-gray-200 rounded-xl px-4 py-3 mb-4 text-gray-800"
+          />
 
-          <Text className="text-xs font-semibold text-gray-500 uppercase mb-2">Description</Text>
-          <TextInput value={description} onChangeText={setDescription} placeholder="Optional description" className="bg-white border border-gray-200 rounded-xl px-4 py-3 mb-4 text-gray-800" />
+          <Text className="text-xs font-semibold text-gray-500 uppercase mb-2">
+            Description
+          </Text>
+          <TextInput
+            value={description}
+            onChangeText={setDescription}
+            placeholder="Optional description"
+            className="bg-white border border-gray-200 rounded-xl px-4 py-3 mb-4 text-gray-800"
+          />
 
-          <Text className="text-xs font-semibold text-gray-500 uppercase mb-2">Credits</Text>
-          <TextInput value={creditStr} onChangeText={setCreditStr} placeholder="e.g. 3.0" keyboardType="numeric" className="bg-white border border-gray-200 rounded-xl px-4 py-3 mb-4 text-gray-800" />
+          <Text className="text-xs font-semibold text-gray-500 uppercase mb-2">
+            Credits
+          </Text>
+          <TextInput
+            value={creditStr}
+            onChangeText={setCreditStr}
+            placeholder="e.g. 3.0"
+            keyboardType="numeric"
+            className="bg-white border border-gray-200 rounded-xl px-4 py-3 mb-4 text-gray-800"
+          />
 
-          <Text className="text-xs font-semibold text-gray-500 uppercase mb-2">Class Type</Text>
+          <Text className="text-xs font-semibold text-gray-500 uppercase mb-2">
+            Class Type
+          </Text>
           <View className="flex-row gap-x-2 mb-4">
             {["LECTURE", "LAB", "TUTORIAL"].map((type) => (
-              <Pressable key={type} onPress={() => setClassType(type)} className={`flex-1 items-center justify-center py-2.5 rounded-lg border ${classType === type ? "bg-indigo-50 border-indigo-300" : "bg-white border-gray-200"}`}>
-                <Text className={`text-sm font-semibold ${classType === type ? "text-indigo-700" : "text-gray-600"}`}>{type}</Text>
+              <Pressable
+                key={type}
+                onPress={() => setClassType(type)}
+                className={`flex-1 items-center justify-center py-2.5 rounded-lg border ${classType === type ? "bg-indigo-50 border-indigo-300" : "bg-white border-gray-200"}`}
+              >
+                <Text
+                  className={`text-sm font-semibold ${classType === type ? "text-indigo-700" : "text-gray-600"}`}
+                >
+                  {type}
+                </Text>
               </Pressable>
             ))}
           </View>
 
-          <Text className="text-xs font-semibold text-gray-500 uppercase mb-2">Professor</Text>
+          <Text className="text-xs font-semibold text-gray-500 uppercase mb-2">
+            Professor
+          </Text>
           {professors.length === 0 ? (
-            <Text className="text-sm text-gray-500 mb-4">No professors available. Please add a professor first.</Text>
+            <Text className="text-sm text-gray-500 mb-4">
+              No professors available. Please add a professor first.
+            </Text>
           ) : (
             professors.map((prof) => (
-              <Pressable key={prof.id} onPress={() => setProfessorId(prof.id)} className={`flex-row items-center justify-between p-4 rounded-xl border mb-2 ${professorId === prof.id ? "bg-indigo-50 border-indigo-300" : "bg-white border-gray-200"}`}>
-                <Text className={`font-semibold ${professorId === prof.id ? "text-indigo-700" : "text-gray-700"}`}>{prof.name}</Text>
-                {professorId === prof.id && <Ionicons name="checkmark-circle" size={20} color="#4f46e5" />}
+              <Pressable
+                key={prof.id}
+                onPress={() => setProfessorId(prof.id)}
+                className={`flex-row items-center justify-between p-4 rounded-xl border mb-2 ${professorId === prof.id ? "bg-indigo-50 border-indigo-300" : "bg-white border-gray-200"}`}
+              >
+                <Text
+                  className={`font-semibold ${professorId === prof.id ? "text-indigo-700" : "text-gray-700"}`}
+                >
+                  {prof.name}
+                </Text>
+                {professorId === prof.id && (
+                  <Ionicons name="checkmark-circle" size={20} color="#4f46e5" />
+                )}
               </Pressable>
             ))
           )}
 
-          <Text className="text-xs font-semibold text-gray-500 uppercase mt-2 mb-2">Organization/Class</Text>
+          <Text className="text-xs font-semibold text-gray-500 uppercase mt-2 mb-2">
+            Organization/Class
+          </Text>
           {orgs.length === 0 ? (
-            <Text className="text-sm text-gray-500 mb-4">No classes available. Please add a class first.</Text>
+            <Text className="text-sm text-gray-500 mb-4">
+              No classes available. Please add a class first.
+            </Text>
           ) : (
             orgs.map((org) => (
-              <Pressable key={org.id} onPress={() => setOrganizationId(org.id)} className={`flex-row items-center justify-between p-4 rounded-xl border mb-2 ${organizationId === org.id ? "bg-indigo-50 border-indigo-300" : "bg-white border-gray-200"}`}>
-                <Text className={`font-semibold ${organizationId === org.id ? "text-indigo-700" : "text-gray-700"}`}>{org.courseName} – Sem {org.semester} ({org.departmentName})</Text>
-                {organizationId === org.id && <Ionicons name="checkmark-circle" size={20} color="#4f46e5" />}
+              <Pressable
+                key={org.id}
+                onPress={() => setOrganizationId(org.id)}
+                className={`flex-row items-center justify-between p-4 rounded-xl border mb-2 ${organizationId === org.id ? "bg-indigo-50 border-indigo-300" : "bg-white border-gray-200"}`}
+              >
+                <Text
+                  className={`font-semibold ${organizationId === org.id ? "text-indigo-700" : "text-gray-700"}`}
+                >
+                  {org.courseName} – Sem {org.semester} ({org.departmentName})
+                </Text>
+                {organizationId === org.id && (
+                  <Ionicons name="checkmark-circle" size={20} color="#4f46e5" />
+                )}
               </Pressable>
             ))
           )}
@@ -694,23 +817,186 @@ function AddCourseModal({
   );
 }
 
+// ─── Add Class (Org) Modal ───────────────────────────────────────────────────
+
+function AddClassModal({
+  visible,
+  onClose,
+  onAdd,
+  initialData,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  onAdd: (data: any) => void;
+  initialData?: any;
+}) {
+  const [departmentName, setDepartmentName] = useState(initialData?.departmentName || "");
+  const [courseName, setCourseName] = useState(initialData?.courseName || "");
+  const [semester, setSemester] = useState(initialData?.semester || "FIRST_SEMESTER");
+  const [sectionStr, setSectionStr] = useState(initialData?.section?.toString() || "");
+
+  React.useEffect(() => {
+    if (initialData) {
+      setDepartmentName(initialData.departmentName);
+      setCourseName(initialData.courseName);
+      setSemester(initialData.semester || "FIRST_SEMESTER");
+      setSectionStr(initialData.section?.toString() || "");
+    } else {
+      setDepartmentName("");
+      setCourseName("");
+      setSemester("FIRST_SEMESTER");
+      setSectionStr("");
+    }
+  }, [initialData, visible]);
+
+  const handleSave = () => {
+    const section = parseInt(sectionStr, 10);
+    if (!departmentName || !courseName || isNaN(section)) {
+      Alert.alert("Error", "Please fill all required fields correctly.");
+      return;
+    }
+    onAdd({
+      departmentName,
+      courseName,
+      semester,
+      section,
+    });
+  };
+
+  const semesters = [
+    "FIRST_SEMESTER",
+    "SECOND_SEMESTER",
+    "THIRD_SEMESTER",
+    "FOURTH_SEMESTER",
+    "FIFTH_SEMESTER",
+    "SIXTH_SEMESTER",
+    "SEVENTH_SEMESTER",
+    "EIGHTH_SEMESTER",
+    "NINTH_SEMESTER",
+    "TENTH_SEMESTER",
+  ];
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
+    >
+      <SafeAreaView className="flex-1 bg-gray-50">
+        <View className="flex-row items-center justify-between px-4 py-3 bg-white border-b border-gray-100">
+          <TouchableOpacity onPress={onClose} className="p-1">
+            <Ionicons name="close" size={22} color="#6b7280" />
+          </TouchableOpacity>
+          <Text className="text-base font-bold text-gray-900">
+            {initialData ? "Edit Class" : "Add Class"}
+          </Text>
+          <TouchableOpacity
+            onPress={handleSave}
+            className="px-4 py-1.5 rounded-lg bg-indigo-600"
+          >
+            <Text className="font-bold text-sm text-white">Save</Text>
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView
+          className="flex-1 px-4 pt-4"
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <Text className="text-xs font-semibold text-gray-500 uppercase mb-2">
+            Department Name
+          </Text>
+          <TextInput
+            value={departmentName}
+            onChangeText={setDepartmentName}
+            placeholder="e.g. CSE"
+            className="bg-white border border-gray-200 rounded-xl px-4 py-3 mb-4 text-gray-800"
+          />
+
+          <Text className="text-xs font-semibold text-gray-500 uppercase mb-2">
+            Course Name
+          </Text>
+          <TextInput
+            value={courseName}
+            onChangeText={setCourseName}
+            placeholder="e.g. B.Tech"
+            className="bg-white border border-gray-200 rounded-xl px-4 py-3 mb-4 text-gray-800"
+          />
+
+          <Text className="text-xs font-semibold text-gray-500 uppercase mb-2">
+            Section
+          </Text>
+          <TextInput
+            value={sectionStr}
+            onChangeText={setSectionStr}
+            placeholder="e.g. 1"
+            keyboardType="numeric"
+            className="bg-white border border-gray-200 rounded-xl px-4 py-3 mb-4 text-gray-800"
+          />
+
+          <Text className="text-xs font-semibold text-gray-500 uppercase mb-2">
+            Semester
+          </Text>
+          {semesters.map((sem) => (
+            <Pressable
+              key={sem}
+              onPress={() => setSemester(sem)}
+              className={`flex-row items-center justify-between p-4 rounded-xl border mb-2 ${semester === sem ? "bg-indigo-50 border-indigo-300" : "bg-white border-gray-200"}`}
+            >
+              <Text
+                className={`font-semibold ${semester === sem ? "text-indigo-700" : "text-gray-700"}`}
+              >
+                {SEMESTER_MAP[sem] || sem.replace("_", " ")}
+              </Text>
+              {semester === sem && (
+                <Ionicons name="checkmark-circle" size={20} color="#4f46e5" />
+              )}
+            </Pressable>
+          ))}
+          <View className="h-10" />
+        </ScrollView>
+      </SafeAreaView>
+    </Modal>
+  );
+}
+
 // ─── Classes Tab ──────────────────────────────────────────────────────────────
 
 function ClassesTab() {
-  const { orgs, removeOrg } = useOrgsStore();
+  const { orgs, deleteOrg, updateOrg } = useOrgsStore();
+  const [editingClass, setEditingClass] = useState<any>(null);
+
+  const handleEditSave = async (classData: any) => {
+    try {
+      await updateOrg(editingClass.id, classData);
+      setEditingClass(null);
+      Alert.alert("Success", "Class updated successfully!");
+    } catch (e: any) {
+      Alert.alert("Error", e.message || "Failed to update class");
+    }
+  };
 
   const handleDelete = (org: any) => {
-    Alert.alert("Delete Class", `Delete ${org.name}?`, [
+    Alert.alert("Delete Class", `Delete ${org.courseName} (${org.departmentName})?`, [
       { text: "Cancel", style: "cancel" },
       {
         text: "Delete",
         style: "destructive",
-        onPress: () => removeOrg(org.id),
+        onPress: async () => {
+          try {
+            await deleteOrg(org.id);
+            Alert.alert("Success", "Class deleted successfully!");
+          } catch (e: any) {
+            Alert.alert("Error", e.message || "Failed to delete class");
+          }
+        },
       },
     ]);
   };
 
   return (
+    <>
     <FlatList
       data={orgs}
       keyExtractor={(c) => c.id}
@@ -720,34 +1006,41 @@ function ClassesTab() {
           <View className="flex-row items-center justify-between">
             <View className="flex-1">
               <Text className="text-base font-bold text-gray-900">
-                {(org as any).alias || (org as any).name || "Unnamed Org"}
+                {org.courseName} – {SEMESTER_MAP[org.semester] || org.semester.replace("_SEMESTER", "")} ({org.departmentName})
               </Text>
               <View className="flex-row gap-x-3 mt-1.5">
                 <View className="flex-row items-center gap-x-1">
                   <Ionicons name="people-outline" size={13} color="#6b7280" />
                   <Text className="text-xs text-gray-500">
-                    ID: {org.id.split('-')[0]}...
+                    Sect: {org.section}
                   </Text>
                 </View>
                 <View className="flex-row items-center gap-x-1">
-                  <Ionicons name="pie-chart-outline" size={13} color="#6b7280" />
+                  <Ionicons
+                    name="pie-chart-outline"
+                    size={13}
+                    color="#6b7280"
+                  />
                   <Text className="text-xs text-gray-500">Active</Text>
                 </View>
               </View>
             </View>
-              <RowActions
-                onEdit={() =>
-                  Alert.alert(
-                    "Edit Class",
-                    `Editing ${(org as any).alias || (org as any).name || "Unnamed Org"}`,
-                  )
-                }
-                onDelete={() => handleDelete(org)}
-              />
+            <RowActions
+              onEdit={() => setEditingClass(org)}
+              onDelete={() => handleDelete(org)}
+            />
           </View>
         </View>
       )}
     />
+    {/* Edit Class Modal */}
+    <AddClassModal
+      visible={!!editingClass}
+      onClose={() => setEditingClass(null)}
+      onAdd={handleEditSave}
+      initialData={editingClass}
+    />
+    </>
   );
 }
 
@@ -828,12 +1121,12 @@ function CoursesTab() {
         text: "Delete",
         style: "destructive",
         onPress: async () => {
-           try {
-             await deleteCourse(c.id);
-             Alert.alert("Success", "Course deleted successfully!");
-           } catch (e: any) {
-             Alert.alert("Error", e.message || "Failed to delete course");
-           }
+          try {
+            await deleteCourse(c.id);
+            Alert.alert("Success", "Course deleted successfully!");
+          } catch (e: any) {
+            Alert.alert("Error", e.message || "Failed to delete course");
+          }
         },
       },
     ]);
@@ -980,9 +1273,11 @@ const TAB_ADD_LABELS: Record<TabKey, string> = {
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<TabKey>("roles");
   const [addUserVisible, setAddUserVisible] = useState(false);
+  const [addClassVisible, setAddClassVisible] = useState(false);
   const [addCourseVisible, setAddCourseVisible] = useState(false);
   const { loggedInUser } = useAuth();
   const { createCourse } = useCoursesStore();
+  const { createOrg, orgs } = useOrgsStore();
 
   const handleAddCourse = async (courseData: any) => {
     try {
@@ -997,22 +1292,49 @@ export default function AdminPage() {
     }
   };
 
+  const handleAddClass = async (classData: any) => {
+    try {
+      await createOrg(classData);
+      setAddClassVisible(false);
+      Alert.alert("Success", "Class added successfully!");
+    } catch (e: any) {
+      Alert.alert("Error", e.message || "Failed to add class");
+    }
+  };
+
   const handleAdd = () => {
     if (activeTab === "roles") {
       setAddUserVisible(true);
     } else if (activeTab === "courses") {
       setAddCourseVisible(true);
+    } else if (activeTab === "classes") {
+      setAddClassVisible(true);
     } else {
       Alert.alert("Add", TAB_ADD_LABELS[activeTab]);
     }
   };
 
-  const { users: storeUsers } = useUsersStore();
+  const { users: storeUsers, updateUser } = useUsersStore();
   const { refresh, refreshing } = useRefresh();
 
-  const handleAddUser = (user: User) => {
-    // In a real app: call API to promote the student, then update store
-    setAddUserVisible(false);
+  const handleAddUser = async (user: User) => {
+    try {
+      const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
+      const res = await fetch(`${origin}/admin/users/${user.id}/role`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: user.role }),
+      });
+      
+      if (!res.ok) throw new Error("Failed to assign role");
+      
+      // Update local store to reflect new role immediately
+      updateUser(user.id, { role: user.role });
+      Alert.alert("Success", "Role assigned successfully!");
+      setAddUserVisible(false);
+    } catch (e: any) {
+      Alert.alert("Error", e.message || "Failed to assign role");
+    }
   };
 
   const STAT_CARDS = [
@@ -1024,7 +1346,7 @@ export default function AdminPage() {
     },
     {
       label: "Classes",
-      value: CLASSES.length,
+      value: orgs.length,
       icon: "school-outline",
       color: "#0891b2",
     },
@@ -1178,6 +1500,12 @@ export default function AdminPage() {
         visible={addCourseVisible}
         onClose={() => setAddCourseVisible(false)}
         onAdd={handleAddCourse}
+      />
+      {/* Add Class Modal */}
+      <AddClassModal
+        visible={addClassVisible}
+        onClose={() => setAddClassVisible(false)}
+        onAdd={handleAddClass}
       />
     </SafeAreaView>
   );

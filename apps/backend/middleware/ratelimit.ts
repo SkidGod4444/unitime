@@ -16,22 +16,25 @@ const getUserAgent = (c: Context) =>
   c.req.raw.headers.get("user-agent") ||
   undefined;
 
-const getRatelimitInstance = (limit: number) => ({
-  free: new Ratelimit({
+const globalLimit = process.env.NODE_ENV === "production" ? 60 : 100;
+const pollingLimit = process.env.NODE_ENV === "production" ? 300 : 500;
+
+const ratelimit = {
+  global: new Ratelimit({
     redis: cache,
     analytics: true,
     enableProtection: true,
-    prefix: "@unitime/ratelimit:free",
-    limiter: Ratelimit.slidingWindow(limit, "5m"),
+    prefix: "@unitime/ratelimit:global",
+    limiter: Ratelimit.slidingWindow(globalLimit, "5m"),
   }),
-  //   pro: new Ratelimit({
-  //     redis: cache,
-  //     analytics: true,
-  //     enableProtection: true,
-  //     prefix: "@unitime/ratelimit:pro",
-  //     limiter: Ratelimit.slidingWindow(limit, "10s"),
-  //   }),
-});
+  polling: new Ratelimit({
+    redis: cache,
+    analytics: true,
+    enableProtection: true,
+    prefix: "@unitime/ratelimit:polling",
+    limiter: Ratelimit.slidingWindow(pollingLimit, "5m"),
+  }),
+};
 
 export const rateLimitHandler = async (c: Context, next: Next) => {
   // Try to get user from context (set by auth middleware if enabled)
@@ -40,20 +43,27 @@ export const rateLimitHandler = async (c: Context, next: Next) => {
   const ip = getClientIp(c);
   const userAgent = getUserAgent(c);
 
-  const limit = process.env.NODE_ENV === "production" ? 60 : 100;
-  const ratelimit = getRatelimitInstance(limit);
-
   // Determine rate limit context
+  const path = c.req.path;
+  const isPollingRoute = [
+    "/v1/timetable",
+    "/v1/attendance",
+    "/v1/users",
+    "/v1/courses",
+    "/v1/orgs",
+    "/v1/profiles",
+  ].some((r) => path.startsWith(r));
+
   let key: string | undefined;
-  let limiter: Ratelimit | undefined;
+  let limiter: Ratelimit;
 
   if (me && me.$id) {
     key = me.$id || ip || userAgent || "anonymous";
-    limiter = ratelimit.free;
+    limiter = isPollingRoute ? ratelimit.polling : ratelimit.global;
   } else {
     // fallback for completely anonymous users
     key = ip || userAgent || "anonymous";
-    limiter = ratelimit.free;
+    limiter = isPollingRoute ? ratelimit.polling : ratelimit.global;
   }
 
   // Apply rate limit

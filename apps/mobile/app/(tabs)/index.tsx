@@ -7,15 +7,15 @@ import * as LocalAuthentication from "expo-local-authentication";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-    Alert,
-    Image,
-    Modal,
-    RefreshControl,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Image,
+  Modal,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -113,8 +113,13 @@ export default function Index() {
     const startH = start.getHours() % 12 || 12;
     const startM = start.getMinutes().toString().padStart(2, "0");
     const startAmPm = start.getHours() >= 12 ? "PM" : "AM";
-    const colors = ["border-l-blue-500", "border-l-green-500", "border-l-purple-500", "border-l-yellow-500"];
-    
+    const colors = [
+      "border-l-blue-500",
+      "border-l-green-500",
+      "border-l-purple-500",
+      "border-l-yellow-500",
+    ];
+
     return {
       id: t.id,
       time: `${startH}:${startM} ${startAmPm}`,
@@ -378,18 +383,25 @@ export default function Index() {
             <Text className="text-lg font-bold text-dark font-lora">
               Today&apos;s Schedule
             </Text>
-            <TouchableOpacity onPress={() => router.push("/schedule")} className="px-3 py-1 rounded-full border border-primary">
+            <TouchableOpacity
+              onPress={() => router.push("/schedule")}
+              className="px-3 py-1 rounded-full border border-primary"
+            >
               <Text className="text-primary text-sm font-medium">See All</Text>
             </TouchableOpacity>
           </View>
 
           <View className="gap-4">
             {loading ? (
-               <Text className="text-center text-gray-500 py-4">Loading schedule...</Text>
+              <Text className="text-center text-gray-500 py-4">
+                Loading schedule...
+              </Text>
             ) : todaysSchedule.length === 0 ? (
-               <View className="bg-gray-50 rounded-2xl p-6 items-center justify-center border border-gray-100 border-dashed">
-                 <Text className="text-gray-500 font-medium my-2">No classes today!</Text>
-               </View>
+              <View className="bg-gray-50 rounded-2xl p-6 items-center justify-center border border-gray-100 border-dashed">
+                <Text className="text-gray-500 font-medium my-2">
+                  No classes today!
+                </Text>
+              </View>
             ) : (
               todaysSchedule.map((item) => (
                 <View
@@ -454,7 +466,8 @@ export default function Index() {
 
               {/* Subtitle */}
               <Text className="text-gray-500 text-center mb-5 leading-6 px-2">
-                We&apos;d love to hear from you! Share your thoughts to help us improve.
+                We&apos;d love to hear from you! Share your thoughts to help us
+                improve.
               </Text>
 
               {/* Text Input */}
@@ -476,13 +489,19 @@ export default function Index() {
                   activeOpacity={0.85}
                   className="bg-blue-600 w-full py-3.5 rounded-2xl flex-row items-center justify-center shadow-lg shadow-blue-200 active:scale-[0.98] gap-2"
                   onPress={() => {
-                    Alert.alert("Thank You!", "Your feedback has been submitted.");
+                    Alert.alert(
+                      "Thank You!",
+                      "Your feedback has been submitted.",
+                    );
                     setFeedbackVisible(false);
                     setFeedbackText("");
                   }}
                 >
                   {/* <Ionicons name="send" size={16} color="#fff" /> */}
-                  <Text numberOfLines={1} className="text-white font-bold text-base text-center flex-shrink">
+                  <Text
+                    numberOfLines={1}
+                    className="text-white font-bold text-base text-center flex-shrink"
+                  >
                     Submit Feedback
                   </Text>
                 </TouchableOpacity>
@@ -495,7 +514,10 @@ export default function Index() {
                     setFeedbackText("");
                   }}
                 >
-                  <Text numberOfLines={1} className="text-gray-600 font-bold text-base text-center">
+                  <Text
+                    numberOfLines={1}
+                    className="text-gray-600 font-bold text-base text-center"
+                  >
                     Cancel
                   </Text>
                 </TouchableOpacity>

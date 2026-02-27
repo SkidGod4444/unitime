@@ -16,11 +16,14 @@ users.get("/me", async (c) => {
       return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
     }
 
-    return c.json({
-      success: true,
-      status_code: 200,
-      user,
-    }, 200);
+    return c.json(
+      {
+        success: true,
+        status_code: 200,
+        user,
+      },
+      200,
+    );
   } catch (error) {
     console.error("Error fetching user details:", error);
     return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
@@ -35,11 +38,14 @@ users.get("/all", async (c) => {
       return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
     }
 
-    return c.json({
-      success: true,
-      status_code: 200,
-      users,
-    }, 200);
+    return c.json(
+      {
+        success: true,
+        status_code: 200,
+        users,
+      },
+      200,
+    );
   } catch (error) {
     console.error("Error fetching users:", error);
     return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
@@ -126,7 +132,11 @@ users.patch("/:id/onboard", async (c) => {
 
 users.post("/create", async (c) => {
   try {
-    const body = await c.req.json<{ id: string; name: string; email: string }>();
+    const body = await c.req.json<{
+      id: string;
+      name: string;
+      email: string;
+    }>();
     const { id, name, email } = body;
 
     if (!id || !name || !email) {

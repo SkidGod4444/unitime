@@ -57,4 +57,3 @@ type OrgT = {
 };
 
 export type { OrgT, ProfileT, TeamT, Theme, UserT };
-

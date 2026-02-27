@@ -3,20 +3,20 @@ import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Modal,
-    ScrollView,
-    Switch,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Modal,
+  ScrollView,
+  Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import Animated, {
-    FadeInDown,
-    FadeInRight,
-    Layout,
+  FadeInDown,
+  FadeInRight,
+  Layout,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -222,8 +222,7 @@ const EditModal = ({
     setHour((h) => ((h - 1 + delta + 12) % 12) + 1);
   const adjustMinute = (delta: number) =>
     setMinute((m) => (m + delta + 60) % 60);
-  const togglePeriod = () =>
-    setPeriod((p) => (p === "AM" ? "PM" : "AM"));
+  const togglePeriod = () => setPeriod((p) => (p === "AM" ? "PM" : "AM"));
 
   const handleSave = () => {
     if (!label.trim()) {
@@ -232,9 +231,7 @@ const EditModal = ({
     }
     // Convert 12h → 24h for storage
     const h24 =
-      period === "AM"
-        ? hour === 12 ? 0 : hour
-        : hour === 12 ? 12 : hour + 12;
+      period === "AM" ? (hour === 12 ? 0 : hour) : hour === 12 ? 12 : hour + 12;
     onSave({
       id: draft?.id,
       label: label.trim(),
@@ -449,8 +446,14 @@ const EditModal = ({
 
 export default function AlarmScreen() {
   const router = useRouter();
-  const { alarms, loading, createAlarm, updateAlarm, deleteAlarm, toggleAlarm } =
-    useAlarms();
+  const {
+    alarms,
+    loading,
+    createAlarm,
+    updateAlarm,
+    deleteAlarm,
+    toggleAlarm,
+  } = useAlarms();
   const [draft, setDraft] = useState<AlarmDraft | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -463,11 +466,16 @@ export default function AlarmScreen() {
       Alert.alert(
         "🚧 Coming Soon",
         "Alarms feature is currently under development. Stay tuned!",
-        [{ text: "Got it", style: "default", onPress: () => router.replace("/") }],
+        [
+          {
+            text: "Got it",
+            style: "default",
+            onPress: () => router.replace("/"),
+          },
+        ],
       );
     }, [router]),
   );
-
 
   const handleToggle = useCallback(
     (id: string) => {

@@ -47,9 +47,25 @@ courses.get("/", async (c) => {
 });
 
 courses.post("/", async (c) => {
-  const { name, code, description, credit, classType, professorId, organizationId, userId } =
-    await c.req.json();
-  if (!name || !code || !credit || !classType || !professorId || !organizationId || !userId) {
+  const {
+    name,
+    code,
+    description,
+    credit,
+    classType,
+    professorId,
+    organizationId,
+    userId,
+  } = await c.req.json();
+  if (
+    !name ||
+    !code ||
+    !credit ||
+    !classType ||
+    !professorId ||
+    !organizationId ||
+    !userId
+  ) {
     return createHonoErrorResponse(c, ERROR_CODES.MISSING_REQUIRED_FIELD);
   }
   const course = await prisma.courses.create({

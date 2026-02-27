@@ -130,10 +130,12 @@ attendance.get("/summary/:userId", async (c) => {
           where: {
             userId,
             sessionId: {
-              in: (await prisma.attendanceQRSession.findMany({
-                where: { courseId }
-              })).map(s => s.id)
-            }
+              in: (
+                await prisma.attendanceQRSession.findMany({
+                  where: { courseId },
+                })
+              ).map((s) => s.id),
+            },
           },
         });
 
@@ -193,10 +195,10 @@ attendance.get("/sessions", async (c) => {
           },
         });
 
-        // Ideally we would fetch ALL enrolled students and map their status, 
+        // Ideally we would fetch ALL enrolled students and map their status,
         // but for now we'll just return the present ones, or mark the rest as absent if needed by the frontend.
         // To properly support the UI's 'editable list', we need all enrolled students.
-        
+
         const enrolledStudents = await prisma.userCourse.findMany({
           where: { courseId: session.courseId },
           include: {
@@ -208,13 +210,13 @@ attendance.get("/sessions", async (c) => {
           },
         });
 
-        const students = enrolledStudents.map(enr => {
-          const isPresent = logs.some(log => log.userId === enr.userId);
+        const students = enrolledStudents.map((enr) => {
+          const isPresent = logs.some((log) => log.userId === enr.userId);
           return {
             id: enr.userId,
             name: enr.user.name,
             rollNo: enr.user.studentProfile?.admissionNumber || enr.userId,
-            status: isPresent ? "present" : "absent"
+            status: isPresent ? "present" : "absent",
           };
         });
 
@@ -224,13 +226,17 @@ attendance.get("/sessions", async (c) => {
           courseCode: (session as any).course?.code || "Unknown",
           courseName: (session as any).course?.name || "Unknown Course",
           // Extract class/section from creator's first org or similar (mocking for now as per plan context)
-          classId: "1", 
+          classId: "1",
           className: "Default Class",
           section: "A",
-          durationMin: Math.round((new Date((session as any).endTime).getTime() - new Date((session as any).startTime).getTime()) / 60000),
-          students
+          durationMin: Math.round(
+            (new Date((session as any).endTime).getTime() -
+              new Date((session as any).startTime).getTime()) /
+              60000,
+          ),
+          students,
         };
-      })
+      }),
     );
 
     return c.json({

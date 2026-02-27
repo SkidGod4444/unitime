@@ -139,9 +139,27 @@ export default function Profile() {
             {/* Info rows — column layout so long text wraps properly */}
             <View className="w-full mt-5 rounded-2xl overflow-hidden border border-gray-100">
               {[
-                { icon: "business-outline", label: "Department", value: myProfile?.department || "N/A", color: "#2563EB", bg: "#EFF6FF" },
-                { icon: "book-outline",     label: "Course",     value: myProfile?.course || "N/A",      color: "#7C3AED", bg: "#F5F3FF" },
-                { icon: "people-outline",   label: "Section",    value: myOrg?.section ? `Sec: ${myOrg.section}` : "N/A",          color: "#059669", bg: "#ECFDF5" },
+                {
+                  icon: "business-outline",
+                  label: "Department",
+                  value: myProfile?.department || "N/A",
+                  color: "#2563EB",
+                  bg: "#EFF6FF",
+                },
+                {
+                  icon: "book-outline",
+                  label: "Course",
+                  value: myProfile?.course || "N/A",
+                  color: "#7C3AED",
+                  bg: "#F5F3FF",
+                },
+                {
+                  icon: "people-outline",
+                  label: "Section",
+                  value: myOrg?.section ? `Sec: ${myOrg.section}` : "N/A",
+                  color: "#059669",
+                  bg: "#ECFDF5",
+                },
               ].map((row, i, arr) => (
                 <View
                   key={row.label}
@@ -151,7 +169,11 @@ export default function Profile() {
                     className="h-8 w-8 rounded-full items-center justify-center shrink-0"
                     style={{ backgroundColor: row.bg }}
                   >
-                    <Ionicons name={row.icon as any} size={15} color={row.color} />
+                    <Ionicons
+                      name={row.icon as any}
+                      size={15}
+                      color={row.color}
+                    />
                   </View>
                   <Text
                     className="text-sm font-bold text-gray-800 flex-shrink ml-3"
@@ -162,7 +184,6 @@ export default function Profile() {
                 </View>
               ))}
             </View>
-
           </View>
         </View>
 

@@ -1,13 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useRef, useState } from "react";
 import {
-    Alert,
-    FlatList,
-    Modal,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  FlatList,
+  Modal,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import Animated, { FadeInDown, Layout } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -153,13 +153,7 @@ const DateItem = ({
   );
 };
 
-const ClassCard = ({
-  session,
-  index,
-}: {
-  session: any;
-  index: number;
-}) => {
+const ClassCard = ({ session, index }: { session: any; index: number }) => {
   return (
     <Animated.View
       entering={FadeInDown.delay(index * 100)}
@@ -363,7 +357,7 @@ export default function ScheduleScreen() {
   );
   const [isCalendarOpen, setCalendarOpen] = useState(false);
   const flatListRef = useRef<FlatList>(null);
-  
+
   const { loggedInUser } = useAuth();
   const { timetables, loading, fetchTimetable } = useTimetableStore();
 
@@ -373,18 +367,18 @@ export default function ScheduleScreen() {
 
   useEffect(() => {
     if (loggedInUser?.id) {
-       // get the day of the week (e.g. MONDAY)
-       const dayMap: Record<string, string> = {
-         "SUN": "SUNDAY",
-         "MON": "MONDAY",
-         "TUE": "TUESDAY",
-         "WED": "WEDNESDAY",
-         "THU": "THURSDAY",
-         "FRI": "FRIDAY",
-         "SAT": "SATURDAY"
-       };
-       const dayStr = dayMap[getDayName(selectedDate)];
-       fetchTimetable(loggedInUser.id, dayStr);
+      // get the day of the week (e.g. MONDAY)
+      const dayMap: Record<string, string> = {
+        SUN: "SUNDAY",
+        MON: "MONDAY",
+        TUE: "TUESDAY",
+        WED: "WEDNESDAY",
+        THU: "THURSDAY",
+        FRI: "FRIDAY",
+        SAT: "SATURDAY",
+      };
+      const dayStr = dayMap[getDayName(selectedDate)];
+      fetchTimetable(loggedInUser.id, dayStr);
     }
   }, [selectedDate, loggedInUser?.id]);
 
@@ -410,22 +404,22 @@ export default function ScheduleScreen() {
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
   };
-  
+
   const formattedClasses = timetables.map((t: any, idx: number) => {
     const start = new Date(t.startTime);
     const end = new Date(t.endTime);
     // basic color palette cycling
     const colors = ["#6366f1", "#ec4899", "#10b981", "#f59e0b", "#8b5cf6"];
-    
+
     // pad hours/mins to "HH:MM"
     const startH = start.getHours() % 12 || 12;
     const startM = start.getMinutes().toString().padStart(2, "0");
     const startAmPm = start.getHours() >= 12 ? "PM" : "AM";
-    
+
     const endH = end.getHours() % 12 || 12;
     const endM = end.getMinutes().toString().padStart(2, "0");
     const endAmPm = end.getHours() >= 12 ? "PM" : "AM";
-    
+
     return {
       id: t.id,
       courseCode: t.course?.code || "UNK",

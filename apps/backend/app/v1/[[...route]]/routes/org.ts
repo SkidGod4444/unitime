@@ -20,12 +20,7 @@ orgs.get("/all", async (c) => {
 });
 
 orgs.post("/create", async (c) => {
-  const {
-    departmentName,
-    courseName,
-    semester,
-    section
-  } = await c.req.json();
+  const { departmentName, courseName, semester, section } = await c.req.json();
   const newOrg = await prisma.organization.create({
     data: {
       departmentName,
@@ -42,6 +37,44 @@ orgs.post("/create", async (c) => {
       success: true,
       status_code: 200,
       org: newOrg,
+    },
+    200,
+  );
+});
+
+orgs.put("/:id/update", async (c) => {
+  const id = c.req.param("id");
+  const body = await c.req.json();
+  const org = await prisma.organization.update({
+    where: { id },
+    data: body,
+  });
+  if (!org) {
+    return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
+  }
+  return c.json(
+    {
+      success: true,
+      status_code: 200,
+      org,
+    },
+    200,
+  );
+});
+
+orgs.delete("/:id", async (c) => {
+  const id = c.req.param("id");
+  const org = await prisma.organization.delete({
+    where: { id },
+  });
+  if (!org) {
+    return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
+  }
+  return c.json(
+    {
+      success: true,
+      status_code: 200,
+      org,
     },
     200,
   );

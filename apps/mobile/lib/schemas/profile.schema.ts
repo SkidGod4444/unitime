@@ -15,6 +15,7 @@ export const profileSchema = z.object({
   department: z.string().min(1, "Department is required"),
   course: z.string().min(1, "Course is required"),
   semister: z.string().min(1, "Semester is required"),
+  section: z.string().min(1, "Section is required"),
   yearOfAdmission: z
     .string()
     .min(1, "Year of admission is required")

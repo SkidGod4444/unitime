@@ -3,11 +3,11 @@ import { isInstitutionalEmail } from "@/utils/email.validator";
 import { UserT } from "@unitime/types";
 import { router } from "expo-router";
 import React, {
-    createContext,
-    ReactNode,
-    useContext,
-    useEffect,
-    useState,
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
 } from "react";
 import { ID } from "react-native-appwrite";
 
@@ -88,7 +88,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             return createData.user as UserT;
           } else {
             const errText = await createRes.text();
-            console.error("Failed to create user in DB:", createRes.status, errText);
+            console.error(
+              "Failed to create user in DB:",
+              createRes.status,
+              errText,
+            );
           }
         }
         return null;

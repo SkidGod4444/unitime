@@ -21,10 +21,10 @@ export type AttendanceSession = {
   section: string;
   durationMin: number;
   students: {
-     id: string;
-     name: string;
-     rollNo: string;
-     status: "present" | "absent";
+    id: string;
+    name: string;
+    rollNo: string;
+    status: "present" | "absent";
   }[];
 };
 
@@ -42,7 +42,10 @@ type AttendanceState = {
   sessionsLoading: boolean;
 
   // Mutation
-  updateSessionAttendance: (sessionId: string, updates: { id: string; status: "present" | "absent" | null }[]) => Promise<boolean>;
+  updateSessionAttendance: (
+    sessionId: string,
+    updates: { id: string; status: "present" | "absent" | null }[],
+  ) => Promise<boolean>;
 };
 
 export const useAttendanceStore = create<AttendanceState>()(
@@ -52,14 +55,15 @@ export const useAttendanceStore = create<AttendanceState>()(
       summaryLoading: false,
       sessions: [],
       sessionsLoading: false,
-      
+
       setSummary: (summary) => set({ summary }),
       setSessions: (sessions) => set({ sessions }),
 
       fetchSummary: async (userId) => {
         set({ summaryLoading: true });
         try {
-          const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+          const origin =
+            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
           const res = await fetch(`${origin}/attendance/summary/${userId}`);
           const data = await res.json();
           if (res.ok && data.success) {
@@ -77,8 +81,11 @@ export const useAttendanceStore = create<AttendanceState>()(
       fetchSessions: async (creatorId) => {
         set({ sessionsLoading: true });
         try {
-          const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-          const res = await fetch(`${origin}/attendance/sessions?creatorId=${creatorId}`);
+          const origin =
+            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+          const res = await fetch(
+            `${origin}/attendance/sessions?creatorId=${creatorId}`,
+          );
           const data = await res.json();
           if (res.ok && data.success) {
             set({ sessions: data.sessions });
@@ -86,47 +93,51 @@ export const useAttendanceStore = create<AttendanceState>()(
             set({ sessions: [] });
           }
         } catch (error) {
-           console.error("Error fetching attendance sessions:", error);
+          console.error("Error fetching attendance sessions:", error);
         } finally {
           set({ sessionsLoading: false });
         }
       },
 
       updateSessionAttendance: async (sessionId, updates) => {
-         try {
-           const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-           const res = await fetch(`${origin}/attendance/sessions/${sessionId}/students`, {
-             method: "PATCH",
-             headers: { "Content-Type": "application/json" },
-             body: JSON.stringify({ students: updates })
-           });
-           const data = await res.json();
-           
-           if (res.ok && data.success) {
-             // Optimistic cache update locally
-             const currentSessions = get().sessions;
-             const updatedSessions = currentSessions.map(s => {
-               if (s.id === sessionId) {
-                 const newStudents = s.students.map(stu => {
-                   const update = updates.find(u => u.id === stu.id);
-                   if (update && update.status) {
-                     return { ...stu, status: update.status };
-                   }
-                   return stu;
-                 });
-                 return { ...s, students: newStudents };
-               }
-               return s;
-             });
-             set({ sessions: updatedSessions });
-             return true;
-           }
-           return false;
-         } catch (error) {
-           console.error("Error updating session attendance:", error);
-           return false;
-         }
-      }
+        try {
+          const origin =
+            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+          const res = await fetch(
+            `${origin}/attendance/sessions/${sessionId}/students`,
+            {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ students: updates }),
+            },
+          );
+          const data = await res.json();
+
+          if (res.ok && data.success) {
+            // Optimistic cache update locally
+            const currentSessions = get().sessions;
+            const updatedSessions = currentSessions.map((s) => {
+              if (s.id === sessionId) {
+                const newStudents = s.students.map((stu) => {
+                  const update = updates.find((u) => u.id === stu.id);
+                  if (update && update.status) {
+                    return { ...stu, status: update.status };
+                  }
+                  return stu;
+                });
+                return { ...s, students: newStudents };
+              }
+              return s;
+            });
+            set({ sessions: updatedSessions });
+            return true;
+          }
+          return false;
+        } catch (error) {
+          console.error("Error updating session attendance:", error);
+          return false;
+        }
+      },
     }),
     {
       name: "attendance-store",

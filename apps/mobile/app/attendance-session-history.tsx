@@ -2,13 +2,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { Stack } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import {
-    Alert,
-    FlatList,
-    Modal,
-    Pressable,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  FlatList,
+  Modal,
+  Pressable,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAttendanceStore } from "../lib/store";
@@ -367,7 +367,8 @@ SessionCard.displayName = "SessionCard";
 export default function AttendanceSessionHistory() {
   const [selectedClassId, setSelectedClassId] = useState("all");
   const [isDropdownOpen, setDropdownOpen] = useState(false);
-  const { sessions: apiSessions, updateSessionAttendance } = useAttendanceStore();
+  const { sessions: apiSessions, updateSessionAttendance } =
+    useAttendanceStore();
 
   // Maps backend session to UI format
   const mappedSessions = useMemo(() => {
@@ -379,13 +380,16 @@ export default function AttendanceSessionHistory() {
       className: "Course Class",
       section: "N/A",
       date: new Date(s.createdAt),
-      durationMin: Math.round((new Date(s.endTime).getTime() - new Date(s.startTime).getTime()) / 60000),
+      durationMin: Math.round(
+        (new Date(s.endTime).getTime() - new Date(s.startTime).getTime()) /
+          60000,
+      ),
       students: s.logs.map((log: any) => ({
         id: log.studentId,
         name: log.student?.name || "Unknown Student",
         rollNo: log.studentId.substring(0, 6),
-        status: (log.status || "present").toLowerCase() as Status
-      }))
+        status: (log.status || "present").toLowerCase() as Status,
+      })),
     }));
   }, [apiSessions]);
 
@@ -394,7 +398,8 @@ export default function AttendanceSessionHistory() {
     // Derived dynamically if needed
   ];
 
-  const selectedClass = CLASSES.find((c) => c.id === selectedClassId) || CLASSES[0];
+  const selectedClass =
+    CLASSES.find((c) => c.id === selectedClassId) || CLASSES[0];
 
   const [editingSession, setEditingSession] = useState<SessionRecord | null>(
     null,
@@ -434,9 +439,9 @@ export default function AttendanceSessionHistory() {
   const handleSaveEdits = useCallback(
     async (sessionId: string, updatedStudents: Student[]) => {
       // Map to backend format { studentId, status }
-      const updates = updatedStudents.map(s => ({
+      const updates = updatedStudents.map((s) => ({
         id: s.id, // Backend currently accepts { id, status } per `attendance.ts` api interface
-        status: s.status ? s.status : null 
+        status: s.status ? s.status : null,
       }));
       await updateSessionAttendance(sessionId, updates);
     },

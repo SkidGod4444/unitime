@@ -48,15 +48,16 @@ export const useTimetableStore = create<TimetablesState>()(
       fetchTimetable: async (userId, day) => {
         set({ loading: true, error: null });
         try {
-          const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+          const origin =
+            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
           let url = `${origin}/timetable/${userId}`;
           if (day) {
             url += `?day=${encodeURIComponent(day)}`;
           }
-          
+
           const res = await fetch(url);
           const data = await res.json();
-          
+
           if (res.ok && data.success) {
             set({ timetables: data.timetables });
           } else if (res.status === 404 || data?.status_code === 404) {
@@ -66,12 +67,12 @@ export const useTimetableStore = create<TimetablesState>()(
             set({ error: "Failed to fetch timetable" });
           }
         } catch (error) {
-           console.error("Error fetching timetable:", error);
-           set({ error: "Network error fetching timetable" });
+          console.error("Error fetching timetable:", error);
+          set({ error: "Network error fetching timetable" });
         } finally {
           set({ loading: false });
         }
-      }
+      },
     }),
     {
       name: "timetable-store",
