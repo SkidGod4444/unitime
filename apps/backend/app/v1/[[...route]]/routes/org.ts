@@ -9,7 +9,7 @@ orgs.get("/all", async (c) => {
   const orgss = await getOrSetCache(
     "orgs:all",
     () => prisma.organization.findMany(),
-    60
+    120,
   );
   if (orgss.length === 0) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);

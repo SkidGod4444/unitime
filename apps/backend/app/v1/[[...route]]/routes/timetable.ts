@@ -7,24 +7,33 @@ const timetable = new Hono();
 
 timetable.get("/:userId", async (c) => {
   const userId = c.req.param("userId");
-  const day = c.req.query("day") as "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY" | undefined;
+  const day = c.req.query("day") as
+    | "MONDAY"
+    | "TUESDAY"
+    | "WEDNESDAY"
+    | "THURSDAY"
+    | "FRIDAY"
+    | "SATURDAY"
+    | "SUNDAY"
+    | undefined;
   const timetables = await getOrSetCache(
     `timetable:${userId}`,
-    () => prisma.timetable.findMany({
-      where: {
-        ...(day && { day }),
-        users: {
-          some: {
-            userId,
+    () =>
+      prisma.timetable.findMany({
+        where: {
+          ...(day && { day }),
+          users: {
+            some: {
+              userId,
+            },
           },
         },
-      },
-      include: {
-        course: true,
-        users: true,
-      },
-    }),
-    60
+        include: {
+          course: true,
+          users: true,
+        },
+      }),
+    120,
   );
   if (timetables.length === 0) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
@@ -42,12 +51,13 @@ timetable.get("/:userId", async (c) => {
 timetable.get("/", async (c) => {
   const timetables = await getOrSetCache(
     "timetable:all",
-    () => prisma.timetable.findMany({
-      include: {
-        users: true,
-      },
-    }),
-    60
+    () =>
+      prisma.timetable.findMany({
+        include: {
+          users: true,
+        },
+      }),
+    120,
   );
   if (timetables.length === 0) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);

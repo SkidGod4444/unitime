@@ -40,10 +40,12 @@ export const getOrSetCache = async <T>(
   const cachedData = await cache.get<T>(sanitizedKey);
 
   if (cachedData !== null) {
+    console.log(`[CACHE HIT] returned from cache for key: ${sanitizedKey}`);
     return cachedData;
   }
 
   const freshData = await fetcher();
+  console.log(`[CACHE MISS] returned from db directly for key: ${sanitizedKey}`);
   await cache.set(sanitizedKey, freshData, { ex: ttlSeconds });
   return freshData;
 };

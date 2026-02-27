@@ -12,11 +12,12 @@ alarms.get("/:userId", async (c) => {
   try {
     const userAlarms = await getOrSetCache(
       `alarms:${userId}`,
-      () => prisma.alarm.findMany({
-        where: { userId },
-        orderBy: { createdAt: "asc" },
-      }),
-      60
+      () =>
+        prisma.alarm.findMany({
+          where: { userId },
+          orderBy: { createdAt: "asc" },
+        }),
+      120,
     );
 
     return c.json(

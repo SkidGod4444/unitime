@@ -12,7 +12,7 @@ users.get("/me", async (c) => {
     const user = await getOrSetCache(
       `user:${me.email}`,
       () => prisma.user.findUnique({ where: { email: me.email } }),
-      60
+      120,
     );
 
     if (!user) {
@@ -38,7 +38,7 @@ users.get("/all", async (c) => {
     const users = await getOrSetCache(
       "users:all",
       () => prisma.user.findMany(),
-      60
+      120,
     );
 
     if (users.length === 0) {
@@ -67,7 +67,7 @@ users.get("/", async (c) => {
   const user = await getOrSetCache(
     `user:${email}`,
     () => prisma.user.findUnique({ where: { email } }),
-    60
+    120,
   );
   if (!user) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
@@ -87,7 +87,7 @@ users.get("/:id", async (c) => {
   const user = await getOrSetCache(
     `user:${id}`,
     () => prisma.user.findUnique({ where: { id } }),
-    60
+    120,
   );
   if (!user) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
@@ -112,7 +112,7 @@ users.put("/:id/update", async (c) => {
   if (!user) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
   }
-  await invalidateCache("users:all", `user:${id}`); 
+  await invalidateCache("users:all", `user:${id}`);
   return c.json(
     {
       success: true,

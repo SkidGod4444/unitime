@@ -65,7 +65,7 @@ profile.get("/all", async (c) => {
   const studentProfiles = await getOrSetCache(
     "profiles:all",
     () => prisma.studentProfile.findMany(),
-    60
+    120,
   );
   console.log("Fetched student profiles:", studentProfiles);
   if (studentProfiles.length === 0) {
@@ -85,12 +85,13 @@ profile.get("/:userId", async (c) => {
   const userId = c.req.param("userId");
   const timetables = await getOrSetCache(
     `profile:${userId}`,
-    () => prisma.studentProfile.findMany({
-      where: {
-        userId,
-      },
-    }),
-    60
+    () =>
+      prisma.studentProfile.findMany({
+        where: {
+          userId,
+        },
+      }),
+    120,
   );
   if (timetables.length === 0) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);

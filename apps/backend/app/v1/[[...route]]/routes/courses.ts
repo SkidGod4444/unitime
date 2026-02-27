@@ -9,11 +9,12 @@ courses.get("/:id", async (c) => {
   const id = c.req.param("id");
   const course = await getOrSetCache(
     `course:${id}`,
-    () => prisma.courses.findUnique({
-      where: { id },
-      include: { users: true },
-    }),
-    60
+    () =>
+      prisma.courses.findUnique({
+        where: { id },
+        include: { users: true },
+      }),
+    120,
   );
   if (!course) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
@@ -32,7 +33,7 @@ courses.get("/", async (c) => {
   const courses = await getOrSetCache(
     "courses:all",
     () => prisma.courses.findMany({ include: { users: true } }),
-    60
+    120,
   );
   if (courses.length === 0) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);

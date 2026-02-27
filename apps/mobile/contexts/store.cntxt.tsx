@@ -89,7 +89,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
             fetchSessions(loggedInUser.id);
           }
         }
-      }, 60 * 1000); // Wait 30s instead of 10s for intensive DB calls
+      }, 30 * 1000); // Wait 30s instead of 10s for intensive DB calls
 
       return () => clearInterval(interval);
     }

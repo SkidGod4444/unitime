@@ -193,17 +193,18 @@ attendance.get("/sessions", async (c) => {
       sessions.map(async (session) => {
         const logs = await getOrSetCache(
           `attendanceLogs:session:${session.id}`,
-          () => prisma.attendanceLogs.findMany({
-            where: { sessionId: session.id },
-            include: {
-              user: {
-                include: {
-                  studentProfile: true,
+          () =>
+            prisma.attendanceLogs.findMany({
+              where: { sessionId: session.id },
+              include: {
+                user: {
+                  include: {
+                    studentProfile: true,
+                  },
                 },
               },
-            },
-          }),
-          60
+            }),
+          120,
         );
 
         // Ideally we would fetch ALL enrolled students and map their status,
@@ -212,17 +213,18 @@ attendance.get("/sessions", async (c) => {
 
         const enrolledStudents = await getOrSetCache(
           `userCourse:course:${session.courseId}`,
-          () => prisma.userCourse.findMany({
-            where: { courseId: session.courseId },
-            include: {
-              user: {
-                include: {
-                  studentProfile: true,
+          () =>
+            prisma.userCourse.findMany({
+              where: { courseId: session.courseId },
+              include: {
+                user: {
+                  include: {
+                    studentProfile: true,
+                  },
                 },
               },
-            },
-          }),
-          60
+            }),
+          120,
         );
 
         const students = enrolledStudents.map((enr) => {
@@ -238,8 +240,12 @@ attendance.get("/sessions", async (c) => {
         return {
           id: session.id,
           date: session.createdAt,
-          courseCode: (session as unknown as { course?: { code: string; name: string } }).course?.code || "Unknown",
-          courseName: (session as unknown as { course?: { code: string; name: string } }).course?.name || "Unknown Course",
+          courseCode:
+            (session as unknown as { course?: { code: string; name: string } })
+              .course?.code || "Unknown",
+          courseName:
+            (session as unknown as { course?: { code: string; name: string } })
+              .course?.name || "Unknown Course",
           // Extract class/section from creator's first org or similar (mocking for now as per plan context)
           classId: "1",
           className: "Default Class",
