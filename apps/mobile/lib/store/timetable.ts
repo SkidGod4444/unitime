@@ -59,6 +59,8 @@ export const useTimetableStore = create<TimetablesState>()(
           
           if (res.ok && data.success) {
             set({ timetables: data.timetables });
+          } else if (res.status === 404 || data?.status_code === 404) {
+            set({ timetables: [] });
           } else {
             console.error("Failed to fetch timetable:", data);
             set({ error: "Failed to fetch timetable" });

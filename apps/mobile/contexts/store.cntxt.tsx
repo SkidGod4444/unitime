@@ -16,54 +16,13 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(false);
   const { loggedInUser } = useAuth();
 
-  const { setUsers } = useUsersStore();
-  const { setProfiles } = useProfilesStore();
-  const { setOrgs } = useOrgsStore();
+  const { fetchUsers } = useUsersStore();
+  const { fetchProfiles } = useProfilesStore();
+  const { fetchOrgs } = useOrgsStore();
   
   const { fetchTimetable } = useTimetableStore();
   const { fetchSummary, fetchSessions } = useAttendanceStore();
   const { fetchCourses } = useCoursesStore();
-
-  const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
-
-  const fetchUsers = React.useCallback(async () => {
-    try {
-      const response = await fetch(`${origin}/users/all`);
-      const data = await response.json();
-      // console.log("Fetched users:", data);
-      if (data.success && data.users) {
-        setUsers(data.users);
-      }
-    } catch (error) {
-      console.error("Failed to fetch users:", error);
-    }
-  }, [origin, setUsers]);
-
-  const fetchProfiles = React.useCallback(async () => {
-    try {
-      const response = await fetch(`${origin}/profiles/all`);
-      const data = await response.json();
-      // console.log("Fetched profiles:", data);
-      if (data.success && data.profiles) {
-        setProfiles(data.profiles);
-      }
-    } catch (error) {
-      console.error("Failed to fetch profiles:", error);
-    }
-  }, [origin, setProfiles]);
-
-  const fetchOrgs = React.useCallback(async () => {
-    try {
-      const response = await fetch(`${origin}/orgs/all`);
-      const data = await response.json();
-      // console.log("Fetched orgs:", data);
-      if (data.success && data.orgs) {
-        setOrgs(data.orgs);
-      }
-    } catch (error) {
-      console.error("Failed to fetch orgs:", error);
-    }
-  }, [origin, setOrgs]);
 
     const refresh = React.useCallback(async () => {
       setLoading(true);
@@ -99,7 +58,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
 
         return () => clearInterval(interval);
       }
-    }, [loggedInUser, refresh]);
+    }, [loggedInUser, fetchSessions, fetchSummary, fetchTimetable, refresh]);
 
   return (
     <StoreContext.Provider value={{ refresh, loading }}>

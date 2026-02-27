@@ -27,6 +27,8 @@ export const useCoursesStore = create<CoursesState>()(
           const data = await res.json();
           if (res.ok && data.success) {
             set({ courses: data.courses });
+          } else if (res.status === 404 || data?.status_code === 404) {
+            set({ courses: [] });
           }
         } catch (error) {
            console.error("Error fetching courses:", error);

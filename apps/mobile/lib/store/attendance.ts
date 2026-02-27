@@ -64,6 +64,8 @@ export const useAttendanceStore = create<AttendanceState>()(
           const data = await res.json();
           if (res.ok && data.success) {
             set({ summary: data.summary });
+          } else if (res.status === 404 || data?.status_code === 404) {
+            set({ summary: [] });
           }
         } catch (error) {
           console.error("Error fetching attendance summary:", error);
@@ -80,6 +82,8 @@ export const useAttendanceStore = create<AttendanceState>()(
           const data = await res.json();
           if (res.ok && data.success) {
             set({ sessions: data.sessions });
+          } else if (res.status === 404 || data?.status_code === 404) {
+            set({ sessions: [] });
           }
         } catch (error) {
            console.error("Error fetching attendance sessions:", error);

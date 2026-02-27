@@ -28,13 +28,33 @@ type UsersState = {
   updateUser: (id: string, updates: Partial<UserT>) => void;
   removeUser: (user_id: string) => void;
   setUsers: (users: UserT[]) => void;
+  loading: boolean;
+  fetchUsers: () => Promise<void>;
 };
 
 export const useUsersStore = create<UsersState>()(
   persist(
     (set) => ({
       users: [],
+      loading: false,
       setUsers: (users) => set({ users }),
+      fetchUsers: async () => {
+        set({ loading: true });
+        try {
+          const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
+          const res = await fetch(`${origin}/users/all`);
+          const data = await res.json();
+          if (res.ok && data.success && data.users) {
+            set({ users: data.users });
+          } else if (res.status === 404 || data?.status_code === 404) {
+             set({ users: [] });
+          }
+        } catch (error) {
+          console.error("Failed to fetch users:", error);
+        } finally {
+          set({ loading: false });
+        }
+      },
       addUser: (user) => set((state) => ({ users: [...state.users, user] })),
       updateUser: (id, updates) =>
         set((state) => ({
@@ -59,13 +79,33 @@ type ProfilesState = {
   addProfile: (profile: ProfileT) => void;
   removeProfile: (profile_id: string) => void;
   setProfiles: (profiles: ProfileT[]) => void;
+  loading: boolean;
+  fetchProfiles: () => Promise<void>;
 };
 
 export const useProfilesStore = create<ProfilesState>()(
   persist(
     (set) => ({
       profiles: [],
+      loading: false,
       setProfiles: (profiles) => set({ profiles }),
+      fetchProfiles: async () => {
+        set({ loading: true });
+        try {
+          const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
+          const res = await fetch(`${origin}/profiles/all`);
+          const data = await res.json();
+          if (res.ok && data.success && data.profiles) {
+            set({ profiles: data.profiles });
+          } else if (res.status === 404 || data?.status_code === 404) {
+             set({ profiles: [] });
+          }
+        } catch (error) {
+          console.error("Failed to fetch profiles:", error);
+        } finally {
+          set({ loading: false });
+        }
+      },
       addProfile: (profile) => set((state) => ({ profiles: [...state.profiles, profile] })),
       removeProfile: (profileId) =>
         set((state) => ({
@@ -85,13 +125,33 @@ type OrgsState = {
   addOrg: (org: OrgT) => void;
   removeOrg: (org_id: string) => void;
   setOrgs: (orgs: OrgT[]) => void;
+  loading: boolean;
+  fetchOrgs: () => Promise<void>;
 };
 
 export const useOrgsStore = create<OrgsState>()(
   persist(
     (set) => ({
       orgs: [],
+      loading: false,
       setOrgs: (orgs) => set({ orgs }),
+      fetchOrgs: async () => {
+        set({ loading: true });
+        try {
+          const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
+          const res = await fetch(`${origin}/orgs/all`);
+          const data = await res.json();
+          if (res.ok && data.success && data.orgs) {
+            set({ orgs: data.orgs });
+          } else if (res.status === 404 || data?.status_code === 404) {
+             set({ orgs: [] });
+          }
+        } catch (error) {
+          console.error("Failed to fetch orgs:", error);
+        } finally {
+          set({ loading: false });
+        }
+      },
       addOrg: (org) => set((state) => ({ orgs: [...state.orgs, org] })),
       removeOrg: (orgId) =>
         set((state) => ({
