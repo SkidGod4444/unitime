@@ -1,5 +1,5 @@
-import { getDynamicCacheTag } from "@/lib/cache";
 import { ERROR_CODES, createHonoErrorResponse } from "@/lib/error.codes";
+import { getOrSetCache, invalidateCache } from "@unitime/cache";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
 
@@ -7,18 +7,14 @@ const courses = new Hono();
 
 courses.get("/:id", async (c) => {
   const id = c.req.param("id");
-  const course = await prisma.courses.findUnique({
-    where: {
-      id,
-    },
-    include: {
-      users: true,
-    },
-    cacheStrategy: {
-      ttl: 60,
-      tags: [getDynamicCacheTag("findUnique_course", id)],
-    },
-  });
+  const course = await getOrSetCache(
+    `course:${id}`,
+    () => prisma.courses.findUnique({
+      where: { id },
+      include: { users: true },
+    }),
+    60
+  );
   if (!course) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
   }
@@ -33,15 +29,11 @@ courses.get("/:id", async (c) => {
 });
 
 courses.get("/", async (c) => {
-  const courses = await prisma.courses.findMany({
-    include: {
-      users: true,
-    },
-      cacheStrategy: {
-        ttl: 60,
-        tags: ["findMany_courses"],
-      },
-  });
+  const courses = await getOrSetCache(
+    "courses:all",
+    () => prisma.courses.findMany({ include: { users: true } }),
+    60
+  );
   if (courses.length === 0) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
   }
@@ -92,9 +84,7 @@ courses.post("/", async (c) => {
     return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
   }
 
-  await prisma.$accelerate.invalidate({
-    tags: ["findMany_courses"],
-  });
+  await invalidateCache("courses:all");
 
   return c.json(
     {
@@ -127,9 +117,7 @@ courses.put("/:id", async (c) => {
     return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT);
   }
 
-  await prisma.$accelerate.invalidate({
-    tags: ["findMany_courses", getDynamicCacheTag("findUnique_course", id)],
-  });
+  await invalidateCache("courses:all", `course:${id}`);
 
   return c.json(
     {
@@ -148,9 +136,7 @@ courses.delete("/:id", async (c) => {
       where: { id },
     });
 
-    await prisma.$accelerate.invalidate({
-      tags: ["findMany_courses", getDynamicCacheTag("findUnique_course", id)],
-    });
+    await invalidateCache("courses:all", `course:${id}`);
 
     return c.json(
       {

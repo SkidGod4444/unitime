@@ -1,6 +1,6 @@
 import { account } from "@/lib/auth";
-import { getDynamicCacheTag } from "@/lib/cache";
 import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
+import { getOrSetCache, invalidateCache } from "@unitime/cache";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
 
@@ -9,13 +9,11 @@ const users = new Hono();
 users.get("/me", async (c) => {
   try {
     const me = await account.get();
-    const user = await prisma.user.findUnique({
-      where: { email: me.email },
-      cacheStrategy: {
-        ttl: 60,
-        tags: [getDynamicCacheTag("findUnique_user", me.email)],
-      },
-    });
+    const user = await getOrSetCache(
+      `user:${me.email}`,
+      () => prisma.user.findUnique({ where: { email: me.email } }),
+      60
+    );
 
     if (!user) {
       return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
@@ -37,12 +35,11 @@ users.get("/me", async (c) => {
 
 users.get("/all", async (c) => {
   try {
-    const users = await prisma.user.findMany({
-      cacheStrategy: {
-        ttl: 60,
-        tags: ["findMany_users"], 
-      },
-    });
+    const users = await getOrSetCache(
+      "users:all",
+      () => prisma.user.findMany(),
+      60
+    );
 
     if (users.length === 0) {
       return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
@@ -67,13 +64,11 @@ users.get("/", async (c) => {
   if (!email) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
   }
-  const user = await prisma.user.findUnique({
-    where: { email },
-    cacheStrategy: {
-      ttl: 60,
-      tags: [getDynamicCacheTag("findUnique_user", email)],
-    },
-  });
+  const user = await getOrSetCache(
+    `user:${email}`,
+    () => prisma.user.findUnique({ where: { email } }),
+    60
+  );
   if (!user) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
   }
@@ -89,13 +84,11 @@ users.get("/", async (c) => {
 
 users.get("/:id", async (c) => {
   const id = c.req.param("id");
-  const user = prisma.user.findUnique({
-    where: { id },
-    cacheStrategy: {
-      ttl: 60,
-      tags: [getDynamicCacheTag("findUnique_user", id)],
-    },
-  });
+  const user = await getOrSetCache(
+    `user:${id}`,
+    () => prisma.user.findUnique({ where: { id } }),
+    60
+  );
   if (!user) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
   }
@@ -119,9 +112,7 @@ users.put("/:id/update", async (c) => {
   if (!user) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
   }
-  await prisma.$accelerate.invalidate({
-    tags: ["findMany_users", getDynamicCacheTag("findUnique_user", id)], 
-  }); 
+  await invalidateCache("users:all", `user:${id}`); 
   return c.json(
     {
       success: true,
@@ -141,9 +132,7 @@ users.patch("/:id/onboard", async (c) => {
   if (!user) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
   }
-  await prisma.$accelerate.invalidate({
-    tags: ["findMany_users", getDynamicCacheTag("findUnique_user", id)],
-  });
+  await invalidateCache("users:all", `user:${id}`);
   return c.json(
     {
       success: true,
@@ -174,9 +163,7 @@ users.post("/create", async (c) => {
       create: { id, name, email },
     });
 
-    await prisma.$accelerate.invalidate({
-      tags: ["findMany_users", getDynamicCacheTag("findUnique_user", id), getDynamicCacheTag("findUnique_user", email)],
-    });
+    await invalidateCache("users:all", `user:${id}`, `user:${email}`);
 
     return c.json(
       {

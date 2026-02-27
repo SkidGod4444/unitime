@@ -1,5 +1,5 @@
-import { getDynamicCacheTag } from "@/lib/cache";
 import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
+import { invalidateCache } from "@unitime/cache";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
 
@@ -24,9 +24,7 @@ admin.patch("/users/:id/role", async (c) => {
       data: { role: body.role },
     });
 
-    await prisma.$accelerate.invalidate({
-      tags: ["findMany_users", getDynamicCacheTag("findUnique_user", id)],
-    });
+    await invalidateCache("users:all", `user:${id}`);
 
     return c.json({
       success: true,
@@ -58,9 +56,7 @@ admin.patch("/users/:id/status", async (c) => {
       data: { status: body.status },
     });
 
-    await prisma.$accelerate.invalidate({
-      tags: ["findMany_users", getDynamicCacheTag("findUnique_user", id)],
-    });
+    await invalidateCache("users:all", `user:${id}`);
 
     return c.json({
       success: true,

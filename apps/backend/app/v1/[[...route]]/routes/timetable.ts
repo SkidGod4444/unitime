@@ -1,5 +1,5 @@
-import { getDynamicCacheTag } from "@/lib/cache";
 import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
+import { getOrSetCache } from "@unitime/cache";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
 
@@ -8,24 +8,24 @@ const timetable = new Hono();
 timetable.get("/:userId", async (c) => {
   const userId = c.req.param("userId");
   const day = c.req.query("day") as "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY" | undefined;
-  const timetables = await prisma.timetable.findMany({
-    where: {
-      ...(day && { day }),
-      users: {
-        some: {
-          userId,
+  const timetables = await getOrSetCache(
+    `timetable:${userId}`,
+    () => prisma.timetable.findMany({
+      where: {
+        ...(day && { day }),
+        users: {
+          some: {
+            userId,
+          },
         },
       },
-    },
-    include: {
-      course: true,
-      users: true,
-    },
-    cacheStrategy: {
-      ttl: 60,
-      tags: [getDynamicCacheTag("findMany_timetable", userId)],
-    },
-  });
+      include: {
+        course: true,
+        users: true,
+      },
+    }),
+    60
+  );
   if (timetables.length === 0) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
   }
@@ -40,15 +40,15 @@ timetable.get("/:userId", async (c) => {
 });
 
 timetable.get("/", async (c) => {
-  const timetables = await prisma.timetable.findMany({
-    include: {
-      users: true,
-    },
-    cacheStrategy: {
-      ttl: 60,
-      tags: ["findMany_timetable"],
-    },
-  });
+  const timetables = await getOrSetCache(
+    "timetable:all",
+    () => prisma.timetable.findMany({
+      include: {
+        users: true,
+      },
+    }),
+    60
+  );
   if (timetables.length === 0) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
   }

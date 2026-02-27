@@ -1,5 +1,6 @@
 import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
 import { generateQRToken, verifyQRToken } from "@/lib/qr.algo";
+import { getOrSetCache, invalidateCache } from "@unitime/cache";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
 
@@ -22,10 +23,7 @@ attendance.post("/qr/session/create", async (c) => {
     return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
   }
 
-  // Not strictly cached yet, but good practice in case sessions list is cached
-  await prisma.$accelerate.invalidate({
-    tags: ["findMany_attendanceLogs", "findMany_userCourse"],
-  });
+  // No cache invalidation needed for userCourse or logs on session creation.
 
   console.log("Created QR session:", qrSession.id, "for course:", courseId);
   return c.json(
@@ -86,9 +84,7 @@ attendance.post("/qr/session/verify", async (c) => {
     return c.json({ error: "Failed to mark attendance" }, 500);
   }
 
-  await prisma.$accelerate.invalidate({
-    tags: ["findMany_attendanceLogs", "findMany_userCourse"],
-  });
+  await invalidateCache(`attendanceLogs:session:${sessionId}`);
 
   return c.json({
     message: "Attendance marked successfully",
@@ -195,39 +191,39 @@ attendance.get("/sessions", async (c) => {
     // We also need the attendance logs to know who was present
     const enhancedSessions = await Promise.all(
       sessions.map(async (session) => {
-        const logs = await prisma.attendanceLogs.findMany({
-          where: { sessionId: session.id },
-          include: {
-            user: {
-              include: {
-                studentProfile: true,
+        const logs = await getOrSetCache(
+          `attendanceLogs:session:${session.id}`,
+          () => prisma.attendanceLogs.findMany({
+            where: { sessionId: session.id },
+            include: {
+              user: {
+                include: {
+                  studentProfile: true,
+                },
               },
             },
-          },
-          cacheStrategy: {
-            ttl: 60,
-            tags: ["findMany_attendanceLogs"],
-          },
-        });
+          }),
+          60
+        );
 
         // Ideally we would fetch ALL enrolled students and map their status,
         // but for now we'll just return the present ones, or mark the rest as absent if needed by the frontend.
         // To properly support the UI's 'editable list', we need all enrolled students.
 
-        const enrolledStudents = await prisma.userCourse.findMany({
-          where: { courseId: session.courseId },
-          include: {
-            user: {
-              include: {
-                studentProfile: true,
+        const enrolledStudents = await getOrSetCache(
+          `userCourse:course:${session.courseId}`,
+          () => prisma.userCourse.findMany({
+            where: { courseId: session.courseId },
+            include: {
+              user: {
+                include: {
+                  studentProfile: true,
+                },
               },
             },
-          },
-          cacheStrategy: {
-            ttl: 60,
-            tags: ["findMany_userCourse"],
-          },
-        });
+          }),
+          60
+        );
 
         const students = enrolledStudents.map((enr) => {
           const isPresent = logs.some((log) => log.userId === enr.userId);
@@ -328,9 +324,7 @@ attendance.patch("/sessions/:id/students", async (c) => {
       }
     });
 
-    await prisma.$accelerate.invalidate({
-      tags: ["findMany_attendanceLogs", "findMany_userCourse"],
-    });
+    await invalidateCache(`attendanceLogs:session:${sessionId}`);
 
     return c.json({
       success: true,

@@ -1,5 +1,5 @@
-import { getDynamicCacheTag } from "@/lib/cache";
 import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
+import { getOrSetCache, invalidateCache } from "@unitime/cache";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
 
@@ -45,9 +45,7 @@ profile.post("/create", async (c) => {
     });
     console.log("Profile created successfully:", newProfile);
 
-    await prisma.$accelerate.invalidate({
-      tags: ["findMany_profiles", getDynamicCacheTag("findMany_profiles", body.userId)],
-    });
+    await invalidateCache("profiles:all", `profile:${body.userId}`);
 
     return c.json(
       {
@@ -64,12 +62,11 @@ profile.post("/create", async (c) => {
 });
 
 profile.get("/all", async (c) => {
-  const studentProfiles = await prisma.studentProfile.findMany({
-    cacheStrategy: {
-      ttl: 60,
-      tags: ["findMany_profiles"],
-    },
-  });
+  const studentProfiles = await getOrSetCache(
+    "profiles:all",
+    () => prisma.studentProfile.findMany(),
+    60
+  );
   console.log("Fetched student profiles:", studentProfiles);
   if (studentProfiles.length === 0) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
@@ -86,15 +83,15 @@ profile.get("/all", async (c) => {
 
 profile.get("/:userId", async (c) => {
   const userId = c.req.param("userId");
-  const timetables = await prisma.studentProfile.findMany({
-    where: {
-      userId,
-    },
-    cacheStrategy: {
-      ttl: 60,
-      tags: [getDynamicCacheTag("findMany_profiles", userId)],
-    },
-  });
+  const timetables = await getOrSetCache(
+    `profile:${userId}`,
+    () => prisma.studentProfile.findMany({
+      where: {
+        userId,
+      },
+    }),
+    60
+  );
   if (timetables.length === 0) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
   }

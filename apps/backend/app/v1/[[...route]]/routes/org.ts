@@ -1,16 +1,16 @@
 import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
+import { getOrSetCache, invalidateCache } from "@unitime/cache";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
 
 const orgs = new Hono();
 
 orgs.get("/all", async (c) => {
-  const orgss = await prisma.organization.findMany({
-    cacheStrategy: {
-      ttl: 60,
-      tags: ["findMany_orgs"],
-    },
-  });
+  const orgss = await getOrSetCache(
+    "orgs:all",
+    () => prisma.organization.findMany(),
+    60
+  );
   if (orgss.length === 0) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
   }
@@ -37,9 +37,7 @@ orgs.post("/create", async (c) => {
   if (!newOrg) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
   }
-  await prisma.$accelerate.invalidate({
-    tags: ["findMany_orgs"],
-  });
+  await invalidateCache("orgs:all");
   return c.json(
     {
       success: true,
@@ -60,9 +58,7 @@ orgs.put("/:id/update", async (c) => {
   if (!org) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
   }
-  await prisma.$accelerate.invalidate({
-    tags: ["findMany_orgs"], 
-  }); 
+  await invalidateCache("orgs:all");
   return c.json(
     {
       success: true,
@@ -81,9 +77,7 @@ orgs.delete("/:id", async (c) => {
   if (!org) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
   }
-  await prisma.$accelerate.invalidate({
-    tags: ["findMany_orgs"],
-  });
+  await invalidateCache("orgs:all");
   return c.json(
     {
       success: true,
