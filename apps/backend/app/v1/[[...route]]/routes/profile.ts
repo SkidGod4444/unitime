@@ -43,6 +43,11 @@ profile.post("/create", async (c) => {
       },
     });
     console.log("Profile created successfully:", newProfile);
+
+    await prisma.$accelerate.invalidate({
+      tags: ["findMany_profiles", `findMany_profiles_${body.userId}`],
+    });
+
     return c.json(
       {
         success: true,
@@ -58,7 +63,12 @@ profile.post("/create", async (c) => {
 });
 
 profile.get("/all", async (c) => {
-  const studentProfiles = await prisma.studentProfile.findMany();
+  const studentProfiles = await prisma.studentProfile.findMany({
+    cacheStrategy: {
+      ttl: 60,
+      tags: ["findMany_profiles"],
+    },
+  });
   console.log("Fetched student profiles:", studentProfiles);
   if (studentProfiles.length === 0) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
@@ -78,6 +88,10 @@ profile.get("/:userId", async (c) => {
   const timetables = await prisma.studentProfile.findMany({
     where: {
       userId,
+    },
+    cacheStrategy: {
+      ttl: 60,
+      tags: [`findMany_profiles_${userId}`],
     },
   });
   if (timetables.length === 0) {

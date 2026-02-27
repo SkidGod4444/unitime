@@ -21,6 +21,12 @@ attendance.post("/qr/session/create", async (c) => {
   if (!qrSession.id) {
     return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
   }
+
+  // Not strictly cached yet, but good practice in case sessions list is cached
+  await prisma.$accelerate.invalidate({
+    tags: ["findMany_attendanceLogs", "findMany_userCourse"],
+  });
+
   console.log("Created QR session:", qrSession.id, "for course:", courseId);
   return c.json(
     {
@@ -79,6 +85,11 @@ attendance.post("/qr/session/verify", async (c) => {
   if (!attendanceRecord.id) {
     return c.json({ error: "Failed to mark attendance" }, 500);
   }
+
+  await prisma.$accelerate.invalidate({
+    tags: ["findMany_attendanceLogs", "findMany_userCourse"],
+  });
+
   return c.json({
     message: "Attendance marked successfully",
   });
@@ -193,6 +204,10 @@ attendance.get("/sessions", async (c) => {
               },
             },
           },
+          cacheStrategy: {
+            ttl: 60,
+            tags: ["findMany_attendanceLogs"],
+          },
         });
 
         // Ideally we would fetch ALL enrolled students and map their status,
@@ -207,6 +222,10 @@ attendance.get("/sessions", async (c) => {
                 studentProfile: true,
               },
             },
+          },
+          cacheStrategy: {
+            ttl: 60,
+            tags: ["findMany_userCourse"],
           },
         });
 
@@ -223,15 +242,15 @@ attendance.get("/sessions", async (c) => {
         return {
           id: session.id,
           date: session.createdAt,
-          courseCode: (session as any).course?.code || "Unknown",
-          courseName: (session as any).course?.name || "Unknown Course",
+          courseCode: (session as unknown as { course?: { code: string; name: string } }).course?.code || "Unknown",
+          courseName: (session as unknown as { course?: { code: string; name: string } }).course?.name || "Unknown Course",
           // Extract class/section from creator's first org or similar (mocking for now as per plan context)
           classId: "1",
           className: "Default Class",
           section: "A",
           durationMin: Math.round(
-            (new Date((session as any).endTime).getTime() -
-              new Date((session as any).startTime).getTime()) /
+            (new Date(session.endTime).getTime() -
+              new Date(session.startTime).getTime()) /
               60000,
           ),
           students,
@@ -307,6 +326,10 @@ attendance.patch("/sessions/:id/students", async (c) => {
           }
         }
       }
+    });
+
+    await prisma.$accelerate.invalidate({
+      tags: ["findMany_attendanceLogs", "findMany_userCourse"],
     });
 
     return c.json({

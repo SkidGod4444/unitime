@@ -10,6 +10,10 @@ users.get("/me", async (c) => {
     const me = await account.get();
     const user = await prisma.user.findUnique({
       where: { email: me.email },
+      cacheStrategy: {
+        ttl: 60,
+        tags: [`findUnique_user_${me.email}`],
+      },
     });
 
     if (!user) {
@@ -32,7 +36,12 @@ users.get("/me", async (c) => {
 
 users.get("/all", async (c) => {
   try {
-    const users = await prisma.user.findMany();
+    const users = await prisma.user.findMany({
+      cacheStrategy: {
+        ttl: 60,
+        tags: ["findMany_users"], 
+      },
+    });
 
     if (users.length === 0) {
       return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
@@ -59,6 +68,10 @@ users.get("/", async (c) => {
   }
   const user = await prisma.user.findUnique({
     where: { email },
+    cacheStrategy: {
+      ttl: 60,
+      tags: [`findUnique_user_${email}`],
+    },
   });
   if (!user) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
@@ -77,6 +90,10 @@ users.get("/:id", async (c) => {
   const id = c.req.param("id");
   const user = prisma.user.findUnique({
     where: { id },
+    cacheStrategy: {
+      ttl: 60,
+      tags: [`findUnique_user_${id}`],
+    },
   });
   if (!user) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
@@ -101,6 +118,9 @@ users.put("/:id/update", async (c) => {
   if (!user) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
   }
+  await prisma.$accelerate.invalidate({
+    tags: ["findMany_users", `findUnique_user_${id}`], 
+  }); 
   return c.json(
     {
       success: true,
@@ -120,6 +140,9 @@ users.patch("/:id/onboard", async (c) => {
   if (!user) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
   }
+  await prisma.$accelerate.invalidate({
+    tags: ["findMany_users", `findUnique_user_${id}`],
+  });
   return c.json(
     {
       success: true,
@@ -148,6 +171,10 @@ users.post("/create", async (c) => {
       where: { email },
       update: {},
       create: { id, name, email },
+    });
+
+    await prisma.$accelerate.invalidate({
+      tags: ["findMany_users", `findUnique_user_${id}`, `findUnique_user_${email}`],
     });
 
     return c.json(

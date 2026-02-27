@@ -6,7 +6,7 @@ const timetable = new Hono();
 
 timetable.get("/:userId", async (c) => {
   const userId = c.req.param("userId");
-  const day = c.req.query("day") as any;
+  const day = c.req.query("day") as "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY" | undefined;
   const timetables = await prisma.timetable.findMany({
     where: {
       ...(day && { day }),
@@ -19,6 +19,10 @@ timetable.get("/:userId", async (c) => {
     include: {
       course: true,
       users: true,
+    },
+    cacheStrategy: {
+      ttl: 60,
+      tags: [`findMany_timetable_${userId}`],
     },
   });
   if (timetables.length === 0) {
@@ -38,6 +42,10 @@ timetable.get("/", async (c) => {
   const timetables = await prisma.timetable.findMany({
     include: {
       users: true,
+    },
+    cacheStrategy: {
+      ttl: 60,
+      tags: ["findMany_timetable"],
     },
   });
   if (timetables.length === 0) {

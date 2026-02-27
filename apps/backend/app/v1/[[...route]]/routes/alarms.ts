@@ -12,6 +12,10 @@ alarms.get("/:userId", async (c) => {
     const userAlarms = await prisma.alarm.findMany({
       where: { userId },
       orderBy: { createdAt: "asc" },
+      cacheStrategy: {
+        ttl: 60,
+        tags: [`findMany_alarms_${userId}`],
+      },
     });
 
     return c.json(
@@ -70,6 +74,10 @@ alarms.post("/", async (c) => {
       },
     });
 
+    await prisma.$accelerate.invalidate({
+      tags: [`findMany_alarms_${alarm.userId}`],
+    });
+
     return c.json(
       {
         success: true,
@@ -118,6 +126,10 @@ alarms.patch("/:id", async (c) => {
       data: body,
     });
 
+    await prisma.$accelerate.invalidate({
+      tags: [`findMany_alarms_${alarm.userId}`],
+    });
+
     return c.json(
       {
         success: true,
@@ -137,7 +149,11 @@ alarms.delete("/:id", async (c) => {
   const id = c.req.param("id");
 
   try {
-    await prisma.alarm.delete({ where: { id } });
+    const alarm = await prisma.alarm.delete({ where: { id } });
+
+    await prisma.$accelerate.invalidate({
+      tags: [`findMany_alarms_${alarm.userId}`],
+    });
 
     return c.json(
       {

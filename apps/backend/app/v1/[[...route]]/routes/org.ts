@@ -5,7 +5,12 @@ import { Hono } from "hono";
 const orgs = new Hono();
 
 orgs.get("/all", async (c) => {
-  const orgss = await prisma.organization.findMany();
+  const orgss = await prisma.organization.findMany({
+    cacheStrategy: {
+      ttl: 60,
+      tags: ["findMany_orgs"],
+    },
+  });
   if (orgss.length === 0) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
   }
@@ -32,6 +37,9 @@ orgs.post("/create", async (c) => {
   if (!newOrg) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
   }
+  await prisma.$accelerate.invalidate({
+    tags: ["findMany_orgs"],
+  });
   return c.json(
     {
       success: true,
@@ -52,6 +60,9 @@ orgs.put("/:id/update", async (c) => {
   if (!org) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
   }
+  await prisma.$accelerate.invalidate({
+    tags: ["findMany_orgs"], 
+  }); 
   return c.json(
     {
       success: true,
@@ -70,6 +81,9 @@ orgs.delete("/:id", async (c) => {
   if (!org) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
   }
+  await prisma.$accelerate.invalidate({
+    tags: ["findMany_orgs"],
+  });
   return c.json(
     {
       success: true,

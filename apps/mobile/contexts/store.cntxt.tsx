@@ -7,8 +7,8 @@ import {
     useUsersStore,
 } from "@/lib/store";
 import { Ionicons } from "@expo/vector-icons";
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
+import { Alert, Modal, Platform, StyleSheet, Text, ToastAndroid, TouchableOpacity, View } from "react-native";
 import { useAuth } from "./auth.cntxt";
 
 type StoreContextType = {
@@ -25,6 +25,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(false);
   const [rateLimitedFeatures, setRateLimitedFeatures] = useState<string[]>([]);
   const { loggedInUser } = useAuth();
+  const lastRefreshedAt = useRef<number>(0);
 
   const { fetchUsers } = useUsersStore();
   const { fetchProfiles } = useProfilesStore();
@@ -35,6 +36,19 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   const { fetchCourses } = useCoursesStore();
 
   const refresh = React.useCallback(async () => {
+    // Throttle manual refreshes to max 1 per 10 seconds
+    const now = Date.now();
+    if (now - lastRefreshedAt.current < 10000) {
+      console.log("Throttling manual refresh");
+      if (Platform.OS === "android") {
+        ToastAndroid.show("Please wait a moment before refreshing again.", ToastAndroid.SHORT);
+      } else {
+        Alert.alert("Refreshing too fast", "Please wait a few seconds before refreshing again.");
+      }
+      return;
+    }
+    lastRefreshedAt.current = now;
+
     setLoading(true);
     await Promise.allSettled([
       fetchUsers(),

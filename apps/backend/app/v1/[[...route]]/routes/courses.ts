@@ -13,6 +13,10 @@ courses.get("/:id", async (c) => {
     include: {
       users: true,
     },
+    cacheStrategy: {
+      ttl: 60,
+      tags: [`findUnique_course_${id}`],
+    },
   });
   if (!course) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
@@ -32,6 +36,10 @@ courses.get("/", async (c) => {
     include: {
       users: true,
     },
+      cacheStrategy: {
+        ttl: 60,
+        tags: ["findMany_courses"],
+      },
   });
   if (courses.length === 0) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
@@ -82,6 +90,11 @@ courses.post("/", async (c) => {
   if (!course.id) {
     return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
   }
+
+  await prisma.$accelerate.invalidate({
+    tags: ["findMany_courses"],
+  });
+
   return c.json(
     {
       success: true,
@@ -112,6 +125,11 @@ courses.put("/:id", async (c) => {
   if (!course.id) {
     return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT);
   }
+
+  await prisma.$accelerate.invalidate({
+    tags: ["findMany_courses", `findUnique_course_${id}`],
+  });
+
   return c.json(
     {
       success: true,
@@ -128,6 +146,11 @@ courses.delete("/:id", async (c) => {
     await prisma.courses.delete({
       where: { id },
     });
+
+    await prisma.$accelerate.invalidate({
+      tags: ["findMany_courses", `findUnique_course_${id}`],
+    });
+
     return c.json(
       {
         success: true,

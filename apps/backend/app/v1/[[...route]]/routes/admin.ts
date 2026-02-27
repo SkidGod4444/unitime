@@ -23,6 +23,10 @@ admin.patch("/users/:id/role", async (c) => {
       data: { role: body.role },
     });
 
+    await prisma.$accelerate.invalidate({
+      tags: ["findMany_users", `findUnique_user_${id}`],
+    });
+
     return c.json({
       success: true,
       status_code: 200,
@@ -51,6 +55,10 @@ admin.patch("/users/:id/status", async (c) => {
     const user = await prisma.user.update({
       where: { id },
       data: { status: body.status },
+    });
+
+    await prisma.$accelerate.invalidate({
+      tags: ["findMany_users", `findUnique_user_${id}`],
     });
 
     return c.json({
