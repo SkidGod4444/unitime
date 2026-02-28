@@ -221,4 +221,39 @@ courses.delete("/:id/enroll", async (c) => {
   }
 });
 
+courses.get("/:id/students", async (c) => {
+  const courseId = c.req.param("id");
+
+  try {
+    const enrollments = await getOrSetCache(
+      `userCourse:course:${courseId}`,
+      () => prisma.userCourse.findMany({
+        where: { courseId },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              expoPushToken: true,
+              studentProfile: true
+            }
+          }
+        }
+      }),
+      120
+    );
+
+    return c.json({
+      success: true,
+      status_code: 200,
+      students: enrollments.map(e => e.user)
+    }, 200);
+
+  } catch (error) {
+    console.error("Error fetching course students:", error);
+    return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
+  }
+});
+
 export default courses;

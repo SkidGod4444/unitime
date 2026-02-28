@@ -1,3 +1,4 @@
+import { AttendanceListener } from "@/components/attendance.listener";
 import BannedUserPopup from "@/components/banned.users.popup";
 import ProfileCompletionPopup from "@/components/profile.completion.popup";
 import QRScannerWidget from "@/components/qr.scanner.widget";
@@ -16,7 +17,6 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "./globals.css";
 import Loader from "./loader";
-import { RealtimeProvider } from "@/contexts/realtime.cntxt";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -77,16 +77,15 @@ function AppContent() {
             <StoreProvider>
               <AlarmsInnerProvider>
                 <PermsProvider>
-                  <RealtimeProvider>
-                    <StatusBar style={"dark"} animated />
+                  <AttendanceListener />
+                  <StatusBar style={"dark"} animated />
 
-                    <BannedUserPopup />
-                    {!isHiddenScreen && <ProfileCompletionPopup />}
+                  <BannedUserPopup />
+                  {!isHiddenScreen && <ProfileCompletionPopup />}
 
-                    <Stack screenOptions={{ headerShown: false }} />
-                    {!isHiddenScreen && <QRScannerWidget />}
-                    <Loader />
-                  </RealtimeProvider>
+                  <Stack screenOptions={{ headerShown: false }} />
+                  {!isHiddenScreen && <QRScannerWidget />}
+                  <Loader />
                 </PermsProvider>
               </AlarmsInnerProvider>
             </StoreProvider>

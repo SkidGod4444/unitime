@@ -61,19 +61,5 @@ export const invalidateCache = async (...keys: string[]): Promise<void> => {
   await cache.del(...sanitizedKeys);
 };
 
-/**
- * Publishes an event to an Upstash Realtime channel over the shared Redis instance.
- *
- * @param channel The realtime channel identifier (e.g. "class:cls_123")
- * @param payload The event data to publish
- */
-export const publishEvent = async (channel: string, payload: any): Promise<void> => {
-  try {
-    const stringifiedPayload = typeof payload === 'string' ? payload : JSON.stringify(payload);
-    await cache.publish(channel, stringifiedPayload);
-    console.log(`[PUBLISH] Event pushed to channel: ${channel}`);
-  } catch (err) {
-    console.error(`[PUBLISH ERROR] Failed to push event to ${channel}:`, err);
-  }
-};
+
 

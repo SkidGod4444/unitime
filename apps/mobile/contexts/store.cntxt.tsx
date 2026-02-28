@@ -95,10 +95,6 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     if (loggedInUser) {
       refresh();
     }
-
-    if (loggedInUser) {
-      refresh();
-    }
   }, [loggedInUser, fetchSessions, fetchSummary, fetchTimetable, refresh]);
 
   useEffect(() => {

@@ -1,4 +1,8 @@
+import { useAuth } from "@/contexts/auth.cntxt";
+import { useCoursesStore, useOrgsStore } from "@/lib/store";
+import { Course } from "@/lib/store/timetable";
 import { Ionicons } from "@expo/vector-icons";
+import { OrgT } from "@unitime/types";
 import * as Location from "expo-location";
 import { Stack, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
@@ -26,7 +30,6 @@ const StudentRow = React.memo(
     onStatusChange: (id: string, status: Status) => void;
   }) => (
     <View className="flex-row items-center justify-between py-3.5 border-b border-gray-100">
-      {/* User Info */}
       <View className="flex-1">
         <Text className="text-base font-semibold text-gray-800">
           {student.name}
@@ -36,7 +39,6 @@ const StudentRow = React.memo(
         </Text>
       </View>
 
-      {/* Status Toggles */}
       <View className="flex-row gap-x-2">
         <Pressable
           onPress={() =>
@@ -89,66 +91,87 @@ const StudentRow = React.memo(
 );
 StudentRow.displayName = "StudentRow";
 
-const COURSES = [
-  { id: "1", name: "Data Structures", code: "CS201" },
-  { id: "2", name: "Operating Systems", code: "CS301" },
-  { id: "3", name: "Computer Networks", code: "CS401" },
-];
-
-const CLASSES = [
-  { id: "1", name: "B.Tech CSE", sec: "A" },
-  { id: "2", name: "B.Tech CSE", sec: "B" },
-  { id: "3", name: "B.Tech IT", sec: "A" },
-];
-
-const INIT_STUDENTS = [
-  { id: "101", name: "Alice Smith", rollNo: "CS20101", status: null as Status },
-  { id: "102", name: "Bob Johnson", rollNo: "CS20102", status: null as Status },
-  {
-    id: "103",
-    name: "Charlie Brown",
-    rollNo: "CS20103",
-    status: null as Status,
-  },
-  {
-    id: "104",
-    name: "Diana Prince",
-    rollNo: "CS20104",
-    status: null as Status,
-  },
-  { id: "105", name: "Evan Davis", rollNo: "CS20105", status: null as Status },
-  {
-    id: "106",
-    name: "Fiona Gallagher",
-    rollNo: "CS20106",
-    status: null as Status,
-  },
-  {
-    id: "107",
-    name: "George Miller",
-    rollNo: "CS20107",
-    status: null as Status,
-  },
-];
-
 export default function AttendanceSessionForm() {
   const router = useRouter();
+  const { loggedInUser } = useAuth();
+  const { courses: allCourses } = useCoursesStore();
+  const { orgs: allOrgs } = useOrgsStore();
 
-  const [selectedCourse, setSelectedCourse] = useState(COURSES[0]);
-  const [selectedClass, setSelectedClass] = useState(CLASSES[0]);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [selectedClass, setSelectedClass] = useState<OrgT | null>(null);
+  
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [classesList, setClassesList] = useState<OrgT[]>([]);
+
   const [selectedTime, setSelectedTime] = useState(5);
-  const [students, setStudents] = useState(INIT_STUDENTS);
+  // Optional: keep students empty or load dynamically based on selected class
+  const [students, setStudents] = useState<Student[]>([]);
 
   const [isCourseDropdownOpen, setCourseDropdownOpen] = useState(false);
   const [isClassDropdownOpen, setClassDropdownOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Location state
-  const [location, setLocation] = useState<{ lat: number; lon: number } | null>(
-    null,
-  );
-  const [locationStatus, setLocationStatus] = useState<
-    "loading" | "ok" | "denied"
-  >("loading");
+  const [location, setLocation] = useState<{ lat: number; lon: number } | null>(null);
+  const [locationStatus, setLocationStatus] = useState<"loading" | "ok" | "denied">("loading");
+
+  useEffect(() => {
+    if (loggedInUser?.role === "ADMIN") {
+      setCourses(allCourses);
+      setClassesList(allOrgs);
+      if (allCourses.length > 0) setSelectedCourse(allCourses[0]);
+      if (allOrgs.length > 0) setSelectedClass(allOrgs[0]);
+    } else if (loggedInUser?.role === "REPRESENTATIVE" || loggedInUser?.role === "PROFESSOR") {
+      const userAny = loggedInUser as any;
+      const userOrgId = userAny.studentProfile?.organizationId;
+      const userOrg = allOrgs.find((o) => o.id === userOrgId) || null;
+      setSelectedClass(userOrg);
+      setClassesList(userOrg ? [userOrg] : []);
+
+      const userEnrolledCourseIds = Array.isArray(userAny.courses) ? userAny.courses.map((c: any) => c.courseId) : [];
+      const userCourses = allCourses.filter((c: Course) => userEnrolledCourseIds.includes(c.id));
+      setCourses(userCourses);
+      if (userCourses.length > 0) setSelectedCourse(userCourses[0]);
+    }
+  }, [loggedInUser, allCourses, allOrgs]);
+
+  // Handle filtering courses when a specific organization (class/section) is selected
+  useEffect(() => {
+    if (selectedClass) {
+      if (loggedInUser?.role === "ADMIN") {
+         const filteredCourses = allCourses.filter(c => c.organizationId === selectedClass.id);
+         setCourses(filteredCourses);
+         
+         // If current selectedCourse is not in the new filtered list, reset it.
+         if (filteredCourses.length > 0) {
+            if (!selectedCourse || !filteredCourses.find(c => c.id === selectedCourse.id)) {
+               setSelectedCourse(filteredCourses[0]);
+            }
+         } else {
+            setSelectedCourse(null);
+         }
+      } else {
+         // For REPRESENTATIVE and PROFESSOR, we also ensure enrolled courses match the org
+         const userAny = loggedInUser as any;
+         const userEnrolledCourseIds = Array.isArray(userAny.courses) ? userAny.courses.map((c: any) => c.courseId) : [];
+         const filteredCourses = allCourses.filter(
+            (c: Course) => userEnrolledCourseIds.includes(c.id) && c.organizationId === selectedClass.id
+         );
+         setCourses(filteredCourses);
+         
+         if (filteredCourses.length > 0) {
+            if (!selectedCourse || !filteredCourses.find(c => c.id === selectedCourse.id)) {
+               setSelectedCourse(filteredCourses[0]);
+            }
+         } else {
+            setSelectedCourse(null);
+         }
+      }
+    } else {
+        // If no class selected, clear courses
+        setCourses([]);
+        setSelectedCourse(null);
+    }
+  }, [selectedClass, allCourses, loggedInUser, selectedCourse]);
 
   useEffect(() => {
     (async () => {
@@ -177,7 +200,7 @@ export default function AttendanceSessionForm() {
     [],
   );
 
-  const handleCreateSession = () => {
+  const handleCreateSession = async () => {
     if (locationStatus !== "ok") {
       Alert.alert(
         "Location Required",
@@ -185,21 +208,99 @@ export default function AttendanceSessionForm() {
       );
       return;
     }
-    // Log for simulation purposes
-    console.log("Creating Session with data:");
-    console.log({
-      selectedCourse,
-      selectedClass,
-      selectedTime,
-      location,
-      students,
-    });
+    if (!selectedCourse) {
+       Alert.alert("Missing Details", "Please select a course to start a session.");
+       return;
+    }
 
-    Alert.alert(
-      "Session Created",
-      "The attendance session has been successfully initiated.",
-      [{ text: "OK", onPress: () => router.back() }],
-    );
+    setIsSubmitting(true);
+    try {
+      const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+      const startTime = new Date();
+      const endTime = new Date(startTime.getTime() + selectedTime * 60000);
+
+      // Create Session
+      const res = await fetch(`${origin}/attendance/qr/session/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          courseId: selectedCourse.id,
+          creatorId: loggedInUser?.id,
+          startTime: startTime.toISOString(),
+          endTime: endTime.toISOString(),
+        }),
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        
+        // Push notification logic from frontend:
+        try {
+          // Fetch enrolled students for the created session's course
+          const studentsRes = await fetch(`${origin}/courses/${selectedCourse.id}/students`);
+          
+          if (studentsRes.ok) {
+            const studentsData = await studentsRes.json();
+            
+            if (studentsData.success && Array.isArray(studentsData.students)) {
+                // Filter out the professor themselves
+                let targetStudents = studentsData.students.filter((s: any) => s.id !== loggedInUser?.id);
+                
+                // If a specific section/class is selected (e.g by Admin), ensure we only notify those students.
+                // OrganizationId usually resides inside the studentProfile.
+                if (selectedClass) {
+                  targetStudents = targetStudents.filter(
+                    (s: any) => s.studentProfile?.organizationId === selectedClass.id
+                  );
+                }
+
+                // Gather Expo tokens
+                const tokens = targetStudents
+                  .map((s: any) => s.expoPushToken)
+                  .filter(Boolean);
+
+                if (tokens.length > 0) {
+                  console.log(`Sending explicit frontend notifications to ${tokens.length} devices...`);
+
+                  const pushPayload = tokens.map((token: string) => ({
+                    to: token,
+                    sound: 'default',
+                    title: 'Attendance Started',
+                    body: `Attendance for ${selectedCourse.name} is now open! Please open the app or tap here to check in.`,
+                    data: { courseId: selectedCourse.id, sessionId: data.qrSession.id }
+                  }));
+
+                  // Dispatch to Expo
+                  await fetch('https://exp.host/--/api/v2/push/send', {
+                    method: 'POST',
+                    headers: {
+                      Accept: 'application/json',
+                      'Accept-encoding': 'gzip, deflate',
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(pushPayload),
+                  });
+                }
+            }
+          }
+        } catch (pushErr) {
+          console.warn("Frontend fallback push notifications failed:", pushErr);
+        }
+
+        Alert.alert(
+          "Session Created",
+          "The attendance session has been successfully initiated and students notified.",
+          [{ text: "OK", onPress: () => router.back() }],
+        );
+      } else {
+        throw new Error(data.message || "Failed to create session");
+      }
+    } catch (e: any) {
+      console.error(e);
+      Alert.alert("Error", e.message || "Something went wrong.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -216,7 +317,6 @@ export default function AttendanceSessionForm() {
         className="flex-1 px-4 pt-4"
         showsVerticalScrollIndicator={false}
       >
-        {/* Header Section */}
         <View className="mb-6">
           <Text className="text-2xl font-bold text-gray-900">
             Create Attendance Session
@@ -226,37 +326,40 @@ export default function AttendanceSessionForm() {
           </Text>
         </View>
 
-        {/* Configuration Card */}
         <View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-6">
           <Text className="text-lg font-semibold text-gray-800 mb-4">
             Session Details
           </Text>
 
-          {/* Course Selector Dropdown (Accordion) */}
+          {/* Course Selector Dropdown (Classes user is enrolled in) */}
           <View className="mb-4">
             <Text className="text-sm font-medium text-gray-700 mb-1.5 shrink-0">
-              Course
+              Classes (Subjects)
             </Text>
-            <Pressable
-              onPress={() => {
-                setCourseDropdownOpen(!isCourseDropdownOpen);
-                setClassDropdownOpen(false); // Close other dropdown
-              }}
-              className="flex-row items-center justify-between bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl"
-            >
-              <Text className="text-gray-800 font-medium">
-                {selectedCourse.code} - {selectedCourse.name}
-              </Text>
-              <Ionicons
-                name={isCourseDropdownOpen ? "chevron-up" : "chevron-down"}
-                size={20}
-                color="#6b7280"
-              />
-            </Pressable>
+            {courses.length === 0 ? (
+               <Text className="text-gray-500 italic my-2">No enrolled classes found.</Text>
+            ) : (
+              <Pressable
+                onPress={() => {
+                  setCourseDropdownOpen(!isCourseDropdownOpen);
+                  setClassDropdownOpen(false);
+                }}
+                className="flex-row items-center justify-between bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl"
+              >
+                <Text className="text-gray-800 font-medium">
+                  {selectedCourse ? `${selectedCourse.code} - ${selectedCourse.name} (${selectedCourse.classType})` : "Select Class..."}
+                </Text>
+                <Ionicons
+                  name={isCourseDropdownOpen ? "chevron-up" : "chevron-down"}
+                  size={20}
+                  color="#6b7280"
+                />
+              </Pressable>
+            )}
 
             {isCourseDropdownOpen && (
               <View className="mt-2 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                {COURSES.map((course, index) => (
+                {courses.map((course, index) => (
                   <Pressable
                     key={course.id}
                     onPress={() => {
@@ -264,21 +367,21 @@ export default function AttendanceSessionForm() {
                       setCourseDropdownOpen(false);
                     }}
                     className={`px-4 py-3 flex-row justify-between items-center ${
-                      index !== COURSES.length - 1
+                      index !== courses.length - 1
                         ? "border-b border-gray-100"
                         : ""
-                    } ${selectedCourse.id === course.id ? "bg-indigo-50/50" : "bg-white"}`}
+                    } ${selectedCourse?.id === course.id ? "bg-indigo-50/50" : "bg-white"}`}
                   >
                     <Text
                       className={`font-medium flex-1 ${
-                        selectedCourse.id === course.id
+                        selectedCourse?.id === course.id
                           ? "text-indigo-600"
                           : "text-gray-700"
                       }`}
                     >
-                      {course.code} - {course.name}
+                      {course.code} - {course.name} ({course.classType})
                     </Text>
-                    {selectedCourse.id === course.id && (
+                    {selectedCourse?.id === course.id && (
                       <Ionicons
                         name="checkmark-circle"
                         size={20}
@@ -291,66 +394,81 @@ export default function AttendanceSessionForm() {
             )}
           </View>
 
-          {/* Class Selector Dropdown (Accordion) */}
-          <View className="mb-4">
-            <Text className="text-sm font-medium text-gray-700 mb-1.5 shrink-0">
-              Class & Section
-            </Text>
-            <Pressable
-              onPress={() => {
-                setClassDropdownOpen(!isClassDropdownOpen);
-                setCourseDropdownOpen(false); // Close other dropdown
-              }}
-              className="flex-row items-center justify-between bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl"
-            >
-              <Text className="text-gray-800 font-medium">
-                {selectedClass.name} (Sec {selectedClass.sec})
-              </Text>
-              <Ionicons
-                name={isClassDropdownOpen ? "chevron-up" : "chevron-down"}
-                size={20}
-                color="#6b7280"
-              />
-            </Pressable>
+          {/* Orgs Selector Dropdown (Organizations/Sections) */}
+          {loggedInUser?.role === "ADMIN" && (
+            <View className="mb-4">
+                <Text className="text-sm font-medium text-gray-700 mb-1.5 shrink-0">
+                  Course & Section
+                </Text>
+                <Pressable
+                  onPress={() => {
+                    setClassDropdownOpen(!isClassDropdownOpen);
+                    setCourseDropdownOpen(false); 
+                  }}
+                  className="flex-row items-center justify-between bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl"
+                >
+                  <Text className="text-gray-800 font-medium">
+                    {selectedClass ? `${selectedClass.courseName} (Sec ${selectedClass.section})` : "Select Course..."}
+                  </Text>
+                  <Ionicons
+                    name={isClassDropdownOpen ? "chevron-up" : "chevron-down"}
+                    size={20}
+                    color="#6b7280"
+                  />
+                </Pressable>
 
-            {isClassDropdownOpen && (
-              <View className="mt-2 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                {CLASSES.map((cls, index) => (
-                  <Pressable
-                    key={cls.id}
-                    onPress={() => {
-                      setSelectedClass(cls);
-                      setClassDropdownOpen(false);
-                    }}
-                    className={`px-4 py-3 flex-row justify-between items-center ${
-                      index !== CLASSES.length - 1
-                        ? "border-b border-gray-100"
-                        : ""
-                    } ${selectedClass.id === cls.id ? "bg-indigo-50/50" : "bg-white"}`}
-                  >
-                    <Text
-                      className={`font-medium flex-1 ${
-                        selectedClass.id === cls.id
-                          ? "text-indigo-600"
-                          : "text-gray-700"
-                      }`}
-                    >
-                      {cls.name} (Sec {cls.sec})
-                    </Text>
-                    {selectedClass.id === cls.id && (
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={20}
-                        color="#4f46e5"
-                      />
-                    )}
-                  </Pressable>
-                ))}
-              </View>
-            )}
-          </View>
+                {isClassDropdownOpen && (
+                  <View className="mt-2 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                    {classesList.map((cls, index) => (
+                      <Pressable
+                        key={cls.id}
+                        onPress={() => {
+                          setSelectedClass(cls);
+                          setClassDropdownOpen(false);
+                        }}
+                        className={`px-4 py-3 flex-row justify-between items-center ${
+                          index !== classesList.length - 1
+                            ? "border-b border-gray-100"
+                            : ""
+                        } ${selectedClass?.id === cls.id ? "bg-indigo-50/50" : "bg-white"}`}
+                      >
+                        <Text
+                          className={`font-medium flex-1 ${
+                            selectedClass?.id === cls.id
+                              ? "text-indigo-600"
+                              : "text-gray-700"
+                          }`}
+                        >
+                          {cls.courseName} (Sec {cls.section})
+                        </Text>
+                        {selectedClass?.id === cls.id && (
+                          <Ionicons
+                            name="checkmark-circle"
+                            size={20}
+                            color="#4f46e5"
+                          />
+                        )}
+                      </Pressable>
+                    ))}
+                  </View>
+                )}
+            </View>
+          )}
 
-          {/* Duration */}
+          {/* For Representative, statically show their org without dropdown */}
+          {loggedInUser?.role !== "ADMIN" && selectedClass && (
+             <View className="mb-4">
+                <Text className="text-sm font-medium text-gray-700 mb-1.5 shrink-0">
+                  Course & Section
+                </Text>
+                <View className="bg-gray-100 border border-gray-200 px-4 py-3 rounded-xl">
+                   <Text className="text-gray-800 font-medium opacity-60">
+                     {selectedClass.courseName} (Sec {selectedClass.section})
+                   </Text>
+                </View>
+             </View>
+          )}
+
           <View className="mb-2">
             <Text className="text-sm font-medium text-gray-700 mb-2 shrink-0">
               Valid Duration
@@ -381,7 +499,6 @@ export default function AttendanceSessionForm() {
             </View>
           </View>
 
-          {/* Location (read-only, auto-fetched) */}
           <View className="mt-4">
             <Text className="text-sm font-medium text-gray-700 mb-1.5">
               Session Location
@@ -427,45 +544,47 @@ export default function AttendanceSessionForm() {
           </View>
         </View>
 
-        {/* Students List Card */}
-        <View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-8">
-          <View className="flex-row justify-between items-end mb-4 pr-1">
-            <View>
-              <Text className="text-lg font-semibold text-gray-800">
-                Manage Students
-              </Text>
-              <Text className="text-xs text-gray-500 mt-1">
-                Manual overrides for this session
+        {students.length > 0 && (
+          <View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-8">
+            <View className="flex-row justify-between items-end mb-4 pr-1">
+              <View>
+                <Text className="text-lg font-semibold text-gray-800">
+                  Manage Students
+                </Text>
+                <Text className="text-xs text-gray-500 mt-1">
+                  Manual overrides for this session
+                </Text>
+              </View>
+              <Text className="text-sm text-indigo-600 font-medium">
+                {students.filter((s) => s.status === "present").length}/
+                {students.length} Present
               </Text>
             </View>
-            <Text className="text-sm text-indigo-600 font-medium">
-              {students.filter((s) => s.status === "present").length}/
-              {students.length} Present
-            </Text>
-          </View>
 
-          {/* Virtualized Student List — handles 60-100 students efficiently */}
-          <FlatList
-            data={students}
-            keyExtractor={(item) => item.id}
-            scrollEnabled={false}
-            removeClippedSubviews={false}
-            renderItem={({ item }) => (
-              <StudentRow student={item} onStatusChange={handleStatusChange} />
-            )}
-          />
-        </View>
+            <FlatList
+              data={students}
+              keyExtractor={(item) => item.id}
+              scrollEnabled={false}
+              removeClippedSubviews={false}
+              renderItem={({ item }) => (
+                <StudentRow student={item} onStatusChange={handleStatusChange} />
+              )}
+            />
+          </View>
+        )}
       </ScrollView>
 
-      {/* Footer Floating Action */}
       <View className="px-4 py-4 bg-white border-t border-gray-100 pb-8 rounded-t-3xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
         <TouchableOpacity
           onPress={handleCreateSession}
+          disabled={isSubmitting}
           activeOpacity={0.8}
-          className="bg-indigo-600 rounded-xl py-4 flex-row items-center justify-center gap-x-2 shadow-sm"
+          className={`rounded-xl py-4 flex-row items-center justify-center gap-x-2 shadow-sm ${isSubmitting ? 'bg-indigo-400' : 'bg-indigo-600'}`}
         >
-          <Text className="text-white font-bold text-lg">Initiate Session</Text>
-          <Ionicons name="arrow-forward" size={20} color="#fff" />
+          <Text className="text-white font-bold text-lg">
+            {isSubmitting ? "Initiating..." : "Initiate Session"}
+          </Text>
+          {!isSubmitting && <Ionicons name="arrow-forward" size={20} color="#fff" />}
         </TouchableOpacity>
       </View>
     </SafeAreaView>

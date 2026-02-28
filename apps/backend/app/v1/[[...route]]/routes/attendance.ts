@@ -26,6 +26,50 @@ attendance.post("/qr/session/create", async (c) => {
   // No cache invalidation needed for userCourse or logs on session creation.
 
   console.log("Created QR session:", qrSession.id, "for course:", courseId);
+
+  // Trigger parallel Push Notifications to enrolled students
+  try {
+    const courseDetails = await prisma.courses.findUnique({
+      where: { id: courseId },
+      select: { name: true }
+    });
+
+    const enrolledStudents = await prisma.userCourse.findMany({
+      where: { courseId: courseId },
+      include: {
+        user: {
+          select: { expoPushToken: true }
+        }
+      }
+    });
+
+    const tokens = enrolledStudents
+      .map((enrollment: any) => enrollment.user?.expoPushToken)
+      .filter(Boolean) as string[];
+
+    if (tokens.length > 0) {
+      const pushDetails = {
+        sound: 'default',
+        title: 'Attendance Started',
+        body: `Attendance for ${courseDetails?.name || 'your class'} is now open! Please open the app to check in.`,
+        data: { courseId: courseId, sessionId: qrSession.id },
+      };
+
+      // Expo Push API chunks requests, but for <100 tokens this bulk push is completely fine
+      await fetch('https://exp.host/--/api/v2/push/send', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Accept-encoding': 'gzip, deflate',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(tokens.map(token => ({ to: token, ...pushDetails })))
+      }).catch(console.error);
+    }
+  } catch (pushErr) {
+    console.error("Failed to push notifications:", pushErr);
+  }
+
   return c.json(
     {
       success: true,
