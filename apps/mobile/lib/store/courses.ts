@@ -82,6 +82,13 @@ export const useCoursesStore = create<CoursesState>()(
       },
       updateCourse: async (id, courseData) => {
         try {
+          // Optimistically update global state
+          set((state) => ({
+            courses: state.courses.map((c) =>
+              c.id === id ? { ...c, ...courseData } : c,
+            ) as Course[],
+          }));
+
           const origin =
             process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
           const res = await fetch(`${origin}/courses/${id}`, {
@@ -95,6 +102,7 @@ export const useCoursesStore = create<CoursesState>()(
           if (res.ok && data.success) {
             useCoursesStore.getState().fetchCourses();
           } else {
+            useCoursesStore.getState().fetchCourses(); // Recover state on error
             throw new Error(data.message || "Failed to update course");
           }
         } catch (error) {

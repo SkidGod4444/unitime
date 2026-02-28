@@ -41,46 +41,36 @@ export default function ManageOrgCoursesScreen() {
   const { loggedInUser } = useAuth();
   const { profiles, fetchProfiles } = useProfilesStore();
   const { users } = useUsersStore();
-  const { courses, updateCourse } = useCoursesStore();
+  const { courses, updateCourse, fetchCourses, loading } = useCoursesStore();
   const { orgs, fetchOrgs } = useOrgsStore();
   const [refreshing, setRefreshing] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
-  const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
+
+  const userProfile = profiles.find((p) => p.userId === loggedInUser?.id);
+  const organizationId = userProfile?.organizationId || null;
+
+  const filteredCourses = React.useMemo(() => {
+    if (!loggedInUser) return [];
+    if (organizationId) {
+      return courses.filter((c: any) => c.organizationId === organizationId);
+    } else if (loggedInUser.role === 'ADMIN') {
+      return courses;
+    }
+    return [];
+  }, [courses, organizationId, loggedInUser]);
 
   const loadData = useCallback(async () => {
     if (!loggedInUser) return;
     try {
-      // Data should ideally be loaded by the main layouts before hitting here, 
-      // but if not, we can ensure profiles are ready for organization matching
-      if (profiles.length === 0) {
-        await fetchProfiles();
-      }
-      if (orgs.length === 0) {
-        await fetchOrgs();
-      }
-      
-      const currentProfiles = useProfilesStore.getState().profiles;
-      const userProfile = currentProfiles.find((p) => p.userId === loggedInUser.id);
-      const organizationId = userProfile?.organizationId || null;
-
-      // We read from the zustand store so the data flow remains central
-      const currentCourses = useCoursesStore.getState().courses;
-      
-      let orgCourses = currentCourses;
-      if (organizationId) {
-        orgCourses = currentCourses.filter((c: any) => c.organizationId === organizationId);
-      } else if (loggedInUser.role !== 'ADMIN') {
-        // Representatives without an org shouldn't see anything. Super Admins see all.
-        orgCourses = [];
-      }
-      
-      setFilteredCourses(orgCourses);
+      if (profiles.length === 0) await fetchProfiles();
+      if (orgs.length === 0) await fetchOrgs();
+      if (courses.length === 0) await fetchCourses();
     } catch (e) {
       console.error("Failed to load generic org courses:", e);
     } finally {
       setRefreshing(false);
     }
-  }, [loggedInUser, fetchProfiles, profiles.length, fetchOrgs, orgs.length]);
+  }, [loggedInUser, fetchProfiles, profiles.length, fetchOrgs, orgs.length, courses.length, fetchCourses]);
 
   useEffect(() => {
     loadData();
@@ -93,18 +83,11 @@ export default function ManageOrgCoursesScreen() {
       const course = courses.find((c) => c.id === courseId);
       if(!course) return;
 
-      // The store's updateCourse requires multiple fields so we pull from the course object.
-      // We pass the negated enrollmentEnabled.
       await updateCourse(courseId, {
          // @ts-ignore
          ...course, 
          enrollmentEnabled: !currentStatus
       });
-      
-      // Update local state directly for snappy optimistic response
-      setFilteredCourses(prev => prev.map(c => 
-        c.id === courseId ? { ...c, enrollmentEnabled: !currentStatus } as Course : c
-      ));
       
       Alert.alert("Success", `Enrollment is now ${!currentStatus ? 'open' : 'closed'} for ${course.code}.`);
     } catch {
@@ -238,35 +221,41 @@ export default function ManageOrgCoursesScreen() {
         </View>
       </View>
       
-      <FlatList
-        data={filteredCourses}
-        keyExtractor={(item) => item.id}
-        className="flex-1 px-4 pt-4"
-          contentContainerStyle={{ paddingBottom: 100 }}
-          refreshControl={
-            <RefreshControl 
-              refreshing={refreshing} 
-              onRefresh={() => {
-                setRefreshing(true);
-                loadData();
-              }} 
-            />
-          }
-          ListEmptyComponent={
-            <View className="items-center py-20 px-4 flex-1 justify-center">
-              <View className="h-20 w-20 bg-gray-100 rounded-full justify-center items-center mb-4">
-                <Ionicons name="school-outline" size={40} color="#9ca3af" />
+      {loading && !refreshing ? (
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="large" color="#4f46e5" />
+        </View>
+      ) : (
+        <FlatList
+          data={filteredCourses}
+          keyExtractor={(item) => item.id}
+          className="flex-1 px-4 pt-4"
+            contentContainerStyle={{ paddingBottom: 100 }}
+            refreshControl={
+              <RefreshControl 
+                refreshing={refreshing} 
+                onRefresh={() => {
+                  setRefreshing(true);
+                  loadData();
+                }} 
+              />
+            }
+            ListEmptyComponent={
+              <View className="items-center py-20 px-4 flex-1 justify-center">
+                <View className="h-20 w-20 bg-gray-100 rounded-full justify-center items-center mb-4">
+                  <Ionicons name="school-outline" size={40} color="#9ca3af" />
+                </View>
+                <Text className="text-lg font-bold text-gray-800 text-center mb-2">
+                  No Courses Found
+                </Text>
+                <Text className="text-gray-500 text-center text-sm px-6">
+                  Your organization does not have any courses set up yet.
+                </Text>
               </View>
-              <Text className="text-lg font-bold text-gray-800 text-center mb-2">
-                No Courses Found
-              </Text>
-              <Text className="text-gray-500 text-center text-sm px-6">
-                Your organization does not have any courses set up yet.
-              </Text>
-            </View>
-          }
-          renderItem={renderItem}
-        />
+            }
+            renderItem={renderItem}
+          />
+      )}
     </SafeAreaView>
   );
 }

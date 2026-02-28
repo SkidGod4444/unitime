@@ -48,6 +48,11 @@ export default function MyCoursesScreen() {
   const userProfile = profiles.find((p) => p.userId === loggedInUser?.id);
   const organizationId = userProfile?.organizationId;
 
+  const filteredCourses = React.useMemo(() => {
+    if (!organizationId) return [];
+    return courses.filter((c) => c.organizationId === organizationId);
+  }, [courses, organizationId]);
+
   const handleEnroll = async (courseId: string) => {
     try {
       setActionLoadingId(courseId);
@@ -69,14 +74,15 @@ export default function MyCoursesScreen() {
     }
   };
 
-  const handleDeEnroll = async (courseId: string) => {
+  const handleDeEnroll = async (courseId: string, status?: string) => {
+    const isPending = status === 'PENDING';
     Alert.alert(
-      "Remove Course",
-      "Are you sure you want to de-enroll from this course?",
+      isPending ? "Cancel Request" : "Remove Course",
+      isPending ? "Are you sure you want to cancel your enrollment request for this course?" : "Are you sure you want to de-enroll from this course?",
       [
-        { text: "Cancel", style: "cancel" },
+        { text: "No", style: "cancel" },
         {
-          text: "Remove",
+          text: isPending ? "Yes, Cancel" : "Remove",
           style: "destructive",
           onPress: async () => {
             try {
@@ -88,12 +94,12 @@ export default function MyCoursesScreen() {
                 body: JSON.stringify({ userId: loggedInUser?.id }),
               });
               
-              if (!res.ok) throw new Error("Failed to de-enroll");
+              if (!res.ok) throw new Error(isPending ? "Failed to cancel request" : "Failed to de-enroll");
               
-              Alert.alert("Success", "You have been removed from the course.");
+              Alert.alert("Success", isPending ? "Your enrollment request has been cancelled." : "You have been removed from the course.");
               fetchCourses();
             } catch {
-              Alert.alert("Error", "Could not de-enroll. Please try again.");
+              Alert.alert("Error", isPending ? "Could not cancel request. Please try again." : "Could not de-enroll. Please try again.");
             } finally {
               setActionLoadingId(null);
             }
@@ -104,15 +110,10 @@ export default function MyCoursesScreen() {
   };
 
   const renderItem = ({ item }: { item: Course }) => {
-    // Hide courses that don't belong to the user's organization
-    if (organizationId && item.organizationId !== organizationId) return null;
-    
     const userEnrollment = (item as any).users?.find((u: any) => u.userId === loggedInUser?.id);
     const org = item.organizationId ? orgs.find((o: any) => o.id === item.organizationId) : null;
     
-    // If not enrolled and enrollment disabled, skip rendering in "My Courses" entirely
-    // or we can render it as "Unavailable".
-    if (!userEnrollment && !item.enrollmentEnabled) return null;
+    const isEnrollmentOpen = item.enrollmentEnabled ?? true;
 
     const rawSemester = org?.semester || (item as any).semester;
     const semesterDisplay = rawSemester ? (SEMESTER_MAP[rawSemester] || rawSemester) : null;
@@ -151,9 +152,13 @@ export default function MyCoursesScreen() {
                 {userEnrollment.status === 'APPROVED' ? 'Enrolled' : userEnrollment.status}
               </Text>
             </View>
-          ) : (
+          ) : isEnrollmentOpen ? (
             <View className="bg-gray-50 border border-gray-200 px-2.5 py-1 rounded-lg">
               <Text className="text-[10px] font-bold text-gray-500 uppercase">Available</Text>
+            </View>
+          ) : (
+            <View className="bg-gray-100 border border-gray-200 px-2.5 py-1 rounded-lg">
+              <Text className="text-[10px] font-bold text-gray-400 uppercase">Closed</Text>
             </View>
           )}
         </View>
@@ -200,21 +205,30 @@ export default function MyCoursesScreen() {
         {/* Actions */}
         <View className="flex-row gap-3">
           {userEnrollment ? (
-            <TouchableOpacity
-              onPress={() => handleDeEnroll(item.id)}
-              disabled={actionLoadingId === item.id}
-              className="flex-1 py-3.5 rounded-xl border border-red-200 bg-red-50 flex-row justify-center items-center gap-2"
-            >
-              {actionLoadingId === item.id ? (
-                <ActivityIndicator color="#ef4444" size="small" />
-              ) : (
-                <>
-                  <Ionicons name="trash-outline" size={18} color="#ef4444" />
-                  <Text className="text-red-600 font-bold">Unenroll</Text>
-                </>
-              )}
-            </TouchableOpacity>
-          ) : (
+            userEnrollment.status === 'REJECTED' ? (
+              <View className="flex-1 py-3.5 rounded-xl border border-red-200 bg-red-50 flex-row justify-center items-center gap-2">
+                <Ionicons name="close-circle-outline" size={18} color="#ef4444" />
+                <Text className="text-red-700 font-bold">Enrollment Rejected</Text>
+              </View>
+            ) : (
+              <TouchableOpacity
+                onPress={() => handleDeEnroll(item.id, userEnrollment.status)}
+                disabled={actionLoadingId === item.id}
+                className="flex-1 py-3.5 rounded-xl border border-red-200 bg-red-50 flex-row justify-center items-center gap-2"
+              >
+                {actionLoadingId === item.id ? (
+                  <ActivityIndicator color="#ef4444" size="small" />
+                ) : (
+                  <>
+                    <Ionicons name={userEnrollment.status === 'PENDING' ? "close-circle-outline" : "log-out-outline"} size={18} color="#ef4444" />
+                    <Text className="text-red-600 font-bold">
+                      {userEnrollment.status === 'PENDING' ? "Cancel Request" : "Opt-Out"}
+                    </Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            )
+          ) : isEnrollmentOpen ? (
             <TouchableOpacity
               onPress={() => handleEnroll(item.id)}
               disabled={actionLoadingId === item.id}
@@ -229,6 +243,11 @@ export default function MyCoursesScreen() {
                 </>
               )}
             </TouchableOpacity>
+          ) : (
+            <View className="flex-1 py-3.5 rounded-xl border border-gray-200 bg-gray-50 flex-row justify-center items-center gap-2">
+              <Ionicons name="lock-closed-outline" size={18} color="#9ca3af" />
+              <Text className="text-gray-500 font-bold">Enrollment Closed</Text>
+            </View>
           )}
         </View>
       </View>
@@ -262,7 +281,7 @@ export default function MyCoursesScreen() {
         </View>
       ) : (
         <FlatList
-          data={courses}
+          data={filteredCourses}
           keyExtractor={(item) => item.id}
           className="flex-1 px-4 pt-4"
           contentContainerStyle={{ paddingBottom: 100 }}
