@@ -1,4 +1,5 @@
 import { useAuth } from "@/contexts/auth.cntxt";
+import { useLocalStore } from "@/contexts/localstore.cntxt";
 import { useAttendanceStore } from "@/lib/store";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -23,6 +24,7 @@ export default function TapToMarkScreen() {
   const router = useRouter();
   const { sessionId, courseName, timeWindow } = useLocalSearchParams();
   const { loggedInUser } = useAuth();
+  const { getItem, setItem } = useLocalStore();
   const markAttendance = useAttendanceStore((state) => state.markAttendance);
 
   const [status, setStatus] = useState<
@@ -87,6 +89,13 @@ export default function TapToMarkScreen() {
         // Success triggers
         setStatus("success");
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+        // Store this session as locally marked to permanently skip any routing loops 
+        const prevStr = await getItem("MARKED_SESSIONS");
+        const prevIds = prevStr ? JSON.parse(prevStr) : [];
+        if (!prevIds.includes(sessionId)) {
+           await setItem("MARKED_SESSIONS", JSON.stringify([...prevIds, sessionId]));
+        }
 
         // Animations for success
         pulseScale.value = withSpring(1);

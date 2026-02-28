@@ -29,7 +29,7 @@ dashboard.get("/:userId", async (c) => {
         const todayStr = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase();
         const timetable = await prisma.timetable.findMany({
           where: {
-            day: todayStr as any,
+            day: todayStr as "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY",
             course: {
               users: { some: { userId: user.id, status: "APPROVED" } }
             }
@@ -48,15 +48,21 @@ dashboard.get("/:userId", async (c) => {
         };
 
         // Get currently active sessions for enrolled courses
-        const activeSessions = await prisma.attendanceQRSession.findMany({
+        // Exclude ones where the user has ALREADY marked attendance
+        const rawActiveSessions = await prisma.attendanceQRSession.findMany({
           where: {
             status: "ACTIVE",
             course: {
               users: { some: { userId: user.id, status: "APPROVED" } }
             }
           },
-          include: { course: true }
+          include: { 
+            course: true
+          }
         });
+
+        // Only return sessions that the user hasn't checked into yet
+        const activeSessions = rawActiveSessions.filter(session => !session.markedUsers.includes(user.id));
 
         return {
           user: { id: user.id, name: user.name, role: user.role },

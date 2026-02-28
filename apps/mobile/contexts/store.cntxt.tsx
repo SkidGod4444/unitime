@@ -8,9 +8,11 @@ import {
 } from "@/lib/store";
 import { useEnrollmentStore } from "@/lib/store/enrollment";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { Alert, Modal, Platform, StyleSheet, Text, ToastAndroid, TouchableOpacity, View } from "react-native";
 import { useAuth } from "./auth.cntxt";
+import { useLocalStore } from "./localstore.cntxt";
 
 type StoreContextType = {
   refresh: () => Promise<void>;
@@ -26,6 +28,8 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(false);
   const [rateLimitedFeatures, setRateLimitedFeatures] = useState<string[]>([]);
   const { loggedInUser } = useAuth();
+  const { getItem } = useLocalStore();
+  const router = useRouter();
   const lastRefreshedAt = useRef<number>(0);
 
   const { fetchUsers } = useUsersStore();
@@ -77,6 +81,47 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
       }
     }
 
+    // Active Session Fallback Check for "Pull to Refresh"
+    if (loggedInUser?.id) {
+       try {
+         const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+         const dashRes = await fetch(`${origin}/dashboard/${loggedInUser.id}`, {
+            headers: {
+              "Cache-Control": "no-cache",
+              "Pragma": "no-cache",
+              "Expires": "0"
+            }
+         });
+         if (dashRes.ok) {
+            const dashData = await dashRes.json();
+            
+            if (dashData.success && dashData.data?.activeSessions?.length > 0) {
+               // The dashboard endpoint explicitly returns the user's `.courses`
+               const dashboardCourses = Array.isArray(dashData.data.courses) ? dashData.data.courses : [];
+               const currentEnrolledIds = dashboardCourses.map((c: any) => c.id);
+               
+               const validSession = dashData.data.activeSessions.find((session: any) => 
+                  currentEnrolledIds.includes(session.courseId)
+               );
+
+               if (validSession) {
+                 const markedStr = await getItem("MARKED_SESSIONS");
+                 const markedIds = markedStr ? JSON.parse(markedStr) : [];
+                 if (markedIds.includes(validSession.id)) {
+                    console.log("Pull-to-refresh fallback ignored session: already marked locally");
+                 } else {
+                    const courseName = validSession.course?.name || validSession.courseId;
+                    console.log("Pull-to-refresh caught Active Session:", validSession.id);
+                    router.push(`/tap-to-mark?sessionId=${validSession.id}&courseName=${courseName}`);
+                 }
+               }
+            }
+         }
+       } catch (err) {
+         console.warn("Manual refresh active session check failed:", err);
+       }
+    }
+
     setLoading(false);
   }, [
     fetchUsers,
@@ -87,8 +132,11 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     fetchSummary,
     fetchSessions,
     fetchEnrollments,
+    getItem,
+    loggedInUser,
     loggedInUser?.id,
     loggedInUser?.role,
+    router,
   ]);
 
   useEffect(() => {

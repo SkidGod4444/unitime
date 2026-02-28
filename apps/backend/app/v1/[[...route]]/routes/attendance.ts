@@ -205,6 +205,16 @@ attendance.post("/checkin", async (c) => {
         markedAt: new Date(),
       }
     });
+    
+    // Add user to the markedUsers array for the session to prevent routing loops
+    await prisma.attendanceQRSession.update({
+      where: { id: sessionId },
+      data: {
+        markedUsers: {
+          push: userId
+        }
+      }
+    });
 
     // Background aggregation: Update attendance_summary asynchronously
     (async () => {
@@ -481,6 +491,18 @@ attendance.patch("/sessions/:id/students", async (c) => {
                 userId: student.id,
               },
             });
+            // Add to markedUsers string array
+            const session = await tx.attendanceQRSession.findUnique({ where: { id: sessionId } });
+            if (session && !session.markedUsers.includes(student.id)) {
+              await tx.attendanceQRSession.update({
+                where: { id: sessionId },
+                data: {
+                  markedUsers: {
+                    push: student.id
+                  }
+                }
+              });
+            }
           }
         } else if (student.status === "absent" || student.status === null) {
           // Remove log if exists
@@ -501,6 +523,18 @@ attendance.patch("/sessions/:id/students", async (c) => {
                 },
               },
             });
+            
+            // Remove from markedUsers array 
+            const session = await tx.attendanceQRSession.findUnique({ where: { id: sessionId } });
+            if (session && session.markedUsers.includes(student.id)) {
+               const newMarkedUsers = session.markedUsers.filter(id => id !== student.id);
+               await tx.attendanceQRSession.update({
+                  where: { id: sessionId },
+                  data: {
+                    markedUsers: newMarkedUsers
+                  }
+               });
+            }
           }
         }
       }
