@@ -72,18 +72,20 @@ export default function StudentProfileForm() {
   // ---------------------------------------------------------------------------
   // Dynamic Options Derivation
   // ---------------------------------------------------------------------------
-  const departments = Array.from(new Set(orgs.map((o) => o.departmentName)));
+  const cleanStr = (s?: string) => (s || "").trim().replace(/\s+/g, " ");
+
+  const departments = Array.from(new Set(orgs.map((o) => cleanStr(o.departmentName))));
 
   const courses = department
-    ? Array.from(new Set(orgs.filter((o) => o.departmentName === department).map((o) => o.courseName)))
+    ? Array.from(new Set(orgs.filter((o) => cleanStr(o.departmentName) === department).map((o) => cleanStr(o.courseName))))
     : [];
 
   const sem = (department && course)
-    ? Array.from(new Set(orgs.filter((o) => o.departmentName === department && o.courseName === course).map((o) => o.semester)))
+    ? Array.from(new Set(orgs.filter((o) => cleanStr(o.departmentName) === department && cleanStr(o.courseName) === course).map((o) => o.semester)))
     : [];
 
   const sections = (department && course && semister)
-    ? Array.from(new Set(orgs.filter((o) => o.departmentName === department && o.courseName === course && o.semester === semister).map((o) => o.section.toString())))
+    ? Array.from(new Set(orgs.filter((o) => cleanStr(o.departmentName) === department && cleanStr(o.courseName) === course && o.semester === semister).map((o) => o.section.toString())))
     : [];
 
   // ---------------------------------------------------------------------------
@@ -122,7 +124,13 @@ export default function StudentProfileForm() {
       return;
     }
 
-    const matchedOrg = orgs.find((o) => o.departmentName === department && o.courseName === course && o.semester === semister && o.section.toString() === section);
+    const matchedOrg = orgs.find(
+      (o) =>
+        cleanStr(o.departmentName) === department &&
+        cleanStr(o.courseName) === course &&
+        o.semester === semister &&
+        o.section.toString() === section
+    );
     if (!matchedOrg) {
       Alert.alert("Error", "Could not find a valid matching active Class/Organization for these selections.");
       return;
