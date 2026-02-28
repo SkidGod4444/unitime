@@ -46,6 +46,12 @@ type AttendanceState = {
     sessionId: string,
     updates: { id: string; status: "present" | "absent" | null }[],
   ) => Promise<boolean>;
+
+  markAttendance: (
+    sessionId: string,
+    userId: string,
+    coordinates: { lat: number; lng: number }
+  ) => Promise<{ success: boolean; message?: string }>;
 };
 
 export const useAttendanceStore = create<AttendanceState>()(
@@ -136,6 +142,22 @@ export const useAttendanceStore = create<AttendanceState>()(
         } catch (error) {
           console.error("Error updating session attendance:", error);
           return false;
+        }
+      },
+
+      markAttendance: async (sessionId, userId, coordinates) => {
+        try {
+          const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+          const res = await fetch(`${origin}/attendance/checkin`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sessionId, userId, coordinates })
+          });
+          const data = await res.json();
+          return { success: res.ok && data.success, message: data.message };
+        } catch (error: any) {
+          console.error("Error marking attendance:", error);
+          return { success: false, message: error.message || "Failed to mark attendance" };
         }
       },
     }),

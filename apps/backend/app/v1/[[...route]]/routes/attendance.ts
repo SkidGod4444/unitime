@@ -91,6 +91,138 @@ attendance.post("/qr/session/verify", async (c) => {
   });
 });
 
+/**
+ * Calculates the great-circle distance between two points on the Earth.
+ * Returns distance in meters.
+ */
+function haversineDistance(coords1: { lat: number; lng: number }, coords2: { lat: number; lng: number }) {
+  const R = 6371e3; // Earth radius in meters
+  const toRadian = (angle: number) => (Math.PI / 180) * angle;
+
+  const dLat = toRadian(coords2.lat - coords1.lat);
+  const dLon = toRadian(coords2.lng - coords1.lng);
+  
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(toRadian(coords1.lat)) * Math.cos(toRadian(coords2.lat)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  
+  return R * c; 
+}
+
+attendance.post("/checkin", async (c) => {
+  const { sessionId, userId, coordinates } = await c.req.json();
+  if (!sessionId || !userId || !coordinates || !coordinates.lat || !coordinates.lng) {
+    return createHonoErrorResponse(c, ERROR_CODES.MISSING_REQUIRED_FIELD);
+  }
+
+  try {
+    const session = await prisma.attendanceQRSession.findUnique({
+      where: { id: sessionId },
+      include: { user: true } // The professor who created it
+    });
+
+    if (!session || session.status !== "ACTIVE") {
+      return c.json({ success: false, message: "Session is invalid or inactive" }, 400);
+    }
+
+    if (!session.user.coordinates) {
+       return c.json({ success: false, message: "Professor location is not broadcasted. Cannot verify." }, 400);
+    }
+    
+    // Parse creator coordinates "lat,lng"
+    const [profLatStr, profLngStr] = session.user.coordinates.split(",");
+    const profCoords = { lat: parseFloat(profLatStr), lng: parseFloat(profLngStr) };
+    
+    // Verify distance
+    const distanceMeters = haversineDistance(coordinates, profCoords);
+    const THRESHOLD_METERS = 75; // 75 meters geofence leeway
+    
+    if (distanceMeters > THRESHOLD_METERS) {
+      console.log(`[Check-in Failed] User ${userId} is ${distanceMeters.toFixed(1)}m away from class.`);
+      return c.json({ success: false, message: "You are too far from the classroom to check in." }, 400);
+    }
+
+    // Check if duplicate
+    const existing = await prisma.attendanceLogs.findUnique({
+      where: { sessionId_userId: { sessionId, userId } }
+    });
+    
+    if (existing) {
+       return c.json({ success: true, message: "Attendance already verified" }, 200);
+    }
+
+    // Save attendance
+    await prisma.attendanceLogs.create({
+      data: {
+        sessionId,
+        userId,
+        sessionType: "TAP_SESSION",
+        markedAt: new Date(),
+      }
+    });
+
+    // Background aggregation: Update attendance_summary asynchronously
+    (async () => {
+      try {
+        const courseId = session.courseId;
+        const totalSessions = await prisma.attendanceQRSession.count({
+          where: { courseId },
+        });
+
+        const attendedSessions = await prisma.attendanceLogs.count({
+          where: {
+            userId,
+            sessionId: {
+              in: (
+                await prisma.attendanceQRSession.findMany({
+                  where: { courseId },
+                })
+              ).map((s) => s.id),
+            },
+          },
+        });
+
+        const percentage = totalSessions === 0 ? 100 : Math.round((attendedSessions / totalSessions) * 100);
+
+        await prisma.attendanceSummary.upsert({
+          where: {
+            userId_courseId: {
+              userId,
+              courseId,
+            }
+          },
+          update: {
+            attended: attendedSessions,
+            total: totalSessions,
+            percentage
+          },
+          create: {
+            userId,
+            courseId,
+            attended: attendedSessions,
+            total: totalSessions,
+            percentage
+          }
+        });
+        console.log(`[Background Job] Updated attendance summary for user ${userId} in course ${courseId}`);
+      } catch (aggrError) {
+        console.error("Failed to aggregate attendance in background:", aggrError);
+      }
+    })();
+    
+    // Important: Invalidate cache for realtime updates
+    await invalidateCache(`attendanceLogs:session:${sessionId}`);
+    await invalidateCache(`dashboard:${userId}`);
+    
+    return c.json({ success: true, message: "Attendance Marked Successfully" }, 200);
+
+  } catch (error) {
+    console.error("Error during manual check-in:", error);
+    return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
+  }
+});
+
 attendance.get("/qr/session/:id", async (c) => {
   const sessionId = c.req.param("id");
 

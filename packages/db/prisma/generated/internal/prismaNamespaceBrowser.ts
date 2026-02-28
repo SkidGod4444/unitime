@@ -58,6 +58,7 @@ export const ModelName = {
   Timetable: 'Timetable',
   AttendanceQRSession: 'AttendanceQRSession',
   AttendanceLogs: 'AttendanceLogs',
+  AttendanceSummary: 'AttendanceSummary',
   StudentProfile: 'StudentProfile',
   Organization: 'Organization',
   Alarm: 'Alarm'
@@ -182,6 +183,20 @@ export const AttendanceLogsScalarFieldEnum = {
 } as const
 
 export type AttendanceLogsScalarFieldEnum = (typeof AttendanceLogsScalarFieldEnum)[keyof typeof AttendanceLogsScalarFieldEnum]
+
+
+export const AttendanceSummaryScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  courseId: 'courseId',
+  attended: 'attended',
+  total: 'total',
+  percentage: 'percentage',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AttendanceSummaryScalarFieldEnum = (typeof AttendanceSummaryScalarFieldEnum)[keyof typeof AttendanceSummaryScalarFieldEnum]
 
 
 export const StudentProfileScalarFieldEnum = {

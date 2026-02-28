@@ -75,6 +75,11 @@ export type AttendanceQRSession = Prisma.AttendanceQRSessionModel
  */
 export type AttendanceLogs = Prisma.AttendanceLogsModel
 /**
+ * Model AttendanceSummary
+ * 
+ */
+export type AttendanceSummary = Prisma.AttendanceSummaryModel
+/**
  * Model StudentProfile
  * 
  */

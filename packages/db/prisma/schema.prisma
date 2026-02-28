@@ -64,6 +64,7 @@ model Courses {
   users               UserCourse[]
   timetable           Timetable[]
   attendanceQRSession AttendanceQRSession[]
+  attendanceSummary   AttendanceSummary[]
   createdAt           DateTime              @default(now()) @map("created_at")
   updatedAt           DateTime              @updatedAt @map("updated_at")
   organizationId      String?               @map("organization_id")
@@ -101,6 +102,7 @@ model User {
   timetables           UserTimetable[]
   attendanceQRSessions AttendanceQRSession[]
   attendances          AttendanceLogs[]
+  attendanceSummary    AttendanceSummary[]
   studentProfile       StudentProfile?
   alarms               Alarm[]
   coordinates          String?               @map("coordinates") // For geofencing, format: "latitude,longitude"
@@ -206,6 +208,22 @@ model AttendanceLogs {
 
   @@unique([sessionId, userId])
   @@map("attendance_logs")
+}
+
+model AttendanceSummary {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  courseId   String   @map("course_id")
+  attended   Int      @default(0)
+  total      Int      @default(0)
+  percentage Float    @default(0.0)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course     Courses  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, courseId])
+  @@map("attendance_summary")
 }
 
 model StudentProfile {

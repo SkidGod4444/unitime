@@ -391,6 +391,7 @@ export const ModelName = {
   Timetable: 'Timetable',
   AttendanceQRSession: 'AttendanceQRSession',
   AttendanceLogs: 'AttendanceLogs',
+  AttendanceSummary: 'AttendanceSummary',
   StudentProfile: 'StudentProfile',
   Organization: 'Organization',
   Alarm: 'Alarm'
@@ -409,7 +410,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "courses" | "user" | "userCourse" | "userTimetable" | "timetable" | "attendanceQRSession" | "attendanceLogs" | "studentProfile" | "organization" | "alarm"
+    modelProps: "courses" | "user" | "userCourse" | "userTimetable" | "timetable" | "attendanceQRSession" | "attendanceLogs" | "attendanceSummary" | "studentProfile" | "organization" | "alarm"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -931,6 +932,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AttendanceSummary: {
+      payload: Prisma.$AttendanceSummaryPayload<ExtArgs>
+      fields: Prisma.AttendanceSummaryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AttendanceSummaryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendanceSummaryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AttendanceSummaryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendanceSummaryPayload>
+        }
+        findFirst: {
+          args: Prisma.AttendanceSummaryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendanceSummaryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AttendanceSummaryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendanceSummaryPayload>
+        }
+        findMany: {
+          args: Prisma.AttendanceSummaryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendanceSummaryPayload>[]
+        }
+        create: {
+          args: Prisma.AttendanceSummaryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendanceSummaryPayload>
+        }
+        createMany: {
+          args: Prisma.AttendanceSummaryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AttendanceSummaryCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendanceSummaryPayload>[]
+        }
+        delete: {
+          args: Prisma.AttendanceSummaryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendanceSummaryPayload>
+        }
+        update: {
+          args: Prisma.AttendanceSummaryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendanceSummaryPayload>
+        }
+        deleteMany: {
+          args: Prisma.AttendanceSummaryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AttendanceSummaryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AttendanceSummaryUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendanceSummaryPayload>[]
+        }
+        upsert: {
+          args: Prisma.AttendanceSummaryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AttendanceSummaryPayload>
+        }
+        aggregate: {
+          args: Prisma.AttendanceSummaryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAttendanceSummary>
+        }
+        groupBy: {
+          args: Prisma.AttendanceSummaryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AttendanceSummaryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AttendanceSummaryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AttendanceSummaryCountAggregateOutputType> | number
+        }
+      }
+    }
     StudentProfile: {
       payload: Prisma.$StudentProfilePayload<ExtArgs>
       fields: Prisma.StudentProfileFieldRefs
@@ -1295,6 +1370,20 @@ export const AttendanceLogsScalarFieldEnum = {
 } as const
 
 export type AttendanceLogsScalarFieldEnum = (typeof AttendanceLogsScalarFieldEnum)[keyof typeof AttendanceLogsScalarFieldEnum]
+
+
+export const AttendanceSummaryScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  courseId: 'courseId',
+  attended: 'attended',
+  total: 'total',
+  percentage: 'percentage',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AttendanceSummaryScalarFieldEnum = (typeof AttendanceSummaryScalarFieldEnum)[keyof typeof AttendanceSummaryScalarFieldEnum]
 
 
 export const StudentProfileScalarFieldEnum = {
@@ -1679,6 +1768,7 @@ export type GlobalOmitConfig = {
   timetable?: Prisma.TimetableOmit
   attendanceQRSession?: Prisma.AttendanceQRSessionOmit
   attendanceLogs?: Prisma.AttendanceLogsOmit
+  attendanceSummary?: Prisma.AttendanceSummaryOmit
   studentProfile?: Prisma.StudentProfileOmit
   organization?: Prisma.OrganizationOmit
   alarm?: Prisma.AlarmOmit

@@ -7,6 +7,7 @@ import { LocalStoreProvider } from "@/contexts/localstore.cntxt";
 import { PermsProvider } from "@/contexts/perms.cntxt";
 import { RoutesProvider } from "@/contexts/routes.cntxt";
 import { StoreProvider } from "@/contexts/store.cntxt";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import { Stack, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -15,6 +16,16 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "./globals.css";
 import Loader from "./loader";
+import { RealtimeProvider } from "@/contexts/realtime.cntxt";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 2,
+      staleTime: 1000 * 60 * 5, // 5 minutes cache by default
+    },
+  },
+});
 
 /**
  * Inner wrapper that reads the logged-in user from AuthContext and passes
@@ -66,14 +77,16 @@ function AppContent() {
             <StoreProvider>
               <AlarmsInnerProvider>
                 <PermsProvider>
-                  <StatusBar style={"dark"} animated />
+                  <RealtimeProvider>
+                    <StatusBar style={"dark"} animated />
 
-                  <BannedUserPopup />
-                  {!isHiddenScreen && <ProfileCompletionPopup />}
+                    <BannedUserPopup />
+                    {!isHiddenScreen && <ProfileCompletionPopup />}
 
-                  <Stack screenOptions={{ headerShown: false }} />
-                  {!isHiddenScreen && <QRScannerWidget />}
-                  <Loader />
+                    <Stack screenOptions={{ headerShown: false }} />
+                    {!isHiddenScreen && <QRScannerWidget />}
+                    <Loader />
+                  </RealtimeProvider>
                 </PermsProvider>
               </AlarmsInnerProvider>
             </StoreProvider>
@@ -86,8 +99,10 @@ function AppContent() {
 
 export default function RootLayout() {
   return (
-    <SafeAreaProvider>
-      <AppContent />
-    </SafeAreaProvider>
+    <QueryClientProvider client={queryClient}>
+      <SafeAreaProvider>
+        <AppContent />
+      </SafeAreaProvider>
+    </QueryClientProvider>
   );
 }

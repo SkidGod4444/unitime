@@ -97,18 +97,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     if (loggedInUser) {
-      const interval = setInterval(async () => {
-        console.log("Refreshing secondary data (attendance/timetable)...");
-        if (loggedInUser.id) {
-          fetchSummary(loggedInUser.id);
-          fetchTimetable(loggedInUser.id);
-          if (loggedInUser.role === "PROFESSOR") {
-            fetchSessions(loggedInUser.id);
-          }
-        }
-      }, 30 * 1000); // Wait 30s instead of 10s for intensive DB calls
-
-      return () => clearInterval(interval);
+      refresh();
     }
   }, [loggedInUser, fetchSessions, fetchSummary, fetchTimetable, refresh]);
 

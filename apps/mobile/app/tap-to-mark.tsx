@@ -1,23 +1,30 @@
+import { useAuth } from "@/contexts/auth.cntxt";
+import { useAttendanceStore } from "@/lib/store";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { useRouter } from "expo-router";
+import * as Location from "expo-location";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
 import Animated, {
-  Easing,
-  FadeInDown,
-  interpolate,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withSequence,
-  withSpring,
-  withTiming,
+    Easing,
+    FadeInDown,
+    interpolate,
+    useAnimatedStyle,
+    useSharedValue,
+    withRepeat,
+    withSequence,
+    withSpring,
+    withTiming,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function TapToMarkScreen() {
   const router = useRouter();
+  const { sessionId, courseName, timeWindow } = useLocalSearchParams();
+  const { loggedInUser } = useAuth();
+  const markAttendance = useAttendanceStore((state) => state.markAttendance);
+
   const [status, setStatus] = useState<
     "idle" | "loading" | "success" | "error"
   >("idle");
@@ -38,10 +45,15 @@ export default function TapToMarkScreen() {
       -1,
       true,
     );
-  }, []);
+  }, [pulseScale]);
 
   const handlePress = async () => {
     if (status !== "idle") return;
+
+    if (!sessionId || !loggedInUser?.id) {
+      Alert.alert("Error", "Missing session or user information.");
+      return;
+    }
 
     // Start loading
     setStatus("loading");
@@ -50,27 +62,55 @@ export default function TapToMarkScreen() {
     // Stop pulse, shrink slightly
     pulseScale.value = withTiming(0.95, { duration: 200 });
 
-    // Simulate API call
-    setTimeout(async () => {
-      // Success triggers
-      setStatus("success");
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    try {
+      // 1. Get high accuracy location precisely when marking attendance
+      const { status: locStatus } = await Location.requestForegroundPermissionsAsync();
+      if (locStatus !== "granted") {
+        setStatus("error");
+        Alert.alert("Permission Error", "Location permission is required to mark attendance.");
+        pulseScale.value = withSpring(1);
+        return;
+      }
 
-      // Animations for success
-      pulseScale.value = withSpring(1);
-      rippleScale.value = withTiming(1, {
-        duration: 500,
-        easing: Easing.out(Easing.cubic),
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
       });
-      contentOpacity.value = withTiming(0, { duration: 300 });
-      successScale.value = withSpring(1, { damping: 12 });
 
-      // Optional: Auto go back or just let user enjoy the success state
-      // setTimeout(() => router.back(), 2000);
-      setTimeout(() => {
-        router.replace("/");
-      }, 5000);
-    }, 2000);
+      // 2. Call backend POST check-in via UI block
+      const result = await markAttendance(
+        sessionId as string,
+        loggedInUser.id,
+        { lat: location.coords.latitude, lng: location.coords.longitude }
+      );
+
+      if (result.success) {
+        // Success triggers
+        setStatus("success");
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+        // Animations for success
+        pulseScale.value = withSpring(1);
+        rippleScale.value = withTiming(1, {
+          duration: 500,
+          easing: Easing.out(Easing.cubic),
+        });
+        contentOpacity.value = withTiming(0, { duration: 300 });
+        successScale.value = withSpring(1, { damping: 12 });
+
+        setTimeout(() => {
+          router.replace("/");
+        }, 5000);
+      } else {
+        setStatus("error");
+        Alert.alert("Attendance Failed", result.message || "Could not verify location or session.");
+        pulseScale.value = withSpring(1);
+      }
+    } catch (error) {
+      console.error("Check-in error:", error);
+      setStatus("error");
+      Alert.alert("Error", "An unexpected error occurred during check-in.");
+      pulseScale.value = withSpring(1);
+    }
   };
 
   const rippleStyle = useAnimatedStyle(() => {
@@ -117,12 +157,12 @@ export default function TapToMarkScreen() {
             Current Session
           </Text>
           <Text className="text-3xl font-bold text-dark text-center mb-2 font-lora">
-            Advanced Mathematics
+            {courseName || "Unknown Course"}
           </Text>
           <View className="flex-row items-center bg-blue-50 px-3 py-1.5 rounded-full">
             <Feather name="clock" size={14} color="#2563EB" />
             <Text className="text-blue-600 ml-1.5 font-medium">
-              10:00 AM - 11:30 AM
+              {timeWindow || "Active Now"}
             </Text>
           </View>
         </View>

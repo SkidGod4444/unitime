@@ -7,6 +7,7 @@ import alarms from "./routes/alarms";
 import attendance from "./routes/attendance";
 import chats from "./routes/chats";
 import courses from "./routes/courses";
+import dashboard from "./routes/dashboard";
 import history from "./routes/history";
 import notifications from "./routes/notifications";
 import orgs from "./routes/org";
@@ -46,6 +47,7 @@ app.use(
   }),
 );
 
+app.route("/dashboard", dashboard);
 app.route("/users", users);
 app.route("/attendance", attendance);
 app.route("/history", history);
