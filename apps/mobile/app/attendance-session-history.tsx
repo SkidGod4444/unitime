@@ -433,10 +433,10 @@ export default function AttendanceSessionHistory() {
         (new Date(s.endTime).getTime() - new Date(s.startTime).getTime()) /
           60000,
       ),
-      students: s.logs.map((log: any) => ({
+      students: (s.logs || []).map((log: any) => ({
         id: log.studentId,
         name: log.student?.name || "Unknown Student",
-        rollNo: log.studentId.substring(0, 6),
+        rollNo: log.studentId?.substring(0, 6) || "UNK",
         status: (log.status || "present").toLowerCase() as Status,
       })),
     }));

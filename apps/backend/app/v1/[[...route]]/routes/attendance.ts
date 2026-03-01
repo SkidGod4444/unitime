@@ -1,7 +1,7 @@
 import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
 import { generateQRToken, verifyQRToken } from "@/lib/qr.algo";
 import { getOrSetCache, invalidateCache } from "@unitime/cache";
-import { Prisma, prisma } from "@unitime/db";
+import { prisma } from "@unitime/db";
 import { Hono } from "hono";
 
 const attendance = new Hono();
@@ -442,11 +442,37 @@ attendance.get("/sessions/all", async (c) => {
       120,
     );
 
+    const enhancedSessions = await Promise.all(
+      attendanceSessions.map(async (session) => {
+        const logs = await prisma.attendanceLogs.findMany({
+          where: { sessionId: session.id },
+        });
+
+        const enrolledStudents = await prisma.userCourse.findMany({
+          where: { courseId: session.courseId },
+          include: {
+            user: { include: { studentProfile: true } },
+          },
+        });
+
+        const formattedLogs = enrolledStudents.map((enr) => {
+          const isPresent = logs.some((log) => log.userId === enr.userId);
+          return {
+            studentId: enr.userId,
+            student: { name: enr.user.name },
+            status: isPresent ? "present" : "absent",
+          };
+        });
+
+        return { ...session, logs: formattedLogs };
+      })
+    );
+
     return c.json(
       {
         success: true,
         status_code: 200,
-        sessions: attendanceSessions,
+        sessions: enhancedSessions,
       },
       200,
     );
