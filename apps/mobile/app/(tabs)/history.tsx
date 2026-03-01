@@ -1,78 +1,47 @@
 import { useRefresh } from "@/hooks/use-refresh";
+import { useHistoryStore } from "@/lib/store/history";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
-  RefreshControl,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
+    RefreshControl,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const FILTERS = ["All", "Attendance", "Assignments", "System"];
+const FILTERS = ["All", "Attendance", "System"];
 
-const HISTORY_DATA = [
-  {
-    id: 1,
-    type: "Attendance",
-    title: "Marked Present",
-    description: "Mathematics - Room 302",
-    timestamp: "2 hours ago",
-    icon: "checkmark-circle",
-    color: "text-green-600",
-    bg: "bg-green-50",
-  },
-  {
-    id: 2,
-    type: "Assignments",
-    title: "Assignment Submitted",
-    description: "Physics Lab Report",
-    timestamp: "5 hours ago",
-    icon: "document-text",
-    color: "text-blue-600",
-    bg: "bg-blue-50",
-  },
-  {
-    id: 3,
-    type: "System",
-    title: "Profile Updated",
-    description: "Changed profile picture",
-    timestamp: "1 day ago",
-    icon: "person",
-    color: "text-purple-600",
-    bg: "bg-purple-50",
-  },
-  {
-    id: 4,
-    type: "Attendance",
-    title: "Class Cancelled",
-    description: "Computer Science - Lab 1",
-    timestamp: "2 days ago",
-    icon: "alert-circle",
-    color: "text-red-600",
-    bg: "bg-red-50",
-  },
-  {
-    id: 5,
-    type: "Assignments",
-    title: "New Assignment",
-    description: "History Essay Due",
-    timestamp: "3 days ago",
-    icon: "book",
-    color: "text-orange-600",
-    bg: "bg-orange-50",
-  },
-];
+// Helper for relative time formatting
+function timeSince(dateString: string) {
+  const date = new Date(dateString);
+  const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+  let interval = seconds / 31536000;
+
+  if (interval > 1) return Math.floor(interval) + " years ago";
+  interval = seconds / 2592000;
+  if (interval > 1) return Math.floor(interval) + " months ago";
+  interval = seconds / 86400;
+  if (interval > 1) return Math.floor(interval) + " days ago";
+  interval = seconds / 3600;
+  if (interval > 1) return Math.floor(interval) + " hours ago";
+  interval = seconds / 60;
+  if (interval > 1) return Math.floor(interval) + " minutes ago";
+  return Math.floor(seconds) + " seconds ago";
+}
 
 export default function History() {
   const [activeFilter, setActiveFilter] = useState("All");
   const { refresh, refreshing } = useRefresh();
+  const { logs, loading } = useHistoryStore();
 
   const filteredData =
     activeFilter === "All"
-      ? HISTORY_DATA
-      : HISTORY_DATA.filter((item) => item.type === activeFilter);
+      ? logs
+      : logs.filter(
+          (item) => item.type === activeFilter.toUpperCase()
+        );
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
@@ -121,7 +90,7 @@ export default function History() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 100, gap: 16 }}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={refresh} />
+            <RefreshControl refreshing={refreshing || loading} onRefresh={refresh} />
           }
         >
           {filteredData.map((item) => (
@@ -130,23 +99,16 @@ export default function History() {
               className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex-row items-center gap-4"
             >
               <View
-                className={`h-12 w-12 rounded-full ${item.bg} justify-center items-center`}
+                className={`h-12 w-12 rounded-full ${
+                  item.type === "ATTENDANCE" ? "bg-green-50" : "bg-purple-50"
+                } justify-center items-center`}
               >
                 <Ionicons
-                  name={item.icon as any}
+                  name={item.type === "ATTENDANCE" ? "checkmark-circle" : "person"}
                   size={24}
-                  className={item.color}
+                  className={item.type === "ATTENDANCE" ? "text-green-600" : "text-purple-600"}
                   style={{
-                    color:
-                      item.color === "text-green-600"
-                        ? "#16A34A"
-                        : item.color === "text-blue-600"
-                          ? "#2563EB"
-                          : item.color === "text-purple-600"
-                            ? "#9333EA"
-                            : item.color === "text-red-600"
-                              ? "#DC2626"
-                              : "#EA580C",
+                    color: item.type === "ATTENDANCE" ? "#16A34A" : "#9333EA",
                   }}
                 />
               </View>
@@ -156,17 +118,17 @@ export default function History() {
                     {item.title}
                   </Text>
                   <Text className="text-xs text-gray-400 font-medium">
-                    {item.timestamp}
+                    {timeSince(item.createdAt)}
                   </Text>
                 </View>
-                <Text className="text-gray-500 text-sm">
+                <Text className="text-gray-500 text-sm" numberOfLines={2}>
                   {item.description}
                 </Text>
               </View>
             </View>
           ))}
 
-          {filteredData.length === 0 && (
+          {!loading && filteredData.length === 0 && (
             <View className="items-center justify-center py-10">
               <Text className="text-gray-400">No activity found</Text>
             </View>

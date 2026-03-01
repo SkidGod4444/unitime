@@ -52,6 +52,8 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   Courses: 'Courses',
+  Notification: 'Notification',
+  HistoryLog: 'HistoryLog',
   User: 'User',
   UserCourse: 'UserCourse',
   UserTimetable: 'UserTimetable',
@@ -98,6 +100,34 @@ export const CoursesScalarFieldEnum = {
 } as const
 
 export type CoursesScalarFieldEnum = (typeof CoursesScalarFieldEnum)[keyof typeof CoursesScalarFieldEnum]
+
+
+export const NotificationScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  body: 'body',
+  type: 'type',
+  readBy: 'readBy',
+  userId: 'userId',
+  organizationId: 'organizationId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
+export const HistoryLogScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  type: 'type',
+  userId: 'userId',
+  organizationId: 'organizationId',
+  createdAt: 'createdAt'
+} as const
+
+export type HistoryLogScalarFieldEnum = (typeof HistoryLogScalarFieldEnum)[keyof typeof HistoryLogScalarFieldEnum]
 
 
 export const UserScalarFieldEnum = {

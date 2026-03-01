@@ -66,7 +66,7 @@ dashboard.get("/:userId", async (c) => {
 
         return {
           user: { id: user.id, name: user.name, role: user.role },
-          courses: (user as any).courses?.map((uc: any) => uc.course) || [],
+          courses: (user as unknown as { courses?: { course: unknown }[] }).courses?.map(uc => uc.course) || [],
           timetable,
           summary,
           activeSessions

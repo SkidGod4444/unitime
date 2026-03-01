@@ -80,6 +80,22 @@ export const UserStatus = {
 export type UserStatus = (typeof UserStatus)[keyof typeof UserStatus]
 
 
+export const NotificationType = {
+  ATTENDANCE: 'ATTENDANCE',
+  SYSTEM: 'SYSTEM'
+} as const
+
+export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType]
+
+
+export const HistoryLogType = {
+  ATTENDANCE: 'ATTENDANCE',
+  SYSTEM: 'SYSTEM'
+} as const
+
+export type HistoryLogType = (typeof HistoryLogType)[keyof typeof HistoryLogType]
+
+
 export const CourseDay = {
   MONDAY: 'MONDAY',
   TUESDAY: 'TUESDAY',

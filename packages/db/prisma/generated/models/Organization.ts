@@ -234,6 +234,8 @@ export type OrganizationWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
   students?: Prisma.StudentProfileListRelationFilter
   courses?: Prisma.CoursesListRelationFilter
+  notifications?: Prisma.NotificationListRelationFilter
+  historyLogs?: Prisma.HistoryLogListRelationFilter
 }
 
 export type OrganizationOrderByWithRelationInput = {
@@ -246,6 +248,8 @@ export type OrganizationOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   students?: Prisma.StudentProfileOrderByRelationAggregateInput
   courses?: Prisma.CoursesOrderByRelationAggregateInput
+  notifications?: Prisma.NotificationOrderByRelationAggregateInput
+  historyLogs?: Prisma.HistoryLogOrderByRelationAggregateInput
 }
 
 export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
@@ -261,6 +265,8 @@ export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Organization"> | Date | string
   students?: Prisma.StudentProfileListRelationFilter
   courses?: Prisma.CoursesListRelationFilter
+  notifications?: Prisma.NotificationListRelationFilter
+  historyLogs?: Prisma.HistoryLogListRelationFilter
 }, "id" | "section">
 
 export type OrganizationOrderByWithAggregationInput = {
@@ -301,6 +307,8 @@ export type OrganizationCreateInput = {
   updatedAt?: Date | string
   students?: Prisma.StudentProfileCreateNestedManyWithoutOrganizationInput
   courses?: Prisma.CoursesCreateNestedManyWithoutOrganizationInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutOrganizationInput
+  historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateInput = {
@@ -313,6 +321,8 @@ export type OrganizationUncheckedCreateInput = {
   updatedAt?: Date | string
   students?: Prisma.StudentProfileUncheckedCreateNestedManyWithoutOrganizationInput
   courses?: Prisma.CoursesUncheckedCreateNestedManyWithoutOrganizationInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutOrganizationInput
+  historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUpdateInput = {
@@ -325,6 +335,8 @@ export type OrganizationUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   students?: Prisma.StudentProfileUpdateManyWithoutOrganizationNestedInput
   courses?: Prisma.CoursesUpdateManyWithoutOrganizationNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutOrganizationNestedInput
+  historyLogs?: Prisma.HistoryLogUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateInput = {
@@ -337,6 +349,8 @@ export type OrganizationUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   students?: Prisma.StudentProfileUncheckedUpdateManyWithoutOrganizationNestedInput
   courses?: Prisma.CoursesUncheckedUpdateManyWithoutOrganizationNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutOrganizationNestedInput
+  historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateManyInput = {
@@ -433,6 +447,38 @@ export type OrganizationUpdateOneWithoutCoursesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutCoursesInput, Prisma.OrganizationUpdateWithoutCoursesInput>, Prisma.OrganizationUncheckedUpdateWithoutCoursesInput>
 }
 
+export type OrganizationCreateNestedOneWithoutNotificationsInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutNotificationsInput, Prisma.OrganizationUncheckedCreateWithoutNotificationsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutNotificationsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneWithoutNotificationsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutNotificationsInput, Prisma.OrganizationUncheckedCreateWithoutNotificationsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutNotificationsInput
+  upsert?: Prisma.OrganizationUpsertWithoutNotificationsInput
+  disconnect?: Prisma.OrganizationWhereInput | boolean
+  delete?: Prisma.OrganizationWhereInput | boolean
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutNotificationsInput, Prisma.OrganizationUpdateWithoutNotificationsInput>, Prisma.OrganizationUncheckedUpdateWithoutNotificationsInput>
+}
+
+export type OrganizationCreateNestedOneWithoutHistoryLogsInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutHistoryLogsInput, Prisma.OrganizationUncheckedCreateWithoutHistoryLogsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutHistoryLogsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneWithoutHistoryLogsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutHistoryLogsInput, Prisma.OrganizationUncheckedCreateWithoutHistoryLogsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutHistoryLogsInput
+  upsert?: Prisma.OrganizationUpsertWithoutHistoryLogsInput
+  disconnect?: Prisma.OrganizationWhereInput | boolean
+  delete?: Prisma.OrganizationWhereInput | boolean
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutHistoryLogsInput, Prisma.OrganizationUpdateWithoutHistoryLogsInput>, Prisma.OrganizationUncheckedUpdateWithoutHistoryLogsInput>
+}
+
 export type OrganizationCreateNestedOneWithoutStudentsInput = {
   create?: Prisma.XOR<Prisma.OrganizationCreateWithoutStudentsInput, Prisma.OrganizationUncheckedCreateWithoutStudentsInput>
   connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutStudentsInput
@@ -456,6 +502,8 @@ export type OrganizationCreateWithoutCoursesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   students?: Prisma.StudentProfileCreateNestedManyWithoutOrganizationInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutOrganizationInput
+  historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutCoursesInput = {
@@ -467,6 +515,8 @@ export type OrganizationUncheckedCreateWithoutCoursesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   students?: Prisma.StudentProfileUncheckedCreateNestedManyWithoutOrganizationInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutOrganizationInput
+  historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutCoursesInput = {
@@ -494,6 +544,8 @@ export type OrganizationUpdateWithoutCoursesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   students?: Prisma.StudentProfileUpdateManyWithoutOrganizationNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutOrganizationNestedInput
+  historyLogs?: Prisma.HistoryLogUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutCoursesInput = {
@@ -505,6 +557,144 @@ export type OrganizationUncheckedUpdateWithoutCoursesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   students?: Prisma.StudentProfileUncheckedUpdateManyWithoutOrganizationNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutOrganizationNestedInput
+  historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutNotificationsInput = {
+  id?: string
+  departmentName: string
+  courseName: string
+  semester: $Enums.CourseSemester
+  section: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  students?: Prisma.StudentProfileCreateNestedManyWithoutOrganizationInput
+  courses?: Prisma.CoursesCreateNestedManyWithoutOrganizationInput
+  historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutNotificationsInput = {
+  id?: string
+  departmentName: string
+  courseName: string
+  semester: $Enums.CourseSemester
+  section: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  students?: Prisma.StudentProfileUncheckedCreateNestedManyWithoutOrganizationInput
+  courses?: Prisma.CoursesUncheckedCreateNestedManyWithoutOrganizationInput
+  historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutNotificationsInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutNotificationsInput, Prisma.OrganizationUncheckedCreateWithoutNotificationsInput>
+}
+
+export type OrganizationUpsertWithoutNotificationsInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutNotificationsInput, Prisma.OrganizationUncheckedUpdateWithoutNotificationsInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutNotificationsInput, Prisma.OrganizationUncheckedCreateWithoutNotificationsInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutNotificationsInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutNotificationsInput, Prisma.OrganizationUncheckedUpdateWithoutNotificationsInput>
+}
+
+export type OrganizationUpdateWithoutNotificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  departmentName?: Prisma.StringFieldUpdateOperationsInput | string
+  courseName?: Prisma.StringFieldUpdateOperationsInput | string
+  semester?: Prisma.EnumCourseSemesterFieldUpdateOperationsInput | $Enums.CourseSemester
+  section?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  students?: Prisma.StudentProfileUpdateManyWithoutOrganizationNestedInput
+  courses?: Prisma.CoursesUpdateManyWithoutOrganizationNestedInput
+  historyLogs?: Prisma.HistoryLogUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutNotificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  departmentName?: Prisma.StringFieldUpdateOperationsInput | string
+  courseName?: Prisma.StringFieldUpdateOperationsInput | string
+  semester?: Prisma.EnumCourseSemesterFieldUpdateOperationsInput | $Enums.CourseSemester
+  section?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  students?: Prisma.StudentProfileUncheckedUpdateManyWithoutOrganizationNestedInput
+  courses?: Prisma.CoursesUncheckedUpdateManyWithoutOrganizationNestedInput
+  historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutHistoryLogsInput = {
+  id?: string
+  departmentName: string
+  courseName: string
+  semester: $Enums.CourseSemester
+  section: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  students?: Prisma.StudentProfileCreateNestedManyWithoutOrganizationInput
+  courses?: Prisma.CoursesCreateNestedManyWithoutOrganizationInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutHistoryLogsInput = {
+  id?: string
+  departmentName: string
+  courseName: string
+  semester: $Enums.CourseSemester
+  section: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  students?: Prisma.StudentProfileUncheckedCreateNestedManyWithoutOrganizationInput
+  courses?: Prisma.CoursesUncheckedCreateNestedManyWithoutOrganizationInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutHistoryLogsInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutHistoryLogsInput, Prisma.OrganizationUncheckedCreateWithoutHistoryLogsInput>
+}
+
+export type OrganizationUpsertWithoutHistoryLogsInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutHistoryLogsInput, Prisma.OrganizationUncheckedUpdateWithoutHistoryLogsInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutHistoryLogsInput, Prisma.OrganizationUncheckedCreateWithoutHistoryLogsInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutHistoryLogsInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutHistoryLogsInput, Prisma.OrganizationUncheckedUpdateWithoutHistoryLogsInput>
+}
+
+export type OrganizationUpdateWithoutHistoryLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  departmentName?: Prisma.StringFieldUpdateOperationsInput | string
+  courseName?: Prisma.StringFieldUpdateOperationsInput | string
+  semester?: Prisma.EnumCourseSemesterFieldUpdateOperationsInput | $Enums.CourseSemester
+  section?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  students?: Prisma.StudentProfileUpdateManyWithoutOrganizationNestedInput
+  courses?: Prisma.CoursesUpdateManyWithoutOrganizationNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutHistoryLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  departmentName?: Prisma.StringFieldUpdateOperationsInput | string
+  courseName?: Prisma.StringFieldUpdateOperationsInput | string
+  semester?: Prisma.EnumCourseSemesterFieldUpdateOperationsInput | $Enums.CourseSemester
+  section?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  students?: Prisma.StudentProfileUncheckedUpdateManyWithoutOrganizationNestedInput
+  courses?: Prisma.CoursesUncheckedUpdateManyWithoutOrganizationNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutStudentsInput = {
@@ -516,6 +706,8 @@ export type OrganizationCreateWithoutStudentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   courses?: Prisma.CoursesCreateNestedManyWithoutOrganizationInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutOrganizationInput
+  historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutStudentsInput = {
@@ -527,6 +719,8 @@ export type OrganizationUncheckedCreateWithoutStudentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   courses?: Prisma.CoursesUncheckedCreateNestedManyWithoutOrganizationInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutOrganizationInput
+  historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutStudentsInput = {
@@ -554,6 +748,8 @@ export type OrganizationUpdateWithoutStudentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   courses?: Prisma.CoursesUpdateManyWithoutOrganizationNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutOrganizationNestedInput
+  historyLogs?: Prisma.HistoryLogUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutStudentsInput = {
@@ -565,6 +761,8 @@ export type OrganizationUncheckedUpdateWithoutStudentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   courses?: Prisma.CoursesUncheckedUpdateManyWithoutOrganizationNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutOrganizationNestedInput
+  historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 
@@ -575,11 +773,15 @@ export type OrganizationUncheckedUpdateWithoutStudentsInput = {
 export type OrganizationCountOutputType = {
   students: number
   courses: number
+  notifications: number
+  historyLogs: number
 }
 
 export type OrganizationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   students?: boolean | OrganizationCountOutputTypeCountStudentsArgs
   courses?: boolean | OrganizationCountOutputTypeCountCoursesArgs
+  notifications?: boolean | OrganizationCountOutputTypeCountNotificationsArgs
+  historyLogs?: boolean | OrganizationCountOutputTypeCountHistoryLogsArgs
 }
 
 /**
@@ -606,6 +808,20 @@ export type OrganizationCountOutputTypeCountCoursesArgs<ExtArgs extends runtime.
   where?: Prisma.CoursesWhereInput
 }
 
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountNotificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.NotificationWhereInput
+}
+
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountHistoryLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.HistoryLogWhereInput
+}
+
 
 export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -617,6 +833,8 @@ export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   updatedAt?: boolean
   students?: boolean | Prisma.Organization$studentsArgs<ExtArgs>
   courses?: boolean | Prisma.Organization$coursesArgs<ExtArgs>
+  notifications?: boolean | Prisma.Organization$notificationsArgs<ExtArgs>
+  historyLogs?: boolean | Prisma.Organization$historyLogsArgs<ExtArgs>
   _count?: boolean | Prisma.OrganizationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["organization"]>
 
@@ -654,6 +872,8 @@ export type OrganizationOmit<ExtArgs extends runtime.Types.Extensions.InternalAr
 export type OrganizationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   students?: boolean | Prisma.Organization$studentsArgs<ExtArgs>
   courses?: boolean | Prisma.Organization$coursesArgs<ExtArgs>
+  notifications?: boolean | Prisma.Organization$notificationsArgs<ExtArgs>
+  historyLogs?: boolean | Prisma.Organization$historyLogsArgs<ExtArgs>
   _count?: boolean | Prisma.OrganizationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type OrganizationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -664,6 +884,8 @@ export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.Intern
   objects: {
     students: Prisma.$StudentProfilePayload<ExtArgs>[]
     courses: Prisma.$CoursesPayload<ExtArgs>[]
+    notifications: Prisma.$NotificationPayload<ExtArgs>[]
+    historyLogs: Prisma.$HistoryLogPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1069,6 +1291,8 @@ export interface Prisma__OrganizationClient<T, Null = never, ExtArgs extends run
   readonly [Symbol.toStringTag]: "PrismaPromise"
   students<T extends Prisma.Organization$studentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$studentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StudentProfilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   courses<T extends Prisma.Organization$coursesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$coursesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CoursesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  notifications<T extends Prisma.Organization$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  historyLogs<T extends Prisma.Organization$historyLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$historyLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$HistoryLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1538,6 +1762,54 @@ export type Organization$coursesArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.CoursesScalarFieldEnum | Prisma.CoursesScalarFieldEnum[]
+}
+
+/**
+ * Organization.notifications
+ */
+export type Organization$notificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Notification
+   */
+  select?: Prisma.NotificationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Notification
+   */
+  omit?: Prisma.NotificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NotificationInclude<ExtArgs> | null
+  where?: Prisma.NotificationWhereInput
+  orderBy?: Prisma.NotificationOrderByWithRelationInput | Prisma.NotificationOrderByWithRelationInput[]
+  cursor?: Prisma.NotificationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.NotificationScalarFieldEnum | Prisma.NotificationScalarFieldEnum[]
+}
+
+/**
+ * Organization.historyLogs
+ */
+export type Organization$historyLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the HistoryLog
+   */
+  select?: Prisma.HistoryLogSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the HistoryLog
+   */
+  omit?: Prisma.HistoryLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.HistoryLogInclude<ExtArgs> | null
+  where?: Prisma.HistoryLogWhereInput
+  orderBy?: Prisma.HistoryLogOrderByWithRelationInput | Prisma.HistoryLogOrderByWithRelationInput[]
+  cursor?: Prisma.HistoryLogWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.HistoryLogScalarFieldEnum | Prisma.HistoryLogScalarFieldEnum[]
 }
 
 /**

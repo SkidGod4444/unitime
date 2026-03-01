@@ -7,6 +7,8 @@ import {
     useUsersStore,
 } from "@/lib/store";
 import { useEnrollmentStore } from "@/lib/store/enrollment";
+import { useHistoryStore } from "@/lib/store/history";
+import { useNotificationsStore } from "@/lib/store/notifications";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
@@ -40,6 +42,8 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   const { fetchSummary, fetchSessions } = useAttendanceStore();
   const { fetchCourses } = useCoursesStore();
   const { fetchEnrollments } = useEnrollmentStore();
+  const { fetchNotifications } = useNotificationsStore();
+  const { fetchHistoryLogs } = useHistoryStore();
 
   const refresh = React.useCallback(async () => {
     // Throttle manual refreshes to max 1 per 10 seconds
@@ -63,6 +67,8 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
       fetchCourses(),
       ...(loggedInUser?.id ? [fetchTimetable(loggedInUser.id)] : []),
       ...(loggedInUser?.id ? [fetchSummary(loggedInUser.id)] : []),
+      ...(loggedInUser?.id ? [fetchNotifications(loggedInUser.id)] : []),
+      ...(loggedInUser?.id ? [fetchHistoryLogs(loggedInUser.id)] : []),
       ...(loggedInUser?.id && loggedInUser.role === "PROFESSOR"
         ? [fetchSessions(loggedInUser.id)]
         : []),
@@ -132,10 +138,10 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     fetchSummary,
     fetchSessions,
     fetchEnrollments,
+    fetchHistoryLogs,
+    fetchNotifications,
     getItem,
     loggedInUser,
-    loggedInUser?.id,
-    loggedInUser?.role,
     router,
   ]);
 

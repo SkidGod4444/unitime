@@ -218,6 +218,40 @@ export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedDateTimeFilter<$PrismaModel>
 }
 
+export type EnumNotificationTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.NotificationType | Prisma.EnumNotificationTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.NotificationType[] | Prisma.ListEnumNotificationTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.NotificationType[] | Prisma.ListEnumNotificationTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumNotificationTypeFilter<$PrismaModel> | $Enums.NotificationType
+}
+
+export type EnumNotificationTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.NotificationType | Prisma.EnumNotificationTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.NotificationType[] | Prisma.ListEnumNotificationTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.NotificationType[] | Prisma.ListEnumNotificationTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumNotificationTypeWithAggregatesFilter<$PrismaModel> | $Enums.NotificationType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumNotificationTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumNotificationTypeFilter<$PrismaModel>
+}
+
+export type EnumHistoryLogTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.HistoryLogType | Prisma.EnumHistoryLogTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.HistoryLogType[] | Prisma.ListEnumHistoryLogTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.HistoryLogType[] | Prisma.ListEnumHistoryLogTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumHistoryLogTypeFilter<$PrismaModel> | $Enums.HistoryLogType
+}
+
+export type EnumHistoryLogTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.HistoryLogType | Prisma.EnumHistoryLogTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.HistoryLogType[] | Prisma.ListEnumHistoryLogTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.HistoryLogType[] | Prisma.ListEnumHistoryLogTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumHistoryLogTypeWithAggregatesFilter<$PrismaModel> | $Enums.HistoryLogType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumHistoryLogTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumHistoryLogTypeFilter<$PrismaModel>
+}
+
 export type BoolNullableFilter<$PrismaModel = never> = {
   equals?: boolean | Prisma.BooleanFieldRefInput<$PrismaModel> | null
   not?: Prisma.NestedBoolNullableFilter<$PrismaModel> | boolean | null
@@ -617,6 +651,40 @@ export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedDateTimeFilter<$PrismaModel>
   _max?: Prisma.NestedDateTimeFilter<$PrismaModel>
+}
+
+export type NestedEnumNotificationTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.NotificationType | Prisma.EnumNotificationTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.NotificationType[] | Prisma.ListEnumNotificationTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.NotificationType[] | Prisma.ListEnumNotificationTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumNotificationTypeFilter<$PrismaModel> | $Enums.NotificationType
+}
+
+export type NestedEnumNotificationTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.NotificationType | Prisma.EnumNotificationTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.NotificationType[] | Prisma.ListEnumNotificationTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.NotificationType[] | Prisma.ListEnumNotificationTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumNotificationTypeWithAggregatesFilter<$PrismaModel> | $Enums.NotificationType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumNotificationTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumNotificationTypeFilter<$PrismaModel>
+}
+
+export type NestedEnumHistoryLogTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.HistoryLogType | Prisma.EnumHistoryLogTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.HistoryLogType[] | Prisma.ListEnumHistoryLogTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.HistoryLogType[] | Prisma.ListEnumHistoryLogTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumHistoryLogTypeFilter<$PrismaModel> | $Enums.HistoryLogType
+}
+
+export type NestedEnumHistoryLogTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.HistoryLogType | Prisma.EnumHistoryLogTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.HistoryLogType[] | Prisma.ListEnumHistoryLogTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.HistoryLogType[] | Prisma.ListEnumHistoryLogTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumHistoryLogTypeWithAggregatesFilter<$PrismaModel> | $Enums.HistoryLogType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumHistoryLogTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumHistoryLogTypeFilter<$PrismaModel>
 }
 
 export type NestedBoolNullableFilter<$PrismaModel = never> = {

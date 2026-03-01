@@ -9,6 +9,8 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/Courses.ts'
+export type * from './models/Notification.ts'
+export type * from './models/HistoryLog.ts'
 export type * from './models/User.ts'
 export type * from './models/UserCourse.ts'
 export type * from './models/UserTimetable.ts'

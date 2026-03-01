@@ -44,7 +44,7 @@ attendance.post("/qr/session/create", async (c) => {
     });
 
     const tokens = enrolledStudents
-      .map((enrollment: any) => enrollment.user?.expoPushToken)
+      .map((enrollment: { user: { expoPushToken: string | null } | null }) => enrollment.user?.expoPushToken)
       .filter(Boolean) as string[];
 
     if (tokens.length > 0) {

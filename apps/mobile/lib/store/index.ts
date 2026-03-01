@@ -227,5 +227,7 @@ export const useOrgsStore = create<OrgsState>()(
 
 export * from "./attendance";
 export * from "./courses";
+export * from "./history";
+export * from "./notifications";
 export * from "./timetable";
 

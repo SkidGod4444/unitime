@@ -23,6 +23,16 @@ export * from './enums.ts';
  */
 export type Courses = Prisma.CoursesModel
 /**
+ * Model Notification
+ * 
+ */
+export type Notification = Prisma.NotificationModel
+/**
+ * Model HistoryLog
+ * 
+ */
+export type HistoryLog = Prisma.HistoryLogModel
+/**
  * Model User
  * 
  */

@@ -87,6 +87,46 @@ enum UserStatus {
   INACTIVE
 }
 
+enum NotificationType {
+  ATTENDANCE
+  SYSTEM
+}
+
+enum HistoryLogType {
+  ATTENDANCE
+  SYSTEM
+}
+
+model Notification {
+  id              String           @id @default(uuid())
+  title           String
+  body            String
+  type            NotificationType
+  readBy          String[]         @default([]) @map("read_by") // Array of user IDs who have read this
+  userId          String?          @map("user_id")
+  user            User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId  String?          @map("organization_id")
+  organization    Organization?    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+
+  @@map("notifications")
+}
+
+model HistoryLog {
+  id              String         @id @default(uuid())
+  title           String
+  description     String
+  type            HistoryLogType
+  userId          String?        @map("user_id")
+  user            User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId  String?        @map("organization_id")
+  organization    Organization?  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt       DateTime       @default(now()) @map("created_at")
+
+  @@map("history_logs")
+}
+
 model User {
   id                   String                @id
   name                 String
@@ -105,6 +145,8 @@ model User {
   attendanceSummary    AttendanceSummary[]
   studentProfile       StudentProfile?
   alarms               Alarm[]
+  notifications        Notification[]
+  historyLogs          HistoryLog[]
   coordinates          String?               @map("coordinates") // For geofencing, format: "latitude,longitude"
   expoPushToken        String?               @map("expo_push_token") // For push notifications
   isOnboarded          Boolean               @default(false) @map("is_onboarded") // To track if user has completed onboarding
@@ -253,6 +295,8 @@ model Organization {
   section        Int              @unique @map("section")
   students       StudentProfile[]
   courses        Courses[]
+  notifications  Notification[]
+  historyLogs    HistoryLog[]
   createdAt      DateTime         @default(now()) @map("created_at")
   updatedAt      DateTime         @updatedAt @map("updated_at")
 

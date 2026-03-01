@@ -385,6 +385,8 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   Courses: 'Courses',
+  Notification: 'Notification',
+  HistoryLog: 'HistoryLog',
   User: 'User',
   UserCourse: 'UserCourse',
   UserTimetable: 'UserTimetable',
@@ -410,7 +412,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "courses" | "user" | "userCourse" | "userTimetable" | "timetable" | "attendanceQRSession" | "attendanceLogs" | "attendanceSummary" | "studentProfile" | "organization" | "alarm"
+    modelProps: "courses" | "notification" | "historyLog" | "user" | "userCourse" | "userTimetable" | "timetable" | "attendanceQRSession" | "attendanceLogs" | "attendanceSummary" | "studentProfile" | "organization" | "alarm"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -485,6 +487,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.CoursesCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.CoursesCountAggregateOutputType> | number
+        }
+      }
+    }
+    Notification: {
+      payload: Prisma.$NotificationPayload<ExtArgs>
+      fields: Prisma.NotificationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.NotificationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotificationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.NotificationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotificationPayload>
+        }
+        findFirst: {
+          args: Prisma.NotificationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotificationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.NotificationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotificationPayload>
+        }
+        findMany: {
+          args: Prisma.NotificationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotificationPayload>[]
+        }
+        create: {
+          args: Prisma.NotificationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotificationPayload>
+        }
+        createMany: {
+          args: Prisma.NotificationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.NotificationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotificationPayload>[]
+        }
+        delete: {
+          args: Prisma.NotificationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotificationPayload>
+        }
+        update: {
+          args: Prisma.NotificationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotificationPayload>
+        }
+        deleteMany: {
+          args: Prisma.NotificationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.NotificationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.NotificationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotificationPayload>[]
+        }
+        upsert: {
+          args: Prisma.NotificationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$NotificationPayload>
+        }
+        aggregate: {
+          args: Prisma.NotificationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateNotification>
+        }
+        groupBy: {
+          args: Prisma.NotificationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.NotificationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.NotificationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.NotificationCountAggregateOutputType> | number
+        }
+      }
+    }
+    HistoryLog: {
+      payload: Prisma.$HistoryLogPayload<ExtArgs>
+      fields: Prisma.HistoryLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.HistoryLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoryLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.HistoryLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoryLogPayload>
+        }
+        findFirst: {
+          args: Prisma.HistoryLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoryLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.HistoryLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoryLogPayload>
+        }
+        findMany: {
+          args: Prisma.HistoryLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoryLogPayload>[]
+        }
+        create: {
+          args: Prisma.HistoryLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoryLogPayload>
+        }
+        createMany: {
+          args: Prisma.HistoryLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.HistoryLogCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoryLogPayload>[]
+        }
+        delete: {
+          args: Prisma.HistoryLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoryLogPayload>
+        }
+        update: {
+          args: Prisma.HistoryLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoryLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.HistoryLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.HistoryLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.HistoryLogUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoryLogPayload>[]
+        }
+        upsert: {
+          args: Prisma.HistoryLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$HistoryLogPayload>
+        }
+        aggregate: {
+          args: Prisma.HistoryLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateHistoryLog>
+        }
+        groupBy: {
+          args: Prisma.HistoryLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HistoryLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.HistoryLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.HistoryLogCountAggregateOutputType> | number
         }
       }
     }
@@ -1287,6 +1437,34 @@ export const CoursesScalarFieldEnum = {
 export type CoursesScalarFieldEnum = (typeof CoursesScalarFieldEnum)[keyof typeof CoursesScalarFieldEnum]
 
 
+export const NotificationScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  body: 'body',
+  type: 'type',
+  readBy: 'readBy',
+  userId: 'userId',
+  organizationId: 'organizationId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
+export const HistoryLogScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  type: 'type',
+  userId: 'userId',
+  organizationId: 'organizationId',
+  createdAt: 'createdAt'
+} as const
+
+export type HistoryLogScalarFieldEnum = (typeof HistoryLogScalarFieldEnum)[keyof typeof HistoryLogScalarFieldEnum]
+
+
 export const UserScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -1570,6 +1748,34 @@ export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
 
 
 /**
+ * Reference to a field of type 'NotificationType'
+ */
+export type EnumNotificationTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NotificationType'>
+    
+
+
+/**
+ * Reference to a field of type 'NotificationType[]'
+ */
+export type ListEnumNotificationTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NotificationType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'HistoryLogType'
+ */
+export type EnumHistoryLogTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'HistoryLogType'>
+    
+
+
+/**
+ * Reference to a field of type 'HistoryLogType[]'
+ */
+export type ListEnumHistoryLogTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'HistoryLogType[]'>
+    
+
+
+/**
  * Reference to a field of type 'UserRole'
  */
 export type EnumUserRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UserRole'>
@@ -1762,6 +1968,8 @@ export type PrismaClientOptions = ({
 }
 export type GlobalOmitConfig = {
   courses?: Prisma.CoursesOmit
+  notification?: Prisma.NotificationOmit
+  historyLog?: Prisma.HistoryLogOmit
   user?: Prisma.UserOmit
   userCourse?: Prisma.UserCourseOmit
   userTimetable?: Prisma.UserTimetableOmit

@@ -269,6 +269,8 @@ export type UserWhereInput = {
   attendanceSummary?: Prisma.AttendanceSummaryListRelationFilter
   studentProfile?: Prisma.XOR<Prisma.StudentProfileNullableScalarRelationFilter, Prisma.StudentProfileWhereInput> | null
   alarms?: Prisma.AlarmListRelationFilter
+  notifications?: Prisma.NotificationListRelationFilter
+  historyLogs?: Prisma.HistoryLogListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -294,6 +296,8 @@ export type UserOrderByWithRelationInput = {
   attendanceSummary?: Prisma.AttendanceSummaryOrderByRelationAggregateInput
   studentProfile?: Prisma.StudentProfileOrderByWithRelationInput
   alarms?: Prisma.AlarmOrderByRelationAggregateInput
+  notifications?: Prisma.NotificationOrderByRelationAggregateInput
+  historyLogs?: Prisma.HistoryLogOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -322,6 +326,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   attendanceSummary?: Prisma.AttendanceSummaryListRelationFilter
   studentProfile?: Prisma.XOR<Prisma.StudentProfileNullableScalarRelationFilter, Prisma.StudentProfileWhereInput> | null
   alarms?: Prisma.AlarmListRelationFilter
+  notifications?: Prisma.NotificationListRelationFilter
+  historyLogs?: Prisma.HistoryLogListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -389,6 +395,8 @@ export type UserCreateInput = {
   attendanceSummary?: Prisma.AttendanceSummaryCreateNestedManyWithoutUserInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   alarms?: Prisma.AlarmCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -414,6 +422,8 @@ export type UserUncheckedCreateInput = {
   attendanceSummary?: Prisma.AttendanceSummaryUncheckedCreateNestedManyWithoutUserInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   alarms?: Prisma.AlarmUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -439,6 +449,8 @@ export type UserUpdateInput = {
   attendanceSummary?: Prisma.AttendanceSummaryUpdateManyWithoutUserNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   alarms?: Prisma.AlarmUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  historyLogs?: Prisma.HistoryLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -464,6 +476,8 @@ export type UserUncheckedUpdateInput = {
   attendanceSummary?: Prisma.AttendanceSummaryUncheckedUpdateManyWithoutUserNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   alarms?: Prisma.AlarmUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -518,6 +532,11 @@ export type UserUncheckedUpdateManyInput = {
   isOnboarded?: Prisma.BoolFieldUpdateOperationsInput | boolean
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+}
+
+export type UserNullableScalarRelationFilter = {
+  is?: Prisma.UserWhereInput | null
+  isNot?: Prisma.UserWhereInput | null
 }
 
 export type UserCountOrderByAggregateInput = {
@@ -577,6 +596,38 @@ export type UserMinOrderByAggregateInput = {
 export type UserScalarRelationFilter = {
   is?: Prisma.UserWhereInput
   isNot?: Prisma.UserWhereInput
+}
+
+export type UserCreateNestedOneWithoutNotificationsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutNotificationsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutNotificationsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutNotificationsInput
+  upsert?: Prisma.UserUpsertWithoutNotificationsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutNotificationsInput, Prisma.UserUpdateWithoutNotificationsInput>, Prisma.UserUncheckedUpdateWithoutNotificationsInput>
+}
+
+export type UserCreateNestedOneWithoutHistoryLogsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutHistoryLogsInput, Prisma.UserUncheckedCreateWithoutHistoryLogsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutHistoryLogsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutHistoryLogsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutHistoryLogsInput, Prisma.UserUncheckedCreateWithoutHistoryLogsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutHistoryLogsInput
+  upsert?: Prisma.UserUpsertWithoutHistoryLogsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutHistoryLogsInput, Prisma.UserUpdateWithoutHistoryLogsInput>, Prisma.UserUncheckedUpdateWithoutHistoryLogsInput>
 }
 
 export type NullableBoolFieldUpdateOperationsInput = {
@@ -693,6 +744,246 @@ export type UserUpdateOneRequiredWithoutAlarmsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAlarmsInput, Prisma.UserUpdateWithoutAlarmsInput>, Prisma.UserUncheckedUpdateWithoutAlarmsInput>
 }
 
+export type UserCreateWithoutNotificationsInput = {
+  id: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  banned?: boolean | null
+  banReason?: string | null
+  banExpires?: Date | string | null
+  coordinates?: string | null
+  expoPushToken?: string | null
+  isOnboarded?: boolean
+  role?: $Enums.UserRole
+  status?: $Enums.UserStatus
+  courses?: Prisma.UserCourseCreateNestedManyWithoutUserInput
+  timetables?: Prisma.UserTimetableCreateNestedManyWithoutUserInput
+  attendanceQRSessions?: Prisma.AttendanceQRSessionCreateNestedManyWithoutUserInput
+  attendances?: Prisma.AttendanceLogsCreateNestedManyWithoutUserInput
+  attendanceSummary?: Prisma.AttendanceSummaryCreateNestedManyWithoutUserInput
+  studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
+  alarms?: Prisma.AlarmCreateNestedManyWithoutUserInput
+  historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutNotificationsInput = {
+  id: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  banned?: boolean | null
+  banReason?: string | null
+  banExpires?: Date | string | null
+  coordinates?: string | null
+  expoPushToken?: string | null
+  isOnboarded?: boolean
+  role?: $Enums.UserRole
+  status?: $Enums.UserStatus
+  courses?: Prisma.UserCourseUncheckedCreateNestedManyWithoutUserInput
+  timetables?: Prisma.UserTimetableUncheckedCreateNestedManyWithoutUserInput
+  attendanceQRSessions?: Prisma.AttendanceQRSessionUncheckedCreateNestedManyWithoutUserInput
+  attendances?: Prisma.AttendanceLogsUncheckedCreateNestedManyWithoutUserInput
+  attendanceSummary?: Prisma.AttendanceSummaryUncheckedCreateNestedManyWithoutUserInput
+  studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
+  alarms?: Prisma.AlarmUncheckedCreateNestedManyWithoutUserInput
+  historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutNotificationsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>
+}
+
+export type UserUpsertWithoutNotificationsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutNotificationsInput, Prisma.UserUncheckedUpdateWithoutNotificationsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutNotificationsInput, Prisma.UserUncheckedCreateWithoutNotificationsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutNotificationsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutNotificationsInput, Prisma.UserUncheckedUpdateWithoutNotificationsInput>
+}
+
+export type UserUpdateWithoutNotificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  banned?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  banReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  coordinates?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  expoPushToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isOnboarded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  courses?: Prisma.UserCourseUpdateManyWithoutUserNestedInput
+  timetables?: Prisma.UserTimetableUpdateManyWithoutUserNestedInput
+  attendanceQRSessions?: Prisma.AttendanceQRSessionUpdateManyWithoutUserNestedInput
+  attendances?: Prisma.AttendanceLogsUpdateManyWithoutUserNestedInput
+  attendanceSummary?: Prisma.AttendanceSummaryUpdateManyWithoutUserNestedInput
+  studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
+  alarms?: Prisma.AlarmUpdateManyWithoutUserNestedInput
+  historyLogs?: Prisma.HistoryLogUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutNotificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  banned?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  banReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  coordinates?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  expoPushToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isOnboarded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  courses?: Prisma.UserCourseUncheckedUpdateManyWithoutUserNestedInput
+  timetables?: Prisma.UserTimetableUncheckedUpdateManyWithoutUserNestedInput
+  attendanceQRSessions?: Prisma.AttendanceQRSessionUncheckedUpdateManyWithoutUserNestedInput
+  attendances?: Prisma.AttendanceLogsUncheckedUpdateManyWithoutUserNestedInput
+  attendanceSummary?: Prisma.AttendanceSummaryUncheckedUpdateManyWithoutUserNestedInput
+  studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
+  alarms?: Prisma.AlarmUncheckedUpdateManyWithoutUserNestedInput
+  historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutHistoryLogsInput = {
+  id: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  banned?: boolean | null
+  banReason?: string | null
+  banExpires?: Date | string | null
+  coordinates?: string | null
+  expoPushToken?: string | null
+  isOnboarded?: boolean
+  role?: $Enums.UserRole
+  status?: $Enums.UserStatus
+  courses?: Prisma.UserCourseCreateNestedManyWithoutUserInput
+  timetables?: Prisma.UserTimetableCreateNestedManyWithoutUserInput
+  attendanceQRSessions?: Prisma.AttendanceQRSessionCreateNestedManyWithoutUserInput
+  attendances?: Prisma.AttendanceLogsCreateNestedManyWithoutUserInput
+  attendanceSummary?: Prisma.AttendanceSummaryCreateNestedManyWithoutUserInput
+  studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
+  alarms?: Prisma.AlarmCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutHistoryLogsInput = {
+  id: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  banned?: boolean | null
+  banReason?: string | null
+  banExpires?: Date | string | null
+  coordinates?: string | null
+  expoPushToken?: string | null
+  isOnboarded?: boolean
+  role?: $Enums.UserRole
+  status?: $Enums.UserStatus
+  courses?: Prisma.UserCourseUncheckedCreateNestedManyWithoutUserInput
+  timetables?: Prisma.UserTimetableUncheckedCreateNestedManyWithoutUserInput
+  attendanceQRSessions?: Prisma.AttendanceQRSessionUncheckedCreateNestedManyWithoutUserInput
+  attendances?: Prisma.AttendanceLogsUncheckedCreateNestedManyWithoutUserInput
+  attendanceSummary?: Prisma.AttendanceSummaryUncheckedCreateNestedManyWithoutUserInput
+  studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
+  alarms?: Prisma.AlarmUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutHistoryLogsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutHistoryLogsInput, Prisma.UserUncheckedCreateWithoutHistoryLogsInput>
+}
+
+export type UserUpsertWithoutHistoryLogsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutHistoryLogsInput, Prisma.UserUncheckedUpdateWithoutHistoryLogsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutHistoryLogsInput, Prisma.UserUncheckedCreateWithoutHistoryLogsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutHistoryLogsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutHistoryLogsInput, Prisma.UserUncheckedUpdateWithoutHistoryLogsInput>
+}
+
+export type UserUpdateWithoutHistoryLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  banned?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  banReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  coordinates?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  expoPushToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isOnboarded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  courses?: Prisma.UserCourseUpdateManyWithoutUserNestedInput
+  timetables?: Prisma.UserTimetableUpdateManyWithoutUserNestedInput
+  attendanceQRSessions?: Prisma.AttendanceQRSessionUpdateManyWithoutUserNestedInput
+  attendances?: Prisma.AttendanceLogsUpdateManyWithoutUserNestedInput
+  attendanceSummary?: Prisma.AttendanceSummaryUpdateManyWithoutUserNestedInput
+  studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
+  alarms?: Prisma.AlarmUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutHistoryLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  banned?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  banReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  coordinates?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  expoPushToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isOnboarded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  courses?: Prisma.UserCourseUncheckedUpdateManyWithoutUserNestedInput
+  timetables?: Prisma.UserTimetableUncheckedUpdateManyWithoutUserNestedInput
+  attendanceQRSessions?: Prisma.AttendanceQRSessionUncheckedUpdateManyWithoutUserNestedInput
+  attendances?: Prisma.AttendanceLogsUncheckedUpdateManyWithoutUserNestedInput
+  attendanceSummary?: Prisma.AttendanceSummaryUncheckedUpdateManyWithoutUserNestedInput
+  studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
+  alarms?: Prisma.AlarmUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+}
+
 export type UserCreateWithoutCoursesInput = {
   id: string
   name: string
@@ -715,6 +1006,8 @@ export type UserCreateWithoutCoursesInput = {
   attendanceSummary?: Prisma.AttendanceSummaryCreateNestedManyWithoutUserInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   alarms?: Prisma.AlarmCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutCoursesInput = {
@@ -739,6 +1032,8 @@ export type UserUncheckedCreateWithoutCoursesInput = {
   attendanceSummary?: Prisma.AttendanceSummaryUncheckedCreateNestedManyWithoutUserInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   alarms?: Prisma.AlarmUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutCoursesInput = {
@@ -779,6 +1074,8 @@ export type UserUpdateWithoutCoursesInput = {
   attendanceSummary?: Prisma.AttendanceSummaryUpdateManyWithoutUserNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   alarms?: Prisma.AlarmUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  historyLogs?: Prisma.HistoryLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCoursesInput = {
@@ -803,6 +1100,8 @@ export type UserUncheckedUpdateWithoutCoursesInput = {
   attendanceSummary?: Prisma.AttendanceSummaryUncheckedUpdateManyWithoutUserNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   alarms?: Prisma.AlarmUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutTimetablesInput = {
@@ -827,6 +1126,8 @@ export type UserCreateWithoutTimetablesInput = {
   attendanceSummary?: Prisma.AttendanceSummaryCreateNestedManyWithoutUserInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   alarms?: Prisma.AlarmCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutTimetablesInput = {
@@ -851,6 +1152,8 @@ export type UserUncheckedCreateWithoutTimetablesInput = {
   attendanceSummary?: Prisma.AttendanceSummaryUncheckedCreateNestedManyWithoutUserInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   alarms?: Prisma.AlarmUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutTimetablesInput = {
@@ -891,6 +1194,8 @@ export type UserUpdateWithoutTimetablesInput = {
   attendanceSummary?: Prisma.AttendanceSummaryUpdateManyWithoutUserNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   alarms?: Prisma.AlarmUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  historyLogs?: Prisma.HistoryLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTimetablesInput = {
@@ -915,6 +1220,8 @@ export type UserUncheckedUpdateWithoutTimetablesInput = {
   attendanceSummary?: Prisma.AttendanceSummaryUncheckedUpdateManyWithoutUserNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   alarms?: Prisma.AlarmUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAttendanceQRSessionsInput = {
@@ -939,6 +1246,8 @@ export type UserCreateWithoutAttendanceQRSessionsInput = {
   attendanceSummary?: Prisma.AttendanceSummaryCreateNestedManyWithoutUserInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   alarms?: Prisma.AlarmCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAttendanceQRSessionsInput = {
@@ -963,6 +1272,8 @@ export type UserUncheckedCreateWithoutAttendanceQRSessionsInput = {
   attendanceSummary?: Prisma.AttendanceSummaryUncheckedCreateNestedManyWithoutUserInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   alarms?: Prisma.AlarmUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAttendanceQRSessionsInput = {
@@ -1003,6 +1314,8 @@ export type UserUpdateWithoutAttendanceQRSessionsInput = {
   attendanceSummary?: Prisma.AttendanceSummaryUpdateManyWithoutUserNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   alarms?: Prisma.AlarmUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  historyLogs?: Prisma.HistoryLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAttendanceQRSessionsInput = {
@@ -1027,6 +1340,8 @@ export type UserUncheckedUpdateWithoutAttendanceQRSessionsInput = {
   attendanceSummary?: Prisma.AttendanceSummaryUncheckedUpdateManyWithoutUserNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   alarms?: Prisma.AlarmUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAttendancesInput = {
@@ -1051,6 +1366,8 @@ export type UserCreateWithoutAttendancesInput = {
   attendanceSummary?: Prisma.AttendanceSummaryCreateNestedManyWithoutUserInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   alarms?: Prisma.AlarmCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAttendancesInput = {
@@ -1075,6 +1392,8 @@ export type UserUncheckedCreateWithoutAttendancesInput = {
   attendanceSummary?: Prisma.AttendanceSummaryUncheckedCreateNestedManyWithoutUserInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   alarms?: Prisma.AlarmUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAttendancesInput = {
@@ -1115,6 +1434,8 @@ export type UserUpdateWithoutAttendancesInput = {
   attendanceSummary?: Prisma.AttendanceSummaryUpdateManyWithoutUserNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   alarms?: Prisma.AlarmUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  historyLogs?: Prisma.HistoryLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAttendancesInput = {
@@ -1139,6 +1460,8 @@ export type UserUncheckedUpdateWithoutAttendancesInput = {
   attendanceSummary?: Prisma.AttendanceSummaryUncheckedUpdateManyWithoutUserNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   alarms?: Prisma.AlarmUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAttendanceSummaryInput = {
@@ -1163,6 +1486,8 @@ export type UserCreateWithoutAttendanceSummaryInput = {
   attendances?: Prisma.AttendanceLogsCreateNestedManyWithoutUserInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   alarms?: Prisma.AlarmCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAttendanceSummaryInput = {
@@ -1187,6 +1512,8 @@ export type UserUncheckedCreateWithoutAttendanceSummaryInput = {
   attendances?: Prisma.AttendanceLogsUncheckedCreateNestedManyWithoutUserInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   alarms?: Prisma.AlarmUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAttendanceSummaryInput = {
@@ -1227,6 +1554,8 @@ export type UserUpdateWithoutAttendanceSummaryInput = {
   attendances?: Prisma.AttendanceLogsUpdateManyWithoutUserNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   alarms?: Prisma.AlarmUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  historyLogs?: Prisma.HistoryLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAttendanceSummaryInput = {
@@ -1251,6 +1580,8 @@ export type UserUncheckedUpdateWithoutAttendanceSummaryInput = {
   attendances?: Prisma.AttendanceLogsUncheckedUpdateManyWithoutUserNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   alarms?: Prisma.AlarmUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutStudentProfileInput = {
@@ -1275,6 +1606,8 @@ export type UserCreateWithoutStudentProfileInput = {
   attendances?: Prisma.AttendanceLogsCreateNestedManyWithoutUserInput
   attendanceSummary?: Prisma.AttendanceSummaryCreateNestedManyWithoutUserInput
   alarms?: Prisma.AlarmCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutStudentProfileInput = {
@@ -1299,6 +1632,8 @@ export type UserUncheckedCreateWithoutStudentProfileInput = {
   attendances?: Prisma.AttendanceLogsUncheckedCreateNestedManyWithoutUserInput
   attendanceSummary?: Prisma.AttendanceSummaryUncheckedCreateNestedManyWithoutUserInput
   alarms?: Prisma.AlarmUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutStudentProfileInput = {
@@ -1339,6 +1674,8 @@ export type UserUpdateWithoutStudentProfileInput = {
   attendances?: Prisma.AttendanceLogsUpdateManyWithoutUserNestedInput
   attendanceSummary?: Prisma.AttendanceSummaryUpdateManyWithoutUserNestedInput
   alarms?: Prisma.AlarmUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  historyLogs?: Prisma.HistoryLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStudentProfileInput = {
@@ -1363,6 +1700,8 @@ export type UserUncheckedUpdateWithoutStudentProfileInput = {
   attendances?: Prisma.AttendanceLogsUncheckedUpdateManyWithoutUserNestedInput
   attendanceSummary?: Prisma.AttendanceSummaryUncheckedUpdateManyWithoutUserNestedInput
   alarms?: Prisma.AlarmUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAlarmsInput = {
@@ -1387,6 +1726,8 @@ export type UserCreateWithoutAlarmsInput = {
   attendances?: Prisma.AttendanceLogsCreateNestedManyWithoutUserInput
   attendanceSummary?: Prisma.AttendanceSummaryCreateNestedManyWithoutUserInput
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAlarmsInput = {
@@ -1411,6 +1752,8 @@ export type UserUncheckedCreateWithoutAlarmsInput = {
   attendances?: Prisma.AttendanceLogsUncheckedCreateNestedManyWithoutUserInput
   attendanceSummary?: Prisma.AttendanceSummaryUncheckedCreateNestedManyWithoutUserInput
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAlarmsInput = {
@@ -1451,6 +1794,8 @@ export type UserUpdateWithoutAlarmsInput = {
   attendances?: Prisma.AttendanceLogsUpdateManyWithoutUserNestedInput
   attendanceSummary?: Prisma.AttendanceSummaryUpdateManyWithoutUserNestedInput
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  historyLogs?: Prisma.HistoryLogUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAlarmsInput = {
@@ -1475,6 +1820,8 @@ export type UserUncheckedUpdateWithoutAlarmsInput = {
   attendances?: Prisma.AttendanceLogsUncheckedUpdateManyWithoutUserNestedInput
   attendanceSummary?: Prisma.AttendanceSummaryUncheckedUpdateManyWithoutUserNestedInput
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -1489,6 +1836,8 @@ export type UserCountOutputType = {
   attendances: number
   attendanceSummary: number
   alarms: number
+  notifications: number
+  historyLogs: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1498,6 +1847,8 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   attendances?: boolean | UserCountOutputTypeCountAttendancesArgs
   attendanceSummary?: boolean | UserCountOutputTypeCountAttendanceSummaryArgs
   alarms?: boolean | UserCountOutputTypeCountAlarmsArgs
+  notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
+  historyLogs?: boolean | UserCountOutputTypeCountHistoryLogsArgs
 }
 
 /**
@@ -1552,6 +1903,20 @@ export type UserCountOutputTypeCountAlarmsArgs<ExtArgs extends runtime.Types.Ext
   where?: Prisma.AlarmWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountNotificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.NotificationWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountHistoryLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.HistoryLogWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1576,6 +1941,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   attendanceSummary?: boolean | Prisma.User$attendanceSummaryArgs<ExtArgs>
   studentProfile?: boolean | Prisma.User$studentProfileArgs<ExtArgs>
   alarms?: boolean | Prisma.User$alarmsArgs<ExtArgs>
+  notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
+  historyLogs?: boolean | Prisma.User$historyLogsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1642,6 +2009,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   attendanceSummary?: boolean | Prisma.User$attendanceSummaryArgs<ExtArgs>
   studentProfile?: boolean | Prisma.User$studentProfileArgs<ExtArgs>
   alarms?: boolean | Prisma.User$alarmsArgs<ExtArgs>
+  notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
+  historyLogs?: boolean | Prisma.User$historyLogsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1657,6 +2026,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     attendanceSummary: Prisma.$AttendanceSummaryPayload<ExtArgs>[]
     studentProfile: Prisma.$StudentProfilePayload<ExtArgs> | null
     alarms: Prisma.$AlarmPayload<ExtArgs>[]
+    notifications: Prisma.$NotificationPayload<ExtArgs>[]
+    historyLogs: Prisma.$HistoryLogPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2075,6 +2446,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   attendanceSummary<T extends Prisma.User$attendanceSummaryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$attendanceSummaryArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AttendanceSummaryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   studentProfile<T extends Prisma.User$studentProfileArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$studentProfileArgs<ExtArgs>>): Prisma.Prisma__StudentProfileClient<runtime.Types.Result.GetResult<Prisma.$StudentProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   alarms<T extends Prisma.User$alarmsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$alarmsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AlarmPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  historyLogs<T extends Prisma.User$historyLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$historyLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$HistoryLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2667,6 +3040,54 @@ export type User$alarmsArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   take?: number
   skip?: number
   distinct?: Prisma.AlarmScalarFieldEnum | Prisma.AlarmScalarFieldEnum[]
+}
+
+/**
+ * User.notifications
+ */
+export type User$notificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Notification
+   */
+  select?: Prisma.NotificationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Notification
+   */
+  omit?: Prisma.NotificationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.NotificationInclude<ExtArgs> | null
+  where?: Prisma.NotificationWhereInput
+  orderBy?: Prisma.NotificationOrderByWithRelationInput | Prisma.NotificationOrderByWithRelationInput[]
+  cursor?: Prisma.NotificationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.NotificationScalarFieldEnum | Prisma.NotificationScalarFieldEnum[]
+}
+
+/**
+ * User.historyLogs
+ */
+export type User$historyLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the HistoryLog
+   */
+  select?: Prisma.HistoryLogSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the HistoryLog
+   */
+  omit?: Prisma.HistoryLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.HistoryLogInclude<ExtArgs> | null
+  where?: Prisma.HistoryLogWhereInput
+  orderBy?: Prisma.HistoryLogOrderByWithRelationInput | Prisma.HistoryLogOrderByWithRelationInput[]
+  cursor?: Prisma.HistoryLogWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.HistoryLogScalarFieldEnum | Prisma.HistoryLogScalarFieldEnum[]
 }
 
 /**
