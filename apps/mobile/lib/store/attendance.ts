@@ -38,7 +38,7 @@ type AttendanceState = {
   // Sessions for professor admin view
   sessions: AttendanceSession[];
   setSessions: (sessions: AttendanceSession[]) => void;
-  fetchSessions: (creatorId: string) => Promise<void>;
+  fetchSessions: () => Promise<void>;
   sessionsLoading: boolean;
 
   // Mutation
@@ -84,13 +84,13 @@ export const useAttendanceStore = create<AttendanceState>()(
         }
       },
 
-      fetchSessions: async (creatorId) => {
+      fetchSessions: async () => {
         set({ sessionsLoading: true });
         try {
           const origin =
             process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
           const res = await fetch(
-            `${origin}/attendance/sessions?creatorId=${creatorId}`,
+            `${origin}/attendance/sessions/all`,
           );
           const data = await res.json();
           if (res.ok && data.success) {

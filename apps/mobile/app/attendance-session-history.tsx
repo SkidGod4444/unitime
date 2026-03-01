@@ -3,14 +3,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { Stack } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import {
-    Alert,
-    FlatList,
-    Modal,
-    Pressable,
-    RefreshControl,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  FlatList,
+  Modal,
+  Pressable,
+  RefreshControl,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAttendanceStore, useOrgsStore } from "../lib/store";
@@ -384,7 +384,7 @@ SessionCard.displayName = "SessionCard";
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
 export default function AttendanceSessionHistory() {
-  const { user } = useAuth();
+  const { loggedInUser: user } = useAuth();
   const isAdmin = user?.role === "ADMIN";
   
   const [selectedClassId, setSelectedClassId] = useState("all");
@@ -403,7 +403,7 @@ export default function AttendanceSessionHistory() {
     setRefreshing(true);
     try {
       if (user?.id) {
-        await Promise.all([fetchSessions(user.id), fetchOrgs(), fetchCourses()]);
+        await Promise.all([fetchSessions(), fetchOrgs(), fetchCourses()]);
       }
     } catch (err) {
       console.warn("Pull-to-refresh failed", err);

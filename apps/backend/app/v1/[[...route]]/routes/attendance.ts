@@ -1,7 +1,7 @@
 import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
 import { generateQRToken, verifyQRToken } from "@/lib/qr.algo";
 import { getOrSetCache, invalidateCache } from "@unitime/cache";
-import { prisma } from "@unitime/db";
+import { Prisma, prisma } from "@unitime/db";
 import { Hono } from "hono";
 
 const attendance = new Hono();
@@ -426,113 +426,30 @@ attendance.get("/summary/:userId", async (c) => {
   }
 });
 
-attendance.get("/sessions", async (c) => {
-  const creatorId = c.req.query("creatorId");
-  if (!creatorId) {
-    return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT);
-  }
-
+attendance.get("/sessions/all", async (c) => {
   try {
-    console.log(`[Sessions] Fetched creatorId: ${creatorId}`);
-    const userRoleProfile = await prisma.user.findUnique({
-      where: { id: creatorId },
-      select: { role: true, studentProfile: { select: { organizationId: true } } }
-    });
-    console.log(`[Sessions] Role structure evaluated: ${JSON.stringify(userRoleProfile)}`);
-
-    let whereClause: any = {};
-    if (userRoleProfile?.role === "ADMIN") {
-      whereClause = {}; 
-    } else if (userRoleProfile?.role === "REPRESENTATIVE" && userRoleProfile.studentProfile?.organizationId) {
-      whereClause = { course: { organizationId: userRoleProfile.studentProfile.organizationId } };
-    } else {
-      whereClause = { createdBy: creatorId };
-    }
-    console.log(`[Sessions] Mapped whereClause constraint: ${JSON.stringify(whereClause)}`);
-
-    const sessions = await prisma.attendanceQRSession.findMany({
-      where: whereClause,
-      include: {
-        course: true,
-      },
-      orderBy: { createdAt: "desc" },
-    });
-    console.log(`[Sessions] Prisma retrieved ${sessions.length} matches securely via whereClause.`);
-
-    // We also need the attendance logs to know who was present
-    const enhancedSessions = await Promise.all(
-      sessions.map(async (session) => {
-        const logs = await getOrSetCache(
-          `attendanceLogs:session:${session.id}`,
-          () =>
-            prisma.attendanceLogs.findMany({
-              where: { sessionId: session.id },
-              include: {
-                user: {
-                  include: {
-                    studentProfile: true,
-                  },
-                },
-              },
-            }),
-          120,
-        );
-
-        // Ideally we would fetch ALL enrolled students and map their status,
-        // but for now we'll just return the present ones, or mark the rest as absent if needed by the frontend.
-        // To properly support the UI's 'editable list', we need all enrolled students.
-
-        const enrolledStudents = await getOrSetCache(
-          `userCourse:course:${session.courseId}`,
-          () =>
-            prisma.userCourse.findMany({
-              where: { courseId: session.courseId },
-              include: {
-                user: {
-                  include: {
-                    studentProfile: true,
-                  },
-                },
-              },
-            }),
-          120,
-        );
-
-        const students = enrolledStudents.map((enr) => {
-          const isPresent = logs.some((log) => log.userId === enr.userId);
-          return {
-            id: enr.userId,
-            name: enr.user.name,
-            rollNo: enr.user.studentProfile?.admissionNumber || enr.userId,
-            status: isPresent ? "present" : "absent",
-          };
-        });
-
-        return {
-          id: session.id,
-          date: session.createdAt,
-          courseCode:
-            (session as unknown as { course?: { code: string; name: string, organizationId: string } })
-              .course?.code || "Unknown",
-          courseName:
-            (session as unknown as { course?: { code: string; name: string, organizationId: string } })
-              .course?.name || "Unknown Course",
-          classId: (session as unknown as { course?: { code: string; name: string, organizationId: string } }).course?.organizationId || "unknown",
-          durationMin: Math.round(
-            (new Date(session.endTime).getTime() -
-              new Date(session.startTime).getTime()) /
-              60000,
-          ),
-          students,
-        };
+    const attendanceSessions = await getOrSetCache(
+      "attendanceQRSessions:all",
+      () => prisma.attendanceQRSession.findMany({
+        include: {
+          user: true,
+          course: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
       }),
+      120,
     );
 
-    return c.json({
-      success: true,
-      status_code: 200,
-      sessions: enhancedSessions,
-    });
+    return c.json(
+      {
+        success: true,
+        status_code: 200,
+        sessions: attendanceSessions,
+      },
+      200,
+    );
   } catch (error) {
     console.error("Error fetching sessions:", error);
     return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
