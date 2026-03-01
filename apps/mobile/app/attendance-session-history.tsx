@@ -1,17 +1,20 @@
+import { useAuth } from "@/contexts/auth.cntxt";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import {
-  Alert,
-  FlatList,
-  Modal,
-  Pressable,
-  Text,
-  TouchableOpacity,
-  View,
+    Alert,
+    FlatList,
+    Modal,
+    Pressable,
+    RefreshControl,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useAttendanceStore } from "../lib/store";
+import { useAttendanceStore, useOrgsStore } from "../lib/store";
+import { useCoursesStore } from "../lib/store/courses";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -23,10 +26,11 @@ type SessionRecord = {
   id: string;
   courseCode: string;
   courseName: string;
-  classId: string;
   className: string;
-  section: string;
+  section: string | number;
   date: Date;
+  startTime: Date;
+  endTime: Date;
   durationMin: number;
   students: Student[];
 };
@@ -35,9 +39,15 @@ type SessionRecord = {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function isEditable(sessionDate: Date): boolean {
+function isOngoing(session: SessionRecord): boolean {
   const now = new Date();
-  const midnight = new Date(sessionDate);
+  return now >= session.startTime && now <= session.endTime;
+}
+
+function isEditable(session: SessionRecord): boolean {
+  if (isOngoing(session)) return false;
+  const now = new Date();
+  const midnight = new Date(session.date);
   midnight.setHours(24, 0, 0, 0);
   return now < midnight;
 }
@@ -251,7 +261,8 @@ type SessionCardProps = {
 
 const SessionCard = React.memo(
   ({ session, onEditPress, onDownloadPress }: SessionCardProps) => {
-    const editable = isEditable(session.date);
+    const editable = isEditable(session);
+    const ongoing = isOngoing(session);
     const presentCount = session.students.filter(
       (s) => s.status === "present",
     ).length;
@@ -267,10 +278,18 @@ const SessionCard = React.memo(
         {/* Top row */}
         <View className="flex-row justify-between items-start">
           <View className="flex-1 pr-3">
-            <Text className="text-base font-bold text-gray-900">
-              {session.courseCode} · {session.courseName}
-            </Text>
-            <Text className="text-xs text-gray-500 mt-0.5 font-medium">
+            <View className="flex-row items-center gap-x-2">
+              <Text className="text-base font-bold text-gray-900 leading-tight">
+                {session.courseCode} · {session.courseName}
+              </Text>
+              {ongoing && (
+                <View className="bg-indigo-100 flex-row items-center px-1.5 py-0.5 rounded-full border border-indigo-200">
+                  <View className="w-1.5 h-1.5 rounded-full bg-indigo-500 mr-1 animate-pulse" />
+                  <Text className="text-[10px] font-bold text-indigo-700 uppercase tracking-tighter">Live</Text>
+                </View>
+              )}
+            </View>
+            <Text className="text-xs text-gray-500 font-medium">
               {session.className} — Sec {session.section}
             </Text>
           </View>
@@ -349,9 +368,9 @@ const SessionCard = React.memo(
           </View>
           {!editable && (
             <View className="flex-row items-center gap-x-1">
-              <Ionicons name="lock-closed-outline" size={11} color="#d1d5db" />
-              <Text className="text-xs text-gray-300 font-medium">
-                Edit locked
+              <Ionicons name={ongoing ? "radio-outline" : "lock-closed-outline"} size={11} color={ongoing ? "#818cf8" : "#d1d5db"} />
+              <Text className={`text-xs font-medium ${ongoing ? "text-indigo-400" : "text-gray-300"}`}>
+                {ongoing ? "Live Session Running" : "Edit locked"}
               </Text>
             </View>
           )}
@@ -365,10 +384,38 @@ SessionCard.displayName = "SessionCard";
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
 export default function AttendanceSessionHistory() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === "ADMIN";
+  
   const [selectedClassId, setSelectedClassId] = useState("all");
+  const [selectedCourseId, setSelectedCourseId] = useState("all");
+  
   const [isDropdownOpen, setDropdownOpen] = useState(false);
-  const { sessions: apiSessions, updateSessionAttendance } =
+  const [isCourseDropdownOpen, setCourseDropdownOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  
+  const { orgs, fetchOrgs } = useOrgsStore();
+  const { courses, fetchCourses } = useCoursesStore();
+  const { sessions: apiSessions, updateSessionAttendance, fetchSessions } =
     useAttendanceStore();
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      if (user?.id) {
+        await Promise.all([fetchSessions(user.id), fetchOrgs(), fetchCourses()]);
+      }
+    } catch (err) {
+      console.warn("Pull-to-refresh failed", err);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [user?.id, fetchSessions, fetchOrgs, fetchCourses]);
+
+  // Eager load dynamically on mount
+  React.useEffect(() => {
+    onRefresh();
+  }, [onRefresh]);
 
   // Maps backend session to UI format
   const mappedSessions = useMemo(() => {
@@ -376,10 +423,12 @@ export default function AttendanceSessionHistory() {
       id: s.id,
       courseCode: s.course?.code || "UNK",
       courseName: s.course?.name || "Unknown Course",
-      classId: "unknown", // To be replaced when Orgs/Schools are integrated
-      className: "Course Class",
-      section: "N/A",
+      classId: s.course?.organizationId || "unknown",
+      className: orgs.find(o => o.id === s.course?.organizationId)?.courseName || "Unknown Class",
+      section: orgs.find(o => o.id === s.course?.organizationId)?.section || "N/A",
       date: new Date(s.createdAt),
+      startTime: new Date(s.startTime),
+      endTime: new Date(s.endTime),
       durationMin: Math.round(
         (new Date(s.endTime).getTime() - new Date(s.startTime).getTime()) /
           60000,
@@ -391,15 +440,38 @@ export default function AttendanceSessionHistory() {
         status: (log.status || "present").toLowerCase() as Status,
       })),
     }));
-  }, [apiSessions]);
+  }, [apiSessions, orgs]);
 
-  const CLASSES = [
-    { id: "all", name: "All Classes", sec: "" },
-    // Derived dynamically if needed
-  ];
+  const CLASSES = useMemo(() => {
+    const defaultOption = { id: "all", name: "All Classes", sec: "" };
+    if (!orgs || orgs.length === 0) return [defaultOption];
+    return [
+      defaultOption,
+      ...orgs.map(org => ({
+        id: org.id,
+        name: `${org.courseName} (${org.departmentName})`,
+        sec: org.section || "",
+      }))
+    ];
+  }, [orgs]);
+
+  const COURSES = useMemo(() => {
+    const defaultOption = { id: "all", name: "All Courses" };
+    if (!courses || courses.length === 0) return [defaultOption];
+    return [
+      defaultOption,
+      ...courses.map(c => ({
+        id: c.id,
+        name: `${c.code} - ${c.name}`,
+      }))
+    ];
+  }, [courses]);
 
   const selectedClass =
     CLASSES.find((c) => c.id === selectedClassId) || CLASSES[0];
+    
+  const selectedCourse =
+    COURSES.find((c) => c.id === selectedCourseId) || COURSES[0];
 
   const [editingSession, setEditingSession] = useState<SessionRecord | null>(
     null,
@@ -407,14 +479,16 @@ export default function AttendanceSessionHistory() {
 
   const filtered = useMemo(
     () =>
-      selectedClassId === "all"
-        ? mappedSessions
-        : mappedSessions.filter((s) => s.classId === selectedClassId),
-    [selectedClassId, mappedSessions],
+      mappedSessions.filter((s) => {
+        const classMatch = selectedClassId === "all" || s.classId === selectedClassId;
+        const courseMatch = selectedCourseId === "all" || s.courseCode === COURSES.find(c => c.id === selectedCourseId)?.name.split(" - ")[0]; // Matching off code easily mapped natively securely
+        return classMatch && courseMatch;
+      }),
+    [selectedClassId, selectedCourseId, mappedSessions, COURSES],
   );
 
   const handleEditPress = useCallback((session: SessionRecord) => {
-    if (!isEditable(session.date)) return;
+    if (!isEditable(session)) return;
     Alert.alert(
       "Edit Attendance",
       `Are you sure you want to edit the attendance for ${session.courseCode} – ${session.className} Sec ${session.section}?`,
@@ -469,58 +543,114 @@ export default function AttendanceSessionHistory() {
           </Text>
         </View>
 
-        {/* Class Filter Dropdown */}
+        {/* Dual Filters container logic natively mapped role-based */}
+        {isAdmin && (
+          <View className="mb-2 z-20">
+            <Text className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-1.5">
+              Filter by Class
+            </Text>
+            <Pressable
+              onPress={() => {
+                setCourseDropdownOpen(false);
+                setDropdownOpen((o) => !o);
+              }}
+              className="flex-row items-center justify-between bg-white border border-gray-200 px-4 py-3 rounded-xl shadow-sm"
+            >
+              <View className="flex-row items-center gap-x-2 w-[85%]">
+                <Ionicons name="people-outline" size={18} color="#6b7280" />
+                <Text className="text-gray-800 font-semibold" numberOfLines={1}>
+                  {selectedClassId === "all"
+                    ? "All Classes"
+                    : `${selectedClass.name} Sec ${selectedClass.sec}`}
+                </Text>
+              </View>
+              <Ionicons
+                name={isDropdownOpen ? "chevron-up" : "chevron-down"}
+                size={20}
+                color="#6b7280"
+              />
+            </Pressable>
+
+            {isDropdownOpen && (
+              <View className="mt-1 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden absolute top-full left-0 right-0 z-50">
+                {CLASSES.map((cls, index) => (
+                  <Pressable
+                    key={cls.id}
+                    onPress={() => {
+                      setSelectedClassId(cls.id);
+                      setDropdownOpen(false);
+                    }}
+                    className={`px-4 py-3 flex-row justify-between items-center ${
+                      index !== CLASSES.length - 1
+                        ? "border-b border-gray-100"
+                        : ""
+                    } ${selectedClassId === cls.id ? "bg-indigo-50" : "bg-white"}`}
+                  >
+                    <Text
+                    className={`font-medium w-[90%] ${selectedClassId === cls.id ? "text-indigo-600" : "text-gray-700"}`}
+                    numberOfLines={1}
+                  >
+                    {cls.id === "all"
+                      ? "All Classes"
+                      : `${cls.name} Sec ${cls.sec}`}
+                  </Text>
+                    {selectedClassId === cls.id && (
+                      <Ionicons name="checkmark-circle" size={18} color="#4f46e5" />
+                    )}
+                  </Pressable>
+                ))}
+              </View>
+            )}
+          </View>
+        )}
+
         <View className="mb-4 z-10">
-          <Text className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-2">
-            Filter by Class
+          <Text className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-1.5">
+            Filter by Course
           </Text>
           <Pressable
-            onPress={() => setDropdownOpen((o) => !o)}
-            className="flex-row items-center justify-between bg-white border border-gray-200 px-4 py-3.5 rounded-xl shadow-sm"
+            onPress={() => {
+              setDropdownOpen(false);
+              setCourseDropdownOpen((o) => !o);
+            }}
+            className="flex-row items-center justify-between bg-white border border-gray-200 px-4 py-3 rounded-xl shadow-sm"
           >
             <View className="flex-row items-center gap-x-2">
-              <Ionicons name="people-outline" size={18} color="#6b7280" />
-              <Text className="text-gray-800 font-semibold">
-                {selectedClassId === "all"
-                  ? "All Classes"
-                  : `${selectedClass.name} (Sec ${selectedClass.sec})`}
+              <Ionicons name="book-outline" size={18} color="#6b7280" />
+              <Text className="text-gray-800 font-semibold w-[85%]" numberOfLines={1}>
+                {selectedCourse.name}
               </Text>
             </View>
             <Ionicons
-              name={isDropdownOpen ? "chevron-up" : "chevron-down"}
+              name={isCourseDropdownOpen ? "chevron-up" : "chevron-down"}
               size={20}
               color="#6b7280"
             />
           </Pressable>
 
-          {isDropdownOpen && (
-            <View className="mt-1 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden absolute top-full left-0 right-0">
-              {CLASSES.map((cls, index) => (
+          {isCourseDropdownOpen && (
+            <View className="mt-1 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden absolute top-full left-0 right-0 z-50">
+              {COURSES.map((course, index) => (
                 <Pressable
-                  key={cls.id}
+                  key={course.id}
                   onPress={() => {
-                    setSelectedClassId(cls.id);
-                    setDropdownOpen(false);
+                    setSelectedCourseId(course.id);
+                    setCourseDropdownOpen(false);
                   }}
-                  className={`px-4 py-3.5 flex-row justify-between items-center ${
-                    index !== CLASSES.length - 1
+                  className={`px-4 py-3 flex-row justify-between items-center ${
+                    index !== COURSES.length - 1
                       ? "border-b border-gray-100"
                       : ""
-                  } ${selectedClassId === cls.id ? "bg-indigo-50" : "bg-white"}`}
+                  } ${selectedCourseId === course.id ? "bg-indigo-50" : "bg-white"}`}
                 >
                   <Text
-                    className={`font-medium ${selectedClassId === cls.id ? "text-indigo-600" : "text-gray-700"}`}
+                    className={`font-medium w-[90%] ${selectedCourseId === course.id ? "text-indigo-600" : "text-gray-700"}`}
+                    numberOfLines={1}
                   >
-                    {cls.id === "all"
-                      ? "All Classes"
-                      : `${cls.name} (Sec ${cls.sec})`}
+                    {course.name}
                   </Text>
-                  {selectedClassId === cls.id && (
-                    <Ionicons
-                      name="checkmark-circle"
-                      size={18}
-                      color="#4f46e5"
-                    />
+                  {selectedCourseId === course.id && (
+                    <Ionicons name="checkmark-circle" size={18} color="#4f46e5" />
                   )}
                 </Pressable>
               ))}
@@ -559,6 +689,9 @@ export default function AttendanceSessionHistory() {
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 32 }}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
             renderItem={({ item }) => (
               <SessionCard
                 session={item}
