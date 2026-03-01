@@ -7,44 +7,111 @@ import { Hono } from "hono";
 const attendance = new Hono();
 
 attendance.post("/qr/session/create", async (c) => {
-  const { courseId, creatorId, startTime, endTime } = await c.req.json();
+  const { courseId, creatorId, startTime, endTime, manualPresentIds, manualAbsentIds } = await c.req.json();
   if (!courseId || !creatorId || !startTime || !endTime) {
     return createHonoErrorResponse(c, ERROR_CODES.MISSING_REQUIRED_FIELD);
   }
+  const manualIds = Array.isArray(manualPresentIds) ? manualPresentIds : [];
+  const absentIds = Array.isArray(manualAbsentIds) ? manualAbsentIds : [];
+
+  const courseDetails = await prisma.courses.findUnique({
+    where: { id: courseId },
+    select: { name: true, organizationId: true }
+  });
+
   const qrSession = await prisma.attendanceQRSession.create({
     data: {
       courseId,
       createdBy: creatorId,
       startTime,
       endTime,
+      markedUsers: manualIds.length > 0 ? manualIds : [],
     },
   });
   if (!qrSession.id) {
     return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
   }
 
-  // No cache invalidation needed for userCourse or logs on session creation.
+  if (manualIds.length > 0) {
+    try {
+      await prisma.attendanceLogs.createMany({
+        data: manualIds.map((userId: string) => ({
+          sessionId: qrSession.id,
+          userId,
+          sessionType: "MANUAL_SESSION",
+          markedAt: new Date(),
+        })),
+        skipDuplicates: true,
+      });
+      console.log(`Manually marked ${manualIds.length} students for session ${qrSession.id}`);
+    } catch (err) {
+      console.error("Failed to commit manual attendance logs during session create", err);
+    }
+  }
 
-  console.log("Created QR session:", qrSession.id, "for course:", courseId);
+    if (manualIds.length > 0) {
+      await prisma.historyLog.createMany({
+        data: manualIds.map((userId: string) => ({
+          title: "Manual Attendance (Present)",
+          description: `You were manually marked Present for ${courseDetails?.name || 'your class'}.`,
+          type: "ATTENDANCE",
+          userId,
+          organizationId: courseDetails?.organizationId || null,
+        }))
+      });
+
+      await prisma.notification.createMany({
+        data: manualIds.map((userId: string) => ({
+          title: "Attendance Updated",
+          body: `You were manually marked Present for ${courseDetails?.name || 'your class'}.`,
+          type: "SYSTEM",
+          userId,
+          organizationId: courseDetails?.organizationId || null,
+        }))
+      });
+    }
+
+    if (absentIds.length > 0) {
+      await prisma.historyLog.createMany({
+        data: absentIds.map((userId: string) => ({
+          title: "Manual Attendance (Absent)",
+          description: `You were manually marked Absent for ${courseDetails?.name || 'your class'}.`,
+          type: "ATTENDANCE",
+          userId,
+          organizationId: courseDetails?.organizationId || null,
+        }))
+      });
+
+      await prisma.notification.createMany({
+        data: absentIds.map((userId: string) => ({
+          title: "Attendance Updated",
+          body: `You were manually marked Absent for ${courseDetails?.name || 'your class'}.`,
+          type: "SYSTEM",
+          userId,
+          organizationId: courseDetails?.organizationId || null,
+        }))
+      });
+    }
 
   // Trigger parallel Push Notifications to enrolled students
   try {
-    const courseDetails = await prisma.courses.findUnique({
-      where: { id: courseId },
-      select: { name: true }
-    });
-
     const enrolledStudents = await prisma.userCourse.findMany({
       where: { courseId: courseId },
       include: {
         user: {
-          select: { expoPushToken: true }
+          select: { id: true, expoPushToken: true }
         }
       }
     });
 
     const tokens = enrolledStudents
-      .map((enrollment: { user: { expoPushToken: string | null } | null }) => enrollment.user?.expoPushToken)
+      .filter((enrollment) => {
+        const uid = enrollment.user?.id;
+        if (!uid || uid === creatorId) return false;
+        if (manualIds.includes(uid) || absentIds.includes(uid)) return false;
+        return true;
+      })
+      .map((enrollment) => enrollment.user?.expoPushToken)
       .filter(Boolean) as string[];
 
     if (tokens.length > 0) {
@@ -366,13 +433,31 @@ attendance.get("/sessions", async (c) => {
   }
 
   try {
+    console.log(`[Sessions] Fetched creatorId: ${creatorId}`);
+    const userRoleProfile = await prisma.user.findUnique({
+      where: { id: creatorId },
+      select: { role: true, studentProfile: { select: { organizationId: true } } }
+    });
+    console.log(`[Sessions] Role structure evaluated: ${JSON.stringify(userRoleProfile)}`);
+
+    let whereClause: any = {};
+    if (userRoleProfile?.role === "ADMIN") {
+      whereClause = {}; 
+    } else if (userRoleProfile?.role === "REPRESENTATIVE" && userRoleProfile.studentProfile?.organizationId) {
+      whereClause = { course: { organizationId: userRoleProfile.studentProfile.organizationId } };
+    } else {
+      whereClause = { createdBy: creatorId };
+    }
+    console.log(`[Sessions] Mapped whereClause constraint: ${JSON.stringify(whereClause)}`);
+
     const sessions = await prisma.attendanceQRSession.findMany({
-      where: { createdBy: creatorId },
+      where: whereClause,
       include: {
         course: true,
       },
       orderBy: { createdAt: "desc" },
     });
+    console.log(`[Sessions] Prisma retrieved ${sessions.length} matches securely via whereClause.`);
 
     // We also need the attendance logs to know who was present
     const enhancedSessions = await Promise.all(
@@ -427,15 +512,12 @@ attendance.get("/sessions", async (c) => {
           id: session.id,
           date: session.createdAt,
           courseCode:
-            (session as unknown as { course?: { code: string; name: string } })
+            (session as unknown as { course?: { code: string; name: string, organizationId: string } })
               .course?.code || "Unknown",
           courseName:
-            (session as unknown as { course?: { code: string; name: string } })
+            (session as unknown as { course?: { code: string; name: string, organizationId: string } })
               .course?.name || "Unknown Course",
-          // Extract class/section from creator's first org or similar (mocking for now as per plan context)
-          classId: "1",
-          className: "Default Class",
-          section: "A",
+          classId: (session as unknown as { course?: { code: string; name: string, organizationId: string } }).course?.organizationId || "unknown",
           durationMin: Math.round(
             (new Date(session.endTime).getTime() -
               new Date(session.startTime).getTime()) /

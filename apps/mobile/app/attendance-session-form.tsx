@@ -173,6 +173,42 @@ export default function AttendanceSessionForm() {
     }
   }, [selectedClass, allCourses, loggedInUser, selectedCourse]);
 
+  // Load students belonging to the selected course and class
+  useEffect(() => {
+    const fetchStudents = async () => {
+      if (!selectedCourse) {
+        setStudents([]);
+        return;
+      }
+      try {
+        const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+        const res = await fetch(`${origin}/courses/${selectedCourse.id}/students`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && Array.isArray(data.students)) {
+            let filteredStudents = data.students.filter((s: any) => s.id !== loggedInUser?.id);
+            if (selectedClass) {
+              filteredStudents = filteredStudents.filter(
+                (s: any) => s.studentProfile?.organizationId === selectedClass.id
+              );
+            }
+            setStudents(
+              filteredStudents.map((s: any) => ({
+                id: s.id,
+                name: s.name,
+                rollNo: s.studentProfile?.admissionNumber || s.email,
+                status: null,
+              }))
+            );
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to natively load students for session form", err);
+      }
+    };
+    fetchStudents();
+  }, [selectedCourse, selectedClass, loggedInUser]);
+
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -220,6 +256,8 @@ export default function AttendanceSessionForm() {
       const endTime = new Date(startTime.getTime() + selectedTime * 60000);
 
       // Create Session
+      const manualPresentIds = students.filter(s => s.status === "present").map(s => s.id);
+      
       const res = await fetch(`${origin}/attendance/qr/session/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -228,6 +266,7 @@ export default function AttendanceSessionForm() {
           creatorId: loggedInUser?.id,
           startTime: startTime.toISOString(),
           endTime: endTime.toISOString(),
+          manualPresentIds
         }),
       });
       const data = await res.json();
@@ -253,6 +292,12 @@ export default function AttendanceSessionForm() {
                     (s: any) => s.studentProfile?.organizationId === selectedClass.id
                   );
                 }
+
+                // Skip sending ping/actionUrls into those who received manual attendance marks.
+                const manualAbsentIds = students.filter(s => s.status === "absent").map(s => s.id);
+                targetStudents = targetStudents.filter(
+                  (s: any) => !manualPresentIds.includes(s.id) && !manualAbsentIds.includes(s.id)
+                );
 
                 // Gather Expo tokens
                 const tokens = targetStudents

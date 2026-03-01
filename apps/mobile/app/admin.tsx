@@ -34,6 +34,7 @@ type User = {
   email: string;
   role: Role;
   admissionNumber?: string | null;
+  expoPushToken?: string | null;
 };
 
 
@@ -184,12 +185,13 @@ function RolesTab({ onAddUserPress }: { onAddUserPress: () => void }) {
             email: u.email,
             role: (u.role ?? "STUDENT") as Role,
             admissionNumber: profile?.admissionNumber ?? null,
+            expoPushToken: u.expoPushToken,
           };
         }),
     [storeUsers, profiles],
   );
 
-  const changeRole = async (userId: string, targetRole: Role) => {
+  const changeRole = async (userId: string, targetRole: Role, user?: User) => {
     try {
       const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
       const res = await fetch(`${origin}/admin/users/${userId}/role`, {
@@ -198,9 +200,43 @@ function RolesTab({ onAddUserPress }: { onAddUserPress: () => void }) {
         body: JSON.stringify({ role: targetRole }),
       });
       if (!res.ok) throw new Error("Failed to change role");
-      // Optionally trigger a store refresh here by calling fetchUsers()
-      // but modifying the store locally provides a snappier experience:
-      // useUsersStore.getState().setUsers(...)
+      
+      const title = "Role Updated";
+      const body = `Your account role has been updated to ${targetRole}.`;
+      
+      // Emit in-app notification directly to the user
+      await fetch(`${origin}/v1/notifications`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          body,
+          type: "SYSTEM",
+          userId,
+          organizationId: null,
+          actionUrl: null,
+        }),
+      });
+
+      // Emit Push Notification if token exists
+      if (user?.expoPushToken) {
+        await fetch('https://exp.host/--/api/v2/push/send', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Accept-encoding': 'gzip, deflate',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            to: user.expoPushToken,
+            sound: 'default',
+            title,
+            body,
+            data: { type: "SYSTEM" },
+          }),
+        });
+      }
+
       setRoleModal(null);
       Alert.alert("Success", "Role updated successfully!");
     } catch {
@@ -318,7 +354,7 @@ function RolesTab({ onAddUserPress }: { onAddUserPress: () => void }) {
               return (
                 <Pressable
                   key={role}
-                  onPress={() => roleModal && changeRole(roleModal.id, role)}
+                  onPress={() => roleModal && changeRole(roleModal.id, role, roleModal)}
                   className={`flex-row items-center justify-between px-4 py-3 rounded-xl mb-2 border ${
                     active
                       ? "border-indigo-300 bg-indigo-50"
@@ -368,7 +404,7 @@ function AddUserModal({
     () =>
       storeUsers
         .filter((u) => u.role === "STUDENT")
-        .map((u) => ({ id: u.id, name: u.name ?? "", email: u.email })),
+        .map((u) => ({ id: u.id, name: u.name ?? "", email: u.email, expoPushToken: u.expoPushToken })),
     [storeUsers],
   );
 
@@ -1377,6 +1413,42 @@ export default function AdminPage() {
       
       if (!res.ok) throw new Error("Failed to assign role");
       
+      const title = "Role Assigned";
+      const body = `You have been assigned the role of ${user.role} by an Administrator.`;
+      
+      // Emit in-app notification directly to the user
+      await fetch(`${origin}/v1/notifications`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          body,
+          type: "SYSTEM",
+          userId: user.id,
+          organizationId: null,
+          actionUrl: null,
+        }),
+      });
+
+      // Emit Push Notification if token exists
+      if (user.expoPushToken) {
+        await fetch('https://exp.host/--/api/v2/push/send', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Accept-encoding': 'gzip, deflate',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            to: user.expoPushToken,
+            sound: 'default',
+            title,
+            body,
+            data: { type: "SYSTEM" },
+          }),
+        });
+      }
+
       // Update local store to reflect new role immediately
       updateUser(user.id, { role: user.role });
       Alert.alert("Success", "Role assigned successfully!");
