@@ -7,13 +7,13 @@ import * as Location from "expo-location";
 import { Stack, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
-  Alert,
-  FlatList,
-  Pressable,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
+    Alert,
+    FlatList,
+    Pressable,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -280,6 +280,40 @@ export default function AttendanceSessionForm() {
                     },
                     body: JSON.stringify(pushPayload),
                   });
+                }
+                
+                // Dispatch native in-app notification
+                try {
+                  const notifPayload = {
+                    title: 'Attendance Started',
+                    body: `Attendance for ${selectedCourse.name} is now open! Tap here to check in.`,
+                    type: 'ATTENDANCE',
+                    userId: null,
+                    organizationId: selectedClass ? selectedClass.id : null,
+                    actionUrl: '/tap-to-mark'
+                  };
+
+                  // If no specific class is selected, creating notifications one-by-one
+                  if (!selectedClass && targetStudents.length > 0) {
+                     await Promise.all(
+                       targetStudents.map((s: any) => 
+                         fetch(`${origin}/notifications`, {
+                           method: "POST",
+                           headers: { "Content-Type": "application/json" },
+                           body: JSON.stringify({ ...notifPayload, userId: s.id, organizationId: null })
+                         })
+                       )
+                     );
+                  } else if (selectedClass) {
+                     // Create one Organization-level notification
+                     await fetch(`${origin}/notifications`, {
+                       method: "POST",
+                       headers: { "Content-Type": "application/json" },
+                       body: JSON.stringify(notifPayload)
+                     });
+                  }
+                } catch (notifErr) {
+                   console.log("Failed to create in-app notifications:", notifErr);
                 }
             }
           }

@@ -2,6 +2,7 @@ import { useAuth } from "@/contexts/auth.cntxt";
 import { useRefresh } from "@/hooks/use-refresh";
 import { Notification, useNotificationsStore } from "@/lib/store/notifications";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React, { useMemo } from "react";
 import {
     RefreshControl,
@@ -13,6 +14,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Notify() {
+  const router = useRouter();
   const { refresh, refreshing } = useRefresh();
   const { loggedInUser } = useAuth();
   const { notifications, loading, markAsRead, markAllAsRead } =
@@ -82,17 +84,19 @@ export default function Notify() {
               Stay updated with your classes
             </Text>
           </View>
-          <TouchableOpacity
-            onPress={() => {
-              if (loggedInUser?.id) {
-                markAllAsRead(loggedInUser.id);
-              }
-            }}
-          >
-            <Text className="text-primary font-medium text-sm mb-1">
-              Mark all as read
-            </Text>
-          </TouchableOpacity>
+          {notifications.length > 0 && (
+            <TouchableOpacity
+              onPress={() => {
+                if (loggedInUser?.id) {
+                  markAllAsRead(loggedInUser.id);
+                }
+              }}
+            >
+              <Text className="text-primary font-medium text-sm mb-1">
+                Mark all as read
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Notification List */}
@@ -121,6 +125,9 @@ export default function Notify() {
                 onPress={() => {
                   if (!isRead && loggedInUser?.id) {
                     markAsRead(item.id, loggedInUser.id);
+                  }
+                  if (item.actionUrl) {
+                    router.push(item.actionUrl as any);
                   }
                 }}
                 className={`p-4 rounded-xl border mb-3 flex-row gap-4 ${

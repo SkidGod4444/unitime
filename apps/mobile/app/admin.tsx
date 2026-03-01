@@ -105,6 +105,32 @@ const ROLE_COLORS: Record<Role, { bg: string; text: string }> = {
   STUDENT: { bg: "bg-green-100", text: "text-green-700" },
 };
 
+const emitAdminNotification = async (
+  organizationId: string,
+  title: string,
+  body: string,
+  actionUrl: string
+) => {
+  try {
+    const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+    await fetch(`${origin}/notifications`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title,
+        body,
+        type: "SYSTEM",
+        userId: null,
+        organizationId,
+        actionUrl,
+      }),
+    });
+  } catch (error) {
+    console.warn("Failed to dispatch admin notification", error);
+  }
+};
+
+
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
 
 type TabKey = "roles" | "classes" | "professors" | "courses" | "attendance";
@@ -934,6 +960,14 @@ function ClassesTab() {
   const handleEditSave = async (classData: any) => {
     try {
       await updateOrg(editingClass.id, classData);
+      
+      await emitAdminNotification(
+        editingClass.id,
+        "Class Details Updated",
+        `Details for ${classData.courseName} (Sec: ${classData.section}) have been changed.`,
+        "/schedule"
+      );
+
       setEditingClass(null);
       Alert.alert("Success", "Class updated successfully!");
     } catch (e: any) {
@@ -1072,6 +1106,14 @@ function CoursesTab() {
   const handleEditSave = async (courseData: any) => {
     try {
       await updateCourse(editingCourse.id, courseData);
+      
+      await emitAdminNotification(
+        courseData.organizationId,
+        "Course Updated",
+        `${courseData.name} details have been updated.`,
+        "/my-courses"
+      );
+
       setEditingCourse(null);
       Alert.alert("Success", "Course updated successfully!");
     } catch (e: any) {
@@ -1088,6 +1130,14 @@ function CoursesTab() {
         onPress: async () => {
           try {
             await deleteCourse(c.id);
+            
+            await emitAdminNotification(
+              c.organizationId,
+              "Course Removed",
+              `${c.name} has been removed from the class curriculum.`,
+              "/my-courses"
+            );
+
             Alert.alert("Success", "Course deleted successfully!");
           } catch (e: any) {
             Alert.alert("Error", e.message || "Failed to delete course");
@@ -1276,6 +1326,14 @@ export default function AdminPage() {
         ...courseData,
         userId: loggedInUser?.id || "",
       });
+      
+      await emitAdminNotification(
+        courseData.organizationId,
+        "New Course Added",
+        `You have been enrolled in ${courseData.name} (${courseData.code}).`,
+        "/my-courses"
+      );
+
       setAddCourseVisible(false);
       Alert.alert("Success", "Course added successfully!");
     } catch (e: any) {

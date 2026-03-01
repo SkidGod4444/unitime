@@ -152,4 +152,34 @@ notifications.put("/user/:userId/read-all", async (c) => {
   }
 });
 
+// Create a new notification
+notifications.post("/", async (c) => {
+  try {
+    const { title, body, type, userId, organizationId, actionUrl } = await c.req.json();
+
+    if (!title || !body || !type) {
+      return c.json({ success: false, error: "Missing required fields" }, { status: 400 });
+    }
+
+    const notification = await prisma.notification.create({
+      data: {
+        title,
+        body,
+        type,
+        userId: userId || null,
+        organizationId: organizationId || null,
+        actionUrl: actionUrl || null,
+      },
+    });
+
+    return c.json({ success: true, notification }, { status: 201 });
+  } catch (error) {
+    console.error("Error creating notification:", error);
+    return c.json(
+      { success: false, error: "Failed to create notification" },
+      { status: 500 }
+    );
+  }
+});
+
 export default notifications;

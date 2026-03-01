@@ -8,6 +8,7 @@ export interface Notification {
   readBy: string[];
   userId: string | null;
   organizationId: string | null;
+  actionUrl: string | null;
   createdAt: string;
   updatedAt: string;
 }

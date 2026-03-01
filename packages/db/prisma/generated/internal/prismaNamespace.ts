@@ -1445,6 +1445,7 @@ export const NotificationScalarFieldEnum = {
   readBy: 'readBy',
   userId: 'userId',
   organizationId: 'organizationId',
+  actionUrl: 'actionUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
