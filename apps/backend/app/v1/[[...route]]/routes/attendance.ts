@@ -578,4 +578,68 @@ attendance.patch("/sessions/:id/students", async (c) => {
   }
 });
 
+attendance.get("/sessions/:id/export", async (c) => {
+  const sessionId = c.req.param("id");
+
+  try {
+    const session = await prisma.attendanceQRSession.findUnique({
+      where: { id: sessionId },
+      include: {
+        course: true,
+      }
+    });
+
+    if (!session) {
+      return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
+    }
+
+    const logs = await prisma.attendanceLogs.findMany({
+      where: { sessionId },
+    });
+
+    const enrolledStudents = await prisma.userCourse.findMany({
+      where: { courseId: session.courseId },
+      include: {
+        user: { include: { studentProfile: true } },
+      },
+    });
+
+    const headers = [
+      "Student Name",
+      "Admission Number",
+      "Email ID",
+      "Contact Number",
+      "Status",
+    ];
+
+    const csvRows = [headers.join(",")];
+
+    for (const enr of enrolledStudents) {
+      const isPresent = logs.some((log) => log.userId === enr.userId);
+      const profile = enr.user.studentProfile;
+      
+      const row = [
+        `"${enr.user.name || ""}"`,
+        `"${profile?.admissionNumber || ""}"`,
+        `"${profile?.studentEmail || enr.user.email || ""}"`,
+        `"${profile?.contactNumber || ""}"`,
+        isPresent ? "Present" : "Absent",
+      ];
+      
+      csvRows.push(row.join(","));
+    }
+
+    const csvString = csvRows.join("\n");
+
+    const response = new Response(csvString);
+    response.headers.set("Content-Type", "text/csv");
+    response.headers.set("Content-Disposition", `attachment; filename="attendance_${session.course.code}.csv"`);
+    return response;
+
+  } catch (error) {
+    console.error("Error exporting session:", error);
+    return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
+  }
+});
+
 export default attendance;

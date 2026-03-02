@@ -65,13 +65,11 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
       fetchProfiles(),
       fetchOrgs(),
       fetchCourses(),
+      fetchSessions(),
       ...(loggedInUser?.id ? [fetchTimetable(loggedInUser.id)] : []),
       ...(loggedInUser?.id ? [fetchSummary(loggedInUser.id)] : []),
       ...(loggedInUser?.id ? [fetchNotifications(loggedInUser.id)] : []),
       ...(loggedInUser?.id ? [fetchHistoryLogs(loggedInUser.id)] : []),
-      ...(loggedInUser?.id && loggedInUser.role === "PROFESSOR"
-        ? [fetchSessions(loggedInUser.id)]
-        : []),
     ]);
 
     // Fetch enrollments if applicable (depends on profiles resolving first)

@@ -1,6 +1,8 @@
 import { useAuth } from "@/contexts/auth.cntxt";
 import { Ionicons } from "@expo/vector-icons";
+import * as FileSystem from 'expo-file-system/legacy';
 import { Stack } from "expo-router";
+import * as Sharing from 'expo-sharing';
 import React, { useCallback, useMemo, useState } from "react";
 import {
   Alert,
@@ -503,11 +505,29 @@ export default function AttendanceSessionHistory() {
     );
   }, []);
 
-  const handleDownloadPress = useCallback((session: SessionRecord) => {
-    Alert.alert(
-      "Download Report",
-      `Downloading attendance report for ${session.courseCode} – ${session.className} Sec ${session.section}.`,
-    );
+  const handleDownloadPress = useCallback(async (session: SessionRecord) => {
+    try {
+      const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+      const fileUri = FileSystem.documentDirectory! + `attendance_${session.courseCode}_${session.id}.csv`;
+      
+      const { uri } = await FileSystem.downloadAsync(
+        `${origin}/attendance/sessions/${session.id}/export`,
+        fileUri
+      );
+      
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri, {
+          mimeType: "text/csv",
+          dialogTitle: `Share ${session.courseCode} Attendance Report`,
+          UTI: "public.comma-separated-values-text"
+        });
+      } else {
+        Alert.alert("Error", "Sharing is not available on this device");
+      }
+    } catch (e) {
+      console.error("Download failed:", e);
+      Alert.alert("Error", "Failed to download attendance report.");
+    }
   }, []);
 
   const handleSaveEdits = useCallback(

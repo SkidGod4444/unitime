@@ -39,6 +39,8 @@ export default ({ config }) => ({
   deepLinking: true,
   plugins: [
     'expo-audio',
+    'expo-file-system',
+    'expo-sharing',
     'expo-localization',
     'expo-quick-actions',
     [
