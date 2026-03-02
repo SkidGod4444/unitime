@@ -8,6 +8,7 @@ import attendance from "./routes/attendance";
 import chats from "./routes/chats";
 import courses from "./routes/courses";
 import dashboard from "./routes/dashboard";
+import download from "./routes/download";
 import history from "./routes/history";
 import notifications from "./routes/notifications";
 import orgs from "./routes/org";
@@ -59,6 +60,7 @@ app.route("/profiles", profile);
 app.route("/orgs", orgs);
 app.route("/admin", admin);
 app.route("/alarms", alarms);
+app.route("/download", download);
 
 export const GET = handle(app);
 export const POST = handle(app);
