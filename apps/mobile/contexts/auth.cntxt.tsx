@@ -2,6 +2,7 @@ import { account, getUser } from "@/lib/auth";
 import { isInstitutionalEmail } from "@/utils/email.validator";
 import { UserT } from "@unitime/types";
 import { router } from "expo-router";
+import { usePostHog } from "posthog-react-native";
 import React, {
   createContext,
   ReactNode,
@@ -42,6 +43,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [error, setError] = useState("");
   const [jwt, setJwt] = useState<string | null>(null);
   const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3001";
+  const posthog = usePostHog();
+
+  useEffect(() => {
+    if (loggedInUser && posthog) {
+      const identifyData: Record<string, any> = {
+        name: loggedInUser.name,
+        email: loggedInUser.email,
+      };
+      
+      if (loggedInUser.role) {
+        identifyData.role = loggedInUser.role;
+      }
+
+      posthog.identify(loggedInUser.id, identifyData);
+    }
+  }, [
+    loggedInUser,
+    loggedInUser?.id,
+    loggedInUser?.name,
+    loggedInUser?.email,
+    loggedInUser?.role,
+    posthog,
+  ]);
 
   async function fetchDbUser(
     email: string,
@@ -182,6 +206,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await account.deleteSession("current");
       setJwt(null);
       setLoggedInUser(null);
+      if (posthog) {
+        posthog.reset();
+      }
       setIsAuthenticated(false);
       router.replace("/auth");
     } catch (err: any) {
@@ -241,6 +268,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       isMounted = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

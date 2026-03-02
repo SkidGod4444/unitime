@@ -1,5 +1,6 @@
 import { AttendanceListener } from "@/components/attendance.listener";
 import BannedUserPopup from "@/components/banned.users.popup";
+import { PostHogAnalyticsProvider } from "@/components/posthog.provider";
 import ProfileCompletionPopup from "@/components/profile.completion.popup";
 import QRScannerWidget from "@/components/qr.scanner.widget";
 import { AlarmsProvider } from "@/contexts/alarms.cntxt";
@@ -79,9 +80,8 @@ function AppContent() {
                 <PermsProvider>
                   <AttendanceListener />
                   <StatusBar style={"dark"} animated />
-
                   <BannedUserPopup />
-                  {!isHiddenScreen && <ProfileCompletionPopup />}
+                  <ProfileCompletionPopup />
 
                   <Stack screenOptions={{ headerShown: false }} />
                   {!isHiddenScreen && <QRScannerWidget />}
@@ -98,10 +98,12 @@ function AppContent() {
 
 export default function RootLayout() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <SafeAreaProvider>
-        <AppContent />
-      </SafeAreaProvider>
-    </QueryClientProvider>
+    <PostHogAnalyticsProvider>
+      <QueryClientProvider client={queryClient}>
+        <SafeAreaProvider>
+          <AppContent />
+        </SafeAreaProvider>
+      </QueryClientProvider>
+    </PostHogAnalyticsProvider>
   );
 }

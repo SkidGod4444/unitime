@@ -1,10 +1,10 @@
 import {
-    useAttendanceStore,
-    useCoursesStore,
-    useOrgsStore,
-    useProfilesStore,
-    useTimetableStore,
-    useUsersStore,
+  useAttendanceStore,
+  useCoursesStore,
+  useOrgsStore,
+  useProfilesStore,
+  useTimetableStore,
+  useUsersStore,
 } from "@/lib/store";
 import { useEnrollmentStore } from "@/lib/store/enrollment";
 import { useHistoryStore } from "@/lib/store/history";
@@ -12,12 +12,12 @@ import { useNotificationsStore } from "@/lib/store/notifications";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
-import { Alert, Modal, Platform, StyleSheet, Text, ToastAndroid, TouchableOpacity, View } from "react-native";
+import { Alert, AppState, Modal, Platform, StyleSheet, Text, ToastAndroid, TouchableOpacity, View } from "react-native";
 import { useAuth } from "./auth.cntxt";
 import { useLocalStore } from "./localstore.cntxt";
 
 type StoreContextType = {
-  refresh: () => Promise<void>;
+  refresh: (isManual?: boolean) => Promise<void>;
   loading: boolean;
 };
 
@@ -45,15 +45,17 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   const { fetchNotifications } = useNotificationsStore();
   const { fetchHistoryLogs } = useHistoryStore();
 
-  const refresh = React.useCallback(async () => {
+  const refresh = React.useCallback(async (isManual: boolean = true) => {
     // Throttle manual refreshes to max 1 per 10 seconds
     const now = Date.now();
     if (now - lastRefreshedAt.current < 10000) {
-      console.log("Throttling manual refresh");
-      if (Platform.OS === "android") {
-        ToastAndroid.show("Please wait a moment before refreshing again.", ToastAndroid.SHORT);
-      } else {
-        Alert.alert("Refreshing too fast", "Please wait a few seconds before refreshing again.");
+      if (isManual) {
+        console.log("Throttling manual refresh");
+        if (Platform.OS === "android") {
+          ToastAndroid.show("Please wait a moment before refreshing again.", ToastAndroid.SHORT);
+        } else {
+          Alert.alert("Refreshing too fast", "Please wait a few seconds before refreshing again.");
+        }
       }
       return;
     }
@@ -143,11 +145,32 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     router,
   ]);
 
+  const appState = useRef(AppState.currentState);
+
   useEffect(() => {
-    if (loggedInUser) {
-      refresh();
+    if (loggedInUser?.id) {
+      refresh(false);
     }
-  }, [loggedInUser, fetchSessions, fetchSummary, fetchTimetable, refresh]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loggedInUser?.id]);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      if (
+        appState.current.match(/inactive|background/) &&
+        nextAppState === "active"
+      ) {
+        if (loggedInUser?.id) {
+          refresh(false);
+        }
+      }
+      appState.current = nextAppState;
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [loggedInUser?.id, refresh]);
 
   useEffect(() => {
     const originalFetch = global.fetch;
@@ -156,22 +179,32 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
       if (response.status === 429) {
         const urlStr =
           typeof args[0] === "string" ? args[0] : (args[0] as Request).url;
-        let feature = "This feature";
+        const lowerUrlStr = urlStr.toLowerCase();
+        let feature = "Data";
         
-        if (urlStr.includes("timetable")) feature = "Timetable";
-        else if (urlStr.includes("attendance")) feature = "Attendance";
-        else if (urlStr.includes("users")) feature = "Users";
-        else if (urlStr.includes("courses")) feature = "Courses";
-        else if (urlStr.includes("orgs") || urlStr.includes("classes")) feature = "Classes";
-        else if (urlStr.includes("profiles")) feature = "Profiles";
-
-        if (feature === "This feature") {
-            const urlPath = new URL(urlStr).pathname;
-            const segments = urlPath.split('/').filter(Boolean);
-            if (segments.length > 0) {
-              const lastSegment = segments[segments.length - 1];
-              feature = lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1);
-            }
+        if (lowerUrlStr.includes("timetable")) feature = "Timetable";
+        else if (lowerUrlStr.includes("dashboard")) feature = "Dashboard";
+        else if (lowerUrlStr.includes("attendance")) feature = "Attendance";
+        else if (lowerUrlStr.includes("users")) feature = "Users";
+        else if (lowerUrlStr.includes("courses")) feature = "Courses";
+        else if (lowerUrlStr.includes("orgs") || lowerUrlStr.includes("classes")) feature = "Classes";
+        else if (lowerUrlStr.includes("profiles")) feature = "Profiles";
+        else if (lowerUrlStr.includes("enrollments")) feature = "Enrollments";
+        else if (lowerUrlStr.includes("history")) feature = "History";
+        else if (lowerUrlStr.includes("alarms")) feature = "Alarms";
+        else if (lowerUrlStr.includes("notifications")) feature = "Notifications";
+        else {
+            try {
+              const urlPath = new URL(urlStr).pathname;
+              const segments = urlPath.split('/').filter(Boolean);
+              for (let i = segments.length - 1; i >= 0; i--) {
+                const seg = segments[i];
+                if (seg !== 'v1' && seg !== 'api' && !seg.includes('_') && !seg.includes('-') && seg.length > 2) {
+                  feature = seg.charAt(0).toUpperCase() + seg.slice(1);
+                  break;
+                }
+              }
+            } catch {}
         }
 
         setRateLimitedFeatures((prev) => {

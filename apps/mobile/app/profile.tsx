@@ -1,16 +1,16 @@
 import { useAuth } from "@/contexts/auth.cntxt";
-import { useOrgsStore, useProfilesStore } from "@/lib/store";
+import { useAttendanceStore, useOrgsStore, useProfilesStore } from "@/lib/store";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
 import {
-  Image,
-  ScrollView,
-  Switch,
-  Text,
-  TouchableOpacity,
-  View,
+    Image,
+    ScrollView,
+    Switch,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -22,55 +22,6 @@ export default function Profile() {
   const { orgs } = useOrgsStore();
   const myProfile = profiles.find((p) => p.userId === loggedInUser?.id);
   const myOrg = orgs.find((o) => o.id === myProfile?.organizationId);
-
-  // Grouped menu items for cleaner code
-  const menuItems = [
-    {
-      title: "Account Settings",
-      items: [
-        {
-          icon: "person-outline",
-          label: "Edit Profile",
-          route: "/edit-profile",
-          color: "#2563EB",
-          bg: "bg-blue-50",
-        },
-        {
-          icon: "notifications-outline",
-          label: "Notifications",
-          route: "/notifications",
-          color: "#F59E0B",
-          bg: "bg-yellow-50",
-        },
-        {
-          icon: "shield-checkmark-outline",
-          label: "Security & Password",
-          route: "/security",
-          color: "#10B981",
-          bg: "bg-green-50",
-        },
-      ],
-    },
-    {
-      title: "App Settings",
-      items: [
-        {
-          icon: "help-buoy-outline",
-          label: "Help & Support",
-          route: "/support",
-          color: "#EC4899",
-          bg: "bg-pink-50",
-        },
-        {
-          icon: "document-text-outline",
-          label: "Privacy Policy",
-          route: "/privacy",
-          color: "#8B5CF6",
-          bg: "bg-purple-50",
-        },
-      ],
-    },
-  ];
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
@@ -142,14 +93,14 @@ export default function Profile() {
                 {
                   icon: "business-outline",
                   label: "Department",
-                  value: myProfile?.department || "N/A",
+                  value: myOrg?.departmentName || myProfile?.department || "N/A",
                   color: "#2563EB",
                   bg: "#EFF6FF",
                 },
                 {
                   icon: "book-outline",
                   label: "Course",
-                  value: myProfile?.course || "N/A",
+                  value: myOrg?.courseName || myProfile?.course || "N/A",
                   color: "#7C3AED",
                   bg: "#F5F3FF",
                 },
@@ -192,21 +143,21 @@ export default function Profile() {
           {[
             {
               label: "Semester",
-              value: "6th",
+              value: myOrg?.semester ? myOrg.semester.replace("_SEMESTER", "").replace("FIRST", "1st").replace("SECOND", "2nd").replace("THIRD", "3rd").replace("FOURTH", "4th").replace("FIFTH", "5th").replace("SIXTH", "6th").replace("SEVENTH", "7th").replace("EIGHTH", "8th").replace("NINTH", "9th").replace("TENTH", "10th") : myProfile?.semester ? myProfile?.semester.replace("_SEMESTER", "").replace("FIRST", "1st").replace("SECOND", "2nd").replace("THIRD", "3rd").replace("FOURTH", "4th").replace("FIFTH", "5th").replace("SIXTH", "6th").replace("SEVENTH", "7th").replace("EIGHTH", "8th").replace("NINTH", "9th").replace("TENTH", "10th") : "N/A",
               icon: "school-outline",
               color: "text-blue-600",
               bg: "bg-blue-50",
             },
             {
-              label: "CGPA",
-              value: "8.9",
-              icon: "ribbon-outline",
-              color: "text-purple-600",
-              bg: "bg-purple-50",
-            },
-            {
               label: "Attendance",
-              value: "92%",
+              value: (() => {
+                 const summaryStore = useAttendanceStore.getState().summary;
+                 if (!summaryStore || summaryStore.length === 0) return "N/A";
+                 const totalAttended = summaryStore.reduce((acc, curr) => acc + curr.attended, 0);
+                 const totalHeld = summaryStore.reduce((acc, curr) => acc + curr.total, 0);
+                 if (totalHeld === 0) return "100%";
+                 return `${Math.round((totalAttended / totalHeld) * 100)}%`;
+              })(),
               icon: "stats-chart-outline",
               color: "text-green-600",
               bg: "bg-green-50",
@@ -227,9 +178,7 @@ export default function Profile() {
                     color:
                       stat.color === "text-blue-600"
                         ? "#2563EB"
-                        : stat.color === "text-purple-600"
-                          ? "#9333EA"
-                          : "#16A34A",
+                        : "#16A34A",
                   }}
                 />
               </View>

@@ -15,7 +15,7 @@ export function AttendanceListener() {
     // (works when app is backgrounded or killed)
     const responseListener = Notifications.addNotificationResponseReceivedListener(async (response) => {
       const data = response.notification.request.content.data;
-      if (data && data.sessionId && data.courseId) {
+      if (data && data.sessionId && data.courseId && loggedInUser?.id) {
          // Check local cache
          const markedStr = await getItem("MARKED_SESSIONS");
          const markedIds = markedStr ? JSON.parse(markedStr) : [];
@@ -23,6 +23,32 @@ export function AttendanceListener() {
             console.log("Ignored Push Notification tap: Session already marked locally.");
             return;
          }
+
+          try {
+            const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+            const res = await fetch(`${origin}/dashboard/${loggedInUser.id}`, {
+               headers: {
+                 "Cache-Control": "no-cache",
+                 "Pragma": "no-cache",
+                 "Expires": "0"
+               }
+            });
+            if (res.ok) {
+              const json = await res.json();
+              if (json.success) {
+                const dashboardCourses = Array.isArray(json.data.courses) ? json.data.courses : [];
+                const currentEnrolledIds = dashboardCourses.map((c: any) => c.id);
+                
+                if (!currentEnrolledIds.includes(data.courseId)) {
+                  console.log("Ignored Push Notification tap: User is not officially enrolled in this course.");
+                  return;
+                }
+              }
+            }
+          } catch (e) {
+             console.warn("Failed to check push notification course validity, proceeding carefully...", e);
+          }
+
 
          console.log("Push Notification tapped! Routing directly to tap-to-mark...");
          setTimeout(() => {
@@ -34,7 +60,8 @@ export function AttendanceListener() {
     return () => {
       responseListener.remove();
     };
-  }, [router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router, loggedInUser?.id]);
 
   // FOREGROUND PULL (Active App / Refresh Fallback)
   // When user opens the app, pull the active sessions from the unified dashboard endpoint
@@ -97,6 +124,7 @@ export function AttendanceListener() {
     return () => {
       subscription.remove();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loggedInUser?.id, router]);
 
   return null; // This component is strictly logic/listeners, no UI
