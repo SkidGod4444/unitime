@@ -1,18 +1,17 @@
 import { useAuth } from "@/contexts/auth.cntxt";
 import { Ionicons } from "@expo/vector-icons";
-import * as FileSystem from 'expo-file-system/legacy';
 import { Stack } from "expo-router";
-import * as Sharing from 'expo-sharing';
 import React, { useCallback, useMemo, useState } from "react";
 import {
   Alert,
   FlatList,
+  Linking,
   Modal,
   Pressable,
   RefreshControl,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAttendanceStore, useOrgsStore } from "../lib/store";
@@ -508,25 +507,17 @@ export default function AttendanceSessionHistory() {
   const handleDownloadPress = useCallback(async (session: SessionRecord) => {
     try {
       const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-      const fileUri = FileSystem.documentDirectory! + `attendance_${session.courseCode}_${session.id}.csv`;
+      const url = `${origin}/attendance/sessions/${session.id}/export`;
       
-      const { uri } = await FileSystem.downloadAsync(
-        `${origin}/attendance/sessions/${session.id}/export`,
-        fileUri
-      );
-      
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(uri, {
-          mimeType: "text/csv",
-          dialogTitle: `Share ${session.courseCode} Attendance Report`,
-          UTI: "public.comma-separated-values-text"
-        });
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
       } else {
-        Alert.alert("Error", "Sharing is not available on this device");
+        Alert.alert("Error", "Your device cannot open this URL.");
       }
     } catch (e) {
-      console.error("Download failed:", e);
-      Alert.alert("Error", "Failed to download attendance report.");
+      console.error("Open URL failed:", e);
+      Alert.alert("Error", "Failed to open download link.");
     }
   }, []);
 

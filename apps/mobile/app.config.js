@@ -39,8 +39,6 @@ export default ({ config }) => ({
   deepLinking: true,
   plugins: [
     'expo-audio',
-    'expo-file-system',
-    'expo-sharing',
     'expo-localization',
     'expo-quick-actions',
     [
@@ -107,12 +105,6 @@ export default ({ config }) => ({
       {
         icon: getAppIcon(),
         color: "#ffffff",
-      },
-    ],
-    [
-      'expo-camera',
-      {
-        cameraPermission: "Allow $(PRODUCT_NAME) to access your camera to scan QR codes.",
       },
     ],
     [

@@ -633,7 +633,7 @@ attendance.get("/sessions/:id/export", async (c) => {
 
     const response = new Response(csvString);
     response.headers.set("Content-Type", "text/csv");
-    response.headers.set("Content-Disposition", `attachment; filename="attendance_${session.course.code}.csv"`);
+    response.headers.set("Content-Disposition", `attachment; filename="UNiTIME_ATTENDANCE_${session.course.code}.csv"`);
     return response;
 
   } catch (error) {
