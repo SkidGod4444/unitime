@@ -112,7 +112,20 @@ dashboard.get("/:userId/bundle", async (c) => {
 
         if (!user) return null;
 
-        const minimalCourses = (user.courses || []).map((uc) => ({
+        const userWithCourses = user as unknown as {
+          courses: {
+            course: {
+              id: string;
+              code: string;
+              name: string;
+              credit: number;
+              classType: unknown;
+              organizationId: string | null;
+            };
+          }[];
+        };
+
+        const minimalCourses = (userWithCourses.courses || []).map((uc) => ({
           // return only the minimal subset used by the client home
           id: uc.course.id,
           code: uc.course.code,

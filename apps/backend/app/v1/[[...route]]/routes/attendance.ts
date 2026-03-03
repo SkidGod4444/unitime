@@ -16,6 +16,7 @@ attendance.use("/sessions/:id/students", requireRole("PROFESSOR", "ADMIN"));
 attendance.post("/qr/session/create", async (c) => {
   const requester = c.get("user") as { $id?: string } | null;
   if (!requester?.$id) return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
+  const requesterId = requester.$id as string;
 
   const parsed = createQRSessionSchema.safeParse(await c.req.json());
   if (!parsed.success) {
@@ -118,7 +119,7 @@ attendance.post("/qr/session/create", async (c) => {
     const tokens = enrolledStudents
       .filter((enrollment) => {
         const uid = enrollment.user?.id;
-        if (!uid || uid === requester.$id) return false;
+        if (!uid || uid === requesterId) return false;
         if (manualIds.includes(uid) || absentIds.includes(uid)) return false;
         return true;
       })
@@ -237,6 +238,7 @@ function haversineDistance(coords1: { lat: number; lng: number }, coords2: { lat
 attendance.post("/checkin", async (c) => {
   const requester = c.get("user") as { $id?: string } | null;
   if (!requester?.$id) return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
+  const requesterId = requester.$id as string;
   const parsed = checkinSchema.safeParse(await c.req.json());
   if (!parsed.success) return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT);
   const { sessionId, coordinates } = parsed.data;
@@ -274,13 +276,13 @@ attendance.post("/checkin", async (c) => {
     const THRESHOLD_METERS = 75; // 75 meters geofence leeway
     
     if (distanceMeters > THRESHOLD_METERS) {
-      console.log(`[Check-in Failed] User ${userId} is ${distanceMeters.toFixed(1)}m away from class.`);
+      console.log(`[Check-in Failed] User ${requesterId} is ${distanceMeters.toFixed(1)}m away from class.`);
       return c.json({ success: false, message: "You are too far from the classroom to check in." }, 400);
     }
 
     // Check approved enrollment for requester
     const enrollment = await prisma.userCourse.findUnique({
-      where: { userId_courseId: { userId: requester.$id, courseId: session.courseId } },
+      where: { userId_courseId: { userId: requesterId, courseId: session.courseId } },
     });
     if (!enrollment || enrollment.status !== "APPROVED") {
       return c.json({ success: false, message: "Not enrolled in this course" }, 403);
@@ -288,7 +290,7 @@ attendance.post("/checkin", async (c) => {
 
     // Check if duplicate
     const existing = await prisma.attendanceLogs.findUnique({
-      where: { sessionId_userId: { sessionId, userId: requester.$id } }
+      where: { sessionId_userId: { sessionId, userId: requesterId } }
     });
     
     if (existing) {
@@ -299,7 +301,7 @@ attendance.post("/checkin", async (c) => {
     await prisma.attendanceLogs.create({
       data: {
         sessionId,
-        userId: requester.$id,
+        userId: requesterId,
         sessionType: "TAP_SESSION",
         markedAt: new Date(),
       }
@@ -310,7 +312,7 @@ attendance.post("/checkin", async (c) => {
       where: { id: sessionId },
       data: {
         markedUsers: {
-          push: requester.$id
+          push: requesterId
         }
       }
     });
@@ -325,7 +327,7 @@ attendance.post("/checkin", async (c) => {
 
         const attendedSessions = await prisma.attendanceLogs.count({
           where: {
-            userId: requester.$id,
+            userId: requesterId,
             sessionId: {
               in: (
                 await prisma.attendanceQRSession.findMany({
@@ -341,7 +343,7 @@ attendance.post("/checkin", async (c) => {
         await prisma.attendanceSummary.upsert({
           where: {
             userId_courseId: {
-              userId: requester.$id,
+              userId: requesterId,
               courseId,
             }
           },
@@ -351,14 +353,14 @@ attendance.post("/checkin", async (c) => {
             percentage
           },
           create: {
-            userId: requester.$id,
+            userId: requesterId,
             courseId,
             attended: attendedSessions,
             total: totalSessions,
             percentage
           }
         });
-        console.log(`[Background Job] Updated attendance summary for user ${requester.$id} in course ${courseId}`);
+        console.log(`[Background Job] Updated attendance summary for user ${requesterId} in course ${courseId}`);
       } catch (aggrError) {
         console.error("Failed to aggregate attendance in background:", aggrError);
       }
@@ -366,7 +368,7 @@ attendance.post("/checkin", async (c) => {
     
     // Important: Invalidate cache for realtime updates
     await invalidateCache(`attendanceLogs:session:${sessionId}`);
-    await invalidateCache(`dashboard:${requester.$id}`, `dashboard:bundle:${requester.$id}`);
+    await invalidateCache(`dashboard:${requesterId}`, `dashboard:bundle:${requesterId}`);
     
     return c.json({ success: true, message: "Attendance Marked Successfully" }, 200);
 
