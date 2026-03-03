@@ -38,8 +38,8 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   const { fetchProfiles } = useProfilesStore();
   const { fetchOrgs } = useOrgsStore();
 
-  const { fetchTimetable } = useTimetableStore();
-  const { fetchSummary, fetchSessions } = useAttendanceStore();
+  const { fetchTimetable, setTimetables } = useTimetableStore();
+  const { fetchSummary, fetchSessions, setSummary } = useAttendanceStore();
   const { fetchCourses } = useCoursesStore();
   const { fetchEnrollments } = useEnrollmentStore();
   const { fetchNotifications } = useNotificationsStore();
@@ -62,16 +62,60 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     lastRefreshedAt.current = now;
 
     setLoading(true);
+
+    const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+
+    // 1) Try dashboard bundle first
+    if (loggedInUser?.id) {
+      try {
+        const res = await fetch(`${origin}/dashboard/${loggedInUser.id}/bundle`, {
+          headers: {
+            "Cache-Control": "no-cache",
+            Pragma: "no-cache",
+            Expires: "0",
+          },
+        });
+        if (res.ok) {
+          const json = await res.json();
+          const data = json?.data || {};
+          if (Array.isArray(data.timetable)) setTimetables(data.timetable);
+          if (Array.isArray(data.attendanceSummary)) setSummary(data.attendanceSummary);
+          if (data.notifications?.items) {
+            // Optimistically set notifications state
+            useNotificationsStore.setState({ notifications: data.notifications.items, loading: false, error: null });
+          }
+          if (Array.isArray(data.history)) {
+            useHistoryStore.setState({ logs: data.history, loading: false, error: null });
+          }
+        } else {
+          // Fallback to legacy per-endpoint calls
+          await Promise.allSettled([
+            fetchTimetable(loggedInUser.id),
+            fetchSummary(loggedInUser.id),
+            fetchNotifications(loggedInUser.id),
+            fetchHistoryLogs(loggedInUser.id),
+          ]);
+        }
+      } catch {
+        // Network error → fallback
+        await Promise.allSettled([
+          fetchTimetable(loggedInUser.id),
+          fetchSummary(loggedInUser.id),
+          fetchNotifications(loggedInUser.id),
+          fetchHistoryLogs(loggedInUser.id),
+        ]);
+      }
+    }
+
+    // 2) Gate heavy admin/prof fetches by role
+    const role = loggedInUser?.role;
+    const adminOrProf = role === 'ADMIN' || role === 'PROFESSOR';
+    const adminOrRep = role === 'ADMIN' || role === 'REPRESENTATIVE';
+
     await Promise.allSettled([
-      fetchUsers(),
-      fetchProfiles(),
-      fetchOrgs(),
-      fetchCourses(),
-      fetchSessions(),
-      ...(loggedInUser?.id ? [fetchTimetable(loggedInUser.id)] : []),
-      ...(loggedInUser?.id ? [fetchSummary(loggedInUser.id)] : []),
-      ...(loggedInUser?.id ? [fetchNotifications(loggedInUser.id)] : []),
-      ...(loggedInUser?.id ? [fetchHistoryLogs(loggedInUser.id)] : []),
+      ...(adminOrProf ? [fetchUsers()] : []),
+      ...(adminOrRep ? [fetchProfiles()] : []),
+      ...(adminOrProf ? [fetchOrgs(), fetchCourses(), fetchSessions()] : []),
     ]);
 
     // Fetch enrollments if applicable (depends on profiles resolving first)

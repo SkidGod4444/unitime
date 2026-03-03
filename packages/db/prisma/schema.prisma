@@ -70,6 +70,7 @@ model Courses {
   organizationId      String?               @map("organization_id")
   organization        Organization?         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
+  @@index([organizationId])
   @@map("courses")
 }
 
@@ -111,6 +112,9 @@ model Notification {
   createdAt       DateTime         @default(now()) @map("created_at")
   updatedAt       DateTime         @updatedAt @map("updated_at")
 
+  @@index([userId])
+  @@index([organizationId])
+  @@index([createdAt])
   @@map("notifications")
 }
 
@@ -125,6 +129,9 @@ model HistoryLog {
   organization    Organization?  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   createdAt       DateTime       @default(now()) @map("created_at")
 
+  @@index([userId])
+  @@index([organizationId])
+  @@index([createdAt])
   @@map("history_logs")
 }
 
@@ -169,6 +176,8 @@ model UserCourse {
   enrolledAt DateTime               @default(now()) @map("enrolled_at")
 
   @@unique([userId, courseId])
+  @@index([courseId])
+  @@index([userId])
   @@map("user_courses")
 }
 
@@ -209,6 +218,7 @@ model Timetable {
   updatedAt DateTime        @updatedAt @map("updated_at")
 
   @@unique([courseId, day, startTime, endTime])
+  @@index([day])
   @@map("timetable")
 }
 
@@ -230,6 +240,9 @@ model AttendanceQRSession {
   createdAt   DateTime           @default(now()) @map("created_at")
   updatedAt   DateTime           @updatedAt @map("updated_at")
 
+  @@index([courseId])
+  @@index([status])
+  @@index([courseId, status])
   @@map("attendance_qr_sessions")
 }
 
@@ -250,6 +263,8 @@ model AttendanceLogs {
   updatedAt   DateTime              @updatedAt @map("updated_at")
 
   @@unique([sessionId, userId])
+  @@index([userId])
+  @@index([sessionId])
   @@map("attendance_logs")
 }
 
