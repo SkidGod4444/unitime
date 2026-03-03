@@ -91,4 +91,159 @@ dashboard.get("/:userId", async (c) => {
   }
 });
 
+// Bundle endpoint to reduce round trips for the mobile home/landing flows
+dashboard.get("/:userId/bundle", async (c) => {
+  const userId = c.req.param("userId");
+
+  try {
+    const payload = await getOrSetCache(
+      `dashboard:bundle:${userId}`,
+      async () => {
+        // 1) User + enrolled courses (approved only)
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+          include: {
+            courses: {
+              where: { status: "APPROVED" },
+              include: { course: true },
+            },
+          },
+        });
+
+        if (!user) return null;
+
+        const minimalCourses = (user.courses || []).map((uc) => ({
+          // return only the minimal subset used by the client home
+          id: uc.course.id,
+          code: uc.course.code,
+          name: uc.course.name,
+          credit: uc.course.credit,
+          classType: uc.course.classType,
+          organizationId: uc.course.organizationId,
+        }));
+
+        // 2) Today timetable entries for the user
+        const todayStr = new Date()
+          .toLocaleDateString("en-US", { weekday: "long" })
+          .toUpperCase();
+        const timetable = await prisma.timetable.findMany({
+          where: {
+            day: todayStr as
+              | "MONDAY"
+              | "TUESDAY"
+              | "WEDNESDAY"
+              | "THURSDAY"
+              | "FRIDAY"
+              | "SATURDAY"
+              | "SUNDAY",
+            course: {
+              users: { some: { userId: user.id, status: "APPROVED" } },
+            },
+          },
+          include: { course: true },
+          orderBy: { startTime: "asc" },
+        });
+
+        // 3) Attendance summary (reuse logic from attendance summary route)
+        const enrollments = await prisma.userCourse.findMany({
+          where: { userId },
+          include: { course: true },
+        });
+
+        const attendanceSummary = await Promise.all(
+          enrollments.map(async (enrollment) => {
+            const courseId = enrollment.courseId;
+
+            const totalSessions = await prisma.attendanceQRSession.count({
+              where: { courseId },
+            });
+
+            const sessionIds = (
+              await prisma.attendanceQRSession.findMany({ where: { courseId }, select: { id: true } })
+            ).map((s) => s.id);
+
+            const attendedSessions = await prisma.attendanceLogs.count({
+              where: { userId, sessionId: { in: sessionIds } },
+            });
+
+            const percentage =
+              totalSessions === 0
+                ? 100
+                : Math.round((attendedSessions / totalSessions) * 100);
+
+            return {
+              courseId,
+              courseName: enrollment.course.name,
+              courseCode: enrollment.course.code,
+              attended: attendedSessions,
+              total: totalSessions,
+              percentage,
+            };
+          })
+        );
+
+        // 4) Active sessions the user hasn't checked into yet
+        const rawActiveSessions = await prisma.attendanceQRSession.findMany({
+          where: {
+            status: "ACTIVE",
+            course: { users: { some: { userId: user.id, status: "APPROVED" } } },
+          },
+          include: { course: true },
+          orderBy: { createdAt: "desc" },
+        });
+        const activeSessions = rawActiveSessions.filter(
+          (s) => !s.markedUsers.includes(user.id)
+        );
+
+        // 5) Notifications (personal + org), last 10 + unreadCount
+        const studentProfile = await prisma.studentProfile.findUnique({
+          where: { userId },
+          select: { organizationId: true },
+        });
+        const organizationId = studentProfile?.organizationId || undefined;
+
+        const notifications = await prisma.notification.findMany({
+          where: {
+            OR: [{ userId }, ...(organizationId ? [{ organizationId }] : [])],
+          },
+          orderBy: { createdAt: "desc" },
+          take: 10,
+        });
+
+        // compute unread across all in taken window (consistent with current approach)
+        const unreadCount = notifications.filter((n) => !n.readBy.includes(userId)).length;
+
+        // 6) History: last 10 personal + org
+        const history = await prisma.historyLog.findMany({
+          where: {
+            OR: [{ userId }, ...(organizationId ? [{ organizationId }] : [])],
+          },
+          orderBy: { createdAt: "desc" },
+          take: 10,
+        });
+
+        return {
+          user: { id: user.id, name: user.name, role: user.role },
+          courses: minimalCourses,
+          timetable,
+          attendanceSummary,
+          activeSessions,
+          notifications: { items: notifications, unreadCount },
+          history,
+        } as const;
+      },
+      120
+    );
+
+    if (!payload) {
+      return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
+    }
+
+    return c.json({ success: true, status_code: 200, data: payload }, 200);
+  } catch (error) {
+    console.error("Dashboard bundle error:", error);
+    return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
+  }
+});
+
 export default dashboard;

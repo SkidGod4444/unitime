@@ -118,7 +118,7 @@ attendance.post("/qr/session/create", async (c) => {
     const tokens = enrolledStudents
       .filter((enrollment) => {
         const uid = enrollment.user?.id;
-        if (!uid || uid === creatorId) return false;
+        if (!uid || uid === requester.$id) return false;
         if (manualIds.includes(uid) || absentIds.includes(uid)) return false;
         return true;
       })
@@ -366,7 +366,7 @@ attendance.post("/checkin", async (c) => {
     
     // Important: Invalidate cache for realtime updates
     await invalidateCache(`attendanceLogs:session:${sessionId}`);
-    await invalidateCache(`dashboard:${requester.$id}`);
+    await invalidateCache(`dashboard:${requester.$id}`, `dashboard:bundle:${requester.$id}`);
     
     return c.json({ success: true, message: "Attendance Marked Successfully" }, 200);
 
