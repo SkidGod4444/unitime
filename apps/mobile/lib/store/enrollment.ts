@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getAuthToken } from "@/lib/auth.token";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
@@ -47,7 +48,11 @@ export const useEnrollmentStore = create<EnrollmentState>()(
             url += `?organizationId=${organizationId}`;
           }
 
-          const res = await fetch(url);
+          const headers: Record<string, string> = {};
+          const token = getAuthToken();
+          if (token) headers["Authorization"] = `Bearer ${token}`;
+
+          const res = await fetch(url, { headers });
           const data = await res.json();
           if (res.ok && data.success) {
             set({ enrollments: data.enrollments });
@@ -63,14 +68,21 @@ export const useEnrollmentStore = create<EnrollmentState>()(
       updateEnrollmentStatus: async (enrollmentId, status) => {
         try {
           const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
+          const token = getAuthToken();
+          const headers: Record<string, string> = { "Content-Type": "application/json" };
+          if (token) headers["Authorization"] = `Bearer ${token}`;
           const res = await fetch(`${origin}/admin/enrollments/${enrollmentId}/status`, {
             method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers,
             body: JSON.stringify({ status }),
           });
           const data = await res.json();
+          if (res.status === 401) {
+            throw new Error("Session expired. Please sign in again.");
+          }
+          if (res.status === 403) {
+            throw new Error("Insufficient permissions to moderate enrollments.");
+          }
           if (res.ok && data.success) {
             // Optimistically remove the enrollment from the list
             set({

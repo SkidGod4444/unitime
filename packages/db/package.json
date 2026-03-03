@@ -23,11 +23,11 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "@prisma/client": "^7.3.0",
+    "@prisma/client": "^7.4.2",
     "@prisma/extension-accelerate": "^3.0.1",
     "@prisma/extension-optimize": "^2.0.1",
     "@prisma/instrumentation": "^6",
-    "prisma": "^7.3.0",
+    "prisma": "^7.4.2",
     "react-native-url-polyfill": "^3.0.0"
   }
 }

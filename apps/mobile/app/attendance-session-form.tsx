@@ -3,6 +3,7 @@ import { useCoursesStore, useOrgsStore } from "@/lib/store";
 import { Course } from "@/lib/store/timetable";
 import { Ionicons } from "@expo/vector-icons";
 import { OrgT } from "@unitime/types";
+import { withAuth } from "@/lib/api";
 import * as Location from "expo-location";
 import { Stack, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
@@ -258,18 +259,32 @@ export default function AttendanceSessionForm() {
       // Create Session
       const manualPresentIds = students.filter(s => s.status === "present").map(s => s.id);
       
-      const res = await fetch(`${origin}/attendance/qr/session/create`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          courseId: selectedCourse.id,
-          creatorId: loggedInUser?.id,
-          startTime: startTime.toISOString(),
-          endTime: endTime.toISOString(),
-          manualPresentIds
+      const res = await fetch(
+        `${origin}/attendance/qr/session/create`,
+        withAuth({
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            courseId: selectedCourse.id,
+            creatorId: loggedInUser?.id,
+            startTime: startTime.toISOString(),
+            endTime: endTime.toISOString(),
+            manualPresentIds,
+          }),
         }),
-      });
+      );
       const data = await res.json();
+
+      if (res.status === 401) {
+        Alert.alert("Not Authenticated", "Session expired. Please sign in again.");
+        setIsSubmitting(false);
+        return;
+      }
+      if (res.status === 403) {
+        Alert.alert("Insufficient permissions", "You do not have access to create sessions.");
+        setIsSubmitting(false);
+        return;
+      }
 
       if (res.ok && data.success) {
         

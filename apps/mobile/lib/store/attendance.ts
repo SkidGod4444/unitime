@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
+import { withAuth } from "@/lib/api";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { getAuthToken } from "@/lib/auth.token";
 
@@ -111,13 +112,22 @@ export const useAttendanceStore = create<AttendanceState>()(
             process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
           const res = await fetch(
             `${origin}/attendance/sessions/${sessionId}/students`,
-            {
+            withAuth({
               method: "PATCH",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ students: updates }),
-            },
+            }),
           );
           const data = await res.json();
+
+          if (res.status === 401) {
+            console.warn("Not authenticated while updating session attendance");
+            return false;
+          }
+          if (res.status === 403) {
+            console.warn("Insufficient permissions to update session attendance");
+            return false;
+          }
 
           if (res.ok && data.success) {
             // Optimistic cache update locally

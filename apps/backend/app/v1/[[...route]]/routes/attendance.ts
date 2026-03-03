@@ -15,8 +15,8 @@ attendance.use("/sessions/:id/students", requireRole("PROFESSOR", "ADMIN"));
 
 attendance.post("/qr/session/create", async (c) => {
   const requester = c.get("user") as { $id?: string } | null;
-  if (!requester?.$id) return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
-  const requesterId = requester.$id as string;
+  const requesterId = (c.get("requesterId") as string | undefined) ?? (requester?.$id as string | undefined) ?? null;
+  if (!requesterId) return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
 
   const parsed = createQRSessionSchema.safeParse(await c.req.json());
   if (!parsed.success) {
@@ -34,7 +34,7 @@ attendance.post("/qr/session/create", async (c) => {
   const qrSession = await prisma.attendanceQRSession.create({
     data: {
       courseId,
-      createdBy: requester.$id,
+      createdBy: requesterId,
       startTime,
       endTime,
       markedUsers: manualIds.length > 0 ? manualIds : [],
@@ -161,7 +161,8 @@ attendance.post("/qr/session/create", async (c) => {
 
 attendance.post("/qr/session/verify", async (c) => {
   const requester = c.get("user") as { $id?: string } | null;
-  if (!requester?.$id) return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
+  const requesterId = (c.get("requesterId") as string | undefined) ?? (requester?.$id as string | undefined) ?? null;
+  if (!requesterId) return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
   const { qrString } = await c.req.json();
   if (!qrString) {
     return createHonoErrorResponse(c, ERROR_CODES.MISSING_REQUIRED_FIELD);
@@ -175,7 +176,7 @@ attendance.post("/qr/session/verify", async (c) => {
     "Verifying attendance for session:",
     sessionId,
     "student:",
-    requester.$id,
+    requesterId,
   );
   const session = await prisma.attendanceQRSession.findUnique({
     where: { id: sessionId },
@@ -187,7 +188,7 @@ attendance.post("/qr/session/verify", async (c) => {
   const existingRecord = await prisma.attendanceLogs.findFirst({
     where: {
       sessionId: sessionId,
-      userId: requester.$id,
+      userId: requesterId,
     },
   });
 
@@ -200,7 +201,7 @@ attendance.post("/qr/session/verify", async (c) => {
   const attendanceRecord = await prisma.attendanceLogs.create({
     data: {
       sessionId: sessionId,
-      userId: requester.$id,
+      userId: requesterId,
       markedAt: new Date(),
     },
   });

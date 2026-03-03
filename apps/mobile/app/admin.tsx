@@ -16,6 +16,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../contexts/auth.cntxt";
+import { getAuthToken } from "@/lib/auth.token";
+import { withAuth } from "@/lib/api";
 import { useRefresh } from "../hooks/use-refresh";
 import {
     useCoursesStore,
@@ -113,9 +115,13 @@ const emitAdminNotification = async (
 ) => {
   try {
     const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+    const token = getAuthToken();
     await fetch(`${origin}/notifications`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       body: JSON.stringify({
         title,
         body,
@@ -192,11 +198,23 @@ function RolesTab({ onAddUserPress }: { onAddUserPress: () => void }) {
   const changeRole = async (userId: string, targetRole: Role) => {
     try {
       const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
+      const token = getAuthToken();
       const res = await fetch(`${origin}/admin/users/${userId}/role`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({ role: targetRole }),
       });
+      if (res.status === 401) {
+        Alert.alert("Not Authenticated", "Session expired. Please sign in again.");
+        return;
+      }
+      if (res.status === 403) {
+        Alert.alert("Insufficient permissions", "You do not have access to perform this action.");
+        return;
+      }
       if (!res.ok) throw new Error("Failed to change role");
       // Optionally trigger a store refresh here by calling fetchUsers()
       // but modifying the store locally provides a snappier experience:
@@ -221,14 +239,28 @@ function RolesTab({ onAddUserPress }: { onAddUserPress: () => void }) {
             try {
               const origin =
                 process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
-              const res = await fetch(
+            const res = await fetch(
                 `${origin}/admin/users/${user.id}/status`,
                 {
                   method: "PATCH",
-                  headers: { "Content-Type": "application/json" },
+                  headers: (() => {
+                    const t = getAuthToken();
+                    return {
+                      "Content-Type": "application/json",
+                      ...(t ? { Authorization: `Bearer ${t}` } : {}),
+                    };
+                  })(),
                   body: JSON.stringify({ status: "INACTIVE" }),
                 },
               );
+              if (res.status === 401) {
+                Alert.alert("Not Authenticated", "Session expired. Please sign in again.");
+                return;
+              }
+              if (res.status === 403) {
+                Alert.alert("Insufficient permissions", "You do not have access to perform this action.");
+                return;
+              }
               if (!res.ok) throw new Error("Failed to deactivate user");
 
               updateUser(user.id, { status: "INACTIVE" });
@@ -1369,12 +1401,23 @@ export default function AdminPage() {
   const handleAddUser = async (user: User) => {
     try {
       const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
-      const res = await fetch(`${origin}/admin/users/${user.id}/role`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role: user.role }),
-      });
-      
+      const res = await fetch(
+        `${origin}/admin/users/${user.id}/role`,
+        withAuth({
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ role: user.role }),
+        }),
+      );
+      if (res.status === 401) {
+        Alert.alert("Not Authenticated", "Session expired. Please sign in again.");
+        return;
+      }
+      if (res.status === 403) {
+        Alert.alert("Insufficient permissions", "You do not have access to perform this action.");
+        return;
+      }
+
       if (!res.ok) throw new Error("Failed to assign role");
       
       // Update local store to reflect new role immediately

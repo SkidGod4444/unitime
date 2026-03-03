@@ -56,9 +56,26 @@ export const authMiddleware: MiddlewareHandler<AppEnv> = async (c, next) => {
   const authHeader = c.req.raw.headers.get("authorization");
   const user = await getCurrentUserFromRequest(cookieHeader, authHeader);
 
-  // Attach user (or null) to context and continue.
-  // Route-level guards should enforce authorization where required.
+  // Attach Appwrite user (or null)
   c.set("user", user);
+
+  // Best-effort: resolve DB user and attach requesterId/requesterRole
+  if (user) {
+    try {
+      let dbUser = await prisma.user.findUnique({ where: { id: user.$id } });
+      if (!dbUser && user.email) {
+        dbUser = await prisma.user.findUnique({ where: { email: user.email } });
+      }
+      if (dbUser) {
+        c.set("requesterId", dbUser.id);
+        c.set("requesterRole", dbUser.role);
+      }
+    } catch (e) {
+      // Non-fatal: proceed without requesterId/Role
+      console.warn("authMiddleware: DB user resolve failed", e);
+    }
+  }
+
   await next();
 };
 
@@ -72,7 +89,11 @@ export const requireRole = (
       return c.json({ error: "You are not authorized!" }, 401);
     }
     try {
-      const dbUser = await prisma.user.findUnique({ where: { id: user.$id } });
+      // Try linking by Appwrite user ID first; fall back to email if needed.
+      let dbUser = await prisma.user.findUnique({ where: { id: user.$id } });
+      if (!dbUser && user.email) {
+        dbUser = await prisma.user.findUnique({ where: { email: user.email } });
+      }
       if (!dbUser) {
         return c.json({ error: "Account not linked" }, 403);
       }
