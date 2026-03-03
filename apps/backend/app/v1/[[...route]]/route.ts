@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { authMiddleware } from "@/middleware/check.auth";
 import { handle } from "hono/vercel";
+import type { AppEnv } from "@/types/app-env";
 import admin from "./routes/admin";
 import alarms from "./routes/alarms";
 import attendance from "./routes/attendance";
@@ -19,7 +20,7 @@ import users from "./routes/users";
 
 export const runtime = "nodejs";
 
-const app = new Hono().basePath("/v1");
+const app = new Hono<AppEnv>().basePath("/v1");
 
 // app.use(logger());
 app.use(authMiddleware);

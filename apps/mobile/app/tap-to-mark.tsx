@@ -81,7 +81,6 @@ export default function TapToMarkScreen() {
       // 2. Call backend POST check-in via UI block
       const result = await markAttendance(
         sessionId as string,
-        loggedInUser.id,
         { lat: location.coords.latitude, lng: location.coords.longitude }
       );
 

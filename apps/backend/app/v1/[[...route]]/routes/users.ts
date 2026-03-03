@@ -4,12 +4,13 @@ import { getOrSetCache, invalidateCache } from "@unitime/cache";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
 import { z } from "zod";
+import type { AppEnv } from "@/types/app-env";
 
-const users = new Hono();
+const users = new Hono<AppEnv>();
 
 users.get("/me", async (c) => {
   try {
-    const me = c.get("user") as { email?: string } | null;
+    const me = c.get("user");
     if (!me?.email) {
       return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
     }

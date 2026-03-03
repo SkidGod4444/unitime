@@ -5,8 +5,9 @@ import { prisma } from "@unitime/db";
 import { Hono } from "hono";
 import { requireRole } from "@/middleware/check.auth";
 import { checkinSchema, createQRSessionSchema } from "@/lib/validation";
+import type { AppEnv } from "@/types/app-env";
 
-const attendance = new Hono();
+const attendance = new Hono<AppEnv>();
 
 // Only professors/admins can create QR sessions
 attendance.use("/qr/session/create", requireRole("PROFESSOR", "ADMIN"));

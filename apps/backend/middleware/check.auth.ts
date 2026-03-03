@@ -2,6 +2,7 @@ import type { MiddlewareHandler } from "hono";
 import { Account, Client, Models } from "node-appwrite";
 import { prisma } from "@unitime/db";
 import type { UserRole } from "@unitime/db";
+import type { AppEnv } from "@/types/app-env";
 
 const APPWRITE_ENDPOINT = process.env.APPWRITE_ENDPOINT as string;
 const APPWRITE_PROJECT_ID = process.env.APPWRITE_PROJECT_ID as string;
@@ -50,7 +51,7 @@ async function getCurrentUserFromRequest(
 }
 
 // Hono middleware: attaches `user` to context
-export const authMiddleware: MiddlewareHandler = async (c, next) => {
+export const authMiddleware: MiddlewareHandler<AppEnv> = async (c, next) => {
   const cookieHeader = c.req.raw.headers.get("cookie");
   const authHeader = c.req.raw.headers.get("authorization");
   const user = await getCurrentUserFromRequest(cookieHeader, authHeader);
@@ -64,7 +65,7 @@ export const authMiddleware: MiddlewareHandler = async (c, next) => {
 // Role guard middleware: ensures the authenticated DB user has one of the required roles
 export const requireRole = (
   ...roles: Array<UserRole>
-): MiddlewareHandler => {
+): MiddlewareHandler<AppEnv> => {
   return async (c, next) => {
     const user = c.get("user") as Models.User<Models.Preferences> | null;
     if (!user) {

@@ -3,8 +3,9 @@ import { invalidateCache } from "@unitime/cache";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
 import { requireRole } from "@/middleware/check.auth";
+import type { AppEnv } from "@/types/app-env";
 
-const admin = new Hono();
+const admin = new Hono<AppEnv>();
 // Only ADMINs can access anything under /admin
 admin.use("*", requireRole("ADMIN"));
 

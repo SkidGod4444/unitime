@@ -11,6 +11,7 @@ import React, {
   useState,
 } from "react";
 import { ID } from "react-native-appwrite";
+import { setAuthTokenProvider } from "@/lib/auth.token";
 
 type AuthContextType = {
   isAuthenticated: boolean;
@@ -44,6 +45,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [jwt, setJwt] = useState<string | null>(null);
   const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3001";
   const posthog = usePostHog();
+
+  useEffect(() => {
+    // Expose a provider so non-React stores can read the current JWT
+    setAuthTokenProvider(() => jwt);
+  }, [jwt]);
 
   useEffect(() => {
     if (loggedInUser && posthog) {

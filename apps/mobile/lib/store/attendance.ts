@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { getAuthToken } from "@/lib/auth.token";
 
 export type AttendanceSummary = {
   courseId: string;
@@ -49,7 +50,6 @@ type AttendanceState = {
 
   markAttendance: (
     sessionId: string,
-    userId: string,
     coordinates: { lat: number; lng: number }
   ) => Promise<{ success: boolean; message?: string }>;
 };
@@ -145,13 +145,16 @@ export const useAttendanceStore = create<AttendanceState>()(
         }
       },
 
-      markAttendance: async (sessionId, userId, coordinates) => {
+      markAttendance: async (sessionId, coordinates) => {
         try {
           const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+          const token = getAuthToken();
+          const headers: Record<string, string> = { "Content-Type": "application/json" };
+          if (token) headers["Authorization"] = `Bearer ${token}`;
           const res = await fetch(`${origin}/attendance/checkin`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ sessionId, userId, coordinates })
+            headers,
+            body: JSON.stringify({ sessionId, coordinates })
           });
           const data = await res.json();
           return { success: res.ok && data.success, message: data.message };
