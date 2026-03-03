@@ -3,16 +3,20 @@ import { Redis } from "@upstash/redis";
 const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
 const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
 
-if (!redisUrl || !redisToken) {
-  throw new Error(
-    "Missing required environment variables: UPSTASH_REDIS_REST_URL and/or UPSTASH_REDIS_REST_TOKEN",
+// Do not throw at import time during builds; create a lazy/dummy client if env is missing.
+// At runtime in deployed environments, the real env must be present.
+export const cache: Redis = (() => {
+  if (redisUrl && redisToken) {
+    return new Redis({ url: redisUrl, token: redisToken });
+  }
+  // Fallback: construct a Redis client with placeholder values. It will only be used if a route
+  // actually calls caching in an environment without proper envs, which is not supported.
+  // This avoids throwing during Next.js build step ("Failed to collect page data").
+  console.warn(
+    "@unitime/cache: UPSTASH env not set; constructing placeholder Redis client for build-time imports.",
   );
-}
-
-export const cache = new Redis({
-  url: redisUrl,
-  token: redisToken,
-});
+  return new Redis({ url: "https://placeholder.invalid", token: "placeholder" });
+})();
 
 /**
  * Validates and sanitizes a cache key, ensuring only alphanumeric characters,
@@ -60,6 +64,5 @@ export const invalidateCache = async (...keys: string[]): Promise<void> => {
   const sanitizedKeys = keys.map(sanitizeCacheKey);
   await cache.del(...sanitizedKeys);
 };
-
 
 
