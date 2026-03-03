@@ -1,17 +1,21 @@
-import { account } from "@/lib/auth";
+// Account access should be request-scoped via auth middleware; use context user instead
 import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
 import { getOrSetCache, invalidateCache } from "@unitime/cache";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
+import { z } from "zod";
 
 const users = new Hono();
 
 users.get("/me", async (c) => {
   try {
-    const me = await account.get();
+    const me = c.get("user") as { email?: string } | null;
+    if (!me?.email) {
+      return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
+    }
     const user = await getOrSetCache(
       `user:${me.email}`,
-      () => prisma.user.findUnique({ where: { email: me.email } }),
+      () => prisma.user.findUnique({ where: { email: me.email! } }),
       120,
     );
 
@@ -104,10 +108,23 @@ users.get("/:id", async (c) => {
 
 users.put("/:id/update", async (c) => {
   const id = c.req.param("id");
-  const body = await c.req.json();
+  const schema = z
+    .object({
+      name: z.string().min(1).optional(),
+      image: z.string().url().optional(),
+    })
+    .strict();
+
+  let parsed: z.infer<typeof schema>;
+  try {
+    parsed = schema.parse(await c.req.json());
+  } catch {
+    return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT);
+  }
+
   const user = await prisma.user.update({
     where: { id },
-    data: body,
+    data: parsed,
   });
   if (!user) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);

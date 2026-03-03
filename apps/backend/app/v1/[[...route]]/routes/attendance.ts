@@ -3,14 +3,24 @@ import { generateQRToken, verifyQRToken } from "@/lib/qr.algo";
 import { getOrSetCache, invalidateCache } from "@unitime/cache";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
+import { requireRole } from "@/middleware/check.auth";
+import { checkinSchema, createQRSessionSchema } from "@/lib/validation";
 
 const attendance = new Hono();
 
+// Only professors/admins can create QR sessions
+attendance.use("/qr/session/create", requireRole("PROFESSOR", "ADMIN"));
+attendance.use("/sessions/:id/students", requireRole("PROFESSOR", "ADMIN"));
+
 attendance.post("/qr/session/create", async (c) => {
-  const { courseId, creatorId, startTime, endTime, manualPresentIds, manualAbsentIds } = await c.req.json();
-  if (!courseId || !creatorId || !startTime || !endTime) {
-    return createHonoErrorResponse(c, ERROR_CODES.MISSING_REQUIRED_FIELD);
+  const requester = c.get("user") as { $id?: string } | null;
+  if (!requester?.$id) return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
+
+  const parsed = createQRSessionSchema.safeParse(await c.req.json());
+  if (!parsed.success) {
+    return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT);
   }
+  const { courseId, startTime, endTime, manualPresentIds, manualAbsentIds } = parsed.data;
   const manualIds = Array.isArray(manualPresentIds) ? manualPresentIds : [];
   const absentIds = Array.isArray(manualAbsentIds) ? manualAbsentIds : [];
 
@@ -22,7 +32,7 @@ attendance.post("/qr/session/create", async (c) => {
   const qrSession = await prisma.attendanceQRSession.create({
     data: {
       courseId,
-      createdBy: creatorId,
+      createdBy: requester.$id,
       startTime,
       endTime,
       markedUsers: manualIds.length > 0 ? manualIds : [],
@@ -148,8 +158,10 @@ attendance.post("/qr/session/create", async (c) => {
 });
 
 attendance.post("/qr/session/verify", async (c) => {
-  const { qrString, userId } = await c.req.json();
-  if (!qrString || !userId) {
+  const requester = c.get("user") as { $id?: string } | null;
+  if (!requester?.$id) return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
+  const { qrString } = await c.req.json();
+  if (!qrString) {
     return createHonoErrorResponse(c, ERROR_CODES.MISSING_REQUIRED_FIELD);
   }
   const isValid = verifyQRToken(qrString);
@@ -161,7 +173,7 @@ attendance.post("/qr/session/verify", async (c) => {
     "Verifying attendance for session:",
     sessionId,
     "student:",
-    userId,
+    requester.$id,
   );
   const session = await prisma.attendanceQRSession.findUnique({
     where: { id: sessionId },
@@ -173,7 +185,7 @@ attendance.post("/qr/session/verify", async (c) => {
   const existingRecord = await prisma.attendanceLogs.findFirst({
     where: {
       sessionId: sessionId,
-      userId: userId,
+      userId: requester.$id,
     },
   });
 
@@ -186,7 +198,7 @@ attendance.post("/qr/session/verify", async (c) => {
   const attendanceRecord = await prisma.attendanceLogs.create({
     data: {
       sessionId: sessionId,
-      userId: userId,
+      userId: requester.$id,
       markedAt: new Date(),
     },
   });
@@ -222,19 +234,30 @@ function haversineDistance(coords1: { lat: number; lng: number }, coords2: { lat
 }
 
 attendance.post("/checkin", async (c) => {
-  const { sessionId, userId, coordinates } = await c.req.json();
-  if (!sessionId || !userId || !coordinates || !coordinates.lat || !coordinates.lng) {
-    return createHonoErrorResponse(c, ERROR_CODES.MISSING_REQUIRED_FIELD);
-  }
+  const requester = c.get("user") as { $id?: string } | null;
+  if (!requester?.$id) return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
+  const parsed = checkinSchema.safeParse(await c.req.json());
+  if (!parsed.success) return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT);
+  const { sessionId, coordinates } = parsed.data;
 
   try {
     const session = await prisma.attendanceQRSession.findUnique({
       where: { id: sessionId },
-      include: { user: true } // The professor who created it
+      include: { user: true, course: true }
     });
 
     if (!session || session.status !== "ACTIVE") {
       return c.json({ success: false, message: "Session is invalid or inactive" }, 400);
+    }
+
+    // Enforce check-in window with optional grace period
+    const now = new Date();
+    const start = new Date(session.startTime);
+    const end = new Date(session.endTime);
+    const allowanceSec = Number(process.env.CHECKIN_GRACE_SECONDS || "120");
+    const endWithGrace = new Date(end.getTime() + allowanceSec * 1000);
+    if (now < start || now > endWithGrace) {
+      return c.json({ success: false, message: "Outside check-in window" }, 400);
     }
 
     if (!session.user.coordinates) {
@@ -254,9 +277,17 @@ attendance.post("/checkin", async (c) => {
       return c.json({ success: false, message: "You are too far from the classroom to check in." }, 400);
     }
 
+    // Check approved enrollment for requester
+    const enrollment = await prisma.userCourse.findUnique({
+      where: { userId_courseId: { userId: requester.$id, courseId: session.courseId } },
+    });
+    if (!enrollment || enrollment.status !== "APPROVED") {
+      return c.json({ success: false, message: "Not enrolled in this course" }, 403);
+    }
+
     // Check if duplicate
     const existing = await prisma.attendanceLogs.findUnique({
-      where: { sessionId_userId: { sessionId, userId } }
+      where: { sessionId_userId: { sessionId, userId: requester.$id } }
     });
     
     if (existing) {
@@ -267,7 +298,7 @@ attendance.post("/checkin", async (c) => {
     await prisma.attendanceLogs.create({
       data: {
         sessionId,
-        userId,
+        userId: requester.$id,
         sessionType: "TAP_SESSION",
         markedAt: new Date(),
       }
@@ -278,7 +309,7 @@ attendance.post("/checkin", async (c) => {
       where: { id: sessionId },
       data: {
         markedUsers: {
-          push: userId
+          push: requester.$id
         }
       }
     });
@@ -293,7 +324,7 @@ attendance.post("/checkin", async (c) => {
 
         const attendedSessions = await prisma.attendanceLogs.count({
           where: {
-            userId,
+            userId: requester.$id,
             sessionId: {
               in: (
                 await prisma.attendanceQRSession.findMany({
@@ -309,7 +340,7 @@ attendance.post("/checkin", async (c) => {
         await prisma.attendanceSummary.upsert({
           where: {
             userId_courseId: {
-              userId,
+              userId: requester.$id,
               courseId,
             }
           },
@@ -319,14 +350,14 @@ attendance.post("/checkin", async (c) => {
             percentage
           },
           create: {
-            userId,
+            userId: requester.$id,
             courseId,
             attended: attendedSessions,
             total: totalSessions,
             percentage
           }
         });
-        console.log(`[Background Job] Updated attendance summary for user ${userId} in course ${courseId}`);
+        console.log(`[Background Job] Updated attendance summary for user ${requester.$id} in course ${courseId}`);
       } catch (aggrError) {
         console.error("Failed to aggregate attendance in background:", aggrError);
       }
@@ -334,7 +365,7 @@ attendance.post("/checkin", async (c) => {
     
     // Important: Invalidate cache for realtime updates
     await invalidateCache(`attendanceLogs:session:${sessionId}`);
-    await invalidateCache(`dashboard:${userId}`);
+    await invalidateCache(`dashboard:${requester.$id}`);
     
     return c.json({ success: true, message: "Attendance Marked Successfully" }, 200);
 
@@ -356,7 +387,7 @@ attendance.get("/qr/session/:id", async (c) => {
   }
 
   const qr = generateQRToken(sessionId);
-  console.log("Generated QR for session:", sessionId, "qrString:", qr.qrString);
+  console.log("Generated QR for session:", sessionId);
   return c.json({
     qrString: qr.qrString,
   });

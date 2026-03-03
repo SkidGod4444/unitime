@@ -1,6 +1,7 @@
 import { rateLimitHandler } from "@/middleware/ratelimit";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { authMiddleware } from "@/middleware/check.auth";
 import { handle } from "hono/vercel";
 import admin from "./routes/admin";
 import alarms from "./routes/alarms";
@@ -21,25 +22,26 @@ export const runtime = "nodejs";
 const app = new Hono().basePath("/v1");
 
 // app.use(logger());
-// app.use(authMiddleware);
+app.use(authMiddleware);
 app.use(rateLimitHandler);
 
-// Allow localhost and local network IPs for mobile development
-const isAllowedOrigin = (origin: string): boolean => {
-  const allowedPatterns = [
-    "http://localhost:3000",
-    /^http:\/\/192\.168\.\d{1,3}\.\d{1,3}:\d+$/,
-    /^http:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+$/,
-  ];
-  return allowedPatterns.some((pattern) =>
-    typeof pattern === "string" ? pattern === origin : pattern.test(origin),
+// Configurable CORS allowlist (comma-separated origins or regex patterns starting with ^)
+const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "http://localhost:3000")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+const isAllowedOrigin = (origin: string | null): boolean => {
+  if (!origin) return false;
+  return ALLOWED_ORIGINS.some((pattern) =>
+    pattern.startsWith("^") ? new RegExp(pattern).test(origin) : pattern === origin,
   );
 };
 
 app.use(
   "*",
   cors({
-    origin: (origin) => (isAllowedOrigin(origin) ? origin : ""),
+    origin: (origin) => (isAllowedOrigin(origin ?? null) ? origin : undefined),
     allowMethods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS", "PUT"],
     allowHeaders: ["Content-Type", "Authorization"],
     exposeHeaders: ["Content-Length"],

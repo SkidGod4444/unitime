@@ -1,5 +1,7 @@
 import type { MiddlewareHandler } from "hono";
 import { Account, Client, Models } from "node-appwrite";
+import { prisma } from "@unitime/db";
+import type { UserRole } from "@unitime/db";
 
 const APPWRITE_ENDPOINT = process.env.APPWRITE_ENDPOINT as string;
 const APPWRITE_PROJECT_ID = process.env.APPWRITE_PROJECT_ID as string;
@@ -53,13 +55,35 @@ export const authMiddleware: MiddlewareHandler = async (c, next) => {
   const authHeader = c.req.raw.headers.get("authorization");
   const user = await getCurrentUserFromRequest(cookieHeader, authHeader);
 
-  // Attach user (or null) to context
+  // Attach user (or null) to context and continue.
+  // Route-level guards should enforce authorization where required.
   c.set("user", user);
-
-  // If you want to enforce auth globally, you can 401 here:
-  if (!user) {
-    return c.json({ error: "You are not authorized!" }, 401);
-  }
-
   await next();
+};
+
+// Role guard middleware: ensures the authenticated DB user has one of the required roles
+export const requireRole = (
+  ...roles: Array<UserRole>
+): MiddlewareHandler => {
+  return async (c, next) => {
+    const user = c.get("user") as Models.User<Models.Preferences> | null;
+    if (!user) {
+      return c.json({ error: "You are not authorized!" }, 401);
+    }
+    try {
+      const dbUser = await prisma.user.findUnique({ where: { id: user.$id } });
+      if (!dbUser) {
+        return c.json({ error: "Account not linked" }, 403);
+      }
+      if (!roles.includes(dbUser.role)) {
+        return c.json({ error: "Forbidden" }, 403);
+      }
+      // useful for downstream handlers
+      c.set("requesterId", dbUser.id);
+      c.set("requesterRole", dbUser.role);
+      await next();
+    } catch {
+      return c.json({ error: "Authorization check failed" }, 500);
+    }
+  };
 };

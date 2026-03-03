@@ -2,8 +2,11 @@ import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
 import { invalidateCache } from "@unitime/cache";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
+import { requireRole } from "@/middleware/check.auth";
 
 const admin = new Hono();
+// Only ADMINs can access anything under /admin
+admin.use("*", requireRole("ADMIN"));
 
 admin.patch("/users/:id/role", async (c) => {
   const id = c.req.param("id");
