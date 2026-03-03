@@ -1,34 +1,16 @@
 import { withAccelerate } from "@prisma/extension-accelerate";
 import { PrismaClient } from "../prisma/generated/client";
 
-// Cache a single instance across hot reloads (dev)
+const prismaClientSingleton = () => {
+  return new PrismaClient({ accelerateUrl: process.env.DATABASE_URL as string }).$extends(withAccelerate());
+};
+
 declare const globalThis: {
-  prismaGlobal?: PrismaClient;
+  prismaGlobal: ReturnType<typeof prismaClientSingleton>;
 } & typeof global;
 
-function createPrisma(): PrismaClient {
-  const datasourceUrl = process.env.DATABASE_URL;
+export const prisma = globalThis.prismaGlobal ?? prismaClientSingleton();
 
-  // Construct a base client; do not throw at import-time if env is missing
-  const base = datasourceUrl
-    ? new PrismaClient({ datasourceUrl })
-    : new PrismaClient();
-
-  // Extend with Accelerate only when a datasourceUrl is provided
-  try {
-    return datasourceUrl ? base.$extends(withAccelerate()) : base;
-  } catch {
-    // Defensive: if extension fails (e.g., build without env), fall back to base client
-    return base;
-  }
-}
-
-export const prisma: PrismaClient =
-  globalThis.prismaGlobal ?? createPrisma();
-
-if (process.env.NODE_ENV !== "production") {
-  globalThis.prismaGlobal = prisma;
-}
-
+if (process.env.NODE_ENV !== "production") globalThis.prismaGlobal = prisma;
 // Re-export types
 export * from "../prisma/generated/client";
