@@ -489,7 +489,10 @@ export function createHonoErrorResponse(
   errorCode: ErrorCode,
   details?: string | Record<string, unknown>,
 ) {
-  return c.json(createErrorResponse(errorCode.status_code, errorCode, details));
+  return c.json(
+    createErrorResponse(errorCode.status_code, errorCode, details),
+    errorCode.status_code as any,
+  );
 }
 
 /**

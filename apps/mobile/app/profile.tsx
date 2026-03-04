@@ -155,7 +155,7 @@ export default function Profile() {
                  if (!summaryStore || summaryStore.length === 0) return "N/A";
                  const totalAttended = summaryStore.reduce((acc, curr) => acc + curr.attended, 0);
                  const totalHeld = summaryStore.reduce((acc, curr) => acc + curr.total, 0);
-                 if (totalHeld === 0) return "100%";
+                 if (totalHeld === 0) return "0%";
                  return `${Math.round((totalAttended / totalHeld) * 100)}%`;
               })(),
               icon: "stats-chart-outline",

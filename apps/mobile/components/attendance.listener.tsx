@@ -1,7 +1,7 @@
 import { useAuth } from "@/contexts/auth.cntxt";
 import { useLocalStore } from "@/contexts/localstore.cntxt";
 import * as Notifications from "expo-notifications";
-import { useRouter } from "expo-router";
+import { useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
 import { AppState, AppStateStatus } from "react-native";
 
@@ -63,6 +63,8 @@ export function AttendanceListener() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router, loggedInUser?.id]);
 
+  const segments = useSegments();
+
   // FOREGROUND PULL (Active App / Refresh Fallback)
   // When user opens the app, pull the active sessions from the unified dashboard endpoint
   useEffect(() => {
@@ -102,8 +104,14 @@ export function AttendanceListener() {
              
              const courseName = validSession.course?.name || validSession.courseId;
              console.log("Found Active Session on Foreground:", validSession.id);
+             
              // Ensure we are not already on the page before auto-redirecting
-             router.push(`/tap-to-mark?sessionId=${validSession.id}&courseName=${courseName}`);
+             const currentRoute = segments[segments.length - 1];
+             if (currentRoute !== "tap-to-mark") {
+               router.push(`/tap-to-mark?sessionId=${validSession.id}&courseName=${courseName}`);
+             } else {
+               console.log("Ignored redirect: Already on tap-to-mark screen.");
+             }
           }
         }
       } catch (err) {

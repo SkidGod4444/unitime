@@ -1,9 +1,9 @@
 import { useAuth } from "@/contexts/auth.cntxt";
+import { withAuth } from "@/lib/api";
 import { useCoursesStore, useOrgsStore } from "@/lib/store";
 import { Course } from "@/lib/store/timetable";
 import { Ionicons } from "@expo/vector-icons";
 import { OrgT } from "@unitime/types";
-import { withAuth } from "@/lib/api";
 import * as Location from "expo-location";
 import { Stack, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
@@ -266,7 +266,6 @@ export default function AttendanceSessionForm() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             courseId: selectedCourse.id,
-            creatorId: loggedInUser?.id,
             startTime: startTime.toISOString(),
             endTime: endTime.toISOString(),
             manualPresentIds,
@@ -387,7 +386,7 @@ export default function AttendanceSessionForm() {
           [{ text: "OK", onPress: () => router.back() }],
         );
       } else {
-        throw new Error(data.message || "Failed to create session");
+        throw new Error(data.error?.message || data.message || "Failed to create session");
       }
     } catch (e: any) {
       console.error(e);

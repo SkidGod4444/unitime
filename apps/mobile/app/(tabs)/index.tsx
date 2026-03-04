@@ -99,13 +99,10 @@ export default function Index() {
   const { summary } = useAttendanceStore();
   const { timetables, loading } = useTimetableStore();
 
-  const overall =
-    summary.length > 0
-      ? Math.round(
-          summary.reduce((acc, curr) => acc + curr.percentage, 0) /
-            summary.length,
-        )
-      : 100;
+  const validSummary = summary.filter((s) => s.total > 0);
+  const totalAttended = validSummary.reduce((acc, curr) => acc + curr.attended, 0);
+  const totalHeld = validSummary.reduce((acc, curr) => acc + curr.total, 0);
+  const overall = totalHeld > 0 ? Math.round((totalAttended / totalHeld) * 100) : 0;
 
   // Map first 3 timetable items for quick dashboard view
   const todaysSchedule = timetables.slice(0, 3).map((t, index) => {
@@ -240,15 +237,15 @@ export default function Index() {
                           {item.courseName}
                         </Text>
                         <Text
-                          className={`text-xs font-bold ${item.percentage >= 75 ? "text-green-600" : "text-red-500"}`}
+                          className={`text-xs font-bold ${item.total === 0 ? "text-gray-400" : item.percentage >= 75 ? "text-green-600" : "text-red-500"}`}
                         >
-                          {item.percentage}%
+                          {item.total === 0 ? 0 : item.percentage}%
                         </Text>
                       </View>
                       <View className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                         <View
-                          className={`h-full rounded-full ${item.percentage >= 75 ? "bg-green-500" : "bg-red-500"}`}
-                          style={{ width: `${item.percentage}%` }}
+                          className={`h-full rounded-full ${item.total === 0 ? "bg-gray-300" : item.percentage >= 75 ? "bg-green-500" : "bg-red-500"}`}
+                          style={{ width: `${item.total === 0 ? 0 : item.percentage}%` }}
                         />
                       </View>
                       <Text className="text-[10px] text-gray-400 mt-0.5">

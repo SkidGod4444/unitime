@@ -106,8 +106,12 @@ export default function TapToMarkScreen() {
         successScale.value = withSpring(1, { damping: 12 });
 
         setTimeout(() => {
-          router.replace("/");
-        }, 5000);
+          if (router.canGoBack()) {
+             router.back();
+          } else {
+             router.replace("/");
+          }
+        }, 2500);
       } else {
         setStatus("error");
         Alert.alert("Attendance Failed", result.message || "Could not verify location or session.");
