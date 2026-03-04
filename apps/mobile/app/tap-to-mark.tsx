@@ -30,6 +30,7 @@ export default function TapToMarkScreen() {
   const [status, setStatus] = useState<
     "idle" | "loading" | "success" | "error"
   >("idle");
+  const isSubmittingRef = React.useRef(false);
 
   // Animation values
   const pulseScale = useSharedValue(1);
@@ -50,13 +51,14 @@ export default function TapToMarkScreen() {
   }, [pulseScale]);
 
   const handlePress = async () => {
-    if (status !== "idle") return;
+    if (status !== "idle" || isSubmittingRef.current) return;
 
     if (!sessionId || !loggedInUser?.id) {
       Alert.alert("Error", "Missing session or user information.");
       return;
     }
 
+    isSubmittingRef.current = true;
     // Start loading
     setStatus("loading");
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -71,6 +73,7 @@ export default function TapToMarkScreen() {
         setStatus("error");
         Alert.alert("Permission Error", "Location permission is required to mark attendance.");
         pulseScale.value = withSpring(1);
+        isSubmittingRef.current = false;
         return;
       }
 
@@ -116,12 +119,14 @@ export default function TapToMarkScreen() {
         setStatus("error");
         Alert.alert("Attendance Failed", result.message || "Could not verify location or session.");
         pulseScale.value = withSpring(1);
+        isSubmittingRef.current = false;
       }
     } catch (error) {
       console.error("Check-in error:", error);
       setStatus("error");
       Alert.alert("Error", "An unexpected error occurred during check-in.");
       pulseScale.value = withSpring(1);
+      isSubmittingRef.current = false;
     }
   };
 

@@ -1,11 +1,11 @@
 import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
 import { generateQRToken, verifyQRToken } from "@/lib/qr.algo";
+import { checkinSchema, createQRSessionSchema } from "@/lib/validation";
+import { requireRole } from "@/middleware/check.auth";
+import type { AppEnv } from "@/types/app-env";
 import { getOrSetCache, invalidateCache } from "@unitime/cache";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
-import { requireRole } from "@/middleware/check.auth";
-import { checkinSchema, createQRSessionSchema } from "@/lib/validation";
-import type { AppEnv } from "@/types/app-env";
 
 const attendance = new Hono<AppEnv>();
 
@@ -261,6 +261,15 @@ attendance.post("/checkin", async (c) => {
     const allowanceSec = Number(process.env.CHECKIN_GRACE_SECONDS || "120");
     const endWithGrace = new Date(end.getTime() + allowanceSec * 1000);
     if (now < start || now > endWithGrace) {
+      await prisma.historyLog.create({
+        data: {
+          title: "Attendance Failed",
+          description: `Check-in for ${session.course.name} failed: Outside allowed time window.`,
+          type: "ATTENDANCE",
+          userId: requesterId,
+          organizationId: session.course.organizationId || null,
+        }
+      });
       return c.json({ success: false, message: "Outside check-in window" }, 400);
     }
 
@@ -278,6 +287,15 @@ attendance.post("/checkin", async (c) => {
     
     if (distanceMeters > THRESHOLD_METERS) {
       console.log(`[Check-in Failed] User ${requesterId} is ${distanceMeters.toFixed(1)}m away from class.`);
+      await prisma.historyLog.create({
+        data: {
+          title: "Attendance Failed",
+          description: `Check-in for ${session.course.name} failed: You are too far (${Math.round(distanceMeters)}m) from the classroom.`,
+          type: "ATTENDANCE",
+          userId: requesterId,
+          organizationId: session.course.organizationId || null,
+        }
+      });
       return c.json({ success: false, message: "You are too far from the classroom to check in." }, 400);
     }
 
@@ -286,6 +304,15 @@ attendance.post("/checkin", async (c) => {
       where: { userId_courseId: { userId: requesterId, courseId: session.courseId } },
     });
     if (!enrollment || enrollment.status !== "APPROVED") {
+      await prisma.historyLog.create({
+        data: {
+          title: "Attendance Failed",
+          description: `Check-in for ${session.course.name} failed: Not enrolled in this course.`,
+          type: "ATTENDANCE",
+          userId: requesterId,
+          organizationId: session.course.organizationId || null,
+        }
+      });
       return c.json({ success: false, message: "Not enrolled in this course" }, 403);
     }
 
@@ -315,6 +342,16 @@ attendance.post("/checkin", async (c) => {
         markedUsers: {
           push: requesterId
         }
+      }
+    });
+
+    await prisma.historyLog.create({
+      data: {
+        title: "Attendance Marked",
+        description: `Successfully checked in for ${session.course.name}.`,
+        type: "ATTENDANCE",
+        userId: requesterId,
+        organizationId: session.course.organizationId || null,
       }
     });
 
