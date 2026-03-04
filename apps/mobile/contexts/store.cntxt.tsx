@@ -10,7 +10,7 @@ import { useEnrollmentStore } from "@/lib/store/enrollment";
 import { useHistoryStore } from "@/lib/store/history";
 import { useNotificationsStore } from "@/lib/store/notifications";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useRouter, useSegments } from "expo-router";
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import { Alert, AppState, Modal, Platform, StyleSheet, Text, ToastAndroid, TouchableOpacity, View } from "react-native";
 import { useAuth } from "./auth.cntxt";
@@ -32,7 +32,9 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   const { loggedInUser } = useAuth();
   const { getItem } = useLocalStore();
   const router = useRouter();
+  const segments = useSegments() as string[];
   const lastRefreshedAt = useRef<number>(0);
+  const redirectingToTapRef = useRef(false);
 
   const { fetchUsers } = useUsersStore();
   const { fetchProfiles } = useProfilesStore();
@@ -155,14 +157,35 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
                );
 
                if (validSession) {
-                 const markedStr = await getItem("MARKED_SESSIONS");
-                 const markedIds = markedStr ? JSON.parse(markedStr) : [];
-                 if (markedIds.includes(validSession.id)) {
-                    console.log("Pull-to-refresh fallback ignored session: already marked locally");
+                 // Expiry guard using same 120s grace as listener/backend
+                 const now = new Date();
+                 const endTime = new Date(validSession.endTime);
+                 const graceEndTime = new Date(endTime.getTime() + 120 * 1000);
+                 if (now > graceEndTime) {
+                   console.log("Pull-to-refresh fallback ignored: session expired.");
                  } else {
-                    const courseName = validSession.course?.name || validSession.courseId;
-                    console.log("Pull-to-refresh caught Active Session:", validSession.id);
-                    router.push(`/tap-to-mark?sessionId=${validSession.id}&courseName=${courseName}`);
+                   const markedStr = await getItem("MARKED_SESSIONS");
+                   const markedIds = markedStr ? JSON.parse(markedStr) : [];
+                   if (markedIds.includes(validSession.id)) {
+                      console.log("Pull-to-refresh fallback ignored session: already marked locally");
+                   } else {
+                      const attemptedStr = await getItem("ATTEMPTED_SESSIONS");
+                      const attemptedIds = attemptedStr ? JSON.parse(attemptedStr) : [];
+                      if (attemptedIds.includes(validSession.id)) {
+                        console.log("Pull-to-refresh fallback ignored: user already attempted.");
+                      } else {
+                        const isOnTapToMark = Array.isArray(segments) && segments.includes("tap-to-mark");
+                        if (!isOnTapToMark && !redirectingToTapRef.current) {
+                          const courseName = validSession.course?.name || validSession.courseId;
+                          redirectingToTapRef.current = true;
+                          console.log("Pull-to-refresh caught Active Session:", validSession.id);
+                          router.push(`/tap-to-mark?sessionId=${validSession.id}&courseName=${courseName}`);
+                          setTimeout(() => { redirectingToTapRef.current = false; }, 800);
+                        } else {
+                          console.log("Pull-to-refresh ignored: already on tap-to-mark or redirecting.");
+                        }
+                      }
+                   }
                  }
                }
             }
@@ -187,6 +210,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     getItem,
     loggedInUser,
     router,
+    segments,
   ]);
 
   const appState = useRef(AppState.currentState);

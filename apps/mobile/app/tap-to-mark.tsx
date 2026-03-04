@@ -58,6 +58,18 @@ export default function TapToMarkScreen() {
       return;
     }
 
+    // Mark that the user has attempted to mark attendance for this session.
+    // This prevents future auto-redirects after the user backs out.
+    try {
+      const attemptedStr = await getItem("ATTEMPTED_SESSIONS");
+      const attemptedIds: string[] = attemptedStr ? JSON.parse(attemptedStr) : [];
+      if (!attemptedIds.includes(String(sessionId))) {
+        await setItem("ATTEMPTED_SESSIONS", JSON.stringify([...attemptedIds, sessionId]));
+      }
+    } catch (e) {
+      console.warn("Failed to persist attempt for session", sessionId, e);
+    }
+
     isSubmittingRef.current = true;
     // Start loading
     setStatus("loading");

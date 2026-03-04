@@ -2,13 +2,14 @@ import { useAuth } from "@/contexts/auth.cntxt";
 import { useLocalStore } from "@/contexts/localstore.cntxt";
 import * as Notifications from "expo-notifications";
 import { useRouter, useSegments } from "expo-router";
-import { useEffect } from "react";
-import { AppState, AppStateStatus } from "react-native";
+import { useEffect, useRef } from "react";
+import { Alert, AppState, AppStateStatus } from "react-native";
 
 export function AttendanceListener() {
   const router = useRouter();
   const { loggedInUser } = useAuth();
   const { getItem } = useLocalStore();
+  const redirectingRef = useRef(false);
   // BACKGROUND & SYSTEM TRAY LISTENER (Expo Push Notifications)
   useEffect(() => {
     // This listener is fired whenever a user taps on or interacts with a notification 
@@ -21,6 +22,14 @@ export function AttendanceListener() {
          const markedIds = markedStr ? JSON.parse(markedStr) : [];
          if (markedIds.includes(data.sessionId)) {
             console.log("Ignored Push Notification tap: Session already marked locally.");
+            return;
+         }
+
+         // If user already attempted this session, don't auto-redirect again
+         const attemptedStr = await getItem("ATTEMPTED_SESSIONS");
+         const attemptedIds = attemptedStr ? JSON.parse(attemptedStr) : [];
+         if (attemptedIds.includes(data.sessionId)) {
+            console.log("Ignored Push Notification tap: User already attempted this session.");
             return;
          }
 
@@ -43,17 +52,43 @@ export function AttendanceListener() {
                   console.log("Ignored Push Notification tap: User is not officially enrolled in this course.");
                   return;
                 }
+
+                // Verify expiration
+                const activeSessions = Array.isArray(json.data.activeSessions) ? json.data.activeSessions : [];
+                const validSession = activeSessions.find((s: any) => s.id === data.sessionId);
+
+                if (!validSession) {
+                   console.log("Ignored Push Notification tap: Session no longer active.");
+                   Alert.alert("Session Expired", "This attendance session is no longer active.");
+                   return;
+                }
+
+                const now = new Date();
+                const endTime = new Date(validSession.endTime);
+                const graceEndTime = new Date(endTime.getTime() + 120 * 1000); // 120 seconds standard backend grace period
+                if (now > graceEndTime) {
+                   console.log("Ignored Push Notification tap: Session time has expired.");
+                   Alert.alert("Session Expired", "This attendance session has ended.");
+                   return;
+                }
               }
             }
           } catch (e) {
              console.warn("Failed to check push notification course validity, proceeding carefully...", e);
+             return;
           }
 
-
-         console.log("Push Notification tapped! Routing directly to tap-to-mark...");
-         setTimeout(() => {
-            router.push(`/tap-to-mark?sessionId=${data.sessionId}&courseName=${data.courseId}`);
-         }, 300);
+         const currentRoute = segments?.[segments.length - 1];
+         if (!redirectingRef.current && currentRoute !== "tap-to-mark") {
+           console.log("Push Notification tapped! Routing directly to tap-to-mark...");
+           redirectingRef.current = true;
+           setTimeout(() => {
+              router.push(`/tap-to-mark?sessionId=${data.sessionId}&courseName=${data.courseId}`);
+              setTimeout(() => { redirectingRef.current = false; }, 800);
+           }, 300);
+         } else {
+           console.log("Ignored Push Notification tap: Already on tap-to-mark screen.");
+         }
       }
     });
 
@@ -61,7 +96,7 @@ export function AttendanceListener() {
       responseListener.remove();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router, loggedInUser?.id]);
+  }, [router, loggedInUser?.id, segments]);
 
   const segments = useSegments();
 
@@ -95,10 +130,27 @@ export function AttendanceListener() {
           );
 
           if (validSession) {
+             const now = new Date();
+             const endTime = new Date(validSession.endTime);
+             const graceEndTime = new Date(endTime.getTime() + 120 * 1000); // 120 seconds standard grace period
+             
+             // Client-side guard against expired sessions
+             if (now > graceEndTime) {
+                console.log("Foreground listener ignored active session: session time has expired.");
+                return;
+             }
+
              const markedStr = await getItem("MARKED_SESSIONS");
              const markedIds = markedStr ? JSON.parse(markedStr) : [];
              if (markedIds.includes(validSession.id)) {
                 console.log("Foreground listener ignored active session: already marked locally.");
+                return;
+             }
+
+             const attemptedStr = await getItem("ATTEMPTED_SESSIONS");
+             const attemptedIds = attemptedStr ? JSON.parse(attemptedStr) : [];
+             if (attemptedIds.includes(validSession.id)) {
+                console.log("Foreground listener ignored active session: user already attempted.");
                 return;
              }
              
@@ -107,8 +159,10 @@ export function AttendanceListener() {
              
              // Ensure we are not already on the page before auto-redirecting
              const currentRoute = segments[segments.length - 1];
-             if (currentRoute !== "tap-to-mark") {
+             if (!redirectingRef.current && currentRoute !== "tap-to-mark") {
+               redirectingRef.current = true;
                router.push(`/tap-to-mark?sessionId=${validSession.id}&courseName=${courseName}`);
+               setTimeout(() => { redirectingRef.current = false; }, 800);
              } else {
                console.log("Ignored redirect: Already on tap-to-mark screen.");
              }
@@ -133,7 +187,7 @@ export function AttendanceListener() {
       subscription.remove();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loggedInUser?.id, router]);
+  }, [loggedInUser?.id, router, segments]);
 
   return null; // This component is strictly logic/listeners, no UI
 }
