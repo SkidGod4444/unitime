@@ -234,7 +234,7 @@ export default function AlarmPlayerScreen() {
     <GestureHandlerRootView className="flex-1">
       {/* Disable iOS swipe-back gesture */}
       <Stack.Screen options={{ gestureEnabled: false }} />
-      <SafeAreaView className="flex-1 bg-white px-6 justify-between">
+      <SafeAreaView className="flex-1 bg-white dark:bg-zinc-900 px-6 justify-between">
         <StatusBar style="dark" />
 
         {/* --- Top Section: Time & Date --- */}

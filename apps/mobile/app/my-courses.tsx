@@ -255,7 +255,7 @@ export default function MyCoursesScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-zinc-900">
       <Stack.Screen options={{ headerShown: false }} />
       
       <View className="flex-row items-center px-6 pt-2 pb-4">

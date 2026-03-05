@@ -1,4 +1,5 @@
 import { useAuth } from "@/contexts/auth.cntxt";
+import { useThemeStore } from "@/lib/store";
 import { isInstitutionalEmail } from "@/utils/email.validator";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
@@ -7,6 +8,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Auth() {
+  const { theme } = useThemeStore();
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
@@ -44,8 +46,8 @@ export default function Auth() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <StatusBar style="dark" />
+    <SafeAreaView className="flex-1 bg-white dark:bg-zinc-900">
+      <StatusBar style={theme === "dark" ? "light" : "dark"} />
       <KeyboardAwareScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         enableOnAndroid={true}
@@ -76,20 +78,20 @@ export default function Auth() {
           </View>
 
           {/* Tagline */}
-          <Text className="text-base text-center font-lora text-gray-400 leading-6 mx-auto">
+          <Text className="text-base text-center font-lora text-gray-400 dark:text-zinc-400 leading-6 mx-auto">
             Effortless class management, seamlessly organized—with UNiTIME.
           </Text>
         </View>
 
         {/* Form Card */}
-        <View className="mx-5 mb-10 bg-gray-50/80 rounded-3xl p-4 shadow-2xl shadow-black/10 border border-gray-200/90">
+        <View className="mx-5 mb-10 bg-gray-50/80 dark:bg-zinc-800/60 rounded-3xl p-4 shadow-2xl shadow-black/10 border border-gray-200/90 dark:border-zinc-700/80">
           {!isLogin && (
             <View className="mb-5">
-              <Text className="text-gray-800 font-lora font-bold mb-2 text-base tracking-wide">
+              <Text className="text-gray-800 dark:text-zinc-100 font-lora font-bold mb-2 text-base tracking-wide">
                 Name
               </Text>
               <TextInput
-                className="bg-white/90 text-black px-4 py-4 rounded-xl font-lato-regular text-base border border-blue-300"
+                className="bg-white/90 dark:bg-zinc-800/90 text-black dark:text-zinc-100 px-4 py-4 rounded-xl font-lato-regular text-base border border-blue-300 dark:border-zinc-700"
                 placeholder="Student"
                 placeholderTextColor="#b0b0b0"
                 autoCapitalize="none"
@@ -100,11 +102,11 @@ export default function Auth() {
           )}
           {/* Email */}
           <View className="mb-5">
-            <Text className="text-gray-800 font-lora font-bold mb-2 text-base tracking-wide">
+            <Text className="text-gray-800 dark:text-zinc-100 font-lora font-bold mb-2 text-base tracking-wide">
               Email
             </Text>
             <TextInput
-              className="bg-white/90 text-black px-4 py-4 rounded-xl font-lato-regular text-base border border-blue-300"
+              className="bg-white/90 dark:bg-zinc-800/90 text-black dark:text-zinc-100 px-4 py-4 rounded-xl font-lato-regular text-base border border-blue-300 dark:border-zinc-700"
               placeholder="student@university.edu"
               placeholderTextColor="#b0b0b0"
               keyboardType="email-address"
@@ -116,12 +118,12 @@ export default function Auth() {
 
           {/* Password */}
           <View className="mb-6">
-            <Text className="text-gray-800 font-lora font-bold mb-2 text-base tracking-wide">
+            <Text className="text-gray-800 dark:text-zinc-100 font-lora font-bold mb-2 text-base tracking-wide">
               Password
             </Text>
-            <View className="flex-row items-center bg-white/90 rounded-xl border border-blue-300">
+            <View className="flex-row items-center bg-white/90 dark:bg-zinc-800/90 rounded-xl border border-blue-300 dark:border-zinc-700">
               <TextInput
-                className="flex-1 text-black px-4 py-4 font-lato-regular text-base"
+                className="flex-1 text-black dark:text-zinc-100 px-4 py-4 font-lato-regular text-base"
                 placeholder="••••••••"
                 placeholderTextColor="#b0b0b0"
                 secureTextEntry={!showPassword}
@@ -132,7 +134,7 @@ export default function Auth() {
                 onPress={() => setShowPassword(!showPassword)}
                 className="px-4 py-4"
               >
-                <Text className="text-gray-500 text-sm font-lato-bold">
+                <Text className="text-gray-500 dark:text-zinc-400 text-sm font-lato-bold">
                   {showPassword ? "Hide" : "Show"}
                 </Text>
               </TouchableOpacity>
@@ -174,17 +176,17 @@ export default function Auth() {
 
         {/* Footer */}
         <View className="flex-row items-center justify-center mb-10 px-16 mt-auto">
-          <Text className="text-gray-400 font-lato-regular text-base text-center">
+          <Text className="text-gray-400 dark:text-zinc-500 font-lato-regular text-base text-center">
             By continuing, you agree to our{" "}
             <Text
-              className="text-gray-500 font-lato-bold text-base text-center underline"
+              className="text-gray-500 dark:text-zinc-400 font-lato-bold text-base text-center underline"
               onPress={() => Linking.openURL("https://l.devwtf.in/unitime")}
             >
               Terms of Service
             </Text>{" "}
             and{" "}
             <Text
-              className="text-gray-500 underline font-lato-bold text-base text-center"
+              className="text-gray-500 dark:text-zinc-400 underline font-lato-bold text-base text-center"
               onPress={() => Linking.openURL("https://l.devwtf.in/unitime")}
             >
               Privacy Policy

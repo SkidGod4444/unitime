@@ -44,14 +44,14 @@ export default function History() {
         );
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-background dark:bg-zinc-900" edges={["top"]}>
       <View className="flex-1 px-5">
         {/* Header */}
         <View className="mt-4 mb-6">
-          <Text className="text-2xl font-bold text-dark font-lora">
+          <Text className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 font-lora">
             Activity History
           </Text>
-          <Text className="text-gray-500 text-sm">
+          <Text className="text-gray-500 dark:text-zinc-400 text-sm">
             Your recent actions and logs
           </Text>
         </View>
@@ -69,13 +69,13 @@ export default function History() {
                 onPress={() => setActiveFilter(filter)}
                 className={`px-4 py-2 rounded-full border ${
                   activeFilter === filter
-                    ? "bg-dark border-dark"
-                    : "bg-white border-gray-200"
+                    ? "bg-zinc-900 dark:bg-zinc-100 border-zinc-900 dark:border-zinc-100"
+                    : "bg-white dark:bg-zinc-900 border-gray-200 dark:border-zinc-800"
                 }`}
               >
                 <Text
                   className={`font-medium text-sm ${
-                    activeFilter === filter ? "text-white" : "text-gray-600"
+                    activeFilter === filter ? "text-white dark:text-zinc-900" : "text-gray-600 dark:text-zinc-300"
                   }`}
                 >
                   {filter}
@@ -96,7 +96,7 @@ export default function History() {
           {filteredData.map((item) => (
             <View
               key={item.id}
-              className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex-row items-center gap-4"
+              className="bg-white dark:bg-zinc-900 p-4 rounded-xl border border-gray-100 dark:border-zinc-800 shadow-sm flex-row items-center gap-4"
             >
               <View
                 className={`h-12 w-12 rounded-full ${
@@ -114,14 +114,14 @@ export default function History() {
               </View>
               <View className="flex-1">
                 <View className="flex-row justify-between items-start mb-1">
-                  <Text className="font-bold text-dark text-base">
+                  <Text className="font-bold text-zinc-900 dark:text-zinc-100 text-base">
                     {item.title}
                   </Text>
-                  <Text className="text-xs text-gray-400 font-medium">
+                  <Text className="text-xs text-gray-400 dark:text-zinc-500 font-medium">
                     {timeSince(item.createdAt)}
                   </Text>
                 </View>
-                <Text className="text-gray-500 text-sm" numberOfLines={2}>
+                <Text className="text-gray-500 dark:text-zinc-300 text-sm" numberOfLines={2}>
                   {item.description}
                 </Text>
               </View>

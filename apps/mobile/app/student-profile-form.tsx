@@ -201,7 +201,7 @@ export default function StudentProfileForm() {
   // UI
   // ---------------------------------------------------------------------------
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-white dark:bg-zinc-900" edges={["top"]}>
       <StatusBar style="dark" />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}

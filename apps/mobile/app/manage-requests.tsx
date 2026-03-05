@@ -73,7 +73,7 @@ export default function ManageRequestsScreen() {
     const semesterDisplay = courseOrg && (courseOrg as any).semester ? SEMESTER_MAP[(courseOrg as any).semester] || (courseOrg as any).semester : null;
     
     return (
-      <View className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm mb-5">
+      <View className="bg-white dark:bg-zinc-900 p-5 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-sm mb-5">
         {/* Student Header */}
         <TouchableOpacity 
           className="flex-row justify-between items-start mb-5"
@@ -87,10 +87,10 @@ export default function ManageRequestsScreen() {
               </Text>
             </View>
             <View className="flex-1 pr-2">
-              <Text className="text-lg font-bold text-gray-900 mb-0.5" numberOfLines={1}>
+              <Text className="text-lg font-bold text-gray-900 dark:text-zinc-100 mb-0.5" numberOfLines={1}>
                 {item.user.name}
               </Text>
-              <Text className="text-sm font-semibold text-gray-500">
+              <Text className="text-sm font-semibold text-gray-500 dark:text-zinc-400">
                 {item.user.studentProfile?.admissionNumber || item.user.email}
               </Text>
             </View>
@@ -101,13 +101,13 @@ export default function ManageRequestsScreen() {
         </TouchableOpacity>
 
         {/* Detailed Grid Info */}
-        <View className="bg-gray-50 p-4 rounded-2xl border border-gray-100 mb-5 flex-row flex-wrap justify-between items-start gap-y-4">
+        <View className="bg-gray-50 dark:bg-zinc-800 p-4 rounded-2xl border border-gray-100 dark:border-zinc-800 mb-5 flex-row flex-wrap justify-between items-start gap-y-4">
             <View className="flex-row items-start w-[48%]">
-              <View className="w-7 h-7 rounded-full bg-white items-center justify-center mr-2 shadow-sm border border-gray-100 mt-0.5">
+              <View className="w-7 h-7 rounded-full bg-white dark:bg-zinc-900 items-center justify-center mr-2 shadow-sm border border-gray-100 dark:border-zinc-800 mt-0.5">
                 <Ionicons name="book" size={12} color="#4b5563" />
               </View>
               <View className="flex-1">
-                 <Text className="text-xs text-gray-700 font-bold" numberOfLines={1}>
+                 <Text className="text-xs text-gray-700 dark:text-zinc-200 font-bold" numberOfLines={1}>
                    {item.course.name}
                  </Text>
                  <Text className="text-[10px] font-semibold text-indigo-600 mt-0.5" numberOfLines={1}>
@@ -117,16 +117,16 @@ export default function ManageRequestsScreen() {
             </View>
 
             <View className="flex-row items-start w-[48%] pl-2">
-              <View className="w-7 h-7 rounded-full bg-white items-center justify-center mr-2 shadow-sm border border-gray-100 mt-0.5">
+              <View className="w-7 h-7 rounded-full bg-white dark:bg-zinc-900 items-center justify-center mr-2 shadow-sm border border-gray-100 dark:border-zinc-800 mt-0.5">
                 <Ionicons name="business" size={12} color="#4b5563" />
               </View>
-              <Text className="text-xs text-gray-700 font-bold flex-1 mt-1" numberOfLines={2}>
+              <Text className="text-xs text-gray-700 dark:text-zinc-200 font-bold flex-1 mt-1" numberOfLines={2}>
                 {courseOrg ? courseOrg.departmentName : 'No Dept'}
               </Text>
             </View>
             
             <View className="flex-row items-center w-[48%]">
-              <View className="w-7 h-7 rounded-full bg-white items-center justify-center mr-2 shadow-sm border border-gray-100">
+              <View className="w-7 h-7 rounded-full bg-white dark:bg-zinc-900 items-center justify-center mr-2 shadow-sm border border-gray-100 dark:border-zinc-800">
                 <Ionicons name="calendar" size={12} color="#4b5563" />
               </View>
               <Text className="text-xs text-gray-700 font-bold flex-1" numberOfLines={1}>
@@ -138,7 +138,7 @@ export default function ManageRequestsScreen() {
               <View className="w-7 h-7 rounded-full bg-white items-center justify-center mr-2 shadow-sm border border-gray-100">
                 <Ionicons name="grid" size={12} color="#4b5563" />
               </View>
-              <Text className="text-xs text-gray-700 font-bold flex-1" numberOfLines={1}>
+              <Text className="text-xs text-gray-700 dark:text-zinc-200 font-bold flex-1" numberOfLines={1}>
                 {courseOrg ? `Sec ${courseOrg.section}` : 'N/A'}
               </Text>
             </View>
@@ -174,7 +174,7 @@ export default function ManageRequestsScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-zinc-900">
       <Stack.Screen options={{ headerShown: false }} />
       
       <View className="flex-row items-center px-6 pt-2 pb-4">
@@ -237,7 +237,7 @@ export default function ManageRequestsScreen() {
         presentationStyle="pageSheet"
         onRequestClose={() => setSelectedUser(null)}
       >
-        <SafeAreaView className="flex-1 bg-gray-50">
+        <SafeAreaView className="flex-1 bg-gray-50 dark:bg-zinc-900">
           <View className="flex-row items-center justify-between px-6 py-4 bg-white border-b border-gray-100">
             <Text className="text-xl font-bold text-gray-900">Student Details</Text>
             <TouchableOpacity onPress={() => setSelectedUser(null)} className="p-1 bg-gray-100 rounded-full">

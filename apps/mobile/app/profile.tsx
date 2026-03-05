@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/auth.cntxt";
-import { useAttendanceStore, useOrgsStore, useProfilesStore } from "@/lib/store";
+import { useAttendanceStore, useOrgsStore, useProfilesStore, useThemeStore } from "@/lib/store";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -16,7 +16,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Profile() {
   const router = useRouter();
-  const [isDark, setIsDark] = React.useState(false);
+  const { theme, toggleTheme } = useThemeStore();
   const { logout, loggedInUser } = useAuth();
   const { profiles } = useProfilesStore();
   const { orgs } = useOrgsStore();
@@ -24,22 +24,22 @@ export default function Profile() {
   const myOrg = orgs.find((o) => o.id === myProfile?.organizationId);
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
-      <StatusBar style="dark" />
+    <SafeAreaView className="flex-1 bg-white dark:bg-zinc-900" edges={["top"]}>
+      <StatusBar style={theme === "dark" ? "light" : "dark"} />
 
       {/* Header */}
-      <View className="px-5 py-2 flex-row items-center justify-between border-b border-gray-50 pb-4">
+      <View className="px-5 py-2 flex-row items-center justify-between border-b border-gray-100 dark:border-zinc-800 pb-4">
         <TouchableOpacity
           onPress={() => router.back()}
-          className="h-10 w-10 bg-gray-50 rounded-full items-center justify-center"
+          className="h-10 w-10 bg-gray-50 dark:bg-zinc-800 rounded-full items-center justify-center"
         >
-          <Ionicons name="arrow-back" size={24} color="#374151" />
+          <Ionicons name="arrow-back" size={24} color={theme === "dark" ? "#E5E7EB" : "#374151"} />
         </TouchableOpacity>
-        <Text className="text-lg font-bold font-lora text-dark">
+        <Text className="text-lg font-bold font-lora text-zinc-900 dark:text-zinc-100">
           My Profile
         </Text>
-        <TouchableOpacity className="h-10 w-10 bg-gray-50 rounded-full items-center justify-center">
-          <Ionicons name="settings-outline" size={22} color="#374151" />
+        <TouchableOpacity className="h-10 w-10 bg-gray-50 dark:bg-zinc-800 rounded-full items-center justify-center">
+          <Ionicons name="settings-outline" size={22} color={theme === "dark" ? "#E5E7EB" : "#374151"} />
         </TouchableOpacity>
       </View>
 
@@ -49,14 +49,14 @@ export default function Profile() {
         contentContainerStyle={{ paddingBottom: 40 }}
       >
         {/* Profile Card */}
-        <View className="mx-5 mt-5 rounded-3xl overflow-hidden border border-gray-100 shadow-sm bg-white">
+        <View className="mx-5 mt-5 rounded-3xl overflow-hidden border border-gray-100 dark:border-zinc-800 shadow-sm bg-white dark:bg-zinc-900">
           {/* Top Banner */}
-          <View className="h-20 bg-primary/10 w-full" />
+          <View className="h-20 bg-primary/10 dark:bg-primary/20 w-full" />
 
           {/* Avatar overlapping the banner */}
           <View className="items-center -mt-12 pb-5 px-5">
             <View className="relative">
-              <View className="h-24 w-24 rounded-full bg-white p-1.5 border-2 border-white shadow-md">
+              <View className="h-24 w-24 rounded-full bg-white dark:bg-zinc-900 p-1.5 border-2 border-white dark:border-zinc-900 shadow-md">
                 <Image
                   source={
                     loggedInUser?.image
@@ -66,21 +66,21 @@ export default function Profile() {
                   className="h-full w-full rounded-full"
                 />
               </View>
-              <TouchableOpacity className="absolute bottom-0 right-0 bg-primary h-7 w-7 rounded-full items-center justify-center border-2 border-white shadow-sm">
+              <TouchableOpacity className="absolute bottom-0 right-0 bg-primary h-7 w-7 rounded-full items-center justify-center border-2 border-white dark:border-zinc-900 shadow-sm">
                 <Ionicons name="camera" size={14} color="white" />
               </TouchableOpacity>
             </View>
 
             {/* Name */}
-            <Text className="text-xl font-bold font-lora text-dark mt-3">
+            <Text className="text-xl font-bold font-lora text-zinc-900 dark:text-zinc-100 mt-3">
               {loggedInUser?.name || "John Doe"}
             </Text>
-            <Text className="text-sm text-gray-400 mt-0.5">
+            <Text className="text-sm text-gray-400 dark:text-zinc-400 mt-0.5">
               {loggedInUser?.email}
             </Text>
 
             {/* Admission number pill */}
-            <View className="flex-row items-center gap-1.5 mt-2.5 bg-primary/10 px-4 py-1.5 rounded-full">
+            <View className="flex-row items-center gap-1.5 mt-2.5 bg-primary/10 dark:bg-primary/20 px-4 py-1.5 rounded-full">
               <Ionicons name="id-card-outline" size={13} color="#2563EB" />
               <Text className="text-primary font-bold text-xs tracking-wider">
                 ID: {myProfile?.admissionNumber ?? "—"}
@@ -88,7 +88,7 @@ export default function Profile() {
             </View>
 
             {/* Info rows — column layout so long text wraps properly */}
-            <View className="w-full mt-5 rounded-2xl overflow-hidden border border-gray-100">
+            <View className="w-full mt-5 rounded-2xl overflow-hidden border border-gray-100 dark:border-zinc-800">
               {[
                 {
                   icon: "business-outline",
@@ -114,7 +114,7 @@ export default function Profile() {
               ].map((row, i, arr) => (
                 <View
                   key={row.label}
-                  className={`flex-row items-center justify-start px-4 py-3 bg-white ${i !== arr.length - 1 ? "border-b border-gray-100" : ""}`}
+                  className={`flex-row items-center justify-start px-4 py-3 bg-white dark:bg-zinc-900 ${i !== arr.length - 1 ? "border-b border-gray-100 dark:border-zinc-800" : ""}`}
                 >
                   <View
                     className="h-8 w-8 rounded-full items-center justify-center shrink-0"
@@ -127,7 +127,7 @@ export default function Profile() {
                     />
                   </View>
                   <Text
-                    className="text-sm font-bold text-gray-800 flex-shrink ml-3"
+                    className="text-sm font-bold text-gray-800 dark:text-zinc-100 flex-shrink ml-3"
                     numberOfLines={1}
                   >
                     {row.value}
@@ -165,7 +165,7 @@ export default function Profile() {
           ].map((stat, index) => (
             <View
               key={index}
-              className="flex-1 bg-white p-3 rounded-2xl border border-gray-100 shadow-sm items-center"
+              className="flex-1 bg-white dark:bg-zinc-900 p-3 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm items-center"
             >
               <View
                 className={`h-8 w-8 ${stat.bg} rounded-full items-center justify-center mb-2`}
@@ -182,8 +182,8 @@ export default function Profile() {
                   }}
                 />
               </View>
-              <Text className="text-lg font-bold text-dark">{stat.value}</Text>
-              <Text className="text-xs text-gray-400 font-medium uppercase tracking-wide">
+              <Text className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{stat.value}</Text>
+              <Text className="text-xs text-gray-400 dark:text-zinc-400 font-medium uppercase tracking-wide">
                 {stat.label}
               </Text>
             </View>
@@ -230,21 +230,21 @@ export default function Profile() {
 
           {/* Dark Mode Toggle */}
           <View>
-            <Text className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-3 ml-1">
+            <Text className="text-sm font-bold text-gray-400 dark:text-zinc-400 uppercase tracking-widest mb-3 ml-1">
               Preferences
             </Text>
-            <View className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden p-4 flex-row items-center justify-between">
+            <View className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm overflow-hidden p-4 flex-row items-center justify-between">
               <View className="flex-row items-center gap-4">
-                <View className="h-10 w-10 bg-slate-100 rounded-full items-center justify-center">
+                <View className="h-10 w-10 bg-slate-100 dark:bg-zinc-800 rounded-full items-center justify-center">
                   <Ionicons name="moon-outline" size={20} color="#475569" />
                 </View>
-                <Text className="text-base font-semibold text-gray-700">
+                <Text className="text-base font-semibold text-gray-700 dark:text-zinc-100">
                   Dark Mode
                 </Text>
               </View>
               <Switch
-                value={isDark}
-                onValueChange={setIsDark}
+                value={theme === "dark"}
+                onValueChange={toggleTheme}
                 trackColor={{ false: "#E2E8F0", true: "#2563EB" }}
                 thumbColor={"#FFFFFF"}
               />
@@ -254,13 +254,13 @@ export default function Profile() {
           {/* Logout Button */}
           <TouchableOpacity
             onPress={logout}
-            className="flex-row items-center justify-center gap-2 bg-red-50 p-4 rounded-2xl border border-red-100 mt-4 active:scale-[0.99] transition-transform"
+            className="flex-row items-center justify-center gap-2 bg-red-50 dark:bg-red-500/10 p-4 rounded-2xl border border-red-100 dark:border-red-500/20 mt-4 active:scale-[0.99] transition-transform"
           >
             <Ionicons name="log-out-outline" size={20} color="#DC2626" />
             <Text className="text-red-600 font-bold text-base">Log Out</Text>
           </TouchableOpacity>
 
-          <Text className="text-center text-xs text-gray-400 mt-4">
+          <Text className="text-center text-xs text-gray-400 dark:text-zinc-500 mt-4">
             Version 1.0.2 (Build 202402)
           </Text>
         </View>

@@ -163,16 +163,16 @@ export default function TapToMarkScreen() {
   });
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-background dark:bg-zinc-900">
       {/* Header */}
       <View className="px-6 py-4 flex-row items-center justify-between">
         <TouchableOpacity
           onPress={() => router.back()}
-          className="p-2 bg-white rounded-full shadow-sm"
+          className="p-2 bg-white dark:bg-zinc-900 rounded-full shadow-sm border border-gray-100 dark:border-zinc-800"
         >
           <Feather name="arrow-left" size={24} color="#18181B" />
         </TouchableOpacity>
-        <Text className="text-lg font-bold text-dark font-lora">
+        <Text className="text-lg font-bold text-zinc-900 dark:text-zinc-100 font-lora">
           Attendance
         </Text>
         <View className="w-10" />
@@ -185,7 +185,7 @@ export default function TapToMarkScreen() {
           <Text className="text-sm font-semibold text-primary mb-1 uppercase tracking-wider">
             Current Session
           </Text>
-          <Text className="text-3xl font-bold text-dark text-center mb-2 font-lora">
+          <Text className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 text-center mb-2 font-lora">
             {courseName || "Unknown Course"}
           </Text>
           <View className="flex-row items-center bg-blue-50 px-3 py-1.5 rounded-full">

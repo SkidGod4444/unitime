@@ -38,16 +38,16 @@ export default function NoNetScreen() {
   }, []);
 
   return (
-    <SafeAreaView className="flex-1 bg-background justify-center items-center px-6">
+    <SafeAreaView className="flex-1 bg-background dark:bg-zinc-900 justify-center items-center px-6">
       <View className="items-center space-y-6">
         <View className="bg-blue-50 p-6 rounded-full">
           <Feather name="wifi-off" size={48} color="#1D4ED8" />
         </View>
 
         <View className="items-center space-y-2">
-          <Text className="text-2xl font-bold text-dark text-center">
-            No Internet Connection
-          </Text>
+      <Text className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 text-center">
+        No Internet Connection
+      </Text>
           <Text className="text-base text-accent text-center px-4">
             Please check your connection and try again.
           </Text>

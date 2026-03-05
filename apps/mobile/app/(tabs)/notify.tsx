@@ -72,15 +72,15 @@ export default function Notify() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-background dark:bg-zinc-900" edges={["top"]}>
       <View className="flex-1 px-5">
         {/* Header */}
         <View className="flex-row justify-between items-end mt-4 mb-6">
           <View>
-            <Text className="text-2xl font-bold text-dark font-lora">
+            <Text className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 font-lora">
               Notifications
             </Text>
-            <Text className="text-gray-500 text-sm">
+            <Text className="text-gray-500 dark:text-zinc-400 text-sm">
               Stay updated with your classes
             </Text>
           </View>
@@ -112,7 +112,7 @@ export default function Notify() {
             />
           }
           renderSectionHeader={({ section: { title } }) => (
-            <Text className="text-gray-500 font-semibold text-xs uppercase tracking-wider mb-3 mt-4 bg-background pt-2">
+            <Text className="text-gray-500 dark:text-zinc-400 font-semibold text-xs uppercase tracking-wider mb-3 mt-4 bg-background dark:bg-zinc-900 pt-2">
               {title}
             </Text>
           )}
@@ -132,14 +132,14 @@ export default function Notify() {
                 }}
                 className={`p-4 rounded-xl border mb-3 flex-row gap-4 ${
                   isRead
-                    ? "bg-white border-gray-100"
-                    : "bg-blue-50/30 border-blue-100"
+                    ? "bg-white dark:bg-zinc-900 border-gray-100 dark:border-zinc-800"
+                    : "bg-blue-50/30 border-blue-100 dark:bg-blue-500/10 dark:border-blue-900/40"
                 }`}
               >
                 <View
                   className={`h-12 w-12 rounded-full ${
                     item.type === "ATTENDANCE" ? "bg-green-50" : "bg-purple-50"
-                  } justify-center items-center shrink-0`}
+                  } justify-center items-center shrink-0 dark:bg-opacity-20`}
                 >
                   <Ionicons
                     name={
@@ -157,15 +157,15 @@ export default function Notify() {
                 <View className="flex-1">
                   <View className="flex-row justify-between items-start mb-1">
                     <Text
-                      className={`font-bold text-base ${isRead ? "text-dark" : "text-black"}`}
+                      className={`font-bold text-base ${isRead ? "text-zinc-900 dark:text-zinc-100" : "text-black dark:text-zinc-100"}`}
                     >
                       {item.title}
                     </Text>
-                    <Text className="text-xs text-gray-400 font-medium shrink-0 ml-2">
+                    <Text className="text-xs text-gray-400 dark:text-zinc-500 font-medium shrink-0 ml-2">
                       {timeSince(item.createdAt)}
                     </Text>
                   </View>
-                  <Text className="text-gray-500 text-sm leading-5" numberOfLines={3}>
+                  <Text className="text-gray-500 dark:text-zinc-300 text-sm leading-5" numberOfLines={3}>
                     {item.body}
                   </Text>
                 </View>
@@ -182,7 +182,7 @@ export default function Notify() {
                 size={48}
                 color="#9CA3AF"
               />
-              <Text className="text-gray-400 mt-4 text-center">
+              <Text className="text-gray-400 dark:text-zinc-500 mt-4 text-center">
                 No notifications yet
               </Text>
             </View>

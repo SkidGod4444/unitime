@@ -183,7 +183,7 @@ function EditSessionModal({ session, onClose, onSave }: EditModalProps) {
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <SafeAreaView className="flex-1 bg-gray-50">
+      <SafeAreaView className="flex-1 bg-gray-50 dark:bg-zinc-900">
         {/* Modal Header */}
         <View className="flex-row items-center justify-between px-4 py-3 bg-white border-b border-gray-100">
           <TouchableOpacity
@@ -534,7 +534,7 @@ export default function AttendanceSessionHistory() {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-zinc-900">
       <Stack.Screen
         options={{
           title: "Attendance History",

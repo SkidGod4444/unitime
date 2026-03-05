@@ -397,7 +397,7 @@ export default function AttendanceSessionForm() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-zinc-900">
       <Stack.Screen
         options={{
           title: "New Attendance",

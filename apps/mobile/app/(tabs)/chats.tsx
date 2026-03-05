@@ -127,15 +127,15 @@ export default function Chats() {
   };
 
   return (
-    <GestureHandlerRootView className="flex-1 bg-white">
-      <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
+    <GestureHandlerRootView className="flex-1 bg-white dark:bg-zinc-900">
+      <SafeAreaView className="flex-1 bg-white dark:bg-zinc-900" edges={["top"]}>
         <View className="flex-1">
           {/* Header */}
-          <View className="px-5 pt-2 pb-4 flex-row justify-between items-center bg-white z-10">
-            <Text className="text-3xl font-bold text-dark font-lora">
+          <View className="px-5 pt-2 pb-4 flex-row justify-between items-center bg-white dark:bg-zinc-900 z-10">
+            <Text className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 font-lora">
               Messages
             </Text>
-            <TouchableOpacity className="bg-gray-50 p-2.5 rounded-full">
+            <TouchableOpacity className="bg-gray-50 dark:bg-zinc-800 p-2.5 rounded-full">
               <Ionicons name="create-outline" size={24} color="#2563EB" />
             </TouchableOpacity>
           </View>
@@ -152,10 +152,10 @@ export default function Chats() {
             ListHeaderComponent={
               <View className="mb-2">
                 {/* Search Bar */}
-                <View className="mx-5 flex-row items-center bg-gray-100 rounded-xl px-4 py-2.5 mb-6">
+                <View className="mx-5 flex-row items-center bg-gray-100 dark:bg-zinc-800 rounded-xl px-4 py-2.5 mb-6">
                   <Ionicons name="search" size={20} color="#9CA3AF" />
                   <TextInput
-                    className="flex-1 ml-3 text-base text-dark"
+                    className="flex-1 ml-3 text-base text-zinc-900 dark:text-zinc-100"
                     placeholder="Search..."
                     placeholderTextColor="#9CA3AF"
                     value={searchQuery}
@@ -165,7 +165,7 @@ export default function Chats() {
 
                 {/* Active Now Rail */}
                 <View className="pl-5 mb-6">
-                  <Text className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">
+                  <Text className="text-xs font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-wider mb-3">
                     Active Now
                   </Text>
                   <ScrollView
@@ -186,7 +186,7 @@ export default function Chats() {
                           <View className="absolute bottom-0 right-0 h-3.5 w-3.5 bg-green-500 rounded-full border-2 border-white" />
                         </View>
                         <Text
-                          className="text-xs text-dark font-medium w-16 text-center"
+                          className="text-xs text-zinc-900 dark:text-zinc-100 font-medium w-16 text-center"
                           numberOfLines={1}
                         >
                           {user.name.split(" ")[0]}
@@ -196,7 +196,7 @@ export default function Chats() {
                   </ScrollView>
                 </View>
 
-                <Text className="px-5 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                <Text className="px-5 text-xs font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-wider mb-2">
                   Recent
                 </Text>
               </View>
@@ -204,7 +204,7 @@ export default function Chats() {
             renderItem={({ item }) => (
               <Swipeable renderRightActions={renderRightActions}>
                 <TouchableOpacity
-                  className="flex-row items-center bg-white px-5 py-3.5 active:bg-gray-50"
+                  className="flex-row items-center bg-white dark:bg-zinc-900 px-5 py-3.5 active:bg-gray-50 dark:active:bg-zinc-800"
                   onPress={() => router.push("/chat")}
                 >
                   <View className="relative">
@@ -217,23 +217,23 @@ export default function Chats() {
                     )}
                   </View>
 
-                  <View className="flex-1 ml-4 justify-center border-b border-gray-100 pb-3.5">
+                  <View className="flex-1 ml-4 justify-center border-b border-gray-100 dark:border-zinc-800 pb-3.5">
                     <View className="flex-row justify-between items-center mb-1">
                       <Text
-                        className={`text-base ${item.unread > 0 ? "font-bold text-dark" : "font-semibold text-gray-800"}`}
+                        className={`text-base ${item.unread > 0 ? "font-bold text-zinc-900 dark:text-zinc-100" : "font-semibold text-gray-800 dark:text-zinc-200"}`}
                         numberOfLines={1}
                       >
                         {item.name}
                       </Text>
                       <Text
-                        className={`text-xs ${item.unread > 0 ? "text-blue-600 font-bold" : "text-gray-400"}`}
+                        className={`text-xs ${item.unread > 0 ? "text-blue-600 font-bold" : "text-gray-400 dark:text-zinc-500"}`}
                       >
                         {item.time}
                       </Text>
                     </View>
                     <View className="flex-row justify-between items-center">
                       <Text
-                        className={`text-sm flex-1 mr-4 ${item.unread > 0 ? "text-dark font-medium" : "text-gray-500"}`}
+                        className={`text-sm flex-1 mr-4 ${item.unread > 0 ? "text-zinc-900 dark:text-zinc-100 font-medium" : "text-gray-500 dark:text-zinc-400"}`}
                         numberOfLines={1}
                       >
                         {item.message}

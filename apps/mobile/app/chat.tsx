@@ -109,7 +109,7 @@ export default function Chat() {
           className={`px-4 py-3 max-w-[75%] ${
             msg.isSent
               ? "bg-blue-600 rounded-2xl rounded-tr-sm"
-              : "bg-gray-100 rounded-2xl rounded-tl-sm"
+              : "bg-gray-100 dark:bg-zinc-800 rounded-2xl rounded-tl-sm"
           }`}
         >
           {!msg.isSent && (
@@ -119,7 +119,7 @@ export default function Chat() {
           )}
           <Text
             className={`text-[15px] leading-[22px] ${
-              msg.isSent ? "text-white" : "text-gray-800"
+              msg.isSent ? "text-white" : "text-gray-800 dark:text-zinc-100"
             }`}
           >
             {msg.text}
@@ -127,7 +127,7 @@ export default function Chat() {
           <View className="flex-row items-center justify-end mt-1 space-x-1">
             <Text
               className={`text-[10px] ${
-                msg.isSent ? "text-blue-200" : "text-gray-400"
+                msg.isSent ? "text-blue-200" : "text-gray-400 dark:text-zinc-400"
               }`}
             >
               {msg.timestamp}
@@ -147,14 +147,14 @@ export default function Chat() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-white dark:bg-zinc-900" edges={["top"]}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
         keyboardVerticalOffset={0}
       >
         {/* Header */}
-        <View className="px-4 py-3 flex-row items-center justify-between border-b border-gray-100 bg-white z-10">
+        <View className="px-4 py-3 flex-row items-center justify-between border-b border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 z-10">
           <View className="flex-row items-center flex-1">
             <TouchableOpacity
               onPress={() => navigation.goBack()}
@@ -170,10 +170,10 @@ export default function Chat() {
               <View className="absolute bottom-0 right-0 h-2.5 w-2.5 bg-green-500 rounded-full border-2 border-white" />
             </View>
             <View className="flex-1 ml-3">
-              <Text className="text-dark text-base font-bold font-lora">
+              <Text className="text-zinc-900 dark:text-zinc-100 text-base font-bold font-lora">
                 Dr. Sarah Wilson
               </Text>
-              <Text className="text-gray-400 text-xs font-medium">Online</Text>
+              <Text className="text-gray-400 dark:text-zinc-500 text-xs font-medium">Online</Text>
             </View>
           </View>
           <View className="flex-row items-center space-x-4 gap-4">
@@ -202,13 +202,13 @@ export default function Chat() {
         </ScrollView>
 
         {/* Input Area */}
-        <View className="px-4 py-3 border-t border-gray-100 bg-white flex-row items-end pb-6">
-          <TouchableOpacity className="p-2 mr-2 bg-gray-50 rounded-full">
+        <View className="px-4 py-3 border-t border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex-row items-end pb-6">
+          <TouchableOpacity className="p-2 mr-2 bg-gray-50 dark:bg-zinc-800 rounded-full">
             <Ionicons name="add" size={24} color="#6B7280" />
           </TouchableOpacity>
-          <View className="flex-1 bg-gray-50 rounded-2xl px-4 py-2 flex-row items-center min-h-[44px]">
+          <View className="flex-1 bg-gray-50 dark:bg-zinc-800 rounded-2xl px-4 py-2 flex-row items-center min-h-[44px]">
             <TextInput
-              className="flex-1 text-base text-dark max-h-24 pt-0"
+              className="flex-1 text-base text-zinc-900 dark:text-zinc-100 max-h-24 pt-0"
               placeholder="Type a message..."
               placeholderTextColor="#9CA3AF"
               value={message}
@@ -232,7 +232,7 @@ export default function Chat() {
               />
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity className="ml-2 bg-gray-50 rounded-full p-2.5 h-11 w-11 justify-center items-center">
+            <TouchableOpacity className="ml-2 bg-gray-50 dark:bg-zinc-800 rounded-full p-2.5 h-11 w-11 justify-center items-center">
               <Ionicons name="mic-outline" size={24} color="#6B7280" />
             </TouchableOpacity>
           )}

@@ -128,7 +128,7 @@ export default function Index() {
   });
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
+    <SafeAreaView className="flex-1 bg-background dark:bg-zinc-900" edges={["top"]}>
       <ScrollView
         className="flex-1 px-5"
         showsVerticalScrollIndicator={false}
@@ -154,10 +154,10 @@ export default function Index() {
               />
             </View>
             <View>
-              <Text className="text-gray-500 font-medium text-sm">
+              <Text className="text-gray-500 dark:text-zinc-400 font-medium text-sm">
                 Welcome back,
               </Text>
-              <Text className="text-dark font-lora font-bold text-xl">
+              <Text className="text-zinc-900 dark:text-zinc-100 font-lora font-bold text-xl">
                 {loggedInUser?.name || "John Doe"}
               </Text>
             </View>
@@ -165,14 +165,14 @@ export default function Index() {
           {loggedInUser && loggedInUser.role === "ADMIN" ? (
             <TouchableOpacity
               onPress={handleAdminPress}
-              className="bg-white p-2.5 rounded-full shadow-sm border border-gray-100"
+              className="bg-white dark:bg-zinc-900 p-2.5 rounded-full shadow-sm border border-gray-100 dark:border-zinc-800"
             >
               <Ionicons name="settings-outline" size={24} color="#18181B" />
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
               onPress={() => setFeedbackVisible(true)}
-              className="bg-white p-2.5 rounded-full shadow-sm border border-gray-100"
+              className="bg-white dark:bg-zinc-900 p-2.5 rounded-full shadow-sm border border-gray-100 dark:border-zinc-800"
             >
               <Ionicons name="heart-outline" size={24} color="#F33A6A" />
             </TouchableOpacity>
@@ -182,11 +182,11 @@ export default function Index() {
         {/* Status Overview Cards */}
         <View className="gap-4">
           {/* Expandable Attendance Card */}
-          <TouchableOpacity
-            onPress={toggleExpand}
-            activeOpacity={0.9}
-            className="bg-white p-4 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden w-full"
-          >
+            <TouchableOpacity
+              onPress={toggleExpand}
+              activeOpacity={0.9}
+              className="bg-white dark:bg-zinc-900 p-4 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-sm relative overflow-hidden w-full"
+            >
             <View className="flex-row justify-between items-start">
               <View>
                 <View className="flex-row items-center mb-2">
@@ -197,11 +197,11 @@ export default function Index() {
                       color="#2563EB"
                     />
                   </View>
-                  <Text className="text-gray-600 font-medium text-xs uppercase tracking-wider">
+                  <Text className="text-gray-600 dark:text-zinc-300 font-medium text-xs uppercase tracking-wider">
                     Overall Attendance
                   </Text>
                 </View>
-                <Text className="text-4xl font-bold text-dark mb-1">
+                <Text className="text-4xl font-bold text-zinc-900 dark:text-zinc-100 mb-1">
                   {overall}%
                 </Text>
               </View>
@@ -220,7 +220,7 @@ export default function Index() {
                 />
               </View>
             </View>
-            <Text className="text-xs text-gray-400 mb-2">
+            <Text className="text-xs text-gray-400 dark:text-zinc-400 mb-2">
               Target: 75% • You are doing great!
             </Text>
 
@@ -248,7 +248,7 @@ export default function Index() {
                           style={{ width: `${item.total === 0 ? 0 : item.percentage}%` }}
                         />
                       </View>
-                      <Text className="text-[10px] text-gray-400 mt-0.5">
+                      <Text className="text-[10px] text-gray-400 dark:text-zinc-500 mt-0.5">
                         {item.attended}/{item.total} Classes
                       </Text>
                     </View>
@@ -261,7 +261,7 @@ export default function Index() {
 
         {/* Quick Actions Grid */}
         <View>
-          <Text className="text-lg font-bold text-dark mb-4 font-lora">
+          <Text className="text-lg font-bold text-zinc-900 dark:text-zinc-100 mb-4 font-lora">
             Quick Actions
           </Text>
           <View className="flex-row flex-wrap justify-between gap-y-4">
@@ -295,7 +295,7 @@ export default function Index() {
               .map((action, index) => (
                 <TouchableOpacity
                   key={index}
-                  className="w-[48%] bg-white p-4 rounded-3xl border border-gray-100 shadow-sm flex-row items-center gap-3"
+                  className="w-[48%] bg-white dark:bg-zinc-900 p-4 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-sm flex-row items-center gap-3"
                   onPress={() => action.route && router.push(action.route as any)}
                 >
                   <View
@@ -319,7 +319,7 @@ export default function Index() {
                       }}
                     />
                   </View>
-                  <Text className="font-semibold text-gray-700">
+                  <Text className="font-semibold text-gray-700 dark:text-zinc-200">
                     {action.label}
                   </Text>
                 </TouchableOpacity>
@@ -333,7 +333,7 @@ export default function Index() {
             loggedInUser.role === "ADMIN" ||
             loggedInUser.role === "PROFESSOR") && (
             <View>
-              <Text className="text-lg font-bold text-dark mb-4 font-lora">
+              <Text className="text-lg font-bold text-zinc-900 dark:text-zinc-100 mb-4 font-lora">
                 Manage Attendance
               </Text>
               <View className="flex-row flex-wrap justify-between gap-y-4">
@@ -355,7 +355,7 @@ export default function Index() {
                 ].map((action, index) => (
                   <TouchableOpacity
                     key={index}
-                    className="w-[48%] bg-white p-4 rounded-3xl border border-gray-100 shadow-sm flex-row items-center gap-3"
+                    className="w-[48%] bg-white dark:bg-zinc-900 p-4 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-sm flex-row items-center gap-3"
                     onPress={() =>
                       action.route && router.push(action.route as any)
                     }
@@ -379,7 +379,7 @@ export default function Index() {
                         }}
                       />
                     </View>
-                    <Text className="font-semibold text-gray-700">
+                    <Text className="font-semibold text-gray-700 dark:text-zinc-200">
                       {action.label}
                     </Text>
                   </TouchableOpacity>
@@ -393,7 +393,7 @@ export default function Index() {
           (loggedInUser.role === "REPRESENTATIVE" ||
             loggedInUser.role === "ADMIN") && (
             <View>
-              <Text className="text-lg font-bold text-dark mb-4 font-lora">
+              <Text className="text-lg font-bold text-zinc-900 dark:text-zinc-100 mb-4 font-lora">
                 Manage Courses
               </Text>
               <View className="flex-row flex-wrap justify-between gap-y-4">
@@ -415,7 +415,7 @@ export default function Index() {
                 ].map((action, index) => (
                   <TouchableOpacity
                     key={index}
-                    className="w-[48%] bg-white p-4 rounded-3xl border border-gray-100 shadow-sm flex-row items-center gap-3"
+                    className="w-[48%] bg-white dark:bg-zinc-900 p-4 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-sm flex-row items-center gap-3"
                     onPress={() =>
                       action.route && router.push(action.route as any)
                     }
@@ -451,7 +451,7 @@ export default function Index() {
         {/* Today's Schedule */}
         <View>
           <View className="flex-row justify-between items-center mb-4">
-            <Text className="text-lg font-bold text-dark font-lora">
+            <Text className="text-lg font-bold text-zinc-900 dark:text-zinc-100 font-lora">
               Today&apos;s Schedule
             </Text>
             <TouchableOpacity
@@ -464,11 +464,11 @@ export default function Index() {
 
           <View className="gap-4">
             {loading ? (
-              <Text className="text-center text-gray-500 py-4">
+              <Text className="text-center text-gray-500 dark:text-zinc-400 py-4">
                 Loading schedule...
               </Text>
             ) : todaysSchedule.length === 0 ? (
-              <View className="bg-gray-50 rounded-2xl p-6 items-center justify-center border border-gray-100 border-dashed">
+              <View className="bg-gray-50 dark:bg-zinc-800 rounded-2xl p-6 items-center justify-center border border-gray-100 dark:border-zinc-800 border-dashed">
                 <Text className="text-gray-500 font-medium my-2">
                   No classes today!
                 </Text>
@@ -477,13 +477,13 @@ export default function Index() {
               todaysSchedule.map((item) => (
                 <View
                   key={item.id}
-                  className={`bg-white p-4 rounded-3xl border-l-4 ${item.color} shadow-sm flex-row justify-between items-center border border-gray-100`}
+                  className={`bg-white dark:bg-zinc-900 p-4 rounded-3xl border-l-4 ${item.color} shadow-sm flex-row justify-between items-center border border-gray-100 dark:border-zinc-800`}
                 >
                   <View className="flex-1">
                     <Text className="text-xs text-gray-500 font-medium mb-1">
                       {item.time}
                     </Text>
-                    <Text className="text-base font-bold text-dark">
+                    <Text className="text-base font-bold text-zinc-900 dark:text-zinc-100">
                       {item.subject}
                     </Text>
                     <View className="flex-row items-center mt-1 gap-1">
@@ -495,7 +495,7 @@ export default function Index() {
                       <Text className="text-xs text-gray-500">{item.room}</Text>
                     </View>
                   </View>
-                  <View className="bg-gray-50 px-3 py-1 rounded-full">
+                  <View className="bg-gray-50 dark:bg-zinc-800 px-3 py-1 rounded-full">
                     <Text className="text-xs font-medium text-gray-600">
                       {item.status}
                     </Text>
@@ -521,7 +521,7 @@ export default function Index() {
           className="flex-1 bg-black/75 justify-end sm:justify-center"
         >
           <TouchableOpacity activeOpacity={1} onPress={() => {}}>
-            <View className="bg-white w-full max-w-[420px] self-center rounded-t-[32px] sm:rounded-[24px] sm:m-6 p-8 pb-10 items-center shadow-2xl">
+            <View className="bg-white dark:bg-zinc-900 w-full max-w-[420px] self-center rounded-t-[32px] sm:rounded-[24px] sm:m-6 p-8 pb-10 items-center shadow-2xl">
               {/* Handle bar */}
               <View className="w-12 h-1.5 bg-gray-200 rounded-full mb-6 sm:hidden" />
 
@@ -531,12 +531,12 @@ export default function Index() {
               </View>
 
               {/* Title */}
-              <Text className="text-2xl font-bold text-gray-900 font-lora text-center mb-2">
+              <Text className="text-2xl font-bold text-zinc-100 font-lora text-center mb-2 dark:text-zinc-100">
                 Send Feedback
               </Text>
 
               {/* Subtitle */}
-              <Text className="text-gray-500 text-center mb-5 leading-6 px-2">
+              <Text className="text-gray-500 dark:text-zinc-400 text-center mb-5 leading-6 px-2">
                 We&apos;d love to hear from you! Share your thoughts to help us
                 improve.
               </Text>
@@ -544,7 +544,7 @@ export default function Index() {
               {/* Text Input */}
               <View className="w-full mb-5">
                 <TextInput
-                  className="bg-gray-50 border border-gray-200 rounded-2xl p-4 text-gray-900 min-h-[120px] text-base"
+                  className="bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-2xl p-4 text-gray-900 dark:text-zinc-100 min-h-[120px] text-base"
                   placeholder="Tell us what you think..."
                   placeholderTextColor="#9CA3AF"
                   multiline
@@ -579,7 +579,7 @@ export default function Index() {
 
                 <TouchableOpacity
                   activeOpacity={0.85}
-                  className="bg-gray-100 w-full py-3.5 rounded-2xl items-center justify-center active:scale-[0.98]"
+                  className="bg-gray-100 dark:bg-zinc-800 w-full py-3.5 rounded-2xl items-center justify-center active:scale-[0.98]"
                   onPress={() => {
                     setFeedbackVisible(false);
                     setFeedbackText("");
@@ -587,7 +587,7 @@ export default function Index() {
                 >
                   <Text
                     numberOfLines={1}
-                    className="text-gray-600 font-bold text-base text-center"
+                    className="text-gray-600 dark:text-zinc-300 font-bold text-base text-center"
                   >
                     Cancel
                   </Text>

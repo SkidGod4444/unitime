@@ -10,10 +10,13 @@ import { PermsProvider } from "@/contexts/perms.cntxt";
 import { RoutesProvider } from "@/contexts/routes.cntxt";
 import { StoreProvider } from "@/contexts/store.cntxt";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
+import { useColorScheme as useNWColorScheme } from "nativewind";
+import { useThemeStore } from "@/lib/store";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import "./globals.css";
@@ -54,6 +57,12 @@ function AppContent() {
   });
 
   const segments = useSegments() as string[];
+  const { setColorScheme } = useNWColorScheme();
+  const appTheme = useThemeStore((s) => s.theme);
+
+  React.useEffect(() => {
+    setColorScheme(appTheme);
+  }, [appTheme, setColorScheme]);
 
   const isHiddenScreen =
     segments.includes("qr-scanner") ||
@@ -79,11 +88,13 @@ function AppContent() {
               <AlarmsInnerProvider>
                 <PermsProvider>
                   <AttendanceListener />
-                  <StatusBar style={"dark"} animated />
+                  <StatusBar style={appTheme === "dark" ? "light" : "dark"} animated />
                   <BannedUserPopup />
                   <ProfileCompletionPopup />
 
-                  <Stack screenOptions={{ headerShown: false }} />
+                  <ThemeProvider value={appTheme === "dark" ? DarkTheme : DefaultTheme}>
+                    <Stack screenOptions={{ headerShown: false }} />
+                  </ThemeProvider>
                   {!isHiddenScreen && <QRScannerWidget />}
                   <Loader />
                 </PermsProvider>

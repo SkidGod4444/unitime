@@ -431,7 +431,7 @@ function AddUserModal({
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <SafeAreaView className="flex-1 bg-gray-50">
+      <SafeAreaView className="flex-1 bg-gray-50 dark:bg-zinc-900">
         {/* Header */}
         <View className="flex-row items-center justify-between px-4 py-3 bg-white border-b border-gray-100">
           <TouchableOpacity onPress={onClose} className="p-1">
@@ -676,7 +676,7 @@ function AddCourseModal({
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <SafeAreaView className="flex-1 bg-gray-50">
+      <SafeAreaView className="flex-1 bg-gray-50 dark:bg-zinc-900">
         <View className="flex-row items-center justify-between px-4 py-3 bg-white border-b border-gray-100">
           <TouchableOpacity onPress={onClose} className="p-1">
             <Ionicons name="close" size={22} color="#6b7280" />
@@ -905,7 +905,7 @@ function AddClassModal({
       presentationStyle="pageSheet"
       onRequestClose={onClose}
     >
-      <SafeAreaView className="flex-1 bg-gray-50">
+      <SafeAreaView className="flex-1 bg-gray-50 dark:bg-zinc-900">
         <View className="flex-row items-center justify-between px-4 py-3 bg-white border-b border-gray-100">
           <TouchableOpacity onPress={onClose} className="p-1">
             <Ionicons name="close" size={22} color="#6b7280" />
@@ -1457,7 +1457,7 @@ export default function AdminPage() {
   ];
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-zinc-900">
       <Stack.Screen
         options={{
           title: "Admin Panel",
