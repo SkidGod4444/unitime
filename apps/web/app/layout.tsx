@@ -1,8 +1,8 @@
+import { ThemeProvider } from "@/components/theme.provider";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme.provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -48,8 +48,9 @@ const fontLora = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "UNITIME - Dashboard",
-  description: "Your personal university's class dashboard",
+  title: "UNiTIME — Class Management for Galgotias University",
+  description:
+    "UNiTIME is an open-source class management platform built by students, for students of Galgotias University. Download the beta APK and experience a better alternative to iCloud.",
 };
 
 export default function RootLayout({
@@ -64,9 +65,8 @@ export default function RootLayout({
       >
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
-          forcedTheme="dark"
-          enableSystem
+          defaultTheme="light"
+          enableSystem={false}
           disableTransitionOnChange
         >
           {children}
