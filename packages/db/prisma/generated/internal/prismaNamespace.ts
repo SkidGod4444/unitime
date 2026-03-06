@@ -396,7 +396,9 @@ export const ModelName = {
   AttendanceSummary: 'AttendanceSummary',
   StudentProfile: 'StudentProfile',
   Organization: 'Organization',
-  Alarm: 'Alarm'
+  Alarm: 'Alarm',
+  LabGroup: 'LabGroup',
+  StudentLabGroup: 'StudentLabGroup'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -412,7 +414,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "courses" | "notification" | "historyLog" | "user" | "userCourse" | "userTimetable" | "timetable" | "attendanceQRSession" | "attendanceLogs" | "attendanceSummary" | "studentProfile" | "organization" | "alarm"
+    modelProps: "courses" | "notification" | "historyLog" | "user" | "userCourse" | "userTimetable" | "timetable" | "attendanceQRSession" | "attendanceLogs" | "attendanceSummary" | "studentProfile" | "organization" | "alarm" | "labGroup" | "studentLabGroup"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1378,6 +1380,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    LabGroup: {
+      payload: Prisma.$LabGroupPayload<ExtArgs>
+      fields: Prisma.LabGroupFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LabGroupFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LabGroupPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LabGroupFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LabGroupPayload>
+        }
+        findFirst: {
+          args: Prisma.LabGroupFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LabGroupPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LabGroupFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LabGroupPayload>
+        }
+        findMany: {
+          args: Prisma.LabGroupFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LabGroupPayload>[]
+        }
+        create: {
+          args: Prisma.LabGroupCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LabGroupPayload>
+        }
+        createMany: {
+          args: Prisma.LabGroupCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LabGroupCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LabGroupPayload>[]
+        }
+        delete: {
+          args: Prisma.LabGroupDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LabGroupPayload>
+        }
+        update: {
+          args: Prisma.LabGroupUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LabGroupPayload>
+        }
+        deleteMany: {
+          args: Prisma.LabGroupDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LabGroupUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LabGroupUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LabGroupPayload>[]
+        }
+        upsert: {
+          args: Prisma.LabGroupUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LabGroupPayload>
+        }
+        aggregate: {
+          args: Prisma.LabGroupAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLabGroup>
+        }
+        groupBy: {
+          args: Prisma.LabGroupGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LabGroupGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LabGroupCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LabGroupCountAggregateOutputType> | number
+        }
+      }
+    }
+    StudentLabGroup: {
+      payload: Prisma.$StudentLabGroupPayload<ExtArgs>
+      fields: Prisma.StudentLabGroupFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.StudentLabGroupFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentLabGroupPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.StudentLabGroupFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentLabGroupPayload>
+        }
+        findFirst: {
+          args: Prisma.StudentLabGroupFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentLabGroupPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.StudentLabGroupFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentLabGroupPayload>
+        }
+        findMany: {
+          args: Prisma.StudentLabGroupFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentLabGroupPayload>[]
+        }
+        create: {
+          args: Prisma.StudentLabGroupCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentLabGroupPayload>
+        }
+        createMany: {
+          args: Prisma.StudentLabGroupCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.StudentLabGroupCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentLabGroupPayload>[]
+        }
+        delete: {
+          args: Prisma.StudentLabGroupDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentLabGroupPayload>
+        }
+        update: {
+          args: Prisma.StudentLabGroupUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentLabGroupPayload>
+        }
+        deleteMany: {
+          args: Prisma.StudentLabGroupDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.StudentLabGroupUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.StudentLabGroupUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentLabGroupPayload>[]
+        }
+        upsert: {
+          args: Prisma.StudentLabGroupUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StudentLabGroupPayload>
+        }
+        aggregate: {
+          args: Prisma.StudentLabGroupAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateStudentLabGroup>
+        }
+        groupBy: {
+          args: Prisma.StudentLabGroupGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StudentLabGroupGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.StudentLabGroupCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StudentLabGroupCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1531,6 +1681,7 @@ export const AttendanceQRSessionScalarFieldEnum = {
   markedUsers: 'markedUsers',
   startTime: 'startTime',
   endTime: 'endTime',
+  labGroupId: 'labGroupId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1611,6 +1762,29 @@ export const AlarmScalarFieldEnum = {
 } as const
 
 export type AlarmScalarFieldEnum = (typeof AlarmScalarFieldEnum)[keyof typeof AlarmScalarFieldEnum]
+
+
+export const LabGroupScalarFieldEnum = {
+  id: 'id',
+  courseId: 'courseId',
+  name: 'name',
+  createdBy: 'createdBy',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LabGroupScalarFieldEnum = (typeof LabGroupScalarFieldEnum)[keyof typeof LabGroupScalarFieldEnum]
+
+
+export const StudentLabGroupScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  labGroupId: 'labGroupId',
+  courseId: 'courseId',
+  joinedAt: 'joinedAt'
+} as const
+
+export type StudentLabGroupScalarFieldEnum = (typeof StudentLabGroupScalarFieldEnum)[keyof typeof StudentLabGroupScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1981,6 +2155,8 @@ export type GlobalOmitConfig = {
   studentProfile?: Prisma.StudentProfileOmit
   organization?: Prisma.OrganizationOmit
   alarm?: Prisma.AlarmOmit
+  labGroup?: Prisma.LabGroupOmit
+  studentLabGroup?: Prisma.StudentLabGroupOmit
 }
 
 /* Types for Logging */

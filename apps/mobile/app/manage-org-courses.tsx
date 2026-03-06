@@ -196,6 +196,17 @@ export default function ManageOrgCoursesScreen() {
              </Text>
            </View>
         </View>
+
+        {/* Lab Groups management for LAB courses */}
+        {typeLabel === 'LAB' && (
+          <TouchableOpacity
+            onPress={() => router.push({ pathname: "/manage-lab-groups", params: { courseId: item.id } } as any)}
+            className="mt-3 flex-row items-center justify-center gap-2 px-4 py-3 rounded-xl border border-purple-200 bg-purple-50"
+          >
+            <Ionicons name="people-outline" size={18} color="#7c3aed" />
+            <Text className="text-purple-700 font-bold">Manage Lab Groups</Text>
+          </TouchableOpacity>
+        )}
       </View>
     );
   };

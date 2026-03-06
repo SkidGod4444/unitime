@@ -7,6 +7,7 @@ export const createQRSessionSchema = z
     endTime: z.coerce.date(),
     manualPresentIds: z.array(z.string()).optional(),
     manualAbsentIds: z.array(z.string()).optional(),
+    labGroupId: z.string().uuid().optional(),
   })
   .strict();
 
@@ -24,7 +25,21 @@ export const userUpdateSchema = z
   })
   .strict();
 
+// Lab Groups
+export const createLabGroupSchema = z
+  .object({
+    name: z.string().min(1),
+  })
+  .strict();
+
+export const joinLabGroupSchema = z
+  .object({
+    courseId: z.string().uuid(),
+  })
+  .strict();
+
 export type CreateQRSessionInput = z.infer<typeof createQRSessionSchema>;
 export type CheckinInput = z.infer<typeof checkinSchema>;
 export type UserUpdateInput = z.infer<typeof userUpdateSchema>;
-
+export type CreateLabGroupInput = z.infer<typeof createLabGroupSchema>;
+export type JoinLabGroupInput = z.infer<typeof joinLabGroupSchema>;

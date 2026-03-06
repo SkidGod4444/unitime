@@ -271,6 +271,8 @@ export type UserWhereInput = {
   alarms?: Prisma.AlarmListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
   historyLogs?: Prisma.HistoryLogListRelationFilter
+  labGroups?: Prisma.LabGroupListRelationFilter
+  studentLabGroups?: Prisma.StudentLabGroupListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -298,6 +300,8 @@ export type UserOrderByWithRelationInput = {
   alarms?: Prisma.AlarmOrderByRelationAggregateInput
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
   historyLogs?: Prisma.HistoryLogOrderByRelationAggregateInput
+  labGroups?: Prisma.LabGroupOrderByRelationAggregateInput
+  studentLabGroups?: Prisma.StudentLabGroupOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -328,6 +332,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   alarms?: Prisma.AlarmListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
   historyLogs?: Prisma.HistoryLogListRelationFilter
+  labGroups?: Prisma.LabGroupListRelationFilter
+  studentLabGroups?: Prisma.StudentLabGroupListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -397,6 +403,8 @@ export type UserCreateInput = {
   alarms?: Prisma.AlarmCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutUserInput
+  labGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
+  studentLabGroups?: Prisma.StudentLabGroupCreateNestedManyWithoutStudentInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -424,6 +432,8 @@ export type UserUncheckedCreateInput = {
   alarms?: Prisma.AlarmUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutUserInput
+  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
+  studentLabGroups?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutStudentInput
 }
 
 export type UserUpdateInput = {
@@ -451,6 +461,8 @@ export type UserUpdateInput = {
   alarms?: Prisma.AlarmUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   historyLogs?: Prisma.HistoryLogUpdateManyWithoutUserNestedInput
+  labGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
+  studentLabGroups?: Prisma.StudentLabGroupUpdateManyWithoutStudentNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -478,6 +490,8 @@ export type UserUncheckedUpdateInput = {
   alarms?: Prisma.AlarmUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutUserNestedInput
+  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
+  studentLabGroups?: Prisma.StudentLabGroupUncheckedUpdateManyWithoutStudentNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -744,6 +758,34 @@ export type UserUpdateOneRequiredWithoutAlarmsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAlarmsInput, Prisma.UserUpdateWithoutAlarmsInput>, Prisma.UserUncheckedUpdateWithoutAlarmsInput>
 }
 
+export type UserCreateNestedOneWithoutLabGroupsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutLabGroupsInput, Prisma.UserUncheckedCreateWithoutLabGroupsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutLabGroupsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutLabGroupsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutLabGroupsInput, Prisma.UserUncheckedCreateWithoutLabGroupsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutLabGroupsInput
+  upsert?: Prisma.UserUpsertWithoutLabGroupsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutLabGroupsInput, Prisma.UserUpdateWithoutLabGroupsInput>, Prisma.UserUncheckedUpdateWithoutLabGroupsInput>
+}
+
+export type UserCreateNestedOneWithoutStudentLabGroupsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutStudentLabGroupsInput, Prisma.UserUncheckedCreateWithoutStudentLabGroupsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutStudentLabGroupsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutStudentLabGroupsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutStudentLabGroupsInput, Prisma.UserUncheckedCreateWithoutStudentLabGroupsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutStudentLabGroupsInput
+  upsert?: Prisma.UserUpsertWithoutStudentLabGroupsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutStudentLabGroupsInput, Prisma.UserUpdateWithoutStudentLabGroupsInput>, Prisma.UserUncheckedUpdateWithoutStudentLabGroupsInput>
+}
+
 export type UserCreateWithoutNotificationsInput = {
   id: string
   name: string
@@ -768,6 +810,8 @@ export type UserCreateWithoutNotificationsInput = {
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   alarms?: Prisma.AlarmCreateNestedManyWithoutUserInput
   historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutUserInput
+  labGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
+  studentLabGroups?: Prisma.StudentLabGroupCreateNestedManyWithoutStudentInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -794,6 +838,8 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   alarms?: Prisma.AlarmUncheckedCreateNestedManyWithoutUserInput
   historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutUserInput
+  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
+  studentLabGroups?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutStudentInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -836,6 +882,8 @@ export type UserUpdateWithoutNotificationsInput = {
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   alarms?: Prisma.AlarmUpdateManyWithoutUserNestedInput
   historyLogs?: Prisma.HistoryLogUpdateManyWithoutUserNestedInput
+  labGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
+  studentLabGroups?: Prisma.StudentLabGroupUpdateManyWithoutStudentNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -862,6 +910,8 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   alarms?: Prisma.AlarmUncheckedUpdateManyWithoutUserNestedInput
   historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutUserNestedInput
+  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
+  studentLabGroups?: Prisma.StudentLabGroupUncheckedUpdateManyWithoutStudentNestedInput
 }
 
 export type UserCreateWithoutHistoryLogsInput = {
@@ -888,6 +938,8 @@ export type UserCreateWithoutHistoryLogsInput = {
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   alarms?: Prisma.AlarmCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  labGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
+  studentLabGroups?: Prisma.StudentLabGroupCreateNestedManyWithoutStudentInput
 }
 
 export type UserUncheckedCreateWithoutHistoryLogsInput = {
@@ -914,6 +966,8 @@ export type UserUncheckedCreateWithoutHistoryLogsInput = {
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   alarms?: Prisma.AlarmUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
+  studentLabGroups?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutStudentInput
 }
 
 export type UserCreateOrConnectWithoutHistoryLogsInput = {
@@ -956,6 +1010,8 @@ export type UserUpdateWithoutHistoryLogsInput = {
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   alarms?: Prisma.AlarmUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  labGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
+  studentLabGroups?: Prisma.StudentLabGroupUpdateManyWithoutStudentNestedInput
 }
 
 export type UserUncheckedUpdateWithoutHistoryLogsInput = {
@@ -982,6 +1038,8 @@ export type UserUncheckedUpdateWithoutHistoryLogsInput = {
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   alarms?: Prisma.AlarmUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
+  studentLabGroups?: Prisma.StudentLabGroupUncheckedUpdateManyWithoutStudentNestedInput
 }
 
 export type UserCreateWithoutCoursesInput = {
@@ -1008,6 +1066,8 @@ export type UserCreateWithoutCoursesInput = {
   alarms?: Prisma.AlarmCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutUserInput
+  labGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
+  studentLabGroups?: Prisma.StudentLabGroupCreateNestedManyWithoutStudentInput
 }
 
 export type UserUncheckedCreateWithoutCoursesInput = {
@@ -1034,6 +1094,8 @@ export type UserUncheckedCreateWithoutCoursesInput = {
   alarms?: Prisma.AlarmUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutUserInput
+  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
+  studentLabGroups?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutStudentInput
 }
 
 export type UserCreateOrConnectWithoutCoursesInput = {
@@ -1076,6 +1138,8 @@ export type UserUpdateWithoutCoursesInput = {
   alarms?: Prisma.AlarmUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   historyLogs?: Prisma.HistoryLogUpdateManyWithoutUserNestedInput
+  labGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
+  studentLabGroups?: Prisma.StudentLabGroupUpdateManyWithoutStudentNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCoursesInput = {
@@ -1102,6 +1166,8 @@ export type UserUncheckedUpdateWithoutCoursesInput = {
   alarms?: Prisma.AlarmUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutUserNestedInput
+  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
+  studentLabGroups?: Prisma.StudentLabGroupUncheckedUpdateManyWithoutStudentNestedInput
 }
 
 export type UserCreateWithoutTimetablesInput = {
@@ -1128,6 +1194,8 @@ export type UserCreateWithoutTimetablesInput = {
   alarms?: Prisma.AlarmCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutUserInput
+  labGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
+  studentLabGroups?: Prisma.StudentLabGroupCreateNestedManyWithoutStudentInput
 }
 
 export type UserUncheckedCreateWithoutTimetablesInput = {
@@ -1154,6 +1222,8 @@ export type UserUncheckedCreateWithoutTimetablesInput = {
   alarms?: Prisma.AlarmUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutUserInput
+  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
+  studentLabGroups?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutStudentInput
 }
 
 export type UserCreateOrConnectWithoutTimetablesInput = {
@@ -1196,6 +1266,8 @@ export type UserUpdateWithoutTimetablesInput = {
   alarms?: Prisma.AlarmUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   historyLogs?: Prisma.HistoryLogUpdateManyWithoutUserNestedInput
+  labGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
+  studentLabGroups?: Prisma.StudentLabGroupUpdateManyWithoutStudentNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTimetablesInput = {
@@ -1222,6 +1294,8 @@ export type UserUncheckedUpdateWithoutTimetablesInput = {
   alarms?: Prisma.AlarmUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutUserNestedInput
+  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
+  studentLabGroups?: Prisma.StudentLabGroupUncheckedUpdateManyWithoutStudentNestedInput
 }
 
 export type UserCreateWithoutAttendanceQRSessionsInput = {
@@ -1248,6 +1322,8 @@ export type UserCreateWithoutAttendanceQRSessionsInput = {
   alarms?: Prisma.AlarmCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutUserInput
+  labGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
+  studentLabGroups?: Prisma.StudentLabGroupCreateNestedManyWithoutStudentInput
 }
 
 export type UserUncheckedCreateWithoutAttendanceQRSessionsInput = {
@@ -1274,6 +1350,8 @@ export type UserUncheckedCreateWithoutAttendanceQRSessionsInput = {
   alarms?: Prisma.AlarmUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutUserInput
+  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
+  studentLabGroups?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutStudentInput
 }
 
 export type UserCreateOrConnectWithoutAttendanceQRSessionsInput = {
@@ -1316,6 +1394,8 @@ export type UserUpdateWithoutAttendanceQRSessionsInput = {
   alarms?: Prisma.AlarmUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   historyLogs?: Prisma.HistoryLogUpdateManyWithoutUserNestedInput
+  labGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
+  studentLabGroups?: Prisma.StudentLabGroupUpdateManyWithoutStudentNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAttendanceQRSessionsInput = {
@@ -1342,6 +1422,8 @@ export type UserUncheckedUpdateWithoutAttendanceQRSessionsInput = {
   alarms?: Prisma.AlarmUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutUserNestedInput
+  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
+  studentLabGroups?: Prisma.StudentLabGroupUncheckedUpdateManyWithoutStudentNestedInput
 }
 
 export type UserCreateWithoutAttendancesInput = {
@@ -1368,6 +1450,8 @@ export type UserCreateWithoutAttendancesInput = {
   alarms?: Prisma.AlarmCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutUserInput
+  labGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
+  studentLabGroups?: Prisma.StudentLabGroupCreateNestedManyWithoutStudentInput
 }
 
 export type UserUncheckedCreateWithoutAttendancesInput = {
@@ -1394,6 +1478,8 @@ export type UserUncheckedCreateWithoutAttendancesInput = {
   alarms?: Prisma.AlarmUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutUserInput
+  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
+  studentLabGroups?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutStudentInput
 }
 
 export type UserCreateOrConnectWithoutAttendancesInput = {
@@ -1436,6 +1522,8 @@ export type UserUpdateWithoutAttendancesInput = {
   alarms?: Prisma.AlarmUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   historyLogs?: Prisma.HistoryLogUpdateManyWithoutUserNestedInput
+  labGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
+  studentLabGroups?: Prisma.StudentLabGroupUpdateManyWithoutStudentNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAttendancesInput = {
@@ -1462,6 +1550,8 @@ export type UserUncheckedUpdateWithoutAttendancesInput = {
   alarms?: Prisma.AlarmUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutUserNestedInput
+  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
+  studentLabGroups?: Prisma.StudentLabGroupUncheckedUpdateManyWithoutStudentNestedInput
 }
 
 export type UserCreateWithoutAttendanceSummaryInput = {
@@ -1488,6 +1578,8 @@ export type UserCreateWithoutAttendanceSummaryInput = {
   alarms?: Prisma.AlarmCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutUserInput
+  labGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
+  studentLabGroups?: Prisma.StudentLabGroupCreateNestedManyWithoutStudentInput
 }
 
 export type UserUncheckedCreateWithoutAttendanceSummaryInput = {
@@ -1514,6 +1606,8 @@ export type UserUncheckedCreateWithoutAttendanceSummaryInput = {
   alarms?: Prisma.AlarmUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutUserInput
+  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
+  studentLabGroups?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutStudentInput
 }
 
 export type UserCreateOrConnectWithoutAttendanceSummaryInput = {
@@ -1556,6 +1650,8 @@ export type UserUpdateWithoutAttendanceSummaryInput = {
   alarms?: Prisma.AlarmUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   historyLogs?: Prisma.HistoryLogUpdateManyWithoutUserNestedInput
+  labGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
+  studentLabGroups?: Prisma.StudentLabGroupUpdateManyWithoutStudentNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAttendanceSummaryInput = {
@@ -1582,6 +1678,8 @@ export type UserUncheckedUpdateWithoutAttendanceSummaryInput = {
   alarms?: Prisma.AlarmUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutUserNestedInput
+  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
+  studentLabGroups?: Prisma.StudentLabGroupUncheckedUpdateManyWithoutStudentNestedInput
 }
 
 export type UserCreateWithoutStudentProfileInput = {
@@ -1608,6 +1706,8 @@ export type UserCreateWithoutStudentProfileInput = {
   alarms?: Prisma.AlarmCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutUserInput
+  labGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
+  studentLabGroups?: Prisma.StudentLabGroupCreateNestedManyWithoutStudentInput
 }
 
 export type UserUncheckedCreateWithoutStudentProfileInput = {
@@ -1634,6 +1734,8 @@ export type UserUncheckedCreateWithoutStudentProfileInput = {
   alarms?: Prisma.AlarmUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutUserInput
+  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
+  studentLabGroups?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutStudentInput
 }
 
 export type UserCreateOrConnectWithoutStudentProfileInput = {
@@ -1676,6 +1778,8 @@ export type UserUpdateWithoutStudentProfileInput = {
   alarms?: Prisma.AlarmUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   historyLogs?: Prisma.HistoryLogUpdateManyWithoutUserNestedInput
+  labGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
+  studentLabGroups?: Prisma.StudentLabGroupUpdateManyWithoutStudentNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStudentProfileInput = {
@@ -1702,6 +1806,8 @@ export type UserUncheckedUpdateWithoutStudentProfileInput = {
   alarms?: Prisma.AlarmUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutUserNestedInput
+  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
+  studentLabGroups?: Prisma.StudentLabGroupUncheckedUpdateManyWithoutStudentNestedInput
 }
 
 export type UserCreateWithoutAlarmsInput = {
@@ -1728,6 +1834,8 @@ export type UserCreateWithoutAlarmsInput = {
   studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutUserInput
+  labGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
+  studentLabGroups?: Prisma.StudentLabGroupCreateNestedManyWithoutStudentInput
 }
 
 export type UserUncheckedCreateWithoutAlarmsInput = {
@@ -1754,6 +1862,8 @@ export type UserUncheckedCreateWithoutAlarmsInput = {
   studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutUserInput
+  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
+  studentLabGroups?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutStudentInput
 }
 
 export type UserCreateOrConnectWithoutAlarmsInput = {
@@ -1796,6 +1906,8 @@ export type UserUpdateWithoutAlarmsInput = {
   studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   historyLogs?: Prisma.HistoryLogUpdateManyWithoutUserNestedInput
+  labGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
+  studentLabGroups?: Prisma.StudentLabGroupUpdateManyWithoutStudentNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAlarmsInput = {
@@ -1822,6 +1934,264 @@ export type UserUncheckedUpdateWithoutAlarmsInput = {
   studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutUserNestedInput
+  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
+  studentLabGroups?: Prisma.StudentLabGroupUncheckedUpdateManyWithoutStudentNestedInput
+}
+
+export type UserCreateWithoutLabGroupsInput = {
+  id: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  banned?: boolean | null
+  banReason?: string | null
+  banExpires?: Date | string | null
+  coordinates?: string | null
+  expoPushToken?: string | null
+  isOnboarded?: boolean
+  role?: $Enums.UserRole
+  status?: $Enums.UserStatus
+  courses?: Prisma.UserCourseCreateNestedManyWithoutUserInput
+  timetables?: Prisma.UserTimetableCreateNestedManyWithoutUserInput
+  attendanceQRSessions?: Prisma.AttendanceQRSessionCreateNestedManyWithoutUserInput
+  attendances?: Prisma.AttendanceLogsCreateNestedManyWithoutUserInput
+  attendanceSummary?: Prisma.AttendanceSummaryCreateNestedManyWithoutUserInput
+  studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
+  alarms?: Prisma.AlarmCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutUserInput
+  studentLabGroups?: Prisma.StudentLabGroupCreateNestedManyWithoutStudentInput
+}
+
+export type UserUncheckedCreateWithoutLabGroupsInput = {
+  id: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  banned?: boolean | null
+  banReason?: string | null
+  banExpires?: Date | string | null
+  coordinates?: string | null
+  expoPushToken?: string | null
+  isOnboarded?: boolean
+  role?: $Enums.UserRole
+  status?: $Enums.UserStatus
+  courses?: Prisma.UserCourseUncheckedCreateNestedManyWithoutUserInput
+  timetables?: Prisma.UserTimetableUncheckedCreateNestedManyWithoutUserInput
+  attendanceQRSessions?: Prisma.AttendanceQRSessionUncheckedCreateNestedManyWithoutUserInput
+  attendances?: Prisma.AttendanceLogsUncheckedCreateNestedManyWithoutUserInput
+  attendanceSummary?: Prisma.AttendanceSummaryUncheckedCreateNestedManyWithoutUserInput
+  studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
+  alarms?: Prisma.AlarmUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutUserInput
+  studentLabGroups?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutStudentInput
+}
+
+export type UserCreateOrConnectWithoutLabGroupsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutLabGroupsInput, Prisma.UserUncheckedCreateWithoutLabGroupsInput>
+}
+
+export type UserUpsertWithoutLabGroupsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutLabGroupsInput, Prisma.UserUncheckedUpdateWithoutLabGroupsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutLabGroupsInput, Prisma.UserUncheckedCreateWithoutLabGroupsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutLabGroupsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutLabGroupsInput, Prisma.UserUncheckedUpdateWithoutLabGroupsInput>
+}
+
+export type UserUpdateWithoutLabGroupsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  banned?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  banReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  coordinates?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  expoPushToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isOnboarded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  courses?: Prisma.UserCourseUpdateManyWithoutUserNestedInput
+  timetables?: Prisma.UserTimetableUpdateManyWithoutUserNestedInput
+  attendanceQRSessions?: Prisma.AttendanceQRSessionUpdateManyWithoutUserNestedInput
+  attendances?: Prisma.AttendanceLogsUpdateManyWithoutUserNestedInput
+  attendanceSummary?: Prisma.AttendanceSummaryUpdateManyWithoutUserNestedInput
+  studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
+  alarms?: Prisma.AlarmUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  historyLogs?: Prisma.HistoryLogUpdateManyWithoutUserNestedInput
+  studentLabGroups?: Prisma.StudentLabGroupUpdateManyWithoutStudentNestedInput
+}
+
+export type UserUncheckedUpdateWithoutLabGroupsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  banned?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  banReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  coordinates?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  expoPushToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isOnboarded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  courses?: Prisma.UserCourseUncheckedUpdateManyWithoutUserNestedInput
+  timetables?: Prisma.UserTimetableUncheckedUpdateManyWithoutUserNestedInput
+  attendanceQRSessions?: Prisma.AttendanceQRSessionUncheckedUpdateManyWithoutUserNestedInput
+  attendances?: Prisma.AttendanceLogsUncheckedUpdateManyWithoutUserNestedInput
+  attendanceSummary?: Prisma.AttendanceSummaryUncheckedUpdateManyWithoutUserNestedInput
+  studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
+  alarms?: Prisma.AlarmUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutUserNestedInput
+  studentLabGroups?: Prisma.StudentLabGroupUncheckedUpdateManyWithoutStudentNestedInput
+}
+
+export type UserCreateWithoutStudentLabGroupsInput = {
+  id: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  banned?: boolean | null
+  banReason?: string | null
+  banExpires?: Date | string | null
+  coordinates?: string | null
+  expoPushToken?: string | null
+  isOnboarded?: boolean
+  role?: $Enums.UserRole
+  status?: $Enums.UserStatus
+  courses?: Prisma.UserCourseCreateNestedManyWithoutUserInput
+  timetables?: Prisma.UserTimetableCreateNestedManyWithoutUserInput
+  attendanceQRSessions?: Prisma.AttendanceQRSessionCreateNestedManyWithoutUserInput
+  attendances?: Prisma.AttendanceLogsCreateNestedManyWithoutUserInput
+  attendanceSummary?: Prisma.AttendanceSummaryCreateNestedManyWithoutUserInput
+  studentProfile?: Prisma.StudentProfileCreateNestedOneWithoutUserInput
+  alarms?: Prisma.AlarmCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutUserInput
+  labGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
+}
+
+export type UserUncheckedCreateWithoutStudentLabGroupsInput = {
+  id: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  banned?: boolean | null
+  banReason?: string | null
+  banExpires?: Date | string | null
+  coordinates?: string | null
+  expoPushToken?: string | null
+  isOnboarded?: boolean
+  role?: $Enums.UserRole
+  status?: $Enums.UserStatus
+  courses?: Prisma.UserCourseUncheckedCreateNestedManyWithoutUserInput
+  timetables?: Prisma.UserTimetableUncheckedCreateNestedManyWithoutUserInput
+  attendanceQRSessions?: Prisma.AttendanceQRSessionUncheckedCreateNestedManyWithoutUserInput
+  attendances?: Prisma.AttendanceLogsUncheckedCreateNestedManyWithoutUserInput
+  attendanceSummary?: Prisma.AttendanceSummaryUncheckedCreateNestedManyWithoutUserInput
+  studentProfile?: Prisma.StudentProfileUncheckedCreateNestedOneWithoutUserInput
+  alarms?: Prisma.AlarmUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutUserInput
+  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
+}
+
+export type UserCreateOrConnectWithoutStudentLabGroupsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutStudentLabGroupsInput, Prisma.UserUncheckedCreateWithoutStudentLabGroupsInput>
+}
+
+export type UserUpsertWithoutStudentLabGroupsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutStudentLabGroupsInput, Prisma.UserUncheckedUpdateWithoutStudentLabGroupsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutStudentLabGroupsInput, Prisma.UserUncheckedCreateWithoutStudentLabGroupsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutStudentLabGroupsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutStudentLabGroupsInput, Prisma.UserUncheckedUpdateWithoutStudentLabGroupsInput>
+}
+
+export type UserUpdateWithoutStudentLabGroupsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  banned?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  banReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  coordinates?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  expoPushToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isOnboarded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  courses?: Prisma.UserCourseUpdateManyWithoutUserNestedInput
+  timetables?: Prisma.UserTimetableUpdateManyWithoutUserNestedInput
+  attendanceQRSessions?: Prisma.AttendanceQRSessionUpdateManyWithoutUserNestedInput
+  attendances?: Prisma.AttendanceLogsUpdateManyWithoutUserNestedInput
+  attendanceSummary?: Prisma.AttendanceSummaryUpdateManyWithoutUserNestedInput
+  studentProfile?: Prisma.StudentProfileUpdateOneWithoutUserNestedInput
+  alarms?: Prisma.AlarmUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  historyLogs?: Prisma.HistoryLogUpdateManyWithoutUserNestedInput
+  labGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
+}
+
+export type UserUncheckedUpdateWithoutStudentLabGroupsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  banned?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  banReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  coordinates?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  expoPushToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isOnboarded?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  status?: Prisma.EnumUserStatusFieldUpdateOperationsInput | $Enums.UserStatus
+  courses?: Prisma.UserCourseUncheckedUpdateManyWithoutUserNestedInput
+  timetables?: Prisma.UserTimetableUncheckedUpdateManyWithoutUserNestedInput
+  attendanceQRSessions?: Prisma.AttendanceQRSessionUncheckedUpdateManyWithoutUserNestedInput
+  attendances?: Prisma.AttendanceLogsUncheckedUpdateManyWithoutUserNestedInput
+  attendanceSummary?: Prisma.AttendanceSummaryUncheckedUpdateManyWithoutUserNestedInput
+  studentProfile?: Prisma.StudentProfileUncheckedUpdateOneWithoutUserNestedInput
+  alarms?: Prisma.AlarmUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutUserNestedInput
+  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
 }
 
 
@@ -1838,6 +2208,8 @@ export type UserCountOutputType = {
   alarms: number
   notifications: number
   historyLogs: number
+  labGroups: number
+  studentLabGroups: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1849,6 +2221,8 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   alarms?: boolean | UserCountOutputTypeCountAlarmsArgs
   notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
   historyLogs?: boolean | UserCountOutputTypeCountHistoryLogsArgs
+  labGroups?: boolean | UserCountOutputTypeCountLabGroupsArgs
+  studentLabGroups?: boolean | UserCountOutputTypeCountStudentLabGroupsArgs
 }
 
 /**
@@ -1917,6 +2291,20 @@ export type UserCountOutputTypeCountHistoryLogsArgs<ExtArgs extends runtime.Type
   where?: Prisma.HistoryLogWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountLabGroupsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LabGroupWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountStudentLabGroupsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.StudentLabGroupWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1943,6 +2331,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   alarms?: boolean | Prisma.User$alarmsArgs<ExtArgs>
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   historyLogs?: boolean | Prisma.User$historyLogsArgs<ExtArgs>
+  labGroups?: boolean | Prisma.User$labGroupsArgs<ExtArgs>
+  studentLabGroups?: boolean | Prisma.User$studentLabGroupsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -2011,6 +2401,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   alarms?: boolean | Prisma.User$alarmsArgs<ExtArgs>
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   historyLogs?: boolean | Prisma.User$historyLogsArgs<ExtArgs>
+  labGroups?: boolean | Prisma.User$labGroupsArgs<ExtArgs>
+  studentLabGroups?: boolean | Prisma.User$studentLabGroupsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -2028,6 +2420,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     alarms: Prisma.$AlarmPayload<ExtArgs>[]
     notifications: Prisma.$NotificationPayload<ExtArgs>[]
     historyLogs: Prisma.$HistoryLogPayload<ExtArgs>[]
+    labGroups: Prisma.$LabGroupPayload<ExtArgs>[]
+    studentLabGroups: Prisma.$StudentLabGroupPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2448,6 +2842,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   alarms<T extends Prisma.User$alarmsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$alarmsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AlarmPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   historyLogs<T extends Prisma.User$historyLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$historyLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$HistoryLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  labGroups<T extends Prisma.User$labGroupsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$labGroupsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LabGroupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  studentLabGroups<T extends Prisma.User$studentLabGroupsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$studentLabGroupsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StudentLabGroupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3088,6 +3484,54 @@ export type User$historyLogsArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.HistoryLogScalarFieldEnum | Prisma.HistoryLogScalarFieldEnum[]
+}
+
+/**
+ * User.labGroups
+ */
+export type User$labGroupsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LabGroup
+   */
+  select?: Prisma.LabGroupSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LabGroup
+   */
+  omit?: Prisma.LabGroupOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LabGroupInclude<ExtArgs> | null
+  where?: Prisma.LabGroupWhereInput
+  orderBy?: Prisma.LabGroupOrderByWithRelationInput | Prisma.LabGroupOrderByWithRelationInput[]
+  cursor?: Prisma.LabGroupWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LabGroupScalarFieldEnum | Prisma.LabGroupScalarFieldEnum[]
+}
+
+/**
+ * User.studentLabGroups
+ */
+export type User$studentLabGroupsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StudentLabGroup
+   */
+  select?: Prisma.StudentLabGroupSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the StudentLabGroup
+   */
+  omit?: Prisma.StudentLabGroupOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StudentLabGroupInclude<ExtArgs> | null
+  where?: Prisma.StudentLabGroupWhereInput
+  orderBy?: Prisma.StudentLabGroupOrderByWithRelationInput | Prisma.StudentLabGroupOrderByWithRelationInput[]
+  cursor?: Prisma.StudentLabGroupWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.StudentLabGroupScalarFieldEnum | Prisma.StudentLabGroupScalarFieldEnum[]
 }
 
 /**

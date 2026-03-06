@@ -4,6 +4,7 @@ import { useCoursesStore, useOrgsStore } from "@/lib/store";
 import { Course } from "@/lib/store/timetable";
 import { Ionicons } from "@expo/vector-icons";
 import { OrgT } from "@unitime/types";
+import { useLabGroupsStore } from "@/lib/store/lab-groups";
 import * as Location from "expo-location";
 import { Stack, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
@@ -97,6 +98,7 @@ export default function AttendanceSessionForm() {
   const { loggedInUser } = useAuth();
   const { courses: allCourses } = useCoursesStore();
   const { orgs: allOrgs } = useOrgsStore();
+  const { fetchLabGroups, fetchLabGroupMembers } = useLabGroupsStore();
 
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [selectedClass, setSelectedClass] = useState<OrgT | null>(null);
@@ -105,6 +107,8 @@ export default function AttendanceSessionForm() {
   const [classesList, setClassesList] = useState<OrgT[]>([]);
 
   const [selectedTime, setSelectedTime] = useState(5);
+  const [labGroups, setLabGroups] = useState<{ id: string; name: string }[]>([]);
+  const [selectedLabGroupId, setSelectedLabGroupId] = useState<string | null>(null);
   // Optional: keep students empty or load dynamically based on selected class
   const [students, setStudents] = useState<Student[]>([]);
 
@@ -193,6 +197,11 @@ export default function AttendanceSessionForm() {
                 (s: any) => s.studentProfile?.organizationId === selectedClass.id
               );
             }
+            if (selectedLabGroupId) {
+              const members = await fetchLabGroupMembers(selectedLabGroupId);
+              const allowed = new Set(members.map((m) => m.id));
+              filteredStudents = filteredStudents.filter((s: any) => allowed.has(s.id));
+            }
             setStudents(
               filteredStudents.map((s: any) => ({
                 id: s.id,
@@ -208,7 +217,21 @@ export default function AttendanceSessionForm() {
       }
     };
     fetchStudents();
-  }, [selectedCourse, selectedClass, loggedInUser]);
+  }, [selectedCourse, selectedClass, loggedInUser, selectedLabGroupId, fetchLabGroupMembers]);
+
+  // Fetch lab groups when LAB course selected
+  useEffect(() => {
+    (async () => {
+      if (selectedCourse && (selectedCourse as any).classType === "LAB") {
+        const groups = await fetchLabGroups(selectedCourse.id);
+        setLabGroups(groups);
+        setSelectedLabGroupId(groups[0]?.id ?? null);
+      } else {
+        setLabGroups([]);
+        setSelectedLabGroupId(null);
+      }
+    })();
+  }, [selectedCourse, fetchLabGroups]);
 
   useEffect(() => {
     (async () => {
@@ -249,6 +272,10 @@ export default function AttendanceSessionForm() {
        Alert.alert("Missing Details", "Please select a course to start a session.");
        return;
     }
+    if ((selectedCourse as any).classType === "LAB" && !selectedLabGroupId) {
+      Alert.alert("Missing Details", "Please select a lab group.");
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -269,6 +296,7 @@ export default function AttendanceSessionForm() {
             startTime: startTime.toISOString(),
             endTime: endTime.toISOString(),
             manualPresentIds,
+            labGroupId: (selectedCourse as any).classType === "LAB" ? selectedLabGroupId : undefined,
           }),
         }),
       );
@@ -560,6 +588,34 @@ export default function AttendanceSessionForm() {
                    </Text>
                 </View>
              </View>
+          )}
+
+          {/* Target Lab Group for LAB courses */}
+          {selectedCourse && (selectedCourse as any).classType === "LAB" && (
+            <View className="mb-2">
+              <Text className="text-sm font-medium text-gray-700 mb-2 shrink-0">
+                Target Lab Group
+              </Text>
+              {labGroups.length === 0 ? (
+                <View className="bg-yellow-50 border border-yellow-200 px-4 py-3 rounded-xl">
+                  <Text className="text-yellow-700 text-xs">
+                    No lab groups found for this course. Ask CR/Admin to create groups.
+                  </Text>
+                </View>
+              ) : (
+                <View className="flex-row flex-wrap gap-2">
+                  {labGroups.map((g) => (
+                    <Pressable
+                      key={g.id}
+                      onPress={() => setSelectedLabGroupId(g.id)}
+                      className={`px-3 py-2 rounded-lg border ${selectedLabGroupId === g.id ? "bg-indigo-50 border-indigo-300" : "bg-white border-gray-200"}`}
+                    >
+                      <Text className={`text-sm font-semibold ${selectedLabGroupId === g.id ? "text-indigo-700" : "text-gray-700"}`}>{g.name}</Text>
+                    </Pressable>
+                  ))}
+                </View>
+              )}
+            </View>
           )}
 
           <View className="mb-2">

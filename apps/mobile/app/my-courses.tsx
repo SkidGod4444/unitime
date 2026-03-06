@@ -12,9 +12,12 @@ import {
     Text,
     TouchableOpacity,
     View,
+    Modal,
+    Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Course } from "../lib/store/timetable";
+import { useLabGroupsStore } from "@/lib/store/lab-groups";
 
 const CLASS_TYPE_COLORS: Record<string, string> = {
   LECTURE: "bg-blue-100 text-blue-800",
@@ -44,27 +47,47 @@ export default function MyCoursesScreen() {
   const { courses, loading, fetchCourses } = useCoursesStore();
   const [refreshing, setRefreshing] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+  const {
+    fetchLabGroups,
+    joinLabGroup,
+  } = useLabGroupsStore();
+  const [groupPicker, setGroupPicker] = useState<{
+    course: Course | null;
+    groups: { id: string; name: string }[];
+    selectedGroupId: string | null;
+    visible: boolean;
+  }>({ course: null, groups: [], selectedGroupId: null, visible: false });
 
   const userProfile = profiles.find((p) => p.userId === loggedInUser?.id);
   const organizationId = userProfile?.organizationId;
 
   const filteredCourses = React.useMemo(() => {
-    if (!organizationId) return [];
+    // Show all courses if user's organization isn't resolved yet,
+    // so newly created courses are visible immediately.
+    if (!organizationId) return courses;
     return courses.filter((c) => c.organizationId === organizationId);
   }, [courses, organizationId]);
 
-  const handleEnroll = async (courseId: string) => {
+  const handleEnroll = async (course: Course) => {
     try {
-      setActionLoadingId(courseId);
+      // If LAB, prompt for lab group selection before enrolling
+      if ((course as any).classType === "LAB") {
+        setActionLoadingId(course.id);
+        const groups = await fetchLabGroups(course.id);
+        setGroupPicker({ course, groups, selectedGroupId: groups[0]?.id ?? null, visible: true });
+        setActionLoadingId(null);
+        return;
+      }
+
+      // LECTURE/TUTORIAL: direct enroll
+      setActionLoadingId(course.id);
       const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
-      const res = await fetch(`${origin}/courses/${courseId}/enroll`, {
+      const res = await fetch(`${origin}/courses/${course.id}/enroll`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: loggedInUser?.id }),
       });
-      
       if (!res.ok) throw new Error("Failed to enroll");
-      
       Alert.alert("Success", "Enrollment request sent. Waiting for approval.");
       fetchCourses();
     } catch {
@@ -121,7 +144,7 @@ export default function MyCoursesScreen() {
     const typeColor = CLASS_TYPE_COLORS[typeLabel] || "bg-gray-100 text-gray-800";
 
     return (
-      <View className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm mb-5">
+      <View className="bg-white dark:bg-zinc-900 p-5 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-sm mb-5">
         {/* Course Header */}
         <View className="flex-row items-start justify-between mb-5">
           <View className="flex-row flex-1 mr-3">
@@ -129,11 +152,11 @@ export default function MyCoursesScreen() {
                <Ionicons name="book" size={22} color="#4f46e5" />
              </View>
              <View className="flex-1 pr-1">
-               <Text className="text-lg font-bold text-gray-900 mb-1 leading-6" numberOfLines={2}>
+               <Text className="text-lg font-bold text-gray-900 dark:text-zinc-100 mb-1 leading-6" numberOfLines={2}>
                  {item.name}
                </Text>
                <View className="flex-row flex-wrap items-center gap-2">
-                 <Text className="text-sm font-bold text-indigo-600">
+                 <Text className="text-sm font-bold text-indigo-600 dark:text-indigo-400">
                    {item.code}
                  </Text>
                  <View className="w-1 h-1 rounded-full bg-gray-300" />
@@ -164,12 +187,12 @@ export default function MyCoursesScreen() {
         </View>
 
         {/* Detailed Grid Info */}
-        <View className="bg-gray-50 p-4 rounded-2xl border border-gray-100 mb-5 flex-row flex-wrap justify-between items-center gap-y-3">
+        <View className="bg-gray-50 dark:bg-zinc-800 p-4 rounded-2xl border border-gray-100 dark:border-zinc-700 mb-5 flex-row flex-wrap justify-between items-center gap-y-3">
             <View className="flex-row items-center w-[48%]">
               <View className="w-7 h-7 rounded-full bg-white items-center justify-center mr-2 shadow-sm border border-gray-100">
                 <Ionicons name="business" size={12} color="#4b5563" />
               </View>
-              <Text className="text-xs text-gray-700 font-bold flex-1" numberOfLines={1}>
+              <Text className="text-xs text-gray-700 dark:text-zinc-200 font-bold flex-1" numberOfLines={1}>
                 {org ? org.departmentName : 'No Dept'}
               </Text>
             </View>
@@ -178,7 +201,7 @@ export default function MyCoursesScreen() {
               <View className="w-7 h-7 rounded-full bg-white items-center justify-center mr-2 shadow-sm border border-gray-100">
                 <Ionicons name="calendar" size={12} color="#4b5563" />
               </View>
-              <Text className="text-xs text-gray-700 font-bold flex-1" numberOfLines={1}>
+              <Text className="text-xs text-gray-700 dark:text-zinc-200 font-bold flex-1" numberOfLines={1}>
                 {semesterDisplay || 'N/A'}
               </Text>
             </View>
@@ -187,7 +210,7 @@ export default function MyCoursesScreen() {
               <View className="w-7 h-7 rounded-full bg-white items-center justify-center mr-2 shadow-sm border border-gray-100">
                 <Ionicons name="grid" size={12} color="#4b5563" />
               </View>
-              <Text className="text-xs text-gray-700 font-bold flex-1" numberOfLines={1}>
+              <Text className="text-xs text-gray-700 dark:text-zinc-200 font-bold flex-1" numberOfLines={1}>
                 {org ? `Sec ${org.section}` : 'N/A'}
               </Text>
             </View>
@@ -196,14 +219,14 @@ export default function MyCoursesScreen() {
               <View className="w-7 h-7 rounded-full bg-white items-center justify-center mr-2 shadow-sm border border-gray-100">
                 <Ionicons name="star" size={12} color="#4b5563" />
               </View>
-              <Text className="text-xs text-gray-700 font-bold flex-1" numberOfLines={1}>
+              <Text className="text-xs text-gray-700 dark:text-zinc-200 font-bold flex-1" numberOfLines={1}>
                 {item.credit ? `${item.credit} Credits` : 'No Credits'}
               </Text>
             </View>
         </View>
 
         {/* Actions */}
-        <View className="flex-row gap-3">
+        <View className="flex-row gap-3 items-center">
           {userEnrollment ? (
             userEnrollment.status === 'REJECTED' ? (
               <View className="flex-1 py-3.5 rounded-xl border border-red-200 bg-red-50 flex-row justify-center items-center gap-2">
@@ -230,10 +253,10 @@ export default function MyCoursesScreen() {
             )
           ) : isEnrollmentOpen ? (
             <TouchableOpacity
-              onPress={() => handleEnroll(item.id)}
-              disabled={actionLoadingId === item.id}
-              className="flex-1 py-3.5 rounded-xl border border-transparent bg-indigo-600 flex-row justify-center items-center gap-2"
-            >
+                  onPress={() => handleEnroll(item)}
+                  disabled={actionLoadingId === item.id}
+                  className="flex-1 py-3.5 rounded-xl border border-transparent bg-indigo-600 flex-row justify-center items-center gap-2"
+                >
               {actionLoadingId === item.id ? (
                 <ActivityIndicator color="#fff" size="small" />
               ) : (
@@ -249,12 +272,28 @@ export default function MyCoursesScreen() {
               <Text className="text-gray-500 font-bold">Enrollment Closed</Text>
             </View>
           )}
+
+          {/* Change Lab Group (if LAB course and enrolled) */}
+          {userEnrollment && typeLabel === 'LAB' && (
+            <TouchableOpacity
+              onPress={async () => {
+                setActionLoadingId(item.id + "_groups");
+                const groups = await fetchLabGroups(item.id);
+                setGroupPicker({ course: item, groups, selectedGroupId: groups[0]?.id ?? null, visible: true });
+                setActionLoadingId(null);
+              }}
+              className="px-3 py-2 rounded-lg border border-indigo-200 bg-indigo-50"
+            >
+              <Text className="text-indigo-700 text-xs font-bold">Change Lab Group</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     );
   };
 
   return (
+    <>
     <SafeAreaView className="flex-1 bg-gray-50 dark:bg-zinc-900">
       <Stack.Screen options={{ headerShown: false }} />
       
@@ -297,13 +336,13 @@ export default function MyCoursesScreen() {
           }
           ListEmptyComponent={
             <View className="items-center py-20 px-4">
-              <View className="h-20 w-20 bg-gray-100 rounded-full justify-center items-center mb-4">
+              <View className="h-20 w-20 bg-gray-100 dark:bg-zinc-800 rounded-full justify-center items-center mb-4">
                 <Ionicons name="book-outline" size={40} color="#9ca3af" />
               </View>
-              <Text className="text-lg font-bold text-gray-800 text-center mb-2">
+              <Text className="text-lg font-bold text-gray-800 dark:text-zinc-100 text-center mb-2">
                 No Courses Found
               </Text>
-              <Text className="text-gray-500 text-center text-sm px-6">
+              <Text className="text-gray-500 dark:text-zinc-400 text-center text-sm px-6">
                 There are no courses available for enrollment right now.
               </Text>
             </View>
@@ -312,5 +351,78 @@ export default function MyCoursesScreen() {
         />
       )}
     </SafeAreaView>
+    {groupPicker.visible && (
+      <Modal
+        transparent
+        animationType="fade"
+        visible={groupPicker.visible}
+        onRequestClose={() => setGroupPicker((s) => ({ ...s, visible: false }))}
+      >
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={() => setGroupPicker((s) => ({ ...s, visible: false }))}
+          className="flex-1 bg-black/60 justify-center px-6"
+        >
+          <TouchableOpacity activeOpacity={1} className="bg-white rounded-2xl p-5">
+            <Text className="text-lg font-bold text-gray-900 mb-2">Select Lab Group</Text>
+            {groupPicker.groups.length === 0 ? (
+              <Text className="text-gray-500">No groups yet. Contact your CR/Admin.</Text>
+            ) : (
+              <View>
+                {groupPicker.groups.map((g) => (
+                  <Pressable
+                    key={g.id}
+                    onPress={() => setGroupPicker((s) => ({ ...s, selectedGroupId: g.id }))}
+                    className={`px-3 py-3 rounded-xl border mb-2 ${groupPicker.selectedGroupId === g.id ? "border-indigo-500 bg-indigo-50" : "border-gray-200 bg-white"}`}
+                  >
+                    <Text className={`font-semibold ${groupPicker.selectedGroupId === g.id ? "text-indigo-700" : "text-gray-700"}`}>{g.name}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            )}
+
+            <View className="flex-row gap-3 mt-3">
+              <TouchableOpacity
+                onPress={() => setGroupPicker((s) => ({ ...s, visible: false }))}
+                className="flex-1 py-3 rounded-xl bg-gray-100 items-center"
+              >
+                <Text className="text-gray-700 font-bold">Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={async () => {
+                  if (!groupPicker.course) return;
+                  // First enroll (creates userCourse row)
+                  const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
+                  const res = await fetch(`${origin}/courses/${groupPicker.course.id}/enroll`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ userId: loggedInUser?.id }),
+                  });
+                  if (!res.ok) {
+                    Alert.alert("Error", "Could not enroll. Please try again.");
+                    return;
+                  }
+                  // Then join group (upsert; allows switching later)
+                  if (groupPicker.selectedGroupId) {
+                    const ok = await joinLabGroup(groupPicker.selectedGroupId, groupPicker.course.id);
+                    if (!ok) {
+                      Alert.alert("Warning", "Enrolled, but failed to set lab group. You can change it later.");
+                    }
+                  }
+                  setGroupPicker({ course: null, groups: [], selectedGroupId: null, visible: false });
+                  Alert.alert("Success", "Enrollment request sent. Waiting for approval.");
+                  fetchCourses();
+                }}
+                disabled={!groupPicker.selectedGroupId}
+                className={`flex-1 py-3 rounded-xl items-center ${groupPicker.selectedGroupId ? "bg-indigo-600" : "bg-indigo-300"}`}
+              >
+                <Text className="text-white font-bold">Join Group</Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
+    )}
+    </>
   );
 }

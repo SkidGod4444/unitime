@@ -2,6 +2,8 @@ import { ERROR_CODES, createHonoErrorResponse } from "@/lib/error.codes";
 import { getOrSetCache, invalidateCache } from "@unitime/cache";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
+import { requireRole } from "@/middleware/check.auth";
+import { createLabGroupSchema } from "@/lib/validation";
 
 const courses = new Hono();
 
@@ -252,6 +254,66 @@ courses.get("/:id/students", async (c) => {
 
   } catch (error) {
     console.error("Error fetching course students:", error);
+    return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Lab Groups nested under a course
+// ─────────────────────────────────────────────────────────────────────────────
+
+// List lab groups for a course
+courses.get("/:id/lab-groups", async (c) => {
+  const courseId = c.req.param("id");
+
+  try {
+    const groups = await getOrSetCache(
+      `labGroups:course:${courseId}`,
+      () =>
+        prisma.labGroup.findMany({
+          where: { courseId },
+          select: { id: true, name: true },
+          orderBy: { createdAt: "asc" },
+        }),
+      120,
+    );
+
+    return c.json({ success: true, status_code: 200, groups }, 200);
+  } catch (error) {
+    console.error("Error listing lab groups:", error);
+    return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
+  }
+});
+
+// Create a lab group for LAB course — ADMIN/REPRESENTATIVE
+courses.post("/:id/lab-groups", requireRole("ADMIN", "REPRESENTATIVE"), async (c) => {
+  const courseId = c.req.param("id");
+  const requesterId = c.get("requesterId");
+  if (!requesterId) return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
+
+  const parsed = createLabGroupSchema.safeParse(await c.req.json());
+  if (!parsed.success) return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT);
+
+  try {
+    const course = await prisma.courses.findUnique({ where: { id: courseId } });
+    if (!course) return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
+    if (course.classType !== "LAB") {
+      return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT, "Only LAB courses can have lab groups");
+    }
+
+    const group = await prisma.labGroup.create({
+      data: {
+        courseId,
+        name: parsed.data.name,
+        createdBy: requesterId,
+      },
+    });
+
+    await invalidateCache(`labGroups:course:${courseId}`);
+
+    return c.json({ success: true, status_code: 201, group }, 201);
+  } catch (error) {
+    console.error("Error creating lab group:", error);
     return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
   }
 });

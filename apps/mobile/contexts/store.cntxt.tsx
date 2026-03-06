@@ -9,6 +9,7 @@ import {
 import { useEnrollmentStore } from "@/lib/store/enrollment";
 import { useHistoryStore } from "@/lib/store/history";
 import { useNotificationsStore } from "@/lib/store/notifications";
+import { useFeedbacksStore, useTicketsStore } from "@/lib/store";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, useSegments } from "expo-router";
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
@@ -46,6 +47,8 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   const { fetchEnrollments } = useEnrollmentStore();
   const { fetchNotifications } = useNotificationsStore();
   const { fetchHistoryLogs } = useHistoryStore();
+  const { fetchMyFeedbacks } = useFeedbacksStore();
+  const { fetchMyTickets } = useTicketsStore();
 
   const refresh = React.useCallback(async (isManual: boolean = true) => {
     // Throttle manual refreshes to max 1 per 10 seconds
@@ -89,6 +92,8 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
           if (Array.isArray(data.history)) {
             useHistoryStore.setState({ logs: data.history, loading: false, error: null });
           }
+          // also refresh personal tickets/feedbacks
+          await Promise.allSettled([fetchMyFeedbacks(), fetchMyTickets()]);
         } else {
           // Fallback to legacy per-endpoint calls
           await Promise.allSettled([
@@ -96,6 +101,8 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
             fetchSummary(loggedInUser.id),
             fetchNotifications(loggedInUser.id),
             fetchHistoryLogs(loggedInUser.id),
+            fetchMyFeedbacks(),
+            fetchMyTickets(),
           ]);
         }
       } catch {
@@ -105,6 +112,8 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
           fetchSummary(loggedInUser.id),
           fetchNotifications(loggedInUser.id),
           fetchHistoryLogs(loggedInUser.id),
+          fetchMyFeedbacks(),
+          fetchMyTickets(),
         ]);
       }
     }
@@ -116,8 +125,11 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
 
     await Promise.allSettled([
       ...(adminOrProf ? [fetchUsers()] : []),
-      ...(adminOrRep ? [fetchProfiles()] : []),
-      ...(adminOrProf ? [fetchOrgs(), fetchCourses(), fetchSessions()] : []),
+      // Always fetch profiles so student's organization is known in UI filters
+      fetchProfiles(),
+      // Always fetch courses so students see newly created ones
+      fetchCourses(),
+      ...(adminOrProf ? [fetchOrgs(), fetchSessions()] : []),
     ]);
 
     // Fetch enrollments if applicable (depends on profiles resolving first)

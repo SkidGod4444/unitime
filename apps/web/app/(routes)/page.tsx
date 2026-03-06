@@ -21,7 +21,7 @@ export default function Home() {
       <div className="relative z-20 w-full border-b border-[#ede8e4] bg-white/80 backdrop-blur-sm">
         <div className="max-w-2xl mx-auto px-6 md:px-8 py-2.5 flex items-center justify-between gap-4">
           <div className="flex items-center gap-2.5 min-w-0">
-            <span className="flex-shrink-0 text-[10px] font-semibold tracking-widest uppercase bg-red-600 text-white px-2 py-0.5 rounded-full">
+            <span className="shrink-0 text-[10px] font-semibold tracking-widest uppercase bg-red-600 text-white px-2 py-0.5 rounded-full">
               New
             </span>
             <span className="text-sm text-[#3d3230] truncate">
@@ -32,7 +32,7 @@ export default function Home() {
             href="https://l.devwtf.in/unitime-apk"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-shrink-0 inline-flex items-center gap-1.5 text-sm font-semibold text-red-600 hover:text-red-700 transition-colors"
+            className="shrink-0 inline-flex items-center gap-1.5 text-sm font-semibold text-red-600 hover:text-red-700 transition-colors"
           >
             Download
             <span className="text-base leading-none">↓</span>
@@ -153,7 +153,7 @@ export default function Home() {
           {/* Security callout */}
           <div className="border border-red-200 bg-red-50/70 rounded-xl p-5">
             <div className="flex gap-3">
-              <span className="text-red-500 text-lg mt-0.5 flex-shrink-0">⚠</span>
+              <span className="text-red-500 text-lg mt-0.5 shrink-0">⚠</span>
               <div>
                 <p className="text-[#3d3230] text-sm leading-relaxed">
                   While downloading our app&apos;s APK file or any future
@@ -304,9 +304,9 @@ export default function Home() {
 function Divider() {
   return (
     <div className="my-12 flex items-center gap-4">
-      <div className="flex-1 h-px bg-gradient-to-r from-transparent to-[#e8e2de]" />
+      <div className="flex-1 h-px bg-linear-to-r from-transparent to-[#e8e2de]" />
       <div className="w-1 h-1 rounded-full bg-[#ddd8d4]" />
-      <div className="flex-1 h-px bg-gradient-to-l from-transparent to-[#e8e2de]" />
+      <div className="flex-1 h-px bg-linear-to-l from-transparent to-[#e8e2de]" />
     </div>
   );
 }

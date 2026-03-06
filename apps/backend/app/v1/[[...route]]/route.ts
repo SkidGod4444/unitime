@@ -17,6 +17,9 @@ import orgs from "./routes/org";
 import profile from "./routes/profile";
 import timetable from "./routes/timetable";
 import users from "./routes/users";
+import labGroups from "./routes/lab-groups";
+import feedbacks from "./routes/feedbacks";
+import tickets from "./routes/tickets";
 
 export const runtime = "nodejs";
 
@@ -64,6 +67,9 @@ app.route("/orgs", orgs);
 app.route("/admin", admin);
 app.route("/alarms", alarms);
 app.route("/download", download);
+app.route("/lab-groups", labGroups);
+app.route("/feedbacks", feedbacks);
+app.route("/tickets", tickets);
 
 export const GET = handle(app);
 export const POST = handle(app);

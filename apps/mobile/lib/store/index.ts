@@ -1,7 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { OrgT, ProfileT, Theme, UserT } from "@unitime/types";
+import type { FeedbackT, SupportTicketT } from "@unitime/types";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { apiFetch } from "@/lib/api";
 
 type ThemeState = {
   theme: Theme;
@@ -231,3 +233,184 @@ export * from "./history";
 export * from "./notifications";
 export * from "./timetable";
 
+// ---------------------------------------------
+// Feedbacks Store
+// ---------------------------------------------
+
+type FeedbacksState = {
+  myFeedbacks: FeedbackT[];
+  adminFeedbacks: Array<FeedbackT & { user?: { id: string; name: string; email: string } | null }>;
+  loading: boolean;
+  fetchMyFeedbacks: () => Promise<void>;
+  createFeedback: (message: string, category?: FeedbackT["category"]) => Promise<FeedbackT | null>;
+  fetchAdminFeedbacks: (organizationId?: string) => Promise<void>;
+  updateFeedbackStatus: (id: string, status: "ACKNOWLEDGED" | "RESOLVED") => Promise<void>;
+};
+
+export const useFeedbacksStore = create<FeedbacksState>()(
+  persist(
+    (set, get) => ({
+      myFeedbacks: [],
+      adminFeedbacks: [],
+      loading: false,
+      fetchMyFeedbacks: async () => {
+        set({ loading: true });
+        try {
+          const res = await apiFetch("/feedbacks/my");
+          if (!res.ok) return;
+          const data = await res.json();
+          set({ myFeedbacks: data.feedbacks ?? [] });
+        } finally {
+          set({ loading: false });
+        }
+      },
+      createFeedback: async (message, category) => {
+        try {
+          const res = await apiFetch("/feedbacks", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message, category }),
+          });
+          if (!res.ok) return null;
+          const data = await res.json();
+          const fb = data.feedback as FeedbackT;
+          set({ myFeedbacks: [fb, ...get().myFeedbacks] });
+          return fb;
+        } catch {
+          return null;
+        }
+      },
+      fetchAdminFeedbacks: async (organizationId?: string) => {
+        set({ loading: true });
+        try {
+          const url = organizationId ? `/feedbacks/admin?organizationId=${organizationId}` : "/feedbacks/admin";
+          const res = await apiFetch(url);
+          if (!res.ok) return;
+          const data = await res.json();
+          set({ adminFeedbacks: data.feedbacks ?? [] });
+        } finally {
+          set({ loading: false });
+        }
+      },
+      updateFeedbackStatus: async (id, status) => {
+        try {
+          const res = await apiFetch(`/feedbacks/${id}/status`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status }),
+          });
+          if (!res.ok) return;
+          const data = await res.json();
+          const updated = data.feedback as FeedbackT;
+          set({
+            adminFeedbacks: get().adminFeedbacks.map((f) => (f.id === id ? { ...f, ...updated } : f)),
+          });
+        } catch {}
+      },
+    }),
+    {
+      name: "feedbacks-store",
+      storage: createJSONStorage(() => AsyncStorage),
+      partialize: (s) => ({ myFeedbacks: s.myFeedbacks }),
+    },
+  ),
+);
+
+// ---------------------------------------------
+// Tickets Store
+// ---------------------------------------------
+
+type TicketsState = {
+  myTickets: SupportTicketT[];
+  adminTickets: Array<SupportTicketT & { user?: { id: string; name: string; email: string } | null }>;
+  loading: boolean;
+  fetchMyTickets: () => Promise<void>;
+  createTicket: (title: string, description: string) => Promise<SupportTicketT | null>;
+  fetchAdminTickets: (organizationId?: string) => Promise<void>;
+  setTicketStatus: (id: string, status: SupportTicketT["status"], assigneeId?: string) => Promise<void>;
+  resolveTicket: (id: string, note: string) => Promise<void>;
+};
+
+export const useTicketsStore = create<TicketsState>()(
+  persist(
+    (set, get) => ({
+      myTickets: [],
+      adminTickets: [],
+      loading: false,
+      fetchMyTickets: async () => {
+        set({ loading: true });
+        try {
+          const res = await apiFetch("/tickets/my");
+          if (!res.ok) return;
+          const data = await res.json();
+          set({ myTickets: data.tickets ?? [] });
+        } finally {
+          set({ loading: false });
+        }
+      },
+      createTicket: async (title, description) => {
+        try {
+          const res = await apiFetch("/tickets", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title, description }),
+          });
+          if (!res.ok) return null;
+          const data = await res.json();
+          const t = data.ticket as SupportTicketT;
+          set({ myTickets: [t, ...get().myTickets] });
+          return t;
+        } catch {
+          return null;
+        }
+      },
+      fetchAdminTickets: async (organizationId?: string) => {
+        set({ loading: true });
+        try {
+          const url = organizationId ? `/tickets/admin?organizationId=${organizationId}` : "/tickets/admin";
+          const res = await apiFetch(url);
+          if (!res.ok) return;
+          const data = await res.json();
+          set({ adminTickets: data.tickets ?? [] });
+        } finally {
+          set({ loading: false });
+        }
+      },
+      setTicketStatus: async (id, status, assigneeId) => {
+        try {
+          const res = await apiFetch(`/tickets/${id}/status`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status, ...(assigneeId ? { assigneeId } : {}) }),
+          });
+          if (!res.ok) return;
+          const data = await res.json();
+          const updated = data.ticket as SupportTicketT;
+          set({
+            adminTickets: get().adminTickets.map((t) => (t.id === id ? { ...t, ...updated } : t)),
+          });
+        } catch {}
+      },
+      resolveTicket: async (id, note) => {
+        try {
+          const res = await apiFetch(`/tickets/${id}/resolve`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ resolutionNote: note }),
+          });
+          if (!res.ok) return;
+          const data = await res.json();
+          const updated = data.ticket as SupportTicketT;
+          set({
+            adminTickets: get().adminTickets.map((t) => (t.id === id ? { ...t, ...updated } : t)),
+          });
+        } catch {}
+      },
+    }),
+    {
+      name: "tickets-store",
+      storage: createJSONStorage(() => AsyncStorage),
+      partialize: (s) => ({ myTickets: s.myTickets }),
+    },
+  ),
+);

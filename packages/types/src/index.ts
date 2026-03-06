@@ -57,3 +57,30 @@ type OrgT = {
 };
 
 export type { OrgT, ProfileT, TeamT, Theme, UserT };
+
+// Feedback & Support Ticket types for mobile usages
+export type FeedbackT = {
+  id: string;
+  userId: string;
+  organizationId?: string | null;
+  message: string;
+  category: "BUG" | "UX" | "FEATURE" | "OTHER";
+  status: "NEW" | "ACKNOWLEDGED" | "RESOLVED";
+  resolvedAt?: string | Date | null;
+  createdAt: string | Date;
+  updatedAt: string | Date;
+};
+
+export type SupportTicketT = {
+  id: string;
+  userId: string;
+  organizationId?: string | null;
+  title: string;
+  description: string;
+  status: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED";
+  resolutionNote?: string | null;
+  assigneeId?: string | null;
+  resolvedAt?: string | Date | null;
+  createdAt: string | Date;
+  updatedAt: string | Date;
+};

@@ -22,7 +22,7 @@ attendance.post("/qr/session/create", async (c) => {
   if (!parsed.success) {
     return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT);
   }
-  const { courseId, startTime, endTime, manualPresentIds, manualAbsentIds } = parsed.data;
+  const { courseId, startTime, endTime, manualPresentIds, manualAbsentIds, labGroupId } = parsed.data;
   const manualIds = Array.isArray(manualPresentIds) ? manualPresentIds : [];
   const absentIds = Array.isArray(manualAbsentIds) ? manualAbsentIds : [];
 
@@ -31,6 +31,14 @@ attendance.post("/qr/session/create", async (c) => {
     select: { name: true, organizationId: true }
   });
 
+  // Optional lab-group validation
+  if (labGroupId) {
+    const group = await prisma.labGroup.findUnique({ where: { id: labGroupId } });
+    if (!group || group.courseId !== courseId) {
+      return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT, "Invalid lab group for this course");
+    }
+  }
+
   const qrSession = await prisma.attendanceQRSession.create({
     data: {
       courseId,
@@ -38,6 +46,7 @@ attendance.post("/qr/session/create", async (c) => {
       startTime,
       endTime,
       markedUsers: manualIds.length > 0 ? manualIds : [],
+      labGroupId: labGroupId || null,
     },
   });
   if (!qrSession.id) {
@@ -107,7 +116,7 @@ attendance.post("/qr/session/create", async (c) => {
 
   // Trigger parallel Push Notifications to enrolled students
   try {
-    const enrolledStudents = await prisma.userCourse.findMany({
+    let enrolledStudents = await prisma.userCourse.findMany({
       where: { courseId: courseId },
       include: {
         user: {
@@ -115,6 +124,16 @@ attendance.post("/qr/session/create", async (c) => {
         }
       }
     });
+
+    // If this is a lab-group session, restrict recipients to members of that group
+    if (labGroupId) {
+      const groupMembers = await prisma.studentLabGroup.findMany({
+        where: { labGroupId },
+        select: { studentId: true },
+      });
+      const allowed = new Set(groupMembers.map((m) => m.studentId));
+      enrolledStudents = enrolledStudents.filter((enr) => allowed.has(enr.userId));
+    }
 
     const tokens = enrolledStudents
       .filter((enrollment) => {
@@ -316,6 +335,16 @@ attendance.post("/checkin", async (c) => {
       return c.json({ success: false, message: "Not enrolled in this course" }, 403);
     }
 
+    // If session targets a lab group, verify student's mapping
+    if (session.labGroupId) {
+      const mapping = await prisma.studentLabGroup.findUnique({
+        where: { studentId_courseId: { studentId: requesterId, courseId: session.courseId } },
+      });
+      if (!mapping || mapping.labGroupId !== session.labGroupId) {
+        return c.json({ success: false, message: "You are not in the targeted lab group for this session" }, 403);
+      }
+    }
+
     // Check if duplicate
     const existing = await prisma.attendanceLogs.findUnique({
       where: { sessionId_userId: { sessionId, userId: requesterId } }
@@ -359,21 +388,31 @@ attendance.post("/checkin", async (c) => {
     (async () => {
       try {
         const courseId = session.courseId;
-        const totalSessions = await prisma.attendanceQRSession.count({
-          where: { courseId },
+        // Determine student's lab group (if any) for this course
+        const myGroup = await prisma.studentLabGroup.findUnique({
+          where: { studentId_courseId: { studentId: requesterId, courseId } },
+          select: { labGroupId: true },
         });
 
-        const attendedSessions = await prisma.attendanceLogs.count({
-          where: {
-            userId: requesterId,
-            sessionId: {
-              in: (
-                await prisma.attendanceQRSession.findMany({
-                  where: { courseId },
-                })
-              ).map((s) => s.id),
+        // Total sessions = all lecture (labGroupId = null) + sessions targeting myGroup.labGroupId (if set)
+        const orClauses: import("@unitime/db").Prisma.AttendanceQRSessionWhereInput[] = [
+          { labGroupId: null },
+        ];
+        if (myGroup?.labGroupId) orClauses.push({ labGroupId: myGroup.labGroupId });
+        const sessionIds = (
+          await prisma.attendanceQRSession.findMany({
+            where: {
+              courseId,
+              OR: orClauses,
             },
-          },
+            select: { id: true },
+          })
+        ).map((s) => s.id);
+
+        const totalSessions = sessionIds.length;
+
+        const attendedSessions = await prisma.attendanceLogs.count({
+          where: { userId: requesterId, sessionId: { in: sessionIds } },
         });
 
         const percentage = totalSessions === 0 ? 100 : Math.round((attendedSessions / totalSessions) * 100);
@@ -452,23 +491,30 @@ attendance.get("/summary/:userId", async (c) => {
       enrollments.map(async (enrollment) => {
         const courseId = enrollment.courseId;
 
-        // 2. Count total sessions created for this course
-        const totalSessions = await prisma.attendanceQRSession.count({
-          where: { courseId },
+        // Determine student's lab group for this course (if any)
+        const myGroup = await prisma.studentLabGroup.findUnique({
+          where: { studentId_courseId: { studentId: userId, courseId } },
+          select: { labGroupId: true },
         });
 
-        // 3. Count sessions this user attended
-        const attendedSessions = await prisma.attendanceLogs.count({
-          where: {
-            userId,
-            sessionId: {
-              in: (
-                await prisma.attendanceQRSession.findMany({
-                  where: { courseId },
-                })
-              ).map((s) => s.id),
+        const orClauses: import("@unitime/db").Prisma.AttendanceQRSessionWhereInput[] = [
+          { labGroupId: null },
+        ];
+        if (myGroup?.labGroupId) orClauses.push({ labGroupId: myGroup.labGroupId });
+        const sessionIds = (
+          await prisma.attendanceQRSession.findMany({
+            where: {
+              courseId,
+              OR: orClauses,
             },
-          },
+            select: { id: true },
+          })
+        ).map((s) => s.id);
+
+        const totalSessions = sessionIds.length;
+
+        const attendedSessions = await prisma.attendanceLogs.count({
+          where: { userId, sessionId: { in: sessionIds } },
         });
 
         const percentage =
@@ -520,12 +566,21 @@ attendance.get("/sessions/all", async (c) => {
           where: { sessionId: session.id },
         });
 
-        const enrolledStudents = await prisma.userCourse.findMany({
+        let enrolledStudents = await prisma.userCourse.findMany({
           where: { courseId: session.courseId },
           include: {
             user: { include: { studentProfile: true } },
           },
         });
+
+        if (session.labGroupId) {
+          const members = await prisma.studentLabGroup.findMany({
+            where: { labGroupId: session.labGroupId },
+            select: { studentId: true },
+          });
+          const allowed = new Set(members.map((m) => m.studentId));
+          enrolledStudents = enrolledStudents.filter((enr) => allowed.has(enr.userId));
+        }
 
         const formattedLogs = enrolledStudents.map((enr) => {
           const isPresent = logs.some((log) => log.userId === enr.userId);
@@ -669,12 +724,21 @@ attendance.get("/sessions/:id/export", async (c) => {
       where: { sessionId },
     });
 
-    const enrolledStudents = await prisma.userCourse.findMany({
+    let enrolledStudents = await prisma.userCourse.findMany({
       where: { courseId: session.courseId },
       include: {
         user: { include: { studentProfile: true } },
       },
     });
+
+    if (session.labGroupId) {
+      const members = await prisma.studentLabGroup.findMany({
+        where: { labGroupId: session.labGroupId },
+        select: { studentId: true },
+      });
+      const allowed = new Set(members.map((m) => m.studentId));
+      enrolledStudents = enrolledStudents.filter((enr) => allowed.has(enr.userId));
+    }
 
     const headers = [
       "Student Name",

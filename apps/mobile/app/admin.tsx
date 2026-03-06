@@ -1,29 +1,31 @@
+import { withAuth } from "@/lib/api";
+import { getAuthToken } from "@/lib/auth.token";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack } from "expo-router";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
-    Alert,
-    FlatList,
-    Modal,
-    Pressable,
-    RefreshControl,
-    ScrollView,
-    Switch,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  FlatList,
+  Modal,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../contexts/auth.cntxt";
-import { getAuthToken } from "@/lib/auth.token";
-import { withAuth } from "@/lib/api";
 import { useRefresh } from "../hooks/use-refresh";
 import {
-    useCoursesStore,
-    useOrgsStore,
-    useProfilesStore,
-    useUsersStore,
+  useCoursesStore,
+  useFeedbacksStore,
+  useOrgsStore,
+  useProfilesStore,
+  useTicketsStore,
+  useUsersStore,
 } from "../lib/store";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -139,7 +141,14 @@ const emitAdminNotification = async (
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
 
-type TabKey = "roles" | "classes" | "professors" | "courses" | "attendance";
+type TabKey =
+  | "roles"
+  | "classes"
+  | "professors"
+  | "courses"
+  | "attendance"
+  | "feedbacks"
+  | "tickets";
 
 const TABS: { key: TabKey; label: string; icon: string }[] = [
   { key: "roles", label: "Roles", icon: "shield-outline" },
@@ -147,6 +156,8 @@ const TABS: { key: TabKey; label: string; icon: string }[] = [
   { key: "professors", label: "Professors", icon: "person-circle-outline" },
   { key: "courses", label: "Courses", icon: "book-outline" },
   { key: "attendance", label: "Attendance", icon: "checkmark-done-outline" },
+  { key: "feedbacks", label: "Feedbacks", icon: "chatbubble-ellipses-outline" },
+  { key: "tickets", label: "Tickets", icon: "help-buoy-outline" },
 ];
 
 // ─── Action button ────────────────────────────────────────────────────────────
@@ -379,6 +390,218 @@ function RolesTab({ onAddUserPress }: { onAddUserPress: () => void }) {
   );
 }
 
+// ─── Feedbacks Tab ───────────────────────────────────────────────────────────
+
+type FeedbackRow = {
+  id: string;
+  message: string;
+  category: "BUG" | "UX" | "FEATURE" | "OTHER";
+  status: "NEW" | "ACKNOWLEDGED" | "RESOLVED";
+  createdAt: string;
+  user?: { id: string; name: string; email: string } | null;
+};
+
+function FeedbacksTab() {
+  const { adminFeedbacks, fetchAdminFeedbacks, updateFeedbackStatus, loading } = useFeedbacksStore();
+
+  useEffect(() => {
+    fetchAdminFeedbacks();
+  }, [fetchAdminFeedbacks]);
+
+  const updateStatus = async (id: string, status: "ACKNOWLEDGED" | "RESOLVED") => {
+    await updateFeedbackStatus(id, status);
+  };
+
+  if (loading && adminFeedbacks.length === 0) {
+    return (
+      <View className="items-center py-10">
+        <Ionicons name="chatbubble-ellipses-outline" size={40} color="#d1d5db" />
+        <Text className="text-gray-400 mt-2 text-sm">Loading feedbacks…</Text>
+      </View>
+    );
+  }
+
+  if (adminFeedbacks.length === 0) {
+    return (
+      <View className="items-center py-10">
+        <Ionicons name="chatbubble-ellipses-outline" size={40} color="#d1d5db" />
+        <Text className="text-gray-400 mt-2 text-sm">No feedbacks yet.</Text>
+      </View>
+    );
+  }
+
+  const catColor = (c: FeedbackRow["category"]) =>
+    ({ BUG: ["bg-red-100", "text-red-700"], UX: ["bg-amber-100", "text-amber-700"], FEATURE: ["bg-indigo-100", "text-indigo-700"], OTHER: ["bg-gray-200", "text-gray-700"] } as const)[c];
+  const stColor = (s: FeedbackRow["status"]) =>
+    ({ NEW: ["bg-blue-100", "text-blue-700"], ACKNOWLEDGED: ["bg-purple-100", "text-purple-700"], RESOLVED: ["bg-green-100", "text-green-700"] } as const)[s];
+
+  return (
+    <FlatList
+      data={adminFeedbacks as any}
+      keyExtractor={(r) => r.id}
+      scrollEnabled={false}
+      renderItem={({ item: r }) => {
+        const [catBg, catText] = catColor(r.category);
+        const [stBg, stText] = stColor(r.status);
+        return (
+          <View className="bg-white rounded-2xl p-4 mb-3 border border-gray-100 shadow-sm">
+            <View className="flex-row items-start justify-between gap-x-3">
+              <View className="flex-1">
+                <Text className="text-base font-bold text-gray-900" numberOfLines={2}>{r.message}</Text>
+                <Text className="text-xs text-gray-500 mt-1">
+                  {r.user?.name || "Unknown"} • {r.user?.email || "—"}
+                </Text>
+                <View className="flex-row gap-x-2 mt-2">
+                  <View className={`px-2.5 py-0.5 rounded-full ${catBg}`}>
+                    <Text className={`text-xs font-bold ${catText}`}>{r.category}</Text>
+                  </View>
+                  <View className={`px-2.5 py-0.5 rounded-full ${stBg}`}>
+                    <Text className={`text-xs font-bold ${stText}`}>{r.status}</Text>
+                  </View>
+                </View>
+              </View>
+              <View className="items-end gap-y-1">
+                {r.status !== "ACKNOWLEDGED" && r.status !== "RESOLVED" && (
+                  <TouchableOpacity onPress={() => updateStatus(r.id, "ACKNOWLEDGED")} className="px-2 py-1 rounded-lg bg-purple-50">
+                    <Text className="text-purple-700 text-xs font-bold">Acknowledge</Text>
+                  </TouchableOpacity>
+                )}
+                {r.status !== "RESOLVED" && (
+                  <TouchableOpacity onPress={() => updateStatus(r.id, "RESOLVED")} className="px-2 py-1 rounded-lg bg-green-50">
+                    <Text className="text-green-700 text-xs font-bold">Resolve</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+          </View>
+        );
+      }}
+    />
+  );
+}
+
+// ─── Tickets Tab ────────────────────────────────────────────────────────────
+
+type TicketRow = {
+  id: string;
+  title: string;
+  description: string;
+  status: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED";
+  resolutionNote?: string | null;
+  createdAt: string;
+  user?: { id: string; name: string; email: string } | null;
+};
+
+function TicketsTab() {
+  const { adminTickets, fetchAdminTickets, setTicketStatus, resolveTicket } = useTicketsStore();
+  const [loading, setLoading] = useState(false);
+  const [resolveModal, setResolveModal] = useState<{ id: string; note: string } | null>(null);
+
+  useEffect(() => {
+    setLoading(true);
+    fetchAdminTickets().finally(() => setLoading(false));
+  }, [fetchAdminTickets]);
+
+  const setStatus = async (id: string, status: TicketRow["status"]) => {
+    await setTicketStatus(id, status);
+  };
+
+  const resolveWithNote = async () => {
+    if (!resolveModal) return;
+    await resolveTicket(resolveModal.id, resolveModal.note);
+    setResolveModal(null);
+  };
+
+  const statusColors = (s: TicketRow["status"]) =>
+    ({ OPEN: ["bg-amber-100", "text-amber-700"], IN_PROGRESS: ["bg-indigo-100", "text-indigo-700"], RESOLVED: ["bg-green-100", "text-green-700"], CLOSED: ["bg-gray-200", "text-gray-700"] } as const)[s];
+
+  if (loading && adminTickets.length === 0) {
+    return (
+      <View className="items-center py-10">
+        <Ionicons name="help-buoy-outline" size={40} color="#d1d5db" />
+        <Text className="text-gray-400 mt-2 text-sm">Loading tickets…</Text>
+      </View>
+    );
+  }
+  if (adminTickets.length === 0) {
+    return (
+      <View className="items-center py-10">
+        <Ionicons name="help-buoy-outline" size={40} color="#d1d5db" />
+        <Text className="text-gray-400 mt-2 text-sm">No tickets yet.</Text>
+      </View>
+    );
+  }
+
+  return (
+    <>
+      <FlatList
+        data={adminTickets as any}
+        keyExtractor={(r) => r.id}
+        scrollEnabled={false}
+        renderItem={({ item: r }) => {
+          const [bg, text] = statusColors(r.status);
+          return (
+            <View className="bg-white rounded-2xl p-4 mb-3 border border-gray-100 shadow-sm">
+              <View className="flex-row items-start justify-between gap-x-2">
+                <View className="flex-1">
+                  <Text className="text-base font-bold text-gray-900" numberOfLines={1}>{r.title}</Text>
+                  <Text className="text-xs text-gray-500 mt-0.5">{r.user?.name || "Unknown"} • {r.user?.email || "—"}</Text>
+                  <Text className="text-sm text-gray-700 mt-2" numberOfLines={3}>{r.description}</Text>
+                  <View className={`self-start mt-2 px-2.5 py-0.5 rounded-full ${bg}`}>
+                    <Text className={`text-xs font-bold ${text}`}>{r.status.replace("_", " ")}</Text>
+                  </View>
+                  {r.resolutionNote ? (
+                    <View className="mt-2 bg-green-50 p-2 rounded-xl border border-green-100">
+                      <Text className="text-xs font-semibold text-green-700">Resolution</Text>
+                      <Text className="text-sm text-green-700 mt-0.5">{r.resolutionNote}</Text>
+                    </View>
+                  ) : null}
+                </View>
+                <View className="items-end gap-y-1">
+                  {r.status !== "RESOLVED" && (
+                    <TouchableOpacity onPress={() => setResolveModal({ id: r.id, note: "" })} className="px-2 py-1 rounded-lg bg-green-50">
+                      <Text className="text-green-700 text-xs font-bold">Resolve</Text>
+                    </TouchableOpacity>
+                  )}
+                  <TouchableOpacity onPress={() => setStatus(r.id, r.status === "OPEN" ? "IN_PROGRESS" : r.status === "IN_PROGRESS" ? "CLOSED" : "OPEN")} className="px-2 py-1 rounded-lg bg-gray-100">
+                    <Text className="text-gray-700 text-xs font-bold">Cycle Status</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          );
+        }}
+      />
+
+      {/* Resolve Modal */}
+      <Modal visible={!!resolveModal} transparent animationType="fade" onRequestClose={() => setResolveModal(null)}>
+        <TouchableOpacity activeOpacity={1} onPress={() => setResolveModal(null)} className="flex-1 bg-black/40 justify-end">
+          <TouchableOpacity activeOpacity={1} onPress={() => {}}>
+            <View className="bg-white rounded-t-3xl p-6">
+              <Text className="text-base font-bold text-gray-900 mb-2">Resolution Note</Text>
+              <TextInput
+                value={resolveModal?.note || ""}
+                onChangeText={(t) => setResolveModal((s) => (s ? { ...s, note: t } : s))}
+                placeholder="Describe the resolution"
+                multiline
+                textAlignVertical="top"
+                className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 mb-3 min-h-[90px]"
+              />
+              <View className="flex-row justify-end gap-2">
+                <TouchableOpacity onPress={() => setResolveModal(null)} className="px-4 py-2 rounded-lg bg-gray-200">
+                  <Text className="text-gray-700 font-bold">Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={resolveWithNote} className="px-4 py-2 rounded-lg bg-green-600">
+                  <Text className="text-white font-bold">Resolve</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
+    </>
+  );
+}
 // ─── Add User Modal ───────────────────────────────────────────────────────────
 
 function AddUserModal({
@@ -883,6 +1106,7 @@ function AddClassModal({
       semester,
       section,
     });
+    onClose();
   };
 
   const semesters = [
@@ -1102,7 +1326,7 @@ function ProfessorsTab() {
             <View className="flex-row items-center gap-x-3 flex-1">
               <View className="w-10 h-10 rounded-full bg-indigo-100 items-center justify-center">
                 <Text className="text-indigo-600 font-bold text-base">
-                  {prof.name.charAt(prof.name.indexOf(" ") + 1)}
+                  {prof.name.charAt(0)}
                 </Text>
               </View>
               <View className="flex-1">
@@ -1341,6 +1565,8 @@ const TAB_ADD_LABELS: Record<TabKey, string> = {
   professors: "Add Professor",
   courses: "Add Course",
   attendance: "New Session",
+  feedbacks: "",
+  tickets: "",
 };
 
 export default function AdminPage() {
@@ -1550,6 +1776,7 @@ export default function AdminPage() {
           <Text className="text-base font-bold text-gray-800">
             {TABS.find((t) => t.key === activeTab)?.label}
           </Text>
+          {(activeTab === "roles" || activeTab === "classes" || activeTab === "courses" || activeTab === "attendance") && (
           <TouchableOpacity
             onPress={handleAdd}
             activeOpacity={0.8}
@@ -1566,6 +1793,7 @@ export default function AdminPage() {
               {TAB_ADD_LABELS[activeTab]}
             </Text>
           </TouchableOpacity>
+          )}
         </View>
 
         {/* Active Tab Content */}
@@ -1577,6 +1805,8 @@ export default function AdminPage() {
           {activeTab === "professors" && <ProfessorsTab />}
           {activeTab === "courses" && <CoursesTab />}
           {activeTab === "attendance" && <AttendanceTab />}
+          {activeTab === "feedbacks" && <FeedbacksTab />}
+          {activeTab === "tickets" && <TicketsTab />}
         </View>
       </ScrollView>
 

@@ -1,7 +1,7 @@
 import { useAuth } from "@/contexts/auth.cntxt";
 import { useLocalStore } from "@/contexts/localstore.cntxt";
 import { useRefresh } from "@/hooks/use-refresh";
-import { useAttendanceStore, useTimetableStore } from "@/lib/store";
+import { useAttendanceStore, useFeedbacksStore, useTimetableStore } from "@/lib/store";
 import { Ionicons } from "@expo/vector-icons";
 import * as LocalAuthentication from "expo-local-authentication";
 import { useRouter } from "expo-router";
@@ -9,7 +9,9 @@ import { useEffect, useState } from "react";
 import {
     Alert,
     Image,
+    KeyboardAvoidingView,
     Modal,
+    Platform,
     RefreshControl,
     ScrollView,
     Text,
@@ -27,6 +29,7 @@ export default function Index() {
   const [expanded, setExpanded] = useState(true);
   const [feedbackVisible, setFeedbackVisible] = useState(false);
   const [feedbackText, setFeedbackText] = useState("");
+  const [feedbackCategory, setFeedbackCategory] = useState<"BUG"|"UX"|"FEATURE"|"OTHER">("OTHER");
   const { loggedInUser } = useAuth();
   const { refresh, refreshing } = useRefresh();
 
@@ -98,6 +101,7 @@ export default function Index() {
 
   const { summary } = useAttendanceStore();
   const { timetables, loading } = useTimetableStore();
+  const { createFeedback } = useFeedbacksStore();
 
   const validSummary = summary.filter((s) => s.total > 0);
   const totalAttended = validSummary.reduce((acc, curr) => acc + curr.attended, 0);
@@ -511,92 +515,136 @@ export default function Index() {
       <Modal
         visible={feedbackVisible}
         transparent
-        animationType="fade"
+        animationType="slide"
         onRequestClose={() => setFeedbackVisible(false)}
         statusBarTranslucent
       >
-        <TouchableOpacity
-          activeOpacity={1}
-          onPress={() => setFeedbackVisible(false)}
-          className="flex-1 bg-black/75 justify-end sm:justify-center"
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1 }}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 24}
         >
-          <TouchableOpacity activeOpacity={1} onPress={() => {}}>
-            <View className="bg-white dark:bg-zinc-900 w-full max-w-[420px] self-center rounded-t-[32px] sm:rounded-[24px] sm:m-6 p-8 pb-10 items-center shadow-2xl">
-              {/* Handle bar */}
-              <View className="w-12 h-1.5 bg-gray-200 rounded-full mb-6 sm:hidden" />
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={() => setFeedbackVisible(false)}
+            className="flex-1 bg-black/75 justify-end"
+          >
+            <TouchableOpacity activeOpacity={1} onPress={() => {}}>
+              <ScrollView
+                keyboardShouldPersistTaps="handled"
+                bounces={false}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ flexGrow: 1 }}
+              >
+                <View className="bg-white dark:bg-zinc-900 w-full rounded-t-[32px] p-8 pb-10 items-center shadow-2xl">
+                  {/* Handle bar */}
+                  <View className="w-12 h-1.5 bg-gray-200 rounded-full mb-6" />
 
-              {/* Icon */}
-              <View className="h-20 w-20 bg-pink-50 rounded-full items-center justify-center mb-5 border-[6px] border-pink-100">
-                <Ionicons name="heart" size={36} color="#F33A6A" />
-              </View>
+                  {/* Icon */}
+                  <View className="h-20 w-20 bg-pink-50 rounded-full items-center justify-center mb-5 border-[6px] border-pink-100">
+                    <Ionicons name="heart" size={36} color="#F33A6A" />
+                  </View>
 
-              {/* Title */}
-              <Text className="text-2xl font-bold text-zinc-100 font-lora text-center mb-2 dark:text-zinc-100">
-                Send Feedback
-              </Text>
-
-              {/* Subtitle */}
-              <Text className="text-gray-500 dark:text-zinc-400 text-center mb-5 leading-6 px-2">
-                We&apos;d love to hear from you! Share your thoughts to help us
-                improve.
-              </Text>
-
-              {/* Text Input */}
-              <View className="w-full mb-5">
-                <TextInput
-                  className="bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-2xl p-4 text-gray-900 dark:text-zinc-100 min-h-[120px] text-base"
-                  placeholder="Tell us what you think..."
-                  placeholderTextColor="#9CA3AF"
-                  multiline
-                  textAlignVertical="top"
-                  value={feedbackText}
-                  onChangeText={setFeedbackText}
-                />
-              </View>
-
-              {/* Action buttons */}
-              <View className="w-full gap-3">
-                <TouchableOpacity
-                  activeOpacity={0.85}
-                  className="bg-blue-600 w-full py-3.5 rounded-2xl flex-row items-center justify-center shadow-lg shadow-blue-200 active:scale-[0.98] gap-2"
-                  onPress={() => {
-                    Alert.alert(
-                      "Thank You!",
-                      "Your feedback has been submitted.",
-                    );
-                    setFeedbackVisible(false);
-                    setFeedbackText("");
-                  }}
-                >
-                  {/* <Ionicons name="send" size={16} color="#fff" /> */}
-                  <Text
-                    numberOfLines={1}
-                    className="text-white font-bold text-base text-center flex-shrink"
-                  >
-                    Submit Feedback
+                  {/* Title */}
+                  <Text className="text-2xl font-bold text-zinc-900 font-lora text-center mb-2 dark:text-zinc-100">
+                    Send Feedback
                   </Text>
-                </TouchableOpacity>
 
-                <TouchableOpacity
-                  activeOpacity={0.85}
-                  className="bg-gray-100 dark:bg-zinc-800 w-full py-3.5 rounded-2xl items-center justify-center active:scale-[0.98]"
-                  onPress={() => {
-                    setFeedbackVisible(false);
-                    setFeedbackText("");
-                  }}
-                >
-                  <Text
-                    numberOfLines={1}
-                    className="text-gray-600 dark:text-zinc-300 font-bold text-base text-center"
-                  >
-                    Cancel
+                  {/* Subtitle */}
+                  <Text className="text-gray-500 dark:text-zinc-400 text-center mb-5 leading-6 px-2">
+                    We&apos;d love to hear from you! Share your thoughts to help us
+                    improve.
                   </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
+
+                  {/* Category selector */}
+                  <View className="w-full mb-3">
+                    <Text className="text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase mb-2">Category</Text>
+                    <View className="flex-row gap-2 flex-wrap">
+                      {(["BUG","UX","FEATURE","OTHER"] as const).map((cat) => {
+                        const active = feedbackCategory === cat;
+                        return (
+                          <TouchableOpacity
+                            key={cat}
+                            className={`px-3 py-1.5 rounded-full border ${active ? "bg-pink-100 border-pink-200" : "bg-gray-100 dark:bg-zinc-800 border-gray-200 dark:border-zinc-700"}`}
+                            onPress={() => setFeedbackCategory(cat)}
+                          >
+                            <Text className={`text-xs font-bold ${active ? "text-pink-700" : "text-gray-600 dark:text-zinc-300"}`}>{cat}</Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                  </View>
+
+                  {/* Text Input */}
+                  <View className="w-full mb-5">
+                    <TextInput
+                      className="bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-2xl p-4 text-gray-900 dark:text-zinc-100 min-h-[120px] text-base"
+                      placeholder="Tell us what you think..."
+                      placeholderTextColor="#9CA3AF"
+                      multiline
+                      textAlignVertical="top"
+                      value={feedbackText}
+                      onChangeText={setFeedbackText}
+                    />
+                  </View>
+
+                  {/* Action buttons */}
+                  <View className="w-full gap-3">
+                    <TouchableOpacity
+                      activeOpacity={0.85}
+                      className="bg-blue-600 w-full py-3.5 rounded-2xl flex-row items-center justify-center shadow-lg shadow-blue-200 active:scale-[0.98] gap-2"
+                      onPress={async () => {
+                        if (!feedbackText.trim()) {
+                          Alert.alert("Feedback required", "Please enter your feedback message.");
+                          return;
+                        }
+                        try {
+                          const fb = await createFeedback(feedbackText.trim(), feedbackCategory);
+                          if (!fb) {
+                            Alert.alert("Failed", "Could not submit feedback. Please try again.");
+                            return;
+                          }
+                          Alert.alert("Thank You!", "Your feedback has been submitted.");
+                          setFeedbackVisible(false);
+                          setFeedbackText("");
+                          setFeedbackCategory("OTHER");
+                        } catch (e) {
+                          console.error(e);
+                          Alert.alert("Failed", "Network error while submitting feedback.");
+                        }
+                      }}
+                    >
+                      <Text
+                        numberOfLines={1}
+                        className="text-white font-bold text-base text-center flex-shrink"
+                      >
+                        Submit Feedback
+                      </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      activeOpacity={0.85}
+                      className="bg-gray-100 dark:bg-zinc-800 w-full py-3.5 rounded-2xl items-center justify-center active:scale-[0.98]"
+                      onPress={() => {
+                        setFeedbackVisible(false);
+                        setFeedbackText("");
+                      }}
+                    >
+                      <Text
+                        numberOfLines={1}
+                        className="text-gray-600 dark:text-zinc-300 font-bold text-base text-center"
+                      >
+                        Cancel
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </ScrollView>
+            </TouchableOpacity>
           </TouchableOpacity>
-        </TouchableOpacity>
+        </KeyboardAvoidingView>
       </Modal>
     </SafeAreaView>
   );
 }
+

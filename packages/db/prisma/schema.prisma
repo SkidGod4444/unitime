@@ -69,6 +69,8 @@ model Courses {
   updatedAt           DateTime              @updatedAt @map("updated_at")
   organizationId      String?               @map("organization_id")
   organization        Organization?         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  labGroups           LabGroup[]
+  studentLabGroups    StudentLabGroup[]
 
   @@index([organizationId])
   @@map("courses")
@@ -93,24 +95,46 @@ enum NotificationType {
   SYSTEM
 }
 
+// New: Feedback categories and statuses
+enum FeedbackCategory {
+  BUG
+  UX
+  FEATURE
+  OTHER
+}
+
+enum FeedbackStatus {
+  NEW
+  ACKNOWLEDGED
+  RESOLVED
+}
+
+// New: Support ticket status
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
 enum HistoryLogType {
   ATTENDANCE
   SYSTEM
 }
 
 model Notification {
-  id              String           @id @default(uuid())
-  title           String
-  body            String
-  type            NotificationType
-  readBy          String[]         @default([]) @map("read_by") // Array of user IDs who have read this
-  userId          String?          @map("user_id")
-  user            User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organizationId  String?          @map("organization_id")
-  organization    Organization?    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  actionUrl       String?          @map("action_url")
-  createdAt       DateTime         @default(now()) @map("created_at")
-  updatedAt       DateTime         @updatedAt @map("updated_at")
+  id             String           @id @default(uuid())
+  title          String
+  body           String
+  type           NotificationType
+  readBy         String[]         @default([]) @map("read_by") // Array of user IDs who have read this
+  userId         String?          @map("user_id")
+  user           User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String?          @map("organization_id")
+  organization   Organization?    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  actionUrl      String?          @map("action_url")
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
 
   @@index([userId])
   @@index([organizationId])
@@ -118,16 +142,62 @@ model Notification {
   @@map("notifications")
 }
 
+// ============================
+// Feedbacks & Support Tickets
+// ============================
+
+model Feedback {
+  id             String           @id @default(uuid())
+  userId         String           @map("user_id")
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String?          @map("organization_id")
+  organization   Organization?    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  message        String
+  category       FeedbackCategory @default(OTHER)
+  status         FeedbackStatus   @default(NEW)
+  resolvedAt     DateTime?        @map("resolved_at")
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([organizationId])
+  @@index([createdAt])
+  @@map("feedbacks")
+}
+
+model SupportTicket {
+  id             String       @id @default(uuid())
+  userId         String       @map("user_id")
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String?      @map("organization_id")
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  title          String
+  description    String
+  status         TicketStatus @default(OPEN)
+  resolutionNote String?      @map("resolution_note")
+  assigneeId     String?      @map("assignee_id")
+  assignee       User?        @relation("TicketAssignee", fields: [assigneeId], references: [id])
+  resolvedAt     DateTime?    @map("resolved_at")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([organizationId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("support_tickets")
+}
+
 model HistoryLog {
-  id              String         @id @default(uuid())
-  title           String
-  description     String
-  type            HistoryLogType
-  userId          String?        @map("user_id")
-  user            User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organizationId  String?        @map("organization_id")
-  organization    Organization?  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  createdAt       DateTime       @default(now()) @map("created_at")
+  id             String         @id @default(uuid())
+  title          String
+  description    String
+  type           HistoryLogType
+  userId         String?        @map("user_id")
+  user           User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String?        @map("organization_id")
+  organization   Organization?  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime       @default(now()) @map("created_at")
 
   @@index([userId])
   @@index([organizationId])
@@ -160,6 +230,8 @@ model User {
   isOnboarded          Boolean               @default(false) @map("is_onboarded") // To track if user has completed onboarding
   role                 UserRole              @default(STUDENT)
   status               UserStatus            @default(ACTIVE)
+  labGroups            LabGroup[]
+  studentLabGroups     StudentLabGroup[]
 
   @@unique([email])
   @@map("user")
@@ -237,12 +309,16 @@ model AttendanceQRSession {
   markedUsers String[]           @default([]) @map("marked_users") // Array of user IDs who have marked attendance
   startTime   DateTime           @map("start_time")
   endTime     DateTime           @map("end_time")
+  // When set, this attendance session targets a specific lab group for a LAB course.
+  labGroupId  String?            @map("lab_group_id")
+  labGroup    LabGroup?          @relation(fields: [labGroupId], references: [id])
   createdAt   DateTime           @default(now()) @map("created_at")
   updatedAt   DateTime           @updatedAt @map("updated_at")
 
   @@index([courseId])
   @@index([status])
   @@index([courseId, status])
+  @@index([labGroupId])
   @@map("attendance_qr_sessions")
 }
 
@@ -326,12 +402,48 @@ model Alarm {
   label       String
   courseCode  String   @map("course_code")
   color       String   @default("#6366f1")
-  time        String   // "HH:MM" 24-hour
-  days        Int[]    // 0=Sun…6=Sat
+  time        String // "HH:MM" 24-hour
+  days        Int[] // 0=Sun…6=Sat
   leadMinutes Int      @default(15) @map("lead_minutes")
   enabled     Boolean  @default(true)
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   @@map("alarms")
+}
+
+// ============================
+// Lab Groups
+// ============================
+
+model LabGroup {
+  id        String                @id @default(uuid())
+  courseId  String                @map("course_id")
+  course    Courses               @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  name      String
+  createdBy String                @map("created_by")
+  creator   User                  @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  students  StudentLabGroup[]
+  sessions  AttendanceQRSession[]
+  createdAt DateTime              @default(now()) @map("created_at")
+  updatedAt DateTime              @updatedAt @map("updated_at")
+
+  @@index([courseId])
+  @@map("lab_groups")
+}
+
+model StudentLabGroup {
+  id         String   @id @default(uuid())
+  studentId  String   @map("student_id")
+  student    User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  labGroupId String   @map("lab_group_id")
+  labGroup   LabGroup @relation(fields: [labGroupId], references: [id], onDelete: Cascade)
+  courseId   String   @map("course_id")
+  course     Courses  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  joinedAt   DateTime @default(now()) @map("joined_at")
+
+  @@unique([studentId, courseId])
+  @@index([labGroupId])
+  @@index([courseId])
+  @@map("student_lab_groups")
 }

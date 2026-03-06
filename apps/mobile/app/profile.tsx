@@ -228,6 +228,28 @@ export default function Profile() {
             </View>
           ))} */}
 
+          {/* Support */}
+          <View>
+            <Text className="text-sm font-bold text-gray-400 dark:text-zinc-400 uppercase tracking-widest mb-3 ml-1">
+              Support
+            </Text>
+            <TouchableOpacity
+              onPress={() => router.push("/support")}
+              className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm overflow-hidden p-4 flex-row items-center justify-between"
+            >
+              <View className="flex-row items-center gap-4">
+                <View className="h-10 w-10 bg-blue-50 dark:bg-blue-900/20 rounded-full items-center justify-center">
+                  <Ionicons name="help-buoy-outline" size={20} color="#2563EB" />
+                </View>
+                <View>
+                  <Text className="text-base font-semibold text-gray-700 dark:text-zinc-100">Support</Text>
+                  <Text className="text-xs text-gray-500 dark:text-zinc-400">Open a ticket or view responses</Text>
+                </View>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color="#9ca3af" />
+            </TouchableOpacity>
+          </View>
+
           {/* Dark Mode Toggle */}
           <View>
             <Text className="text-sm font-bold text-gray-400 dark:text-zinc-400 uppercase tracking-widest mb-3 ml-1">
@@ -250,6 +272,8 @@ export default function Profile() {
               />
             </View>
           </View>
+
+          
 
           {/* Logout Button */}
           <TouchableOpacity

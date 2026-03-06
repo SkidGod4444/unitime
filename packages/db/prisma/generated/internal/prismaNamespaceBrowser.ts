@@ -63,7 +63,9 @@ export const ModelName = {
   AttendanceSummary: 'AttendanceSummary',
   StudentProfile: 'StudentProfile',
   Organization: 'Organization',
-  Alarm: 'Alarm'
+  Alarm: 'Alarm',
+  LabGroup: 'LabGroup',
+  StudentLabGroup: 'StudentLabGroup'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -196,6 +198,7 @@ export const AttendanceQRSessionScalarFieldEnum = {
   markedUsers: 'markedUsers',
   startTime: 'startTime',
   endTime: 'endTime',
+  labGroupId: 'labGroupId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -276,6 +279,29 @@ export const AlarmScalarFieldEnum = {
 } as const
 
 export type AlarmScalarFieldEnum = (typeof AlarmScalarFieldEnum)[keyof typeof AlarmScalarFieldEnum]
+
+
+export const LabGroupScalarFieldEnum = {
+  id: 'id',
+  courseId: 'courseId',
+  name: 'name',
+  createdBy: 'createdBy',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LabGroupScalarFieldEnum = (typeof LabGroupScalarFieldEnum)[keyof typeof LabGroupScalarFieldEnum]
+
+
+export const StudentLabGroupScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  labGroupId: 'labGroupId',
+  courseId: 'courseId',
+  joinedAt: 'joinedAt'
+} as const
+
+export type StudentLabGroupScalarFieldEnum = (typeof StudentLabGroupScalarFieldEnum)[keyof typeof StudentLabGroupScalarFieldEnum]
 
 
 export const SortOrder = {
