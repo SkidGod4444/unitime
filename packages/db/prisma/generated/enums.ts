@@ -88,6 +88,35 @@ export const NotificationType = {
 export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType]
 
 
+export const FeedbackCategory = {
+  BUG: 'BUG',
+  UX: 'UX',
+  FEATURE: 'FEATURE',
+  OTHER: 'OTHER'
+} as const
+
+export type FeedbackCategory = (typeof FeedbackCategory)[keyof typeof FeedbackCategory]
+
+
+export const FeedbackStatus = {
+  NEW: 'NEW',
+  ACKNOWLEDGED: 'ACKNOWLEDGED',
+  RESOLVED: 'RESOLVED'
+} as const
+
+export type FeedbackStatus = (typeof FeedbackStatus)[keyof typeof FeedbackStatus]
+
+
+export const TicketStatus = {
+  OPEN: 'OPEN',
+  IN_PROGRESS: 'IN_PROGRESS',
+  RESOLVED: 'RESOLVED',
+  CLOSED: 'CLOSED'
+} as const
+
+export type TicketStatus = (typeof TicketStatus)[keyof typeof TicketStatus]
+
+
 export const HistoryLogType = {
   ATTENDANCE: 'ATTENDANCE',
   SYSTEM: 'SYSTEM'

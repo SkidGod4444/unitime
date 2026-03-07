@@ -53,6 +53,8 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   Courses: 'Courses',
   Notification: 'Notification',
+  Feedback: 'Feedback',
+  SupportTicket: 'SupportTicket',
   HistoryLog: 'HistoryLog',
   User: 'User',
   UserCourse: 'UserCourse',
@@ -118,6 +120,38 @@ export const NotificationScalarFieldEnum = {
 } as const
 
 export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
+
+
+export const FeedbackScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  organizationId: 'organizationId',
+  message: 'message',
+  category: 'category',
+  status: 'status',
+  resolvedAt: 'resolvedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FeedbackScalarFieldEnum = (typeof FeedbackScalarFieldEnum)[keyof typeof FeedbackScalarFieldEnum]
+
+
+export const SupportTicketScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  organizationId: 'organizationId',
+  title: 'title',
+  description: 'description',
+  status: 'status',
+  resolutionNote: 'resolutionNote',
+  assigneeId: 'assigneeId',
+  resolvedAt: 'resolvedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SupportTicketScalarFieldEnum = (typeof SupportTicketScalarFieldEnum)[keyof typeof SupportTicketScalarFieldEnum]
 
 
 export const HistoryLogScalarFieldEnum = {

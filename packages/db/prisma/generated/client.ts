@@ -52,6 +52,16 @@ export type Courses = Prisma.CoursesModel
  */
 export type Notification = Prisma.NotificationModel
 /**
+ * Model Feedback
+ * 
+ */
+export type Feedback = Prisma.FeedbackModel
+/**
+ * Model SupportTicket
+ * 
+ */
+export type SupportTicket = Prisma.SupportTicketModel
+/**
  * Model HistoryLog
  * 
  */

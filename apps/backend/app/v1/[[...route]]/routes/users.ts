@@ -1,10 +1,10 @@
 // Account access should be request-scoped via auth middleware; use context user instead
 import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
+import type { AppEnv } from "@/types/app-env";
 import { getOrSetCache, invalidateCache } from "@unitime/cache";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
 import { z } from "zod";
-import type { AppEnv } from "@/types/app-env";
 
 const users = new Hono<AppEnv>();
 
@@ -109,12 +109,12 @@ users.get("/:id", async (c) => {
 
 users.put("/:id/update", async (c) => {
   const id = c.req.param("id");
-  const schema = z
-    .object({
-      name: z.string().min(1).optional(),
-      image: z.string().url().optional(),
-    })
-    .strict();
+  const schema = z.object({
+    name: z.string().min(1).optional(),
+    image: z.string().url().optional(),
+    expoPushToken: z.string().optional(),
+    coordinates: z.string().optional(),
+  });
 
   let parsed: z.infer<typeof schema>;
   try {

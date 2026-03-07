@@ -10,6 +10,8 @@
  */
 export type * from './models/Courses.ts'
 export type * from './models/Notification.ts'
+export type * from './models/Feedback.ts'
+export type * from './models/SupportTicket.ts'
 export type * from './models/HistoryLog.ts'
 export type * from './models/User.ts'
 export type * from './models/UserCourse.ts'

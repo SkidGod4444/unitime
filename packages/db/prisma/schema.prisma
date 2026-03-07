@@ -225,6 +225,9 @@ model User {
   alarms               Alarm[]
   notifications        Notification[]
   historyLogs          HistoryLog[]
+  feedbacks            Feedback[]
+  tickets              SupportTicket[]
+  assignedTickets      SupportTicket[]       @relation("TicketAssignee")
   coordinates          String?               @map("coordinates") // For geofencing, format: "latitude,longitude"
   expoPushToken        String?               @map("expo_push_token") // For push notifications
   isOnboarded          Boolean               @default(false) @map("is_onboarded") // To track if user has completed onboarding
@@ -389,6 +392,8 @@ model Organization {
   courses        Courses[]
   notifications  Notification[]
   historyLogs    HistoryLog[]
+  feedbacks      Feedback[]
+  tickets        SupportTicket[]
   createdAt      DateTime         @default(now()) @map("created_at")
   updatedAt      DateTime         @updatedAt @map("updated_at")
 

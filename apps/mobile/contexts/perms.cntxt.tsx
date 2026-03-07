@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/api";
 import { Camera, PermissionStatus } from "expo-camera";
 import * as Location from "expo-location";
 import * as MediaLibrary from "expo-media-library";
@@ -85,8 +86,7 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
           const location = await Location.getCurrentPositionAsync({});
           console.log("Current location:", location);
           if (loggedInUser) {
-            const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
-            await fetch(`${origin}/users/${loggedInUser.id}/update`, {
+            await apiFetch(`/users/${loggedInUser.id}/update`, {
               method: "PUT",
               headers: {
                 "Content-Type": "application/json",
@@ -131,8 +131,7 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
         const expoToken = (await Notifications.getExpoPushTokenAsync()).data;
         console.log("Expo Push Token:", expoToken);
         if (loggedInUser) {
-          const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
-          await fetch(`${origin}/users/${loggedInUser.id}/update`, {
+          await apiFetch(`/users/${loggedInUser.id}/update`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
