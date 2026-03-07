@@ -1,5 +1,5 @@
 import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
-import { prisma, Prisma } from "@unitime/db";
+import { prisma } from "@unitime/db";
 import { Hono } from "hono";
 import { z } from "zod";
 import type { AppEnv } from "@/types/app-env";
@@ -84,7 +84,7 @@ tickets.patch("/:id/status", requireRole("ADMIN"), async (c) => {
   const id = c.req.param("id");
   const schema = z
     .object({
-      status: z.nativeEnum(Prisma.TicketStatus),
+      status: z.enum(["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"] as const),
       assigneeId: z.string().optional(),
     })
     .strict();
@@ -124,7 +124,7 @@ tickets.patch("/:id/resolve", requireRole("ADMIN"), async (c) => {
     const update = await prisma.supportTicket.update({
       where: { id },
       data: {
-        status: Prisma.TicketStatus.RESOLVED,
+        status: "RESOLVED",
         resolutionNote: body.resolutionNote,
         resolvedAt: new Date(),
       },
