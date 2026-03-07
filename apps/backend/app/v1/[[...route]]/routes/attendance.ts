@@ -22,7 +22,7 @@ attendance.post("/qr/session/create", async (c) => {
   if (!parsed.success) {
     return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT);
   }
-  const { courseId, startTime, endTime, manualPresentIds, manualAbsentIds, labGroupId } = parsed.data;
+  const { courseId, startTime, endTime, manualPresentIds, manualAbsentIds, labGroupId, geofenceRadius } = parsed.data;
   const manualIds = Array.isArray(manualPresentIds) ? manualPresentIds : [];
   const absentIds = Array.isArray(manualAbsentIds) ? manualAbsentIds : [];
 
@@ -47,6 +47,7 @@ attendance.post("/qr/session/create", async (c) => {
       endTime,
       markedUsers: manualIds.length > 0 ? manualIds : [],
       labGroupId: labGroupId || null,
+      geofenceRadius: geofenceRadius ?? 75,
     },
   });
   if (!qrSession.id) {
@@ -300,9 +301,9 @@ attendance.post("/checkin", async (c) => {
     const [profLatStr, profLngStr] = session.user.coordinates.split(",");
     const profCoords = { lat: parseFloat(profLatStr), lng: parseFloat(profLngStr) };
     
-    // Verify distance
+    // Verify distance using per-session geofence radius (default 75m)
     const distanceMeters = haversineDistance(coordinates, profCoords);
-    const THRESHOLD_METERS = 75; // 75 meters geofence leeway
+    const THRESHOLD_METERS = session.geofenceRadius ?? 75;
     
     if (distanceMeters > THRESHOLD_METERS) {
       console.log(`[Check-in Failed] User ${requesterId} is ${distanceMeters.toFixed(1)}m away from class.`);

@@ -1,15 +1,14 @@
 import { z } from "zod";
 
-export const createQRSessionSchema = z
-  .object({
-    courseId: z.string().uuid(),
-    startTime: z.coerce.date(),
-    endTime: z.coerce.date(),
-    manualPresentIds: z.array(z.string()).optional(),
-    manualAbsentIds: z.array(z.string()).optional(),
-    labGroupId: z.string().uuid().optional(),
-  })
-  .strict();
+export const createQRSessionSchema = z.object({
+  courseId: z.string().uuid(),
+  startTime: z.coerce.date(),
+  endTime: z.coerce.date(),
+  manualPresentIds: z.array(z.string()).optional(),
+  manualAbsentIds: z.array(z.string()).optional(),
+  labGroupId: z.string().uuid().optional(),
+  geofenceRadius: z.number().int().min(10).max(500).optional(),
+});
 
 export const checkinSchema = z
   .object({

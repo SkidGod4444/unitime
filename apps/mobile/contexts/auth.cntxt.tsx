@@ -1,17 +1,17 @@
 import { account, getUser } from "@/lib/auth";
+import { setAuthTokenProvider } from "@/lib/auth.token";
 import { isInstitutionalEmail } from "@/utils/email.validator";
 import { UserT } from "@unitime/types";
 import { router } from "expo-router";
 import { usePostHog } from "posthog-react-native";
 import React, {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useState,
+    createContext,
+    ReactNode,
+    useContext,
+    useEffect,
+    useState,
 } from "react";
 import { ID } from "react-native-appwrite";
-import { setAuthTokenProvider } from "@/lib/auth.token";
 
 type AuthContextType = {
   isAuthenticated: boolean;
@@ -23,6 +23,7 @@ type AuthContextType = {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
+  refreshJwt: () => Promise<string | null>;
 };
 
 const AuthContext = createContext<AuthContextType>({
@@ -35,6 +36,7 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => {},
   register: async () => {},
   logout: async () => {},
+  refreshJwt: async () => null,
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -224,6 +226,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }
 
+  // Refresh the Appwrite JWT (expires after 15 min) — call before sensitive authenticated requests
+  const refreshJwt = async (): Promise<string | null> => {
+    try {
+      const jwtResponse = await account.createJWT();
+      setJwt(jwtResponse.jwt);
+      setAuthTokenProvider(() => jwtResponse.jwt);
+      return jwtResponse.jwt;
+    } catch (err) {
+      console.warn("Failed to refresh JWT:", err);
+      return null;
+    }
+  };
+
   useEffect(() => {
     let isMounted = true;
 
@@ -289,6 +304,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         login,
         register,
         logout,
+        refreshJwt,
       }}
     >
       {children}

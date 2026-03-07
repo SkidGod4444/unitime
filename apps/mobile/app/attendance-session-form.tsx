@@ -1,10 +1,10 @@
 import { useAuth } from "@/contexts/auth.cntxt";
 import { withAuth } from "@/lib/api";
 import { useCoursesStore, useOrgsStore } from "@/lib/store";
+import { useLabGroupsStore } from "@/lib/store/lab-groups";
 import { Course } from "@/lib/store/timetable";
 import { Ionicons } from "@expo/vector-icons";
 import { OrgT } from "@unitime/types";
-import { useLabGroupsStore } from "@/lib/store/lab-groups";
 import * as Location from "expo-location";
 import { Stack, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
@@ -95,7 +95,7 @@ StudentRow.displayName = "StudentRow";
 
 export default function AttendanceSessionForm() {
   const router = useRouter();
-  const { loggedInUser } = useAuth();
+  const { loggedInUser, refreshJwt } = useAuth();
   const { courses: allCourses } = useCoursesStore();
   const { orgs: allOrgs } = useOrgsStore();
   const { fetchLabGroups, fetchLabGroupMembers } = useLabGroupsStore();
@@ -118,6 +118,7 @@ export default function AttendanceSessionForm() {
 
   const [location, setLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [locationStatus, setLocationStatus] = useState<"loading" | "ok" | "denied">("loading");
+  const [geofenceRadius, setGeofenceRadius] = useState(75);
 
   useEffect(() => {
     if (loggedInUser?.role === "ADMIN") {
@@ -233,6 +234,13 @@ export default function AttendanceSessionForm() {
     })();
   }, [selectedCourse, fetchLabGroups]);
 
+  // Refresh JWT proactively when the form mounts — Appwrite JWTs expire in 15 min.
+  // Professors often keeps the app open well beyond that before creating a session.
+  useEffect(() => {
+    refreshJwt().catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -285,33 +293,56 @@ export default function AttendanceSessionForm() {
 
       // Create Session
       const manualPresentIds = students.filter(s => s.status === "present").map(s => s.id);
-      
-      const res = await fetch(
-        `${origin}/attendance/qr/session/create`,
-        withAuth({
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            courseId: selectedCourse.id,
-            startTime: startTime.toISOString(),
-            endTime: endTime.toISOString(),
-            manualPresentIds,
-            labGroupId: (selectedCourse as any).classType === "LAB" ? selectedLabGroupId : undefined,
-          }),
-        }),
-      );
-      const data = await res.json();
 
+      // Helper: makes the session create POST and returns {res, data}
+      const doCreateSession = async () => {
+        const r = await fetch(
+          `${origin}/attendance/qr/session/create`,
+          withAuth({
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              courseId: selectedCourse!.id,
+              startTime: startTime.toISOString(),
+              endTime: endTime.toISOString(),
+              manualPresentIds,
+              labGroupId: (selectedCourse as any).classType === "LAB" ? selectedLabGroupId : undefined,
+              geofenceRadius,
+            }),
+          }),
+        );
+        const d = await r.json();
+        return { res: r, data: d };
+      };
+
+      // First attempt
+      let { res, data } = await doCreateSession();
+
+      // If 401, the Appwrite JWT may have just expired — refresh once and retry
       if (res.status === 401) {
-        Alert.alert("Not Authenticated", "Session expired. Please sign in again.");
-        setIsSubmitting(false);
-        return;
+        console.log("Got 401 on session create, attempting JWT refresh...");
+        const newToken = await refreshJwt();
+        if (!newToken) {
+          Alert.alert("Not Authenticated", "Could not refresh your session. Please sign in again.");
+          setIsSubmitting(false);
+          return;
+        }
+        // Retry with the fresh token
+        ({ res, data } = await doCreateSession());
+        if (res.status === 401) {
+          Alert.alert("Not Authenticated", "Session expired. Please sign in again.");
+          setIsSubmitting(false);
+          return;
+        }
       }
+
       if (res.status === 403) {
         Alert.alert("Insufficient permissions", "You do not have access to create sessions.");
         setIsSubmitting(false);
         return;
       }
+
+
 
       if (res.ok && data.success) {
         
@@ -691,7 +722,44 @@ export default function AttendanceSessionForm() {
               Auto-detected · Read only
             </Text>
           </View>
+
+          {/* Geofence Radius Control */}
+          <View className="mt-4">
+            <View className="flex-row items-center justify-between mb-2">
+              <View>
+                <Text className="text-sm font-medium text-gray-700">Geofence Radius</Text>
+                <Text className="text-xs text-gray-400 mt-0.5">
+                  Students must be within this distance from you
+                </Text>
+              </View>
+              <View className="bg-indigo-100 px-2.5 py-1 rounded-full">
+                <Text className="text-indigo-700 text-sm font-bold">{geofenceRadius} m</Text>
+              </View>
+            </View>
+            <View className="flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
+              {[25, 50, 75, 100, 150, 200].map((val, idx, arr) => (
+                <Pressable
+                  key={val}
+                  onPress={() => setGeofenceRadius(val)}
+                  className={`flex-1 items-center py-2.5 ${
+                    geofenceRadius === val
+                      ? "bg-indigo-600"
+                      : "bg-transparent"
+                  } ${idx !== arr.length - 1 ? "border-r border-gray-200" : ""}`}
+                >
+                  <Text
+                    className={`text-xs font-bold ${
+                      geofenceRadius === val ? "text-white" : "text-gray-500"
+                    }`}
+                  >
+                    {val}m
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
         </View>
+
 
         {students.length > 0 && (
           <View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-8">

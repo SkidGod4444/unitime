@@ -20,8 +20,18 @@ export type AttendanceQRSessionModel = runtime.Types.Result.DefaultSelection<Pri
 
 export type AggregateAttendanceQRSession = {
   _count: AttendanceQRSessionCountAggregateOutputType | null
+  _avg: AttendanceQRSessionAvgAggregateOutputType | null
+  _sum: AttendanceQRSessionSumAggregateOutputType | null
   _min: AttendanceQRSessionMinAggregateOutputType | null
   _max: AttendanceQRSessionMaxAggregateOutputType | null
+}
+
+export type AttendanceQRSessionAvgAggregateOutputType = {
+  geofenceRadius: number | null
+}
+
+export type AttendanceQRSessionSumAggregateOutputType = {
+  geofenceRadius: number | null
 }
 
 export type AttendanceQRSessionMinAggregateOutputType = {
@@ -31,6 +41,7 @@ export type AttendanceQRSessionMinAggregateOutputType = {
   status: $Enums.AttendanceQRStatus | null
   startTime: Date | null
   endTime: Date | null
+  geofenceRadius: number | null
   labGroupId: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -43,6 +54,7 @@ export type AttendanceQRSessionMaxAggregateOutputType = {
   status: $Enums.AttendanceQRStatus | null
   startTime: Date | null
   endTime: Date | null
+  geofenceRadius: number | null
   labGroupId: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -56,12 +68,21 @@ export type AttendanceQRSessionCountAggregateOutputType = {
   markedUsers: number
   startTime: number
   endTime: number
+  geofenceRadius: number
   labGroupId: number
   createdAt: number
   updatedAt: number
   _all: number
 }
 
+
+export type AttendanceQRSessionAvgAggregateInputType = {
+  geofenceRadius?: true
+}
+
+export type AttendanceQRSessionSumAggregateInputType = {
+  geofenceRadius?: true
+}
 
 export type AttendanceQRSessionMinAggregateInputType = {
   id?: true
@@ -70,6 +91,7 @@ export type AttendanceQRSessionMinAggregateInputType = {
   status?: true
   startTime?: true
   endTime?: true
+  geofenceRadius?: true
   labGroupId?: true
   createdAt?: true
   updatedAt?: true
@@ -82,6 +104,7 @@ export type AttendanceQRSessionMaxAggregateInputType = {
   status?: true
   startTime?: true
   endTime?: true
+  geofenceRadius?: true
   labGroupId?: true
   createdAt?: true
   updatedAt?: true
@@ -95,6 +118,7 @@ export type AttendanceQRSessionCountAggregateInputType = {
   markedUsers?: true
   startTime?: true
   endTime?: true
+  geofenceRadius?: true
   labGroupId?: true
   createdAt?: true
   updatedAt?: true
@@ -139,6 +163,18 @@ export type AttendanceQRSessionAggregateArgs<ExtArgs extends runtime.Types.Exten
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: AttendanceQRSessionAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: AttendanceQRSessionSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: AttendanceQRSessionMinAggregateInputType
@@ -169,6 +205,8 @@ export type AttendanceQRSessionGroupByArgs<ExtArgs extends runtime.Types.Extensi
   take?: number
   skip?: number
   _count?: AttendanceQRSessionCountAggregateInputType | true
+  _avg?: AttendanceQRSessionAvgAggregateInputType
+  _sum?: AttendanceQRSessionSumAggregateInputType
   _min?: AttendanceQRSessionMinAggregateInputType
   _max?: AttendanceQRSessionMaxAggregateInputType
 }
@@ -181,10 +219,13 @@ export type AttendanceQRSessionGroupByOutputType = {
   markedUsers: string[]
   startTime: Date
   endTime: Date
+  geofenceRadius: number | null
   labGroupId: string | null
   createdAt: Date
   updatedAt: Date
   _count: AttendanceQRSessionCountAggregateOutputType | null
+  _avg: AttendanceQRSessionAvgAggregateOutputType | null
+  _sum: AttendanceQRSessionSumAggregateOutputType | null
   _min: AttendanceQRSessionMinAggregateOutputType | null
   _max: AttendanceQRSessionMaxAggregateOutputType | null
 }
@@ -215,6 +256,7 @@ export type AttendanceQRSessionWhereInput = {
   markedUsers?: Prisma.StringNullableListFilter<"AttendanceQRSession">
   startTime?: Prisma.DateTimeFilter<"AttendanceQRSession"> | Date | string
   endTime?: Prisma.DateTimeFilter<"AttendanceQRSession"> | Date | string
+  geofenceRadius?: Prisma.IntNullableFilter<"AttendanceQRSession"> | number | null
   labGroupId?: Prisma.StringNullableFilter<"AttendanceQRSession"> | string | null
   createdAt?: Prisma.DateTimeFilter<"AttendanceQRSession"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AttendanceQRSession"> | Date | string
@@ -231,6 +273,7 @@ export type AttendanceQRSessionOrderByWithRelationInput = {
   markedUsers?: Prisma.SortOrder
   startTime?: Prisma.SortOrder
   endTime?: Prisma.SortOrder
+  geofenceRadius?: Prisma.SortOrderInput | Prisma.SortOrder
   labGroupId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -250,6 +293,7 @@ export type AttendanceQRSessionWhereUniqueInput = Prisma.AtLeast<{
   markedUsers?: Prisma.StringNullableListFilter<"AttendanceQRSession">
   startTime?: Prisma.DateTimeFilter<"AttendanceQRSession"> | Date | string
   endTime?: Prisma.DateTimeFilter<"AttendanceQRSession"> | Date | string
+  geofenceRadius?: Prisma.IntNullableFilter<"AttendanceQRSession"> | number | null
   labGroupId?: Prisma.StringNullableFilter<"AttendanceQRSession"> | string | null
   createdAt?: Prisma.DateTimeFilter<"AttendanceQRSession"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AttendanceQRSession"> | Date | string
@@ -266,12 +310,15 @@ export type AttendanceQRSessionOrderByWithAggregationInput = {
   markedUsers?: Prisma.SortOrder
   startTime?: Prisma.SortOrder
   endTime?: Prisma.SortOrder
+  geofenceRadius?: Prisma.SortOrderInput | Prisma.SortOrder
   labGroupId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.AttendanceQRSessionCountOrderByAggregateInput
+  _avg?: Prisma.AttendanceQRSessionAvgOrderByAggregateInput
   _max?: Prisma.AttendanceQRSessionMaxOrderByAggregateInput
   _min?: Prisma.AttendanceQRSessionMinOrderByAggregateInput
+  _sum?: Prisma.AttendanceQRSessionSumOrderByAggregateInput
 }
 
 export type AttendanceQRSessionScalarWhereWithAggregatesInput = {
@@ -285,6 +332,7 @@ export type AttendanceQRSessionScalarWhereWithAggregatesInput = {
   markedUsers?: Prisma.StringNullableListFilter<"AttendanceQRSession">
   startTime?: Prisma.DateTimeWithAggregatesFilter<"AttendanceQRSession"> | Date | string
   endTime?: Prisma.DateTimeWithAggregatesFilter<"AttendanceQRSession"> | Date | string
+  geofenceRadius?: Prisma.IntNullableWithAggregatesFilter<"AttendanceQRSession"> | number | null
   labGroupId?: Prisma.StringNullableWithAggregatesFilter<"AttendanceQRSession"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AttendanceQRSession"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"AttendanceQRSession"> | Date | string
@@ -296,6 +344,7 @@ export type AttendanceQRSessionCreateInput = {
   markedUsers?: Prisma.AttendanceQRSessionCreatemarkedUsersInput | string[]
   startTime: Date | string
   endTime: Date | string
+  geofenceRadius?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutAttendanceQRSessionsInput
@@ -311,6 +360,7 @@ export type AttendanceQRSessionUncheckedCreateInput = {
   markedUsers?: Prisma.AttendanceQRSessionCreatemarkedUsersInput | string[]
   startTime: Date | string
   endTime: Date | string
+  geofenceRadius?: number | null
   labGroupId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -322,6 +372,7 @@ export type AttendanceQRSessionUpdateInput = {
   markedUsers?: Prisma.AttendanceQRSessionUpdatemarkedUsersInput | string[]
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  geofenceRadius?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutAttendanceQRSessionsNestedInput
@@ -337,6 +388,7 @@ export type AttendanceQRSessionUncheckedUpdateInput = {
   markedUsers?: Prisma.AttendanceQRSessionUpdatemarkedUsersInput | string[]
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  geofenceRadius?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   labGroupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -350,6 +402,7 @@ export type AttendanceQRSessionCreateManyInput = {
   markedUsers?: Prisma.AttendanceQRSessionCreatemarkedUsersInput | string[]
   startTime: Date | string
   endTime: Date | string
+  geofenceRadius?: number | null
   labGroupId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -361,6 +414,7 @@ export type AttendanceQRSessionUpdateManyMutationInput = {
   markedUsers?: Prisma.AttendanceQRSessionUpdatemarkedUsersInput | string[]
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  geofenceRadius?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -373,6 +427,7 @@ export type AttendanceQRSessionUncheckedUpdateManyInput = {
   markedUsers?: Prisma.AttendanceQRSessionUpdatemarkedUsersInput | string[]
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  geofenceRadius?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   labGroupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -396,9 +451,14 @@ export type AttendanceQRSessionCountOrderByAggregateInput = {
   markedUsers?: Prisma.SortOrder
   startTime?: Prisma.SortOrder
   endTime?: Prisma.SortOrder
+  geofenceRadius?: Prisma.SortOrder
   labGroupId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type AttendanceQRSessionAvgOrderByAggregateInput = {
+  geofenceRadius?: Prisma.SortOrder
 }
 
 export type AttendanceQRSessionMaxOrderByAggregateInput = {
@@ -408,6 +468,7 @@ export type AttendanceQRSessionMaxOrderByAggregateInput = {
   status?: Prisma.SortOrder
   startTime?: Prisma.SortOrder
   endTime?: Prisma.SortOrder
+  geofenceRadius?: Prisma.SortOrder
   labGroupId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -420,9 +481,14 @@ export type AttendanceQRSessionMinOrderByAggregateInput = {
   status?: Prisma.SortOrder
   startTime?: Prisma.SortOrder
   endTime?: Prisma.SortOrder
+  geofenceRadius?: Prisma.SortOrder
   labGroupId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type AttendanceQRSessionSumOrderByAggregateInput = {
+  geofenceRadius?: Prisma.SortOrder
 }
 
 export type AttendanceQRSessionCreateNestedManyWithoutCourseInput = {
@@ -522,6 +588,14 @@ export type AttendanceQRSessionUpdatemarkedUsersInput = {
   push?: string | string[]
 }
 
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type AttendanceQRSessionCreateNestedManyWithoutLabGroupInput = {
   create?: Prisma.XOR<Prisma.AttendanceQRSessionCreateWithoutLabGroupInput, Prisma.AttendanceQRSessionUncheckedCreateWithoutLabGroupInput> | Prisma.AttendanceQRSessionCreateWithoutLabGroupInput[] | Prisma.AttendanceQRSessionUncheckedCreateWithoutLabGroupInput[]
   connectOrCreate?: Prisma.AttendanceQRSessionCreateOrConnectWithoutLabGroupInput | Prisma.AttendanceQRSessionCreateOrConnectWithoutLabGroupInput[]
@@ -570,6 +644,7 @@ export type AttendanceQRSessionCreateWithoutCourseInput = {
   markedUsers?: Prisma.AttendanceQRSessionCreatemarkedUsersInput | string[]
   startTime: Date | string
   endTime: Date | string
+  geofenceRadius?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutAttendanceQRSessionsInput
@@ -583,6 +658,7 @@ export type AttendanceQRSessionUncheckedCreateWithoutCourseInput = {
   markedUsers?: Prisma.AttendanceQRSessionCreatemarkedUsersInput | string[]
   startTime: Date | string
   endTime: Date | string
+  geofenceRadius?: number | null
   labGroupId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -625,6 +701,7 @@ export type AttendanceQRSessionScalarWhereInput = {
   markedUsers?: Prisma.StringNullableListFilter<"AttendanceQRSession">
   startTime?: Prisma.DateTimeFilter<"AttendanceQRSession"> | Date | string
   endTime?: Prisma.DateTimeFilter<"AttendanceQRSession"> | Date | string
+  geofenceRadius?: Prisma.IntNullableFilter<"AttendanceQRSession"> | number | null
   labGroupId?: Prisma.StringNullableFilter<"AttendanceQRSession"> | string | null
   createdAt?: Prisma.DateTimeFilter<"AttendanceQRSession"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AttendanceQRSession"> | Date | string
@@ -636,6 +713,7 @@ export type AttendanceQRSessionCreateWithoutUserInput = {
   markedUsers?: Prisma.AttendanceQRSessionCreatemarkedUsersInput | string[]
   startTime: Date | string
   endTime: Date | string
+  geofenceRadius?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   course: Prisma.CoursesCreateNestedOneWithoutAttendanceQRSessionInput
@@ -649,6 +727,7 @@ export type AttendanceQRSessionUncheckedCreateWithoutUserInput = {
   markedUsers?: Prisma.AttendanceQRSessionCreatemarkedUsersInput | string[]
   startTime: Date | string
   endTime: Date | string
+  geofenceRadius?: number | null
   labGroupId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -686,6 +765,7 @@ export type AttendanceQRSessionCreateWithoutLabGroupInput = {
   markedUsers?: Prisma.AttendanceQRSessionCreatemarkedUsersInput | string[]
   startTime: Date | string
   endTime: Date | string
+  geofenceRadius?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutAttendanceQRSessionsInput
@@ -700,6 +780,7 @@ export type AttendanceQRSessionUncheckedCreateWithoutLabGroupInput = {
   markedUsers?: Prisma.AttendanceQRSessionCreatemarkedUsersInput | string[]
   startTime: Date | string
   endTime: Date | string
+  geofenceRadius?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -737,6 +818,7 @@ export type AttendanceQRSessionCreateManyCourseInput = {
   markedUsers?: Prisma.AttendanceQRSessionCreatemarkedUsersInput | string[]
   startTime: Date | string
   endTime: Date | string
+  geofenceRadius?: number | null
   labGroupId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -748,6 +830,7 @@ export type AttendanceQRSessionUpdateWithoutCourseInput = {
   markedUsers?: Prisma.AttendanceQRSessionUpdatemarkedUsersInput | string[]
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  geofenceRadius?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutAttendanceQRSessionsNestedInput
@@ -761,6 +844,7 @@ export type AttendanceQRSessionUncheckedUpdateWithoutCourseInput = {
   markedUsers?: Prisma.AttendanceQRSessionUpdatemarkedUsersInput | string[]
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  geofenceRadius?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   labGroupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -773,6 +857,7 @@ export type AttendanceQRSessionUncheckedUpdateManyWithoutCourseInput = {
   markedUsers?: Prisma.AttendanceQRSessionUpdatemarkedUsersInput | string[]
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  geofenceRadius?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   labGroupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -785,6 +870,7 @@ export type AttendanceQRSessionCreateManyUserInput = {
   markedUsers?: Prisma.AttendanceQRSessionCreatemarkedUsersInput | string[]
   startTime: Date | string
   endTime: Date | string
+  geofenceRadius?: number | null
   labGroupId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -796,6 +882,7 @@ export type AttendanceQRSessionUpdateWithoutUserInput = {
   markedUsers?: Prisma.AttendanceQRSessionUpdatemarkedUsersInput | string[]
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  geofenceRadius?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   course?: Prisma.CoursesUpdateOneRequiredWithoutAttendanceQRSessionNestedInput
@@ -809,6 +896,7 @@ export type AttendanceQRSessionUncheckedUpdateWithoutUserInput = {
   markedUsers?: Prisma.AttendanceQRSessionUpdatemarkedUsersInput | string[]
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  geofenceRadius?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   labGroupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -821,6 +909,7 @@ export type AttendanceQRSessionUncheckedUpdateManyWithoutUserInput = {
   markedUsers?: Prisma.AttendanceQRSessionUpdatemarkedUsersInput | string[]
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  geofenceRadius?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   labGroupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -834,6 +923,7 @@ export type AttendanceQRSessionCreateManyLabGroupInput = {
   markedUsers?: Prisma.AttendanceQRSessionCreatemarkedUsersInput | string[]
   startTime: Date | string
   endTime: Date | string
+  geofenceRadius?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -844,6 +934,7 @@ export type AttendanceQRSessionUpdateWithoutLabGroupInput = {
   markedUsers?: Prisma.AttendanceQRSessionUpdatemarkedUsersInput | string[]
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  geofenceRadius?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutAttendanceQRSessionsNestedInput
@@ -858,6 +949,7 @@ export type AttendanceQRSessionUncheckedUpdateWithoutLabGroupInput = {
   markedUsers?: Prisma.AttendanceQRSessionUpdatemarkedUsersInput | string[]
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  geofenceRadius?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -870,6 +962,7 @@ export type AttendanceQRSessionUncheckedUpdateManyWithoutLabGroupInput = {
   markedUsers?: Prisma.AttendanceQRSessionUpdatemarkedUsersInput | string[]
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  geofenceRadius?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -884,6 +977,7 @@ export type AttendanceQRSessionSelect<ExtArgs extends runtime.Types.Extensions.I
   markedUsers?: boolean
   startTime?: boolean
   endTime?: boolean
+  geofenceRadius?: boolean
   labGroupId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -900,6 +994,7 @@ export type AttendanceQRSessionSelectCreateManyAndReturn<ExtArgs extends runtime
   markedUsers?: boolean
   startTime?: boolean
   endTime?: boolean
+  geofenceRadius?: boolean
   labGroupId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -916,6 +1011,7 @@ export type AttendanceQRSessionSelectUpdateManyAndReturn<ExtArgs extends runtime
   markedUsers?: boolean
   startTime?: boolean
   endTime?: boolean
+  geofenceRadius?: boolean
   labGroupId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -932,12 +1028,13 @@ export type AttendanceQRSessionSelectScalar = {
   markedUsers?: boolean
   startTime?: boolean
   endTime?: boolean
+  geofenceRadius?: boolean
   labGroupId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AttendanceQRSessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "courseId" | "createdBy" | "status" | "markedUsers" | "startTime" | "endTime" | "labGroupId" | "createdAt" | "updatedAt", ExtArgs["result"]["attendanceQRSession"]>
+export type AttendanceQRSessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "courseId" | "createdBy" | "status" | "markedUsers" | "startTime" | "endTime" | "geofenceRadius" | "labGroupId" | "createdAt" | "updatedAt", ExtArgs["result"]["attendanceQRSession"]>
 export type AttendanceQRSessionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   course?: boolean | Prisma.CoursesDefaultArgs<ExtArgs>
@@ -969,6 +1066,7 @@ export type $AttendanceQRSessionPayload<ExtArgs extends runtime.Types.Extensions
     markedUsers: string[]
     startTime: Date
     endTime: Date
+    geofenceRadius: number | null
     labGroupId: string | null
     createdAt: Date
     updatedAt: Date
@@ -1405,6 +1503,7 @@ export interface AttendanceQRSessionFieldRefs {
   readonly markedUsers: Prisma.FieldRef<"AttendanceQRSession", 'String[]'>
   readonly startTime: Prisma.FieldRef<"AttendanceQRSession", 'DateTime'>
   readonly endTime: Prisma.FieldRef<"AttendanceQRSession", 'DateTime'>
+  readonly geofenceRadius: Prisma.FieldRef<"AttendanceQRSession", 'Int'>
   readonly labGroupId: Prisma.FieldRef<"AttendanceQRSession", 'String'>
   readonly createdAt: Prisma.FieldRef<"AttendanceQRSession", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"AttendanceQRSession", 'DateTime'>

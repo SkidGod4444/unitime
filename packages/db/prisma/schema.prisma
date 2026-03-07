@@ -303,20 +303,21 @@ enum AttendanceQRStatus {
 }
 
 model AttendanceQRSession {
-  id          String             @id @default(uuid())
-  courseId    String             @map("course_id")
-  createdBy   String             @map("created_by")
-  user        User               @relation(fields: [createdBy], references: [id], onDelete: Cascade)
-  course      Courses            @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  status      AttendanceQRStatus @default(ACTIVE)
-  markedUsers String[]           @default([]) @map("marked_users") // Array of user IDs who have marked attendance
-  startTime   DateTime           @map("start_time")
-  endTime     DateTime           @map("end_time")
+  id            String             @id @default(uuid())
+  courseId      String             @map("course_id")
+  createdBy     String             @map("created_by")
+  user          User               @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  course        Courses            @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  status        AttendanceQRStatus @default(ACTIVE)
+  markedUsers   String[]           @default([]) @map("marked_users") // Array of user IDs who have marked attendance
+  startTime     DateTime           @map("start_time")
+  endTime       DateTime           @map("end_time")
+  geofenceRadius Int?              @default(75) @map("geofence_radius") // Radius in meters for location validation
   // When set, this attendance session targets a specific lab group for a LAB course.
-  labGroupId  String?            @map("lab_group_id")
-  labGroup    LabGroup?          @relation(fields: [labGroupId], references: [id])
-  createdAt   DateTime           @default(now()) @map("created_at")
-  updatedAt   DateTime           @updatedAt @map("updated_at")
+  labGroupId    String?            @map("lab_group_id")
+  labGroup      LabGroup?          @relation(fields: [labGroupId], references: [id])
+  createdAt     DateTime           @default(now()) @map("created_at")
+  updatedAt     DateTime           @updatedAt @map("updated_at")
 
   @@index([courseId])
   @@index([status])

@@ -232,6 +232,7 @@ export const AttendanceQRSessionScalarFieldEnum = {
   markedUsers: 'markedUsers',
   startTime: 'startTime',
   endTime: 'endTime',
+  geofenceRadius: 'geofenceRadius',
   labGroupId: 'labGroupId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

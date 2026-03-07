@@ -1863,6 +1863,7 @@ export const AttendanceQRSessionScalarFieldEnum = {
   markedUsers: 'markedUsers',
   startTime: 'startTime',
   endTime: 'endTime',
+  geofenceRadius: 'geofenceRadius',
   labGroupId: 'labGroupId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -2245,20 +2246,6 @@ export type ListEnumAttendanceQRStatusFieldRefInput<$PrismaModel> = FieldRefInpu
 
 
 /**
- * Reference to a field of type 'AttendanceSessionType'
- */
-export type EnumAttendanceSessionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AttendanceSessionType'>
-    
-
-
-/**
- * Reference to a field of type 'AttendanceSessionType[]'
- */
-export type ListEnumAttendanceSessionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AttendanceSessionType[]'>
-    
-
-
-/**
  * Reference to a field of type 'Int'
  */
 export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
@@ -2269,6 +2256,20 @@ export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'In
  * Reference to a field of type 'Int[]'
  */
 export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+/**
+ * Reference to a field of type 'AttendanceSessionType'
+ */
+export type EnumAttendanceSessionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AttendanceSessionType'>
+    
+
+
+/**
+ * Reference to a field of type 'AttendanceSessionType[]'
+ */
+export type ListEnumAttendanceSessionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AttendanceSessionType[]'>
     
 
 /**

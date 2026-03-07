@@ -19,7 +19,8 @@
         "APPWRITE_PROJECT_ID",
         "APPWRITE_PROJECT_NAME",
         "APPWRITE_ENDPOINT",
-        "APPWRITE_DEV_KEY"
+        "APPWRITE_DEV_KEY",
+        "BETA_APK_URL"
       ]
     },
     "lint": {

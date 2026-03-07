@@ -10,6 +10,11 @@ export function AttendanceListener() {
   const { loggedInUser } = useAuth();
   const { getItem } = useLocalStore();
   const redirectingRef = useRef(false);
+
+  // IMPORTANT: useSegments must be called at the top of the component
+  // so both useEffects below have a stable, non-undefined reference.
+  const segments = useSegments();
+
   // BACKGROUND & SYSTEM TRAY LISTENER (Expo Push Notifications)
   useEffect(() => {
     // This listener is fired whenever a user taps on or interacts with a notification 
@@ -65,7 +70,7 @@ export function AttendanceListener() {
 
                 const now = new Date();
                 const endTime = new Date(validSession.endTime);
-                const graceEndTime = new Date(endTime.getTime() + 120 * 1000); // 120 seconds standard backend grace period
+                const graceEndTime = new Date(endTime.getTime() + 120 * 1000);
                 if (now > graceEndTime) {
                    console.log("Ignored Push Notification tap: Session time has expired.");
                    Alert.alert("Session Expired", "This attendance session has ended.");
@@ -78,8 +83,9 @@ export function AttendanceListener() {
              return;
           }
 
-         const currentRoute = segments?.[segments.length - 1];
-         if (!redirectingRef.current && currentRoute !== "tap-to-mark") {
+         // Use Array.includes for robust route check regardless of stack depth
+             const alreadyOnTapToMark = Array.isArray(segments) && (segments as string[]).includes("tap-to-mark");
+         if (!redirectingRef.current && !alreadyOnTapToMark) {
            console.log("Push Notification tapped! Routing directly to tap-to-mark...");
            redirectingRef.current = true;
            setTimeout(() => {
@@ -98,17 +104,13 @@ export function AttendanceListener() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router, loggedInUser?.id, segments]);
 
-  const segments = useSegments();
-
   // FOREGROUND PULL (Active App / Refresh Fallback)
-  // When user opens the app, pull the active sessions from the unified dashboard endpoint
   useEffect(() => {
     if (!loggedInUser?.id) return;
 
     const checkActiveSessions = async () => {
       try {
         const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-        // The dashboard endpoint was built in Phase 1 to contain everything
         const res = await fetch(`${origin}/dashboard/${loggedInUser.id}`, {
            headers: {
              "Cache-Control": "no-cache",
@@ -120,7 +122,6 @@ export function AttendanceListener() {
         
         const json = await res.json();
         if (json.success && json.data?.activeSessions?.length > 0) {
-          // The dashboard endpoint explicitly returns the user's `.courses`
           const dashboardCourses = Array.isArray(json.data.courses) ? json.data.courses : [];
           const currentEnrolledIds = dashboardCourses.map((c: any) => c.id);
 
@@ -132,9 +133,8 @@ export function AttendanceListener() {
           if (validSession) {
              const now = new Date();
              const endTime = new Date(validSession.endTime);
-             const graceEndTime = new Date(endTime.getTime() + 120 * 1000); // 120 seconds standard grace period
+             const graceEndTime = new Date(endTime.getTime() + 120 * 1000);
              
-             // Client-side guard against expired sessions
              if (now > graceEndTime) {
                 console.log("Foreground listener ignored active session: session time has expired.");
                 return;
@@ -155,13 +155,18 @@ export function AttendanceListener() {
              }
              
              const courseName = validSession.course?.name || validSession.courseId;
+             const courseCode = validSession.course?.code || "";
+             const endTimeISO = validSession.endTime || "";
+             const startTimeISO = validSession.startTime || "";
              console.log("Found Active Session on Foreground:", validSession.id);
              
-             // Ensure we are not already on the page before auto-redirecting
-             const currentRoute = segments[segments.length - 1];
-             if (!redirectingRef.current && currentRoute !== "tap-to-mark") {
+             // Use Array.includes for robust check that works at any route stack depth
+                 const alreadyOnTapToMark = Array.isArray(segments) && (segments as string[]).includes("tap-to-mark");
+             if (!redirectingRef.current && !alreadyOnTapToMark) {
                redirectingRef.current = true;
-               router.push(`/tap-to-mark?sessionId=${validSession.id}&courseName=${courseName}`);
+               router.push(
+                 `/tap-to-mark?sessionId=${validSession.id}&courseName=${encodeURIComponent(courseName)}&courseCode=${encodeURIComponent(courseCode)}&endTime=${encodeURIComponent(endTimeISO)}&startTime=${encodeURIComponent(startTimeISO)}`
+               );
                setTimeout(() => { redirectingRef.current = false; }, 800);
              } else {
                console.log("Ignored redirect: Already on tap-to-mark screen.");
@@ -173,7 +178,7 @@ export function AttendanceListener() {
       }
     };
 
-    // 1. Check immediately upon mount (if app loads fully open)
+    // 1. Check immediately upon mount
     checkActiveSessions();
 
     // 2. Add an AppState listener if they minimize and reopen within the window
