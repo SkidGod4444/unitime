@@ -491,7 +491,7 @@ export function createHonoErrorResponse(
 ) {
   return c.json(
     createErrorResponse(errorCode.status_code, errorCode, details),
-    errorCode.status_code as number,
+    errorCode.status_code as unknown as Parameters<typeof c.json>[1],
   );
 }
 
