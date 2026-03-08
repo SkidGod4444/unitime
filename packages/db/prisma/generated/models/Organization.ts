@@ -552,12 +552,10 @@ export type OrganizationCreateNestedOneWithoutLabGroupsInput = {
   connect?: Prisma.OrganizationWhereUniqueInput
 }
 
-export type OrganizationUpdateOneWithoutLabGroupsNestedInput = {
+export type OrganizationUpdateOneRequiredWithoutLabGroupsNestedInput = {
   create?: Prisma.XOR<Prisma.OrganizationCreateWithoutLabGroupsInput, Prisma.OrganizationUncheckedCreateWithoutLabGroupsInput>
   connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutLabGroupsInput
   upsert?: Prisma.OrganizationUpsertWithoutLabGroupsInput
-  disconnect?: Prisma.OrganizationWhereInput | boolean
-  delete?: Prisma.OrganizationWhereInput | boolean
   connect?: Prisma.OrganizationWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutLabGroupsInput, Prisma.OrganizationUpdateWithoutLabGroupsInput>, Prisma.OrganizationUncheckedUpdateWithoutLabGroupsInput>
 }

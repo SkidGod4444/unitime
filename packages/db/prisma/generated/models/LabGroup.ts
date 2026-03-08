@@ -26,64 +26,64 @@ export type AggregateLabGroup = {
 
 export type LabGroupMinAggregateOutputType = {
   id: string | null
-  courseId: string | null
   name: string | null
   createdBy: string | null
   createdAt: Date | null
   updatedAt: Date | null
   organizationId: string | null
+  coursesId: string | null
 }
 
 export type LabGroupMaxAggregateOutputType = {
   id: string | null
-  courseId: string | null
   name: string | null
   createdBy: string | null
   createdAt: Date | null
   updatedAt: Date | null
   organizationId: string | null
+  coursesId: string | null
 }
 
 export type LabGroupCountAggregateOutputType = {
   id: number
-  courseId: number
   name: number
   createdBy: number
   createdAt: number
   updatedAt: number
   organizationId: number
+  coursesId: number
   _all: number
 }
 
 
 export type LabGroupMinAggregateInputType = {
   id?: true
-  courseId?: true
   name?: true
   createdBy?: true
   createdAt?: true
   updatedAt?: true
   organizationId?: true
+  coursesId?: true
 }
 
 export type LabGroupMaxAggregateInputType = {
   id?: true
-  courseId?: true
   name?: true
   createdBy?: true
   createdAt?: true
   updatedAt?: true
   organizationId?: true
+  coursesId?: true
 }
 
 export type LabGroupCountAggregateInputType = {
   id?: true
-  courseId?: true
   name?: true
   createdBy?: true
   createdAt?: true
   updatedAt?: true
   organizationId?: true
+  coursesId?: true
   _all?: true
 }
 
@@ -161,12 +161,12 @@ export type LabGroupGroupByArgs<ExtArgs extends runtime.Types.Extensions.Interna
 
 export type LabGroupGroupByOutputType = {
   id: string
-  courseId: string
   name: string
   createdBy: string
   createdAt: Date
   updatedAt: Date
-  organizationId: string | null
+  organizationId: string
+  coursesId: string | null
   _count: LabGroupCountAggregateOutputType | null
   _min: LabGroupMinAggregateOutputType | null
   _max: LabGroupMaxAggregateOutputType | null
@@ -192,36 +192,34 @@ export type LabGroupWhereInput = {
   OR?: Prisma.LabGroupWhereInput[]
   NOT?: Prisma.LabGroupWhereInput | Prisma.LabGroupWhereInput[]
   id?: Prisma.StringFilter<"LabGroup"> | string
-  courseId?: Prisma.StringFilter<"LabGroup"> | string
   name?: Prisma.StringFilter<"LabGroup"> | string
   createdBy?: Prisma.StringFilter<"LabGroup"> | string
   createdAt?: Prisma.DateTimeFilter<"LabGroup"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"LabGroup"> | Date | string
-  organizationId?: Prisma.StringNullableFilter<"LabGroup"> | string | null
-  course?: Prisma.XOR<Prisma.CoursesScalarRelationFilter, Prisma.CoursesWhereInput>
+  organizationId?: Prisma.StringFilter<"LabGroup"> | string
+  coursesId?: Prisma.StringNullableFilter<"LabGroup"> | string | null
   creator?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
-  students?: Prisma.StudentLabGroupListRelationFilter
   studentProfiles?: Prisma.StudentProfileListRelationFilter
   sessions?: Prisma.AttendanceQRSessionListRelationFilter
   timetables?: Prisma.TimetableListRelationFilter
-  organization?: Prisma.XOR<Prisma.OrganizationNullableScalarRelationFilter, Prisma.OrganizationWhereInput> | null
+  organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
+  courses?: Prisma.XOR<Prisma.CoursesNullableScalarRelationFilter, Prisma.CoursesWhereInput> | null
 }
 
 export type LabGroupOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  courseId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   createdBy?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  organizationId?: Prisma.SortOrderInput | Prisma.SortOrder
-  course?: Prisma.CoursesOrderByWithRelationInput
+  organizationId?: Prisma.SortOrder
+  coursesId?: Prisma.SortOrderInput | Prisma.SortOrder
   creator?: Prisma.UserOrderByWithRelationInput
-  students?: Prisma.StudentLabGroupOrderByRelationAggregateInput
   studentProfiles?: Prisma.StudentProfileOrderByRelationAggregateInput
   sessions?: Prisma.AttendanceQRSessionOrderByRelationAggregateInput
   timetables?: Prisma.TimetableOrderByRelationAggregateInput
   organization?: Prisma.OrganizationOrderByWithRelationInput
+  courses?: Prisma.CoursesOrderByWithRelationInput
 }
 
 export type LabGroupWhereUniqueInput = Prisma.AtLeast<{
@@ -229,29 +227,28 @@ export type LabGroupWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.LabGroupWhereInput | Prisma.LabGroupWhereInput[]
   OR?: Prisma.LabGroupWhereInput[]
   NOT?: Prisma.LabGroupWhereInput | Prisma.LabGroupWhereInput[]
-  courseId?: Prisma.StringFilter<"LabGroup"> | string
   name?: Prisma.StringFilter<"LabGroup"> | string
   createdBy?: Prisma.StringFilter<"LabGroup"> | string
   createdAt?: Prisma.DateTimeFilter<"LabGroup"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"LabGroup"> | Date | string
-  organizationId?: Prisma.StringNullableFilter<"LabGroup"> | string | null
-  course?: Prisma.XOR<Prisma.CoursesScalarRelationFilter, Prisma.CoursesWhereInput>
+  organizationId?: Prisma.StringFilter<"LabGroup"> | string
+  coursesId?: Prisma.StringNullableFilter<"LabGroup"> | string | null
   creator?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
-  students?: Prisma.StudentLabGroupListRelationFilter
   studentProfiles?: Prisma.StudentProfileListRelationFilter
   sessions?: Prisma.AttendanceQRSessionListRelationFilter
   timetables?: Prisma.TimetableListRelationFilter
-  organization?: Prisma.XOR<Prisma.OrganizationNullableScalarRelationFilter, Prisma.OrganizationWhereInput> | null
+  organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
+  courses?: Prisma.XOR<Prisma.CoursesNullableScalarRelationFilter, Prisma.CoursesWhereInput> | null
 }, "id">
 
 export type LabGroupOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  courseId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   createdBy?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  organizationId?: Prisma.SortOrderInput | Prisma.SortOrder
+  organizationId?: Prisma.SortOrder
+  coursesId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.LabGroupCountOrderByAggregateInput
   _max?: Prisma.LabGroupMaxOrderByAggregateInput
   _min?: Prisma.LabGroupMinOrderByAggregateInput
@@ -262,12 +259,12 @@ export type LabGroupScalarWhereWithAggregatesInput = {
   OR?: Prisma.LabGroupScalarWhereWithAggregatesInput[]
   NOT?: Prisma.LabGroupScalarWhereWithAggregatesInput | Prisma.LabGroupScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"LabGroup"> | string
-  courseId?: Prisma.StringWithAggregatesFilter<"LabGroup"> | string
   name?: Prisma.StringWithAggregatesFilter<"LabGroup"> | string
   createdBy?: Prisma.StringWithAggregatesFilter<"LabGroup"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"LabGroup"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"LabGroup"> | Date | string
-  organizationId?: Prisma.StringNullableWithAggregatesFilter<"LabGroup"> | string | null
+  organizationId?: Prisma.StringWithAggregatesFilter<"LabGroup"> | string
+  coursesId?: Prisma.StringNullableWithAggregatesFilter<"LabGroup"> | string | null
 }
 
 export type LabGroupCreateInput = {
@@ -275,24 +272,22 @@ export type LabGroupCreateInput = {
   name: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  course: Prisma.CoursesCreateNestedOneWithoutLabGroupsInput
   creator: Prisma.UserCreateNestedOneWithoutCreatedLabGroupsInput
-  students?: Prisma.StudentLabGroupCreateNestedManyWithoutLabGroupInput
   studentProfiles?: Prisma.StudentProfileCreateNestedManyWithoutLabGroupInput
   sessions?: Prisma.AttendanceQRSessionCreateNestedManyWithoutLabGroupInput
   timetables?: Prisma.TimetableCreateNestedManyWithoutLabGroupInput
-  organization?: Prisma.OrganizationCreateNestedOneWithoutLabGroupsInput
+  organization: Prisma.OrganizationCreateNestedOneWithoutLabGroupsInput
+  courses?: Prisma.CoursesCreateNestedOneWithoutLabGroupsInput
 }
 
 export type LabGroupUncheckedCreateInput = {
   id?: string
-  courseId: string
   name: string
   createdBy: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  organizationId?: string | null
-  students?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutLabGroupInput
+  organizationId: string
+  coursesId?: string | null
   studentProfiles?: Prisma.StudentProfileUncheckedCreateNestedManyWithoutLabGroupInput
   sessions?: Prisma.AttendanceQRSessionUncheckedCreateNestedManyWithoutLabGroupInput
   timetables?: Prisma.TimetableUncheckedCreateNestedManyWithoutLabGroupInput
@@ -303,24 +298,22 @@ export type LabGroupUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  course?: Prisma.CoursesUpdateOneRequiredWithoutLabGroupsNestedInput
   creator?: Prisma.UserUpdateOneRequiredWithoutCreatedLabGroupsNestedInput
-  students?: Prisma.StudentLabGroupUpdateManyWithoutLabGroupNestedInput
   studentProfiles?: Prisma.StudentProfileUpdateManyWithoutLabGroupNestedInput
   sessions?: Prisma.AttendanceQRSessionUpdateManyWithoutLabGroupNestedInput
   timetables?: Prisma.TimetableUpdateManyWithoutLabGroupNestedInput
-  organization?: Prisma.OrganizationUpdateOneWithoutLabGroupsNestedInput
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutLabGroupsNestedInput
+  courses?: Prisma.CoursesUpdateOneWithoutLabGroupsNestedInput
 }
 
 export type LabGroupUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdBy?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  organizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  students?: Prisma.StudentLabGroupUncheckedUpdateManyWithoutLabGroupNestedInput
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  coursesId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   studentProfiles?: Prisma.StudentProfileUncheckedUpdateManyWithoutLabGroupNestedInput
   sessions?: Prisma.AttendanceQRSessionUncheckedUpdateManyWithoutLabGroupNestedInput
   timetables?: Prisma.TimetableUncheckedUpdateManyWithoutLabGroupNestedInput
@@ -328,12 +321,12 @@ export type LabGroupUncheckedUpdateInput = {
 
 export type LabGroupCreateManyInput = {
   id?: string
-  courseId: string
   name: string
   createdBy: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  organizationId?: string | null
+  organizationId: string
+  coursesId?: string | null
 }
 
 export type LabGroupUpdateManyMutationInput = {
@@ -345,12 +338,12 @@ export type LabGroupUpdateManyMutationInput = {
 
 export type LabGroupUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdBy?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  organizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  coursesId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type LabGroupListRelationFilter = {
@@ -370,78 +363,73 @@ export type LabGroupNullableScalarRelationFilter = {
 
 export type LabGroupCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  courseId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   createdBy?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
+  coursesId?: Prisma.SortOrder
 }
 
 export type LabGroupMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  courseId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   createdBy?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
+  coursesId?: Prisma.SortOrder
 }
 
 export type LabGroupMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  courseId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   createdBy?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   organizationId?: Prisma.SortOrder
+  coursesId?: Prisma.SortOrder
 }
 
-export type LabGroupScalarRelationFilter = {
-  is?: Prisma.LabGroupWhereInput
-  isNot?: Prisma.LabGroupWhereInput
-}
-
-export type LabGroupCreateNestedManyWithoutCourseInput = {
-  create?: Prisma.XOR<Prisma.LabGroupCreateWithoutCourseInput, Prisma.LabGroupUncheckedCreateWithoutCourseInput> | Prisma.LabGroupCreateWithoutCourseInput[] | Prisma.LabGroupUncheckedCreateWithoutCourseInput[]
-  connectOrCreate?: Prisma.LabGroupCreateOrConnectWithoutCourseInput | Prisma.LabGroupCreateOrConnectWithoutCourseInput[]
-  createMany?: Prisma.LabGroupCreateManyCourseInputEnvelope
+export type LabGroupCreateNestedManyWithoutCoursesInput = {
+  create?: Prisma.XOR<Prisma.LabGroupCreateWithoutCoursesInput, Prisma.LabGroupUncheckedCreateWithoutCoursesInput> | Prisma.LabGroupCreateWithoutCoursesInput[] | Prisma.LabGroupUncheckedCreateWithoutCoursesInput[]
+  connectOrCreate?: Prisma.LabGroupCreateOrConnectWithoutCoursesInput | Prisma.LabGroupCreateOrConnectWithoutCoursesInput[]
+  createMany?: Prisma.LabGroupCreateManyCoursesInputEnvelope
   connect?: Prisma.LabGroupWhereUniqueInput | Prisma.LabGroupWhereUniqueInput[]
 }
 
-export type LabGroupUncheckedCreateNestedManyWithoutCourseInput = {
-  create?: Prisma.XOR<Prisma.LabGroupCreateWithoutCourseInput, Prisma.LabGroupUncheckedCreateWithoutCourseInput> | Prisma.LabGroupCreateWithoutCourseInput[] | Prisma.LabGroupUncheckedCreateWithoutCourseInput[]
-  connectOrCreate?: Prisma.LabGroupCreateOrConnectWithoutCourseInput | Prisma.LabGroupCreateOrConnectWithoutCourseInput[]
-  createMany?: Prisma.LabGroupCreateManyCourseInputEnvelope
+export type LabGroupUncheckedCreateNestedManyWithoutCoursesInput = {
+  create?: Prisma.XOR<Prisma.LabGroupCreateWithoutCoursesInput, Prisma.LabGroupUncheckedCreateWithoutCoursesInput> | Prisma.LabGroupCreateWithoutCoursesInput[] | Prisma.LabGroupUncheckedCreateWithoutCoursesInput[]
+  connectOrCreate?: Prisma.LabGroupCreateOrConnectWithoutCoursesInput | Prisma.LabGroupCreateOrConnectWithoutCoursesInput[]
+  createMany?: Prisma.LabGroupCreateManyCoursesInputEnvelope
   connect?: Prisma.LabGroupWhereUniqueInput | Prisma.LabGroupWhereUniqueInput[]
 }
 
-export type LabGroupUpdateManyWithoutCourseNestedInput = {
-  create?: Prisma.XOR<Prisma.LabGroupCreateWithoutCourseInput, Prisma.LabGroupUncheckedCreateWithoutCourseInput> | Prisma.LabGroupCreateWithoutCourseInput[] | Prisma.LabGroupUncheckedCreateWithoutCourseInput[]
-  connectOrCreate?: Prisma.LabGroupCreateOrConnectWithoutCourseInput | Prisma.LabGroupCreateOrConnectWithoutCourseInput[]
-  upsert?: Prisma.LabGroupUpsertWithWhereUniqueWithoutCourseInput | Prisma.LabGroupUpsertWithWhereUniqueWithoutCourseInput[]
-  createMany?: Prisma.LabGroupCreateManyCourseInputEnvelope
+export type LabGroupUpdateManyWithoutCoursesNestedInput = {
+  create?: Prisma.XOR<Prisma.LabGroupCreateWithoutCoursesInput, Prisma.LabGroupUncheckedCreateWithoutCoursesInput> | Prisma.LabGroupCreateWithoutCoursesInput[] | Prisma.LabGroupUncheckedCreateWithoutCoursesInput[]
+  connectOrCreate?: Prisma.LabGroupCreateOrConnectWithoutCoursesInput | Prisma.LabGroupCreateOrConnectWithoutCoursesInput[]
+  upsert?: Prisma.LabGroupUpsertWithWhereUniqueWithoutCoursesInput | Prisma.LabGroupUpsertWithWhereUniqueWithoutCoursesInput[]
+  createMany?: Prisma.LabGroupCreateManyCoursesInputEnvelope
   set?: Prisma.LabGroupWhereUniqueInput | Prisma.LabGroupWhereUniqueInput[]
   disconnect?: Prisma.LabGroupWhereUniqueInput | Prisma.LabGroupWhereUniqueInput[]
   delete?: Prisma.LabGroupWhereUniqueInput | Prisma.LabGroupWhereUniqueInput[]
   connect?: Prisma.LabGroupWhereUniqueInput | Prisma.LabGroupWhereUniqueInput[]
-  update?: Prisma.LabGroupUpdateWithWhereUniqueWithoutCourseInput | Prisma.LabGroupUpdateWithWhereUniqueWithoutCourseInput[]
-  updateMany?: Prisma.LabGroupUpdateManyWithWhereWithoutCourseInput | Prisma.LabGroupUpdateManyWithWhereWithoutCourseInput[]
+  update?: Prisma.LabGroupUpdateWithWhereUniqueWithoutCoursesInput | Prisma.LabGroupUpdateWithWhereUniqueWithoutCoursesInput[]
+  updateMany?: Prisma.LabGroupUpdateManyWithWhereWithoutCoursesInput | Prisma.LabGroupUpdateManyWithWhereWithoutCoursesInput[]
   deleteMany?: Prisma.LabGroupScalarWhereInput | Prisma.LabGroupScalarWhereInput[]
 }
 
-export type LabGroupUncheckedUpdateManyWithoutCourseNestedInput = {
-  create?: Prisma.XOR<Prisma.LabGroupCreateWithoutCourseInput, Prisma.LabGroupUncheckedCreateWithoutCourseInput> | Prisma.LabGroupCreateWithoutCourseInput[] | Prisma.LabGroupUncheckedCreateWithoutCourseInput[]
-  connectOrCreate?: Prisma.LabGroupCreateOrConnectWithoutCourseInput | Prisma.LabGroupCreateOrConnectWithoutCourseInput[]
-  upsert?: Prisma.LabGroupUpsertWithWhereUniqueWithoutCourseInput | Prisma.LabGroupUpsertWithWhereUniqueWithoutCourseInput[]
-  createMany?: Prisma.LabGroupCreateManyCourseInputEnvelope
+export type LabGroupUncheckedUpdateManyWithoutCoursesNestedInput = {
+  create?: Prisma.XOR<Prisma.LabGroupCreateWithoutCoursesInput, Prisma.LabGroupUncheckedCreateWithoutCoursesInput> | Prisma.LabGroupCreateWithoutCoursesInput[] | Prisma.LabGroupUncheckedCreateWithoutCoursesInput[]
+  connectOrCreate?: Prisma.LabGroupCreateOrConnectWithoutCoursesInput | Prisma.LabGroupCreateOrConnectWithoutCoursesInput[]
+  upsert?: Prisma.LabGroupUpsertWithWhereUniqueWithoutCoursesInput | Prisma.LabGroupUpsertWithWhereUniqueWithoutCoursesInput[]
+  createMany?: Prisma.LabGroupCreateManyCoursesInputEnvelope
   set?: Prisma.LabGroupWhereUniqueInput | Prisma.LabGroupWhereUniqueInput[]
   disconnect?: Prisma.LabGroupWhereUniqueInput | Prisma.LabGroupWhereUniqueInput[]
   delete?: Prisma.LabGroupWhereUniqueInput | Prisma.LabGroupWhereUniqueInput[]
   connect?: Prisma.LabGroupWhereUniqueInput | Prisma.LabGroupWhereUniqueInput[]
-  update?: Prisma.LabGroupUpdateWithWhereUniqueWithoutCourseInput | Prisma.LabGroupUpdateWithWhereUniqueWithoutCourseInput[]
-  updateMany?: Prisma.LabGroupUpdateManyWithWhereWithoutCourseInput | Prisma.LabGroupUpdateManyWithWhereWithoutCourseInput[]
+  update?: Prisma.LabGroupUpdateWithWhereUniqueWithoutCoursesInput | Prisma.LabGroupUpdateWithWhereUniqueWithoutCoursesInput[]
+  updateMany?: Prisma.LabGroupUpdateManyWithWhereWithoutCoursesInput | Prisma.LabGroupUpdateManyWithWhereWithoutCoursesInput[]
   deleteMany?: Prisma.LabGroupScalarWhereInput | Prisma.LabGroupScalarWhereInput[]
 }
 
@@ -577,70 +565,54 @@ export type LabGroupUncheckedUpdateManyWithoutOrganizationNestedInput = {
   deleteMany?: Prisma.LabGroupScalarWhereInput | Prisma.LabGroupScalarWhereInput[]
 }
 
-export type LabGroupCreateNestedOneWithoutStudentsInput = {
-  create?: Prisma.XOR<Prisma.LabGroupCreateWithoutStudentsInput, Prisma.LabGroupUncheckedCreateWithoutStudentsInput>
-  connectOrCreate?: Prisma.LabGroupCreateOrConnectWithoutStudentsInput
-  connect?: Prisma.LabGroupWhereUniqueInput
-}
-
-export type LabGroupUpdateOneRequiredWithoutStudentsNestedInput = {
-  create?: Prisma.XOR<Prisma.LabGroupCreateWithoutStudentsInput, Prisma.LabGroupUncheckedCreateWithoutStudentsInput>
-  connectOrCreate?: Prisma.LabGroupCreateOrConnectWithoutStudentsInput
-  upsert?: Prisma.LabGroupUpsertWithoutStudentsInput
-  connect?: Prisma.LabGroupWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.LabGroupUpdateToOneWithWhereWithoutStudentsInput, Prisma.LabGroupUpdateWithoutStudentsInput>, Prisma.LabGroupUncheckedUpdateWithoutStudentsInput>
-}
-
-export type LabGroupCreateWithoutCourseInput = {
+export type LabGroupCreateWithoutCoursesInput = {
   id?: string
   name: string
   createdAt?: Date | string
   updatedAt?: Date | string
   creator: Prisma.UserCreateNestedOneWithoutCreatedLabGroupsInput
-  students?: Prisma.StudentLabGroupCreateNestedManyWithoutLabGroupInput
   studentProfiles?: Prisma.StudentProfileCreateNestedManyWithoutLabGroupInput
   sessions?: Prisma.AttendanceQRSessionCreateNestedManyWithoutLabGroupInput
   timetables?: Prisma.TimetableCreateNestedManyWithoutLabGroupInput
-  organization?: Prisma.OrganizationCreateNestedOneWithoutLabGroupsInput
+  organization: Prisma.OrganizationCreateNestedOneWithoutLabGroupsInput
 }
 
-export type LabGroupUncheckedCreateWithoutCourseInput = {
+export type LabGroupUncheckedCreateWithoutCoursesInput = {
   id?: string
   name: string
   createdBy: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  organizationId?: string | null
-  students?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutLabGroupInput
+  organizationId: string
   studentProfiles?: Prisma.StudentProfileUncheckedCreateNestedManyWithoutLabGroupInput
   sessions?: Prisma.AttendanceQRSessionUncheckedCreateNestedManyWithoutLabGroupInput
   timetables?: Prisma.TimetableUncheckedCreateNestedManyWithoutLabGroupInput
 }
 
-export type LabGroupCreateOrConnectWithoutCourseInput = {
+export type LabGroupCreateOrConnectWithoutCoursesInput = {
   where: Prisma.LabGroupWhereUniqueInput
-  create: Prisma.XOR<Prisma.LabGroupCreateWithoutCourseInput, Prisma.LabGroupUncheckedCreateWithoutCourseInput>
+  create: Prisma.XOR<Prisma.LabGroupCreateWithoutCoursesInput, Prisma.LabGroupUncheckedCreateWithoutCoursesInput>
 }
 
-export type LabGroupCreateManyCourseInputEnvelope = {
-  data: Prisma.LabGroupCreateManyCourseInput | Prisma.LabGroupCreateManyCourseInput[]
+export type LabGroupCreateManyCoursesInputEnvelope = {
+  data: Prisma.LabGroupCreateManyCoursesInput | Prisma.LabGroupCreateManyCoursesInput[]
   skipDuplicates?: boolean
 }
 
-export type LabGroupUpsertWithWhereUniqueWithoutCourseInput = {
+export type LabGroupUpsertWithWhereUniqueWithoutCoursesInput = {
   where: Prisma.LabGroupWhereUniqueInput
-  update: Prisma.XOR<Prisma.LabGroupUpdateWithoutCourseInput, Prisma.LabGroupUncheckedUpdateWithoutCourseInput>
-  create: Prisma.XOR<Prisma.LabGroupCreateWithoutCourseInput, Prisma.LabGroupUncheckedCreateWithoutCourseInput>
+  update: Prisma.XOR<Prisma.LabGroupUpdateWithoutCoursesInput, Prisma.LabGroupUncheckedUpdateWithoutCoursesInput>
+  create: Prisma.XOR<Prisma.LabGroupCreateWithoutCoursesInput, Prisma.LabGroupUncheckedCreateWithoutCoursesInput>
 }
 
-export type LabGroupUpdateWithWhereUniqueWithoutCourseInput = {
+export type LabGroupUpdateWithWhereUniqueWithoutCoursesInput = {
   where: Prisma.LabGroupWhereUniqueInput
-  data: Prisma.XOR<Prisma.LabGroupUpdateWithoutCourseInput, Prisma.LabGroupUncheckedUpdateWithoutCourseInput>
+  data: Prisma.XOR<Prisma.LabGroupUpdateWithoutCoursesInput, Prisma.LabGroupUncheckedUpdateWithoutCoursesInput>
 }
 
-export type LabGroupUpdateManyWithWhereWithoutCourseInput = {
+export type LabGroupUpdateManyWithWhereWithoutCoursesInput = {
   where: Prisma.LabGroupScalarWhereInput
-  data: Prisma.XOR<Prisma.LabGroupUpdateManyMutationInput, Prisma.LabGroupUncheckedUpdateManyWithoutCourseInput>
+  data: Prisma.XOR<Prisma.LabGroupUpdateManyMutationInput, Prisma.LabGroupUncheckedUpdateManyWithoutCoursesInput>
 }
 
 export type LabGroupScalarWhereInput = {
@@ -648,12 +620,12 @@ export type LabGroupScalarWhereInput = {
   OR?: Prisma.LabGroupScalarWhereInput[]
   NOT?: Prisma.LabGroupScalarWhereInput | Prisma.LabGroupScalarWhereInput[]
   id?: Prisma.StringFilter<"LabGroup"> | string
-  courseId?: Prisma.StringFilter<"LabGroup"> | string
   name?: Prisma.StringFilter<"LabGroup"> | string
   createdBy?: Prisma.StringFilter<"LabGroup"> | string
   createdAt?: Prisma.DateTimeFilter<"LabGroup"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"LabGroup"> | Date | string
-  organizationId?: Prisma.StringNullableFilter<"LabGroup"> | string | null
+  organizationId?: Prisma.StringFilter<"LabGroup"> | string
+  coursesId?: Prisma.StringNullableFilter<"LabGroup"> | string | null
 }
 
 export type LabGroupCreateWithoutCreatorInput = {
@@ -661,22 +633,20 @@ export type LabGroupCreateWithoutCreatorInput = {
   name: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  course: Prisma.CoursesCreateNestedOneWithoutLabGroupsInput
-  students?: Prisma.StudentLabGroupCreateNestedManyWithoutLabGroupInput
   studentProfiles?: Prisma.StudentProfileCreateNestedManyWithoutLabGroupInput
   sessions?: Prisma.AttendanceQRSessionCreateNestedManyWithoutLabGroupInput
   timetables?: Prisma.TimetableCreateNestedManyWithoutLabGroupInput
-  organization?: Prisma.OrganizationCreateNestedOneWithoutLabGroupsInput
+  organization: Prisma.OrganizationCreateNestedOneWithoutLabGroupsInput
+  courses?: Prisma.CoursesCreateNestedOneWithoutLabGroupsInput
 }
 
 export type LabGroupUncheckedCreateWithoutCreatorInput = {
   id?: string
-  courseId: string
   name: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  organizationId?: string | null
-  students?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutLabGroupInput
+  organizationId: string
+  coursesId?: string | null
   studentProfiles?: Prisma.StudentProfileUncheckedCreateNestedManyWithoutLabGroupInput
   sessions?: Prisma.AttendanceQRSessionUncheckedCreateNestedManyWithoutLabGroupInput
   timetables?: Prisma.TimetableUncheckedCreateNestedManyWithoutLabGroupInput
@@ -713,23 +683,21 @@ export type LabGroupCreateWithoutTimetablesInput = {
   name: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  course: Prisma.CoursesCreateNestedOneWithoutLabGroupsInput
   creator: Prisma.UserCreateNestedOneWithoutCreatedLabGroupsInput
-  students?: Prisma.StudentLabGroupCreateNestedManyWithoutLabGroupInput
   studentProfiles?: Prisma.StudentProfileCreateNestedManyWithoutLabGroupInput
   sessions?: Prisma.AttendanceQRSessionCreateNestedManyWithoutLabGroupInput
-  organization?: Prisma.OrganizationCreateNestedOneWithoutLabGroupsInput
+  organization: Prisma.OrganizationCreateNestedOneWithoutLabGroupsInput
+  courses?: Prisma.CoursesCreateNestedOneWithoutLabGroupsInput
 }
 
 export type LabGroupUncheckedCreateWithoutTimetablesInput = {
   id?: string
-  courseId: string
   name: string
   createdBy: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  organizationId?: string | null
-  students?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutLabGroupInput
+  organizationId: string
+  coursesId?: string | null
   studentProfiles?: Prisma.StudentProfileUncheckedCreateNestedManyWithoutLabGroupInput
   sessions?: Prisma.AttendanceQRSessionUncheckedCreateNestedManyWithoutLabGroupInput
 }
@@ -755,23 +723,21 @@ export type LabGroupUpdateWithoutTimetablesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  course?: Prisma.CoursesUpdateOneRequiredWithoutLabGroupsNestedInput
   creator?: Prisma.UserUpdateOneRequiredWithoutCreatedLabGroupsNestedInput
-  students?: Prisma.StudentLabGroupUpdateManyWithoutLabGroupNestedInput
   studentProfiles?: Prisma.StudentProfileUpdateManyWithoutLabGroupNestedInput
   sessions?: Prisma.AttendanceQRSessionUpdateManyWithoutLabGroupNestedInput
-  organization?: Prisma.OrganizationUpdateOneWithoutLabGroupsNestedInput
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutLabGroupsNestedInput
+  courses?: Prisma.CoursesUpdateOneWithoutLabGroupsNestedInput
 }
 
 export type LabGroupUncheckedUpdateWithoutTimetablesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdBy?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  organizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  students?: Prisma.StudentLabGroupUncheckedUpdateManyWithoutLabGroupNestedInput
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  coursesId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   studentProfiles?: Prisma.StudentProfileUncheckedUpdateManyWithoutLabGroupNestedInput
   sessions?: Prisma.AttendanceQRSessionUncheckedUpdateManyWithoutLabGroupNestedInput
 }
@@ -781,23 +747,21 @@ export type LabGroupCreateWithoutSessionsInput = {
   name: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  course: Prisma.CoursesCreateNestedOneWithoutLabGroupsInput
   creator: Prisma.UserCreateNestedOneWithoutCreatedLabGroupsInput
-  students?: Prisma.StudentLabGroupCreateNestedManyWithoutLabGroupInput
   studentProfiles?: Prisma.StudentProfileCreateNestedManyWithoutLabGroupInput
   timetables?: Prisma.TimetableCreateNestedManyWithoutLabGroupInput
-  organization?: Prisma.OrganizationCreateNestedOneWithoutLabGroupsInput
+  organization: Prisma.OrganizationCreateNestedOneWithoutLabGroupsInput
+  courses?: Prisma.CoursesCreateNestedOneWithoutLabGroupsInput
 }
 
 export type LabGroupUncheckedCreateWithoutSessionsInput = {
   id?: string
-  courseId: string
   name: string
   createdBy: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  organizationId?: string | null
-  students?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutLabGroupInput
+  organizationId: string
+  coursesId?: string | null
   studentProfiles?: Prisma.StudentProfileUncheckedCreateNestedManyWithoutLabGroupInput
   timetables?: Prisma.TimetableUncheckedCreateNestedManyWithoutLabGroupInput
 }
@@ -823,23 +787,21 @@ export type LabGroupUpdateWithoutSessionsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  course?: Prisma.CoursesUpdateOneRequiredWithoutLabGroupsNestedInput
   creator?: Prisma.UserUpdateOneRequiredWithoutCreatedLabGroupsNestedInput
-  students?: Prisma.StudentLabGroupUpdateManyWithoutLabGroupNestedInput
   studentProfiles?: Prisma.StudentProfileUpdateManyWithoutLabGroupNestedInput
   timetables?: Prisma.TimetableUpdateManyWithoutLabGroupNestedInput
-  organization?: Prisma.OrganizationUpdateOneWithoutLabGroupsNestedInput
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutLabGroupsNestedInput
+  courses?: Prisma.CoursesUpdateOneWithoutLabGroupsNestedInput
 }
 
 export type LabGroupUncheckedUpdateWithoutSessionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdBy?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  organizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  students?: Prisma.StudentLabGroupUncheckedUpdateManyWithoutLabGroupNestedInput
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  coursesId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   studentProfiles?: Prisma.StudentProfileUncheckedUpdateManyWithoutLabGroupNestedInput
   timetables?: Prisma.TimetableUncheckedUpdateManyWithoutLabGroupNestedInput
 }
@@ -849,23 +811,21 @@ export type LabGroupCreateWithoutStudentProfilesInput = {
   name: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  course: Prisma.CoursesCreateNestedOneWithoutLabGroupsInput
   creator: Prisma.UserCreateNestedOneWithoutCreatedLabGroupsInput
-  students?: Prisma.StudentLabGroupCreateNestedManyWithoutLabGroupInput
   sessions?: Prisma.AttendanceQRSessionCreateNestedManyWithoutLabGroupInput
   timetables?: Prisma.TimetableCreateNestedManyWithoutLabGroupInput
-  organization?: Prisma.OrganizationCreateNestedOneWithoutLabGroupsInput
+  organization: Prisma.OrganizationCreateNestedOneWithoutLabGroupsInput
+  courses?: Prisma.CoursesCreateNestedOneWithoutLabGroupsInput
 }
 
 export type LabGroupUncheckedCreateWithoutStudentProfilesInput = {
   id?: string
-  courseId: string
   name: string
   createdBy: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  organizationId?: string | null
-  students?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutLabGroupInput
+  organizationId: string
+  coursesId?: string | null
   sessions?: Prisma.AttendanceQRSessionUncheckedCreateNestedManyWithoutLabGroupInput
   timetables?: Prisma.TimetableUncheckedCreateNestedManyWithoutLabGroupInput
 }
@@ -891,23 +851,21 @@ export type LabGroupUpdateWithoutStudentProfilesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  course?: Prisma.CoursesUpdateOneRequiredWithoutLabGroupsNestedInput
   creator?: Prisma.UserUpdateOneRequiredWithoutCreatedLabGroupsNestedInput
-  students?: Prisma.StudentLabGroupUpdateManyWithoutLabGroupNestedInput
   sessions?: Prisma.AttendanceQRSessionUpdateManyWithoutLabGroupNestedInput
   timetables?: Prisma.TimetableUpdateManyWithoutLabGroupNestedInput
-  organization?: Prisma.OrganizationUpdateOneWithoutLabGroupsNestedInput
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutLabGroupsNestedInput
+  courses?: Prisma.CoursesUpdateOneWithoutLabGroupsNestedInput
 }
 
 export type LabGroupUncheckedUpdateWithoutStudentProfilesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdBy?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  organizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  students?: Prisma.StudentLabGroupUncheckedUpdateManyWithoutLabGroupNestedInput
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  coursesId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sessions?: Prisma.AttendanceQRSessionUncheckedUpdateManyWithoutLabGroupNestedInput
   timetables?: Prisma.TimetableUncheckedUpdateManyWithoutLabGroupNestedInput
 }
@@ -917,22 +875,20 @@ export type LabGroupCreateWithoutOrganizationInput = {
   name: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  course: Prisma.CoursesCreateNestedOneWithoutLabGroupsInput
   creator: Prisma.UserCreateNestedOneWithoutCreatedLabGroupsInput
-  students?: Prisma.StudentLabGroupCreateNestedManyWithoutLabGroupInput
   studentProfiles?: Prisma.StudentProfileCreateNestedManyWithoutLabGroupInput
   sessions?: Prisma.AttendanceQRSessionCreateNestedManyWithoutLabGroupInput
   timetables?: Prisma.TimetableCreateNestedManyWithoutLabGroupInput
+  courses?: Prisma.CoursesCreateNestedOneWithoutLabGroupsInput
 }
 
 export type LabGroupUncheckedCreateWithoutOrganizationInput = {
   id?: string
-  courseId: string
   name: string
   createdBy: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  students?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutLabGroupInput
+  coursesId?: string | null
   studentProfiles?: Prisma.StudentProfileUncheckedCreateNestedManyWithoutLabGroupInput
   sessions?: Prisma.AttendanceQRSessionUncheckedCreateNestedManyWithoutLabGroupInput
   timetables?: Prisma.TimetableUncheckedCreateNestedManyWithoutLabGroupInput
@@ -964,125 +920,55 @@ export type LabGroupUpdateManyWithWhereWithoutOrganizationInput = {
   data: Prisma.XOR<Prisma.LabGroupUpdateManyMutationInput, Prisma.LabGroupUncheckedUpdateManyWithoutOrganizationInput>
 }
 
-export type LabGroupCreateWithoutStudentsInput = {
-  id?: string
-  name: string
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  course: Prisma.CoursesCreateNestedOneWithoutLabGroupsInput
-  creator: Prisma.UserCreateNestedOneWithoutCreatedLabGroupsInput
-  studentProfiles?: Prisma.StudentProfileCreateNestedManyWithoutLabGroupInput
-  sessions?: Prisma.AttendanceQRSessionCreateNestedManyWithoutLabGroupInput
-  timetables?: Prisma.TimetableCreateNestedManyWithoutLabGroupInput
-  organization?: Prisma.OrganizationCreateNestedOneWithoutLabGroupsInput
-}
-
-export type LabGroupUncheckedCreateWithoutStudentsInput = {
-  id?: string
-  courseId: string
-  name: string
-  createdBy: string
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  organizationId?: string | null
-  studentProfiles?: Prisma.StudentProfileUncheckedCreateNestedManyWithoutLabGroupInput
-  sessions?: Prisma.AttendanceQRSessionUncheckedCreateNestedManyWithoutLabGroupInput
-  timetables?: Prisma.TimetableUncheckedCreateNestedManyWithoutLabGroupInput
-}
-
-export type LabGroupCreateOrConnectWithoutStudentsInput = {
-  where: Prisma.LabGroupWhereUniqueInput
-  create: Prisma.XOR<Prisma.LabGroupCreateWithoutStudentsInput, Prisma.LabGroupUncheckedCreateWithoutStudentsInput>
-}
-
-export type LabGroupUpsertWithoutStudentsInput = {
-  update: Prisma.XOR<Prisma.LabGroupUpdateWithoutStudentsInput, Prisma.LabGroupUncheckedUpdateWithoutStudentsInput>
-  create: Prisma.XOR<Prisma.LabGroupCreateWithoutStudentsInput, Prisma.LabGroupUncheckedCreateWithoutStudentsInput>
-  where?: Prisma.LabGroupWhereInput
-}
-
-export type LabGroupUpdateToOneWithWhereWithoutStudentsInput = {
-  where?: Prisma.LabGroupWhereInput
-  data: Prisma.XOR<Prisma.LabGroupUpdateWithoutStudentsInput, Prisma.LabGroupUncheckedUpdateWithoutStudentsInput>
-}
-
-export type LabGroupUpdateWithoutStudentsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  course?: Prisma.CoursesUpdateOneRequiredWithoutLabGroupsNestedInput
-  creator?: Prisma.UserUpdateOneRequiredWithoutCreatedLabGroupsNestedInput
-  studentProfiles?: Prisma.StudentProfileUpdateManyWithoutLabGroupNestedInput
-  sessions?: Prisma.AttendanceQRSessionUpdateManyWithoutLabGroupNestedInput
-  timetables?: Prisma.TimetableUpdateManyWithoutLabGroupNestedInput
-  organization?: Prisma.OrganizationUpdateOneWithoutLabGroupsNestedInput
-}
-
-export type LabGroupUncheckedUpdateWithoutStudentsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  createdBy?: Prisma.StringFieldUpdateOperationsInput | string
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  organizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  studentProfiles?: Prisma.StudentProfileUncheckedUpdateManyWithoutLabGroupNestedInput
-  sessions?: Prisma.AttendanceQRSessionUncheckedUpdateManyWithoutLabGroupNestedInput
-  timetables?: Prisma.TimetableUncheckedUpdateManyWithoutLabGroupNestedInput
-}
-
-export type LabGroupCreateManyCourseInput = {
+export type LabGroupCreateManyCoursesInput = {
   id?: string
   name: string
   createdBy: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  organizationId?: string | null
+  organizationId: string
 }
 
-export type LabGroupUpdateWithoutCourseInput = {
+export type LabGroupUpdateWithoutCoursesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   creator?: Prisma.UserUpdateOneRequiredWithoutCreatedLabGroupsNestedInput
-  students?: Prisma.StudentLabGroupUpdateManyWithoutLabGroupNestedInput
   studentProfiles?: Prisma.StudentProfileUpdateManyWithoutLabGroupNestedInput
   sessions?: Prisma.AttendanceQRSessionUpdateManyWithoutLabGroupNestedInput
   timetables?: Prisma.TimetableUpdateManyWithoutLabGroupNestedInput
-  organization?: Prisma.OrganizationUpdateOneWithoutLabGroupsNestedInput
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutLabGroupsNestedInput
 }
 
-export type LabGroupUncheckedUpdateWithoutCourseInput = {
+export type LabGroupUncheckedUpdateWithoutCoursesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdBy?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  organizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  students?: Prisma.StudentLabGroupUncheckedUpdateManyWithoutLabGroupNestedInput
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   studentProfiles?: Prisma.StudentProfileUncheckedUpdateManyWithoutLabGroupNestedInput
   sessions?: Prisma.AttendanceQRSessionUncheckedUpdateManyWithoutLabGroupNestedInput
   timetables?: Prisma.TimetableUncheckedUpdateManyWithoutLabGroupNestedInput
 }
 
-export type LabGroupUncheckedUpdateManyWithoutCourseInput = {
+export type LabGroupUncheckedUpdateManyWithoutCoursesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdBy?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  organizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type LabGroupCreateManyCreatorInput = {
   id?: string
-  courseId: string
   name: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  organizationId?: string | null
+  organizationId: string
+  coursesId?: string | null
 }
 
 export type LabGroupUpdateWithoutCreatorInput = {
@@ -1090,22 +976,20 @@ export type LabGroupUpdateWithoutCreatorInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  course?: Prisma.CoursesUpdateOneRequiredWithoutLabGroupsNestedInput
-  students?: Prisma.StudentLabGroupUpdateManyWithoutLabGroupNestedInput
   studentProfiles?: Prisma.StudentProfileUpdateManyWithoutLabGroupNestedInput
   sessions?: Prisma.AttendanceQRSessionUpdateManyWithoutLabGroupNestedInput
   timetables?: Prisma.TimetableUpdateManyWithoutLabGroupNestedInput
-  organization?: Prisma.OrganizationUpdateOneWithoutLabGroupsNestedInput
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutLabGroupsNestedInput
+  courses?: Prisma.CoursesUpdateOneWithoutLabGroupsNestedInput
 }
 
 export type LabGroupUncheckedUpdateWithoutCreatorInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  organizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  students?: Prisma.StudentLabGroupUncheckedUpdateManyWithoutLabGroupNestedInput
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  coursesId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   studentProfiles?: Prisma.StudentProfileUncheckedUpdateManyWithoutLabGroupNestedInput
   sessions?: Prisma.AttendanceQRSessionUncheckedUpdateManyWithoutLabGroupNestedInput
   timetables?: Prisma.TimetableUncheckedUpdateManyWithoutLabGroupNestedInput
@@ -1113,20 +997,20 @@ export type LabGroupUncheckedUpdateWithoutCreatorInput = {
 
 export type LabGroupUncheckedUpdateManyWithoutCreatorInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  organizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  coursesId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type LabGroupCreateManyOrganizationInput = {
   id?: string
-  courseId: string
   name: string
   createdBy: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  coursesId?: string | null
 }
 
 export type LabGroupUpdateWithoutOrganizationInput = {
@@ -1134,22 +1018,20 @@ export type LabGroupUpdateWithoutOrganizationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  course?: Prisma.CoursesUpdateOneRequiredWithoutLabGroupsNestedInput
   creator?: Prisma.UserUpdateOneRequiredWithoutCreatedLabGroupsNestedInput
-  students?: Prisma.StudentLabGroupUpdateManyWithoutLabGroupNestedInput
   studentProfiles?: Prisma.StudentProfileUpdateManyWithoutLabGroupNestedInput
   sessions?: Prisma.AttendanceQRSessionUpdateManyWithoutLabGroupNestedInput
   timetables?: Prisma.TimetableUpdateManyWithoutLabGroupNestedInput
+  courses?: Prisma.CoursesUpdateOneWithoutLabGroupsNestedInput
 }
 
 export type LabGroupUncheckedUpdateWithoutOrganizationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdBy?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  students?: Prisma.StudentLabGroupUncheckedUpdateManyWithoutLabGroupNestedInput
+  coursesId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   studentProfiles?: Prisma.StudentProfileUncheckedUpdateManyWithoutLabGroupNestedInput
   sessions?: Prisma.AttendanceQRSessionUncheckedUpdateManyWithoutLabGroupNestedInput
   timetables?: Prisma.TimetableUncheckedUpdateManyWithoutLabGroupNestedInput
@@ -1157,11 +1039,11 @@ export type LabGroupUncheckedUpdateWithoutOrganizationInput = {
 
 export type LabGroupUncheckedUpdateManyWithoutOrganizationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdBy?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  coursesId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -1170,14 +1052,12 @@ export type LabGroupUncheckedUpdateManyWithoutOrganizationInput = {
  */
 
 export type LabGroupCountOutputType = {
-  students: number
   studentProfiles: number
   sessions: number
   timetables: number
 }
 
 export type LabGroupCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  students?: boolean | LabGroupCountOutputTypeCountStudentsArgs
   studentProfiles?: boolean | LabGroupCountOutputTypeCountStudentProfilesArgs
   sessions?: boolean | LabGroupCountOutputTypeCountSessionsArgs
   timetables?: boolean | LabGroupCountOutputTypeCountTimetablesArgs
@@ -1191,13 +1071,6 @@ export type LabGroupCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Ext
    * Select specific fields to fetch from the LabGroupCountOutputType
    */
   select?: Prisma.LabGroupCountOutputTypeSelect<ExtArgs> | null
-}
-
-/**
- * LabGroupCountOutputType without action
- */
-export type LabGroupCountOutputTypeCountStudentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.StudentLabGroupWhereInput
 }
 
 /**
@@ -1224,99 +1097,96 @@ export type LabGroupCountOutputTypeCountTimetablesArgs<ExtArgs extends runtime.T
 
 export type LabGroupSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  courseId?: boolean
   name?: boolean
   createdBy?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organizationId?: boolean
-  course?: boolean | Prisma.CoursesDefaultArgs<ExtArgs>
+  coursesId?: boolean
   creator?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  students?: boolean | Prisma.LabGroup$studentsArgs<ExtArgs>
   studentProfiles?: boolean | Prisma.LabGroup$studentProfilesArgs<ExtArgs>
   sessions?: boolean | Prisma.LabGroup$sessionsArgs<ExtArgs>
   timetables?: boolean | Prisma.LabGroup$timetablesArgs<ExtArgs>
-  organization?: boolean | Prisma.LabGroup$organizationArgs<ExtArgs>
+  organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
+  courses?: boolean | Prisma.LabGroup$coursesArgs<ExtArgs>
   _count?: boolean | Prisma.LabGroupCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["labGroup"]>
 
 export type LabGroupSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  courseId?: boolean
   name?: boolean
   createdBy?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organizationId?: boolean
-  course?: boolean | Prisma.CoursesDefaultArgs<ExtArgs>
+  coursesId?: boolean
   creator?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  organization?: boolean | Prisma.LabGroup$organizationArgs<ExtArgs>
+  organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
+  courses?: boolean | Prisma.LabGroup$coursesArgs<ExtArgs>
 }, ExtArgs["result"]["labGroup"]>
 
 export type LabGroupSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  courseId?: boolean
   name?: boolean
   createdBy?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organizationId?: boolean
-  course?: boolean | Prisma.CoursesDefaultArgs<ExtArgs>
+  coursesId?: boolean
   creator?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  organization?: boolean | Prisma.LabGroup$organizationArgs<ExtArgs>
+  organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
+  courses?: boolean | Prisma.LabGroup$coursesArgs<ExtArgs>
 }, ExtArgs["result"]["labGroup"]>
 
 export type LabGroupSelectScalar = {
   id?: boolean
-  courseId?: boolean
   name?: boolean
   createdBy?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   organizationId?: boolean
+  coursesId?: boolean
 }
 
-export type LabGroupOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "courseId" | "name" | "createdBy" | "createdAt" | "updatedAt" | "organizationId", ExtArgs["result"]["labGroup"]>
+export type LabGroupOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "createdBy" | "createdAt" | "updatedAt" | "organizationId" | "coursesId", ExtArgs["result"]["labGroup"]>
 export type LabGroupInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  course?: boolean | Prisma.CoursesDefaultArgs<ExtArgs>
   creator?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  students?: boolean | Prisma.LabGroup$studentsArgs<ExtArgs>
   studentProfiles?: boolean | Prisma.LabGroup$studentProfilesArgs<ExtArgs>
   sessions?: boolean | Prisma.LabGroup$sessionsArgs<ExtArgs>
   timetables?: boolean | Prisma.LabGroup$timetablesArgs<ExtArgs>
-  organization?: boolean | Prisma.LabGroup$organizationArgs<ExtArgs>
+  organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
+  courses?: boolean | Prisma.LabGroup$coursesArgs<ExtArgs>
   _count?: boolean | Prisma.LabGroupCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type LabGroupIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  course?: boolean | Prisma.CoursesDefaultArgs<ExtArgs>
   creator?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  organization?: boolean | Prisma.LabGroup$organizationArgs<ExtArgs>
+  organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
+  courses?: boolean | Prisma.LabGroup$coursesArgs<ExtArgs>
 }
 export type LabGroupIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  course?: boolean | Prisma.CoursesDefaultArgs<ExtArgs>
   creator?: boolean | Prisma.UserDefaultArgs<ExtArgs>
-  organization?: boolean | Prisma.LabGroup$organizationArgs<ExtArgs>
+  organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
+  courses?: boolean | Prisma.LabGroup$coursesArgs<ExtArgs>
 }
 
 export type $LabGroupPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "LabGroup"
   objects: {
-    course: Prisma.$CoursesPayload<ExtArgs>
     creator: Prisma.$UserPayload<ExtArgs>
-    students: Prisma.$StudentLabGroupPayload<ExtArgs>[]
     studentProfiles: Prisma.$StudentProfilePayload<ExtArgs>[]
     sessions: Prisma.$AttendanceQRSessionPayload<ExtArgs>[]
     timetables: Prisma.$TimetablePayload<ExtArgs>[]
-    organization: Prisma.$OrganizationPayload<ExtArgs> | null
+    organization: Prisma.$OrganizationPayload<ExtArgs>
+    courses: Prisma.$CoursesPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    courseId: string
     name: string
     createdBy: string
     createdAt: Date
     updatedAt: Date
-    organizationId: string | null
+    organizationId: string
+    coursesId: string | null
   }, ExtArgs["result"]["labGroup"]>
   composites: {}
 }
@@ -1711,13 +1581,12 @@ readonly fields: LabGroupFieldRefs;
  */
 export interface Prisma__LabGroupClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  course<T extends Prisma.CoursesDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CoursesDefaultArgs<ExtArgs>>): Prisma.Prisma__CoursesClient<runtime.Types.Result.GetResult<Prisma.$CoursesPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   creator<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  students<T extends Prisma.LabGroup$studentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LabGroup$studentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StudentLabGroupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   studentProfiles<T extends Prisma.LabGroup$studentProfilesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LabGroup$studentProfilesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StudentProfilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sessions<T extends Prisma.LabGroup$sessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LabGroup$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AttendanceQRSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   timetables<T extends Prisma.LabGroup$timetablesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LabGroup$timetablesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TimetablePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  organization<T extends Prisma.LabGroup$organizationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LabGroup$organizationArgs<ExtArgs>>): Prisma.Prisma__OrganizationClient<runtime.Types.Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  organization<T extends Prisma.OrganizationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OrganizationDefaultArgs<ExtArgs>>): Prisma.Prisma__OrganizationClient<runtime.Types.Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  courses<T extends Prisma.LabGroup$coursesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LabGroup$coursesArgs<ExtArgs>>): Prisma.Prisma__CoursesClient<runtime.Types.Result.GetResult<Prisma.$CoursesPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1748,12 +1617,12 @@ export interface Prisma__LabGroupClient<T, Null = never, ExtArgs extends runtime
  */
 export interface LabGroupFieldRefs {
   readonly id: Prisma.FieldRef<"LabGroup", 'String'>
-  readonly courseId: Prisma.FieldRef<"LabGroup", 'String'>
   readonly name: Prisma.FieldRef<"LabGroup", 'String'>
   readonly createdBy: Prisma.FieldRef<"LabGroup", 'String'>
   readonly createdAt: Prisma.FieldRef<"LabGroup", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"LabGroup", 'DateTime'>
   readonly organizationId: Prisma.FieldRef<"LabGroup", 'String'>
+  readonly coursesId: Prisma.FieldRef<"LabGroup", 'String'>
 }
     
 
@@ -2150,30 +2019,6 @@ export type LabGroupDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
 }
 
 /**
- * LabGroup.students
- */
-export type LabGroup$studentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the StudentLabGroup
-   */
-  select?: Prisma.StudentLabGroupSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the StudentLabGroup
-   */
-  omit?: Prisma.StudentLabGroupOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.StudentLabGroupInclude<ExtArgs> | null
-  where?: Prisma.StudentLabGroupWhereInput
-  orderBy?: Prisma.StudentLabGroupOrderByWithRelationInput | Prisma.StudentLabGroupOrderByWithRelationInput[]
-  cursor?: Prisma.StudentLabGroupWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.StudentLabGroupScalarFieldEnum | Prisma.StudentLabGroupScalarFieldEnum[]
-}
-
-/**
  * LabGroup.studentProfiles
  */
 export type LabGroup$studentProfilesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2246,22 +2091,22 @@ export type LabGroup$timetablesArgs<ExtArgs extends runtime.Types.Extensions.Int
 }
 
 /**
- * LabGroup.organization
+ * LabGroup.courses
  */
-export type LabGroup$organizationArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type LabGroup$coursesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the Organization
+   * Select specific fields to fetch from the Courses
    */
-  select?: Prisma.OrganizationSelect<ExtArgs> | null
+  select?: Prisma.CoursesSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the Organization
+   * Omit specific fields from the Courses
    */
-  omit?: Prisma.OrganizationOmit<ExtArgs> | null
+  omit?: Prisma.CoursesOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.OrganizationInclude<ExtArgs> | null
-  where?: Prisma.OrganizationWhereInput
+  include?: Prisma.CoursesInclude<ExtArgs> | null
+  where?: Prisma.CoursesWhereInput
 }
 
 /**

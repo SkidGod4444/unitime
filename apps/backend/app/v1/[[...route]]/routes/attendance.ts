@@ -128,11 +128,11 @@ attendance.post("/qr/session/create", async (c) => {
 
     // If this is a lab-group session, restrict recipients to members of that group
     if (labGroupId) {
-      const groupMembers = await prisma.studentLabGroup.findMany({
+      const groupMembers = await prisma.studentProfile.findMany({
         where: { labGroupId },
-        select: { studentId: true },
+        select: { userId: true },
       });
-      const allowed = new Set(groupMembers.map((m) => m.studentId));
+      const allowed = new Set(groupMembers.map((m) => m.userId));
       enrolledStudents = enrolledStudents.filter((enr) => allowed.has(enr.userId));
     }
 
@@ -338,13 +338,8 @@ attendance.post("/checkin", async (c) => {
 
     // If session targets a lab group, verify student's mapping
     if (session.labGroupId) {
-      const mapping = await prisma.studentLabGroup.findUnique({
-        where: {
-          studentId_courseId: {
-            studentId: requesterId,
-            courseId: session.courseId,
-          },
-        },
+      const mapping = await prisma.studentProfile.findUnique({
+        where: { userId: requesterId },
       });
       if (!mapping || mapping.labGroupId !== session.labGroupId) {
         return c.json({ success: false, message: "You are not in the targeted lab group for this session" }, 403);
@@ -395,13 +390,8 @@ attendance.post("/checkin", async (c) => {
       try {
         const courseId = session.courseId;
         // Determine student's lab group (if any) for this course
-        const myGroup = await prisma.studentLabGroup.findUnique({
-          where: {
-            studentId_courseId: {
-              studentId: requesterId,
-              courseId,
-            },
-          },
+        const myGroup = await prisma.studentProfile.findUnique({
+          where: { userId: requesterId },
           select: { labGroupId: true },
         });
 
@@ -503,13 +493,8 @@ attendance.get("/summary/:userId", async (c) => {
         const courseId = enrollment.courseId;
 
         // Determine student's lab group for this course (if any)
-        const myGroup = await prisma.studentLabGroup.findUnique({
-          where: {
-            studentId_courseId: {
-              studentId: userId,
-              courseId,
-            },
-          },
+        const myGroup = await prisma.studentProfile.findUnique({
+          where: { userId },
           select: { labGroupId: true },
         });
 
@@ -590,11 +575,11 @@ attendance.get("/sessions/all", async (c) => {
         });
 
         if (session.labGroupId) {
-          const members = await prisma.studentLabGroup.findMany({
+          const members = await prisma.studentProfile.findMany({
             where: { labGroupId: session.labGroupId },
-            select: { studentId: true },
+            select: { userId: true },
           });
-          const allowed = new Set(members.map((m) => m.studentId));
+          const allowed = new Set(members.map((m) => m.userId));
           enrolledStudents = enrolledStudents.filter((enr) => allowed.has(enr.userId));
         }
 
@@ -748,11 +733,11 @@ attendance.get("/sessions/:id/export", async (c) => {
     });
 
     if (session.labGroupId) {
-      const members = await prisma.studentLabGroup.findMany({
+      const members = await prisma.studentProfile.findMany({
         where: { labGroupId: session.labGroupId },
-        select: { studentId: true },
+        select: { userId: true },
       });
-      const allowed = new Set(members.map((m) => m.studentId));
+      const allowed = new Set(members.map((m) => m.userId));
       enrolledStudents = enrolledStudents.filter((enr) => allowed.has(enr.userId));
     }
 

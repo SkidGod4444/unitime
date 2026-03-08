@@ -116,8 +116,3 @@ export type Alarm = Prisma.AlarmModel
  * 
  */
 export type LabGroup = Prisma.LabGroupModel
-/**
- * Model StudentLabGroup
- * 
- */
-export type StudentLabGroup = Prisma.StudentLabGroupModel

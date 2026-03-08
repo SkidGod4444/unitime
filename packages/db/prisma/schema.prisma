@@ -231,7 +231,6 @@ model User {
   isOnboarded          Boolean               @default(false) @map("is_onboarded") // To track if user has completed onboarding
   role                 UserRole              @default(STUDENT)
   status               UserStatus            @default(ACTIVE)
-  studentLabGroups     StudentLabGroup[]
   createdLabGroups     LabGroup[]
 
   @@unique([email])
@@ -413,35 +412,18 @@ model Alarm {
 
 model LabGroup {
   id              String                @id @default(uuid())
-  courseId        String                @map("course_id")
-  course          Courses               @relation(fields: [courseId], references: [id], onDelete: Cascade)
   name            String
   createdBy       String                @map("created_by")
   creator         User                  @relation(fields: [createdBy], references: [id], onDelete: Cascade)
-  students        StudentLabGroup[]
   studentProfiles StudentProfile[]
   sessions        AttendanceQRSession[]
   timetables      Timetable[]
   createdAt       DateTime              @default(now()) @map("created_at")
   updatedAt       DateTime              @updatedAt @map("updated_at")
-  organization    Organization?         @relation(fields: [organizationId], references: [id])
-  organizationId  String?
+  organization    Organization          @relation(fields: [organizationId], references: [id])
+  organizationId  String                @map("organization_id")
+  courses         Courses?              @relation(fields: [coursesId], references: [id])
+  coursesId       String?
 
-  @@index([courseId])
   @@map("lab_groups")
-}
-
-model StudentLabGroup {
-  id         String   @id @default(uuid())
-  studentId  String   @map("student_id")
-  student    User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  courseId   String   @map("course_id")
-  labGroupId String   @map("lab_group_id")
-  labGroup   LabGroup @relation(fields: [labGroupId], references: [id], onDelete: Cascade)
-  joinedAt   DateTime @default(now()) @map("joined_at")
-
-  @@unique([studentId, courseId])
-  @@index([labGroupId])
-  @@index([courseId])
-  @@map("student_lab_groups")
 }

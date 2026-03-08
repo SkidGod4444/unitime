@@ -21,11 +21,11 @@ timetable.get("/week/:userId", async (c) => {
   const courseIds = userCourses.map((uc) => uc.courseId);
 
   // 2. Get user's lab groups
-  const studentGroups = await prisma.studentLabGroup.findMany({
-    where: { studentId: userId },
+  const profile = await prisma.studentProfile.findUnique({
+    where: { userId },
     select: { labGroupId: true },
   });
-  const labGroupIds = studentGroups.map((sg) => sg.labGroupId);
+  const labGroupIds = profile?.labGroupId ? [profile.labGroupId] : [];
 
   const cacheKey = `timetable:week:${userId}:${labGroupIds.join(",") || "none"}`;
   const timetables = await getOrSetCache(
@@ -106,11 +106,11 @@ timetable.get("/:userId", async (c) => {
   const courseIds = userCourses.map((uc) => uc.courseId);
 
   // 2. Get user's lab groups
-  const studentGroups = await prisma.studentLabGroup.findMany({
-    where: { studentId: userId },
+  const profile = await prisma.studentProfile.findUnique({
+    where: { userId },
     select: { labGroupId: true },
   });
-  const labGroupIds = studentGroups.map((sg) => sg.labGroupId);
+  const labGroupIds = profile?.labGroupId ? [profile.labGroupId] : [];
 
   const timetables = await getOrSetCache(
     `timetable:${userId}:${day ?? "all"}`,

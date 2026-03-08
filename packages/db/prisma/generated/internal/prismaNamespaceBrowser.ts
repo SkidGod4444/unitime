@@ -65,8 +65,7 @@ export const ModelName = {
   StudentProfile: 'StudentProfile',
   Organization: 'Organization',
   Alarm: 'Alarm',
-  LabGroup: 'LabGroup',
-  StudentLabGroup: 'StudentLabGroup'
+  LabGroup: 'LabGroup'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -308,26 +307,15 @@ export type AlarmScalarFieldEnum = (typeof AlarmScalarFieldEnum)[keyof typeof Al
 
 export const LabGroupScalarFieldEnum = {
   id: 'id',
-  courseId: 'courseId',
   name: 'name',
   createdBy: 'createdBy',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  organizationId: 'organizationId'
+  organizationId: 'organizationId',
+  coursesId: 'coursesId'
 } as const
 
 export type LabGroupScalarFieldEnum = (typeof LabGroupScalarFieldEnum)[keyof typeof LabGroupScalarFieldEnum]
-
-
-export const StudentLabGroupScalarFieldEnum = {
-  id: 'id',
-  studentId: 'studentId',
-  courseId: 'courseId',
-  labGroupId: 'labGroupId',
-  joinedAt: 'joinedAt'
-} as const
-
-export type StudentLabGroupScalarFieldEnum = (typeof StudentLabGroupScalarFieldEnum)[keyof typeof StudentLabGroupScalarFieldEnum]
 
 
 export const SortOrder = {

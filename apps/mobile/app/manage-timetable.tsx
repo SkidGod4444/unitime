@@ -29,7 +29,7 @@ export default function ManageTimetableScreen() {
   const { loggedInUser, refreshJwt } = useAuth();
   const { createTimetableEntry, deleteTimetableEntry } = useTimetableStore();
   const { courses, fetchCourses } = useCoursesStore();
-  const { byCourse, fetchCourseLabGroups, createLabGroup } = useLabGroupsStore();
+  const { byOrg, fetchOrgLabGroups, createLabGroup } = useLabGroupsStore();
 
   const [selectedDay, setSelectedDay] = useState(DAYS[0]);
   const [allEntries, setAllEntries] = useState<TimetableEntry[]>([]);
@@ -78,8 +78,8 @@ export default function ManageTimetableScreen() {
   useEffect(() => {
     if (formCourseId) {
       const course = courses.find((c) => c.id === formCourseId);
-      if (course?.classType === "LAB") {
-        fetchCourseLabGroups(formCourseId);
+      if (course?.classType === "LAB" && course.organizationId) {
+        fetchOrgLabGroups(course.organizationId);
       } else {
         setActiveGroupId(null);
       }
@@ -88,8 +88,11 @@ export default function ManageTimetableScreen() {
 
   const handleCreateGroup = async () => {
     if (!newGroupName.trim() || !formCourseId) return;
+    const course = courses.find(c => c.id === formCourseId);
+    if (!course || !course.organizationId) return;
+    
     setCreatingGroup(true);
-    const created = await createLabGroup(formCourseId, newGroupName.trim());
+    const created = await createLabGroup(course.organizationId, newGroupName.trim());
     setCreatingGroup(false);
     if (created) {
       setNewGroupName("");
@@ -298,7 +301,8 @@ export default function ManageTimetableScreen() {
               </TouchableOpacity>
 
               {(() => {
-                const courseLabGroups = formCourseId ? (byCourse[formCourseId] ?? []) : [];
+                const orgId = courses.find((c) => c.id === formCourseId)?.organizationId;
+                const courseLabGroups = orgId ? (byOrg[orgId] ?? []) : [];
                 return (
                   <>
                     {courseLabGroups.map((g) => (
@@ -390,7 +394,8 @@ export default function ManageTimetableScreen() {
               {(() => {
                 const selectedCourse = courses.find(c => c.id === formCourseId);
                 if (selectedCourse?.classType === "LAB") {
-                  const courseLabGroups = byCourse[formCourseId] || [];
+                  const orgId = selectedCourse.organizationId;
+                  const courseLabGroups = orgId ? (byOrg[orgId] || []) : [];
                   const activeGroupName = activeGroupId
                     ? courseLabGroups.find((g) => g.id === activeGroupId)?.name ?? "Unknown Group"
                     : "All Students";
