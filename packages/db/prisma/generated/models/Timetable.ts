@@ -28,9 +28,10 @@ export type TimetableMinAggregateOutputType = {
   id: string | null
   courseId: string | null
   day: $Enums.CourseDay | null
-  startTime: Date | null
-  endTime: Date | null
+  startTime: string | null
+  endTime: string | null
   location: string | null
+  labGroupId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -39,9 +40,10 @@ export type TimetableMaxAggregateOutputType = {
   id: string | null
   courseId: string | null
   day: $Enums.CourseDay | null
-  startTime: Date | null
-  endTime: Date | null
+  startTime: string | null
+  endTime: string | null
   location: string | null
+  labGroupId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -53,6 +55,7 @@ export type TimetableCountAggregateOutputType = {
   startTime: number
   endTime: number
   location: number
+  labGroupId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -66,6 +69,7 @@ export type TimetableMinAggregateInputType = {
   startTime?: true
   endTime?: true
   location?: true
+  labGroupId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -77,6 +81,7 @@ export type TimetableMaxAggregateInputType = {
   startTime?: true
   endTime?: true
   location?: true
+  labGroupId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -88,6 +93,7 @@ export type TimetableCountAggregateInputType = {
   startTime?: true
   endTime?: true
   location?: true
+  labGroupId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -169,9 +175,10 @@ export type TimetableGroupByOutputType = {
   id: string
   courseId: string
   day: $Enums.CourseDay
-  startTime: Date
-  endTime: Date
+  startTime: string
+  endTime: string
   location: string | null
+  labGroupId: string | null
   createdAt: Date
   updatedAt: Date
   _count: TimetableCountAggregateOutputType | null
@@ -201,13 +208,14 @@ export type TimetableWhereInput = {
   id?: Prisma.StringFilter<"Timetable"> | string
   courseId?: Prisma.StringFilter<"Timetable"> | string
   day?: Prisma.EnumCourseDayFilter<"Timetable"> | $Enums.CourseDay
-  startTime?: Prisma.DateTimeFilter<"Timetable"> | Date | string
-  endTime?: Prisma.DateTimeFilter<"Timetable"> | Date | string
+  startTime?: Prisma.StringFilter<"Timetable"> | string
+  endTime?: Prisma.StringFilter<"Timetable"> | string
   location?: Prisma.StringNullableFilter<"Timetable"> | string | null
+  labGroupId?: Prisma.StringNullableFilter<"Timetable"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Timetable"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Timetable"> | Date | string
   course?: Prisma.XOR<Prisma.CoursesScalarRelationFilter, Prisma.CoursesWhereInput>
-  users?: Prisma.UserTimetableListRelationFilter
+  labGroup?: Prisma.XOR<Prisma.LabGroupNullableScalarRelationFilter, Prisma.LabGroupWhereInput> | null
 }
 
 export type TimetableOrderByWithRelationInput = {
@@ -217,28 +225,30 @@ export type TimetableOrderByWithRelationInput = {
   startTime?: Prisma.SortOrder
   endTime?: Prisma.SortOrder
   location?: Prisma.SortOrderInput | Prisma.SortOrder
+  labGroupId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   course?: Prisma.CoursesOrderByWithRelationInput
-  users?: Prisma.UserTimetableOrderByRelationAggregateInput
+  labGroup?: Prisma.LabGroupOrderByWithRelationInput
 }
 
 export type TimetableWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  courseId_day_startTime_endTime?: Prisma.TimetableCourseIdDayStartTimeEndTimeCompoundUniqueInput
+  courseId_day_startTime_endTime_labGroupId?: Prisma.TimetableCourseIdDayStartTimeEndTimeLabGroupIdCompoundUniqueInput
   AND?: Prisma.TimetableWhereInput | Prisma.TimetableWhereInput[]
   OR?: Prisma.TimetableWhereInput[]
   NOT?: Prisma.TimetableWhereInput | Prisma.TimetableWhereInput[]
   courseId?: Prisma.StringFilter<"Timetable"> | string
   day?: Prisma.EnumCourseDayFilter<"Timetable"> | $Enums.CourseDay
-  startTime?: Prisma.DateTimeFilter<"Timetable"> | Date | string
-  endTime?: Prisma.DateTimeFilter<"Timetable"> | Date | string
+  startTime?: Prisma.StringFilter<"Timetable"> | string
+  endTime?: Prisma.StringFilter<"Timetable"> | string
   location?: Prisma.StringNullableFilter<"Timetable"> | string | null
+  labGroupId?: Prisma.StringNullableFilter<"Timetable"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Timetable"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Timetable"> | Date | string
   course?: Prisma.XOR<Prisma.CoursesScalarRelationFilter, Prisma.CoursesWhereInput>
-  users?: Prisma.UserTimetableListRelationFilter
-}, "id" | "courseId_day_startTime_endTime">
+  labGroup?: Prisma.XOR<Prisma.LabGroupNullableScalarRelationFilter, Prisma.LabGroupWhereInput> | null
+}, "id" | "courseId_day_startTime_endTime_labGroupId">
 
 export type TimetableOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -247,6 +257,7 @@ export type TimetableOrderByWithAggregationInput = {
   startTime?: Prisma.SortOrder
   endTime?: Prisma.SortOrder
   location?: Prisma.SortOrderInput | Prisma.SortOrder
+  labGroupId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.TimetableCountOrderByAggregateInput
@@ -261,9 +272,10 @@ export type TimetableScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Timetable"> | string
   courseId?: Prisma.StringWithAggregatesFilter<"Timetable"> | string
   day?: Prisma.EnumCourseDayWithAggregatesFilter<"Timetable"> | $Enums.CourseDay
-  startTime?: Prisma.DateTimeWithAggregatesFilter<"Timetable"> | Date | string
-  endTime?: Prisma.DateTimeWithAggregatesFilter<"Timetable"> | Date | string
+  startTime?: Prisma.StringWithAggregatesFilter<"Timetable"> | string
+  endTime?: Prisma.StringWithAggregatesFilter<"Timetable"> | string
   location?: Prisma.StringNullableWithAggregatesFilter<"Timetable"> | string | null
+  labGroupId?: Prisma.StringNullableWithAggregatesFilter<"Timetable"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Timetable"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Timetable"> | Date | string
 }
@@ -271,58 +283,59 @@ export type TimetableScalarWhereWithAggregatesInput = {
 export type TimetableCreateInput = {
   id?: string
   day?: $Enums.CourseDay
-  startTime: Date | string
-  endTime: Date | string
+  startTime: string
+  endTime: string
   location?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   course: Prisma.CoursesCreateNestedOneWithoutTimetableInput
-  users?: Prisma.UserTimetableCreateNestedManyWithoutTimetableInput
+  labGroup?: Prisma.LabGroupCreateNestedOneWithoutTimetablesInput
 }
 
 export type TimetableUncheckedCreateInput = {
   id?: string
   courseId: string
   day?: $Enums.CourseDay
-  startTime: Date | string
-  endTime: Date | string
+  startTime: string
+  endTime: string
   location?: string | null
+  labGroupId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  users?: Prisma.UserTimetableUncheckedCreateNestedManyWithoutTimetableInput
 }
 
 export type TimetableUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   day?: Prisma.EnumCourseDayFieldUpdateOperationsInput | $Enums.CourseDay
-  startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  startTime?: Prisma.StringFieldUpdateOperationsInput | string
+  endTime?: Prisma.StringFieldUpdateOperationsInput | string
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   course?: Prisma.CoursesUpdateOneRequiredWithoutTimetableNestedInput
-  users?: Prisma.UserTimetableUpdateManyWithoutTimetableNestedInput
+  labGroup?: Prisma.LabGroupUpdateOneWithoutTimetablesNestedInput
 }
 
 export type TimetableUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   courseId?: Prisma.StringFieldUpdateOperationsInput | string
   day?: Prisma.EnumCourseDayFieldUpdateOperationsInput | $Enums.CourseDay
-  startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  startTime?: Prisma.StringFieldUpdateOperationsInput | string
+  endTime?: Prisma.StringFieldUpdateOperationsInput | string
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  labGroupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  users?: Prisma.UserTimetableUncheckedUpdateManyWithoutTimetableNestedInput
 }
 
 export type TimetableCreateManyInput = {
   id?: string
   courseId: string
   day?: $Enums.CourseDay
-  startTime: Date | string
-  endTime: Date | string
+  startTime: string
+  endTime: string
   location?: string | null
+  labGroupId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -330,8 +343,8 @@ export type TimetableCreateManyInput = {
 export type TimetableUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   day?: Prisma.EnumCourseDayFieldUpdateOperationsInput | $Enums.CourseDay
-  startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  startTime?: Prisma.StringFieldUpdateOperationsInput | string
+  endTime?: Prisma.StringFieldUpdateOperationsInput | string
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -341,9 +354,10 @@ export type TimetableUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   courseId?: Prisma.StringFieldUpdateOperationsInput | string
   day?: Prisma.EnumCourseDayFieldUpdateOperationsInput | $Enums.CourseDay
-  startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  startTime?: Prisma.StringFieldUpdateOperationsInput | string
+  endTime?: Prisma.StringFieldUpdateOperationsInput | string
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  labGroupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -358,16 +372,12 @@ export type TimetableOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
-export type TimetableScalarRelationFilter = {
-  is?: Prisma.TimetableWhereInput
-  isNot?: Prisma.TimetableWhereInput
-}
-
-export type TimetableCourseIdDayStartTimeEndTimeCompoundUniqueInput = {
+export type TimetableCourseIdDayStartTimeEndTimeLabGroupIdCompoundUniqueInput = {
   courseId: string
   day: $Enums.CourseDay
-  startTime: Date | string
-  endTime: Date | string
+  startTime: string
+  endTime: string
+  labGroupId: string
 }
 
 export type TimetableCountOrderByAggregateInput = {
@@ -377,6 +387,7 @@ export type TimetableCountOrderByAggregateInput = {
   startTime?: Prisma.SortOrder
   endTime?: Prisma.SortOrder
   location?: Prisma.SortOrder
+  labGroupId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -388,6 +399,7 @@ export type TimetableMaxOrderByAggregateInput = {
   startTime?: Prisma.SortOrder
   endTime?: Prisma.SortOrder
   location?: Prisma.SortOrder
+  labGroupId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -399,6 +411,7 @@ export type TimetableMinOrderByAggregateInput = {
   startTime?: Prisma.SortOrder
   endTime?: Prisma.SortOrder
   location?: Prisma.SortOrder
+  labGroupId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -445,44 +458,72 @@ export type TimetableUncheckedUpdateManyWithoutCourseNestedInput = {
   deleteMany?: Prisma.TimetableScalarWhereInput | Prisma.TimetableScalarWhereInput[]
 }
 
-export type TimetableCreateNestedOneWithoutUsersInput = {
-  create?: Prisma.XOR<Prisma.TimetableCreateWithoutUsersInput, Prisma.TimetableUncheckedCreateWithoutUsersInput>
-  connectOrCreate?: Prisma.TimetableCreateOrConnectWithoutUsersInput
-  connect?: Prisma.TimetableWhereUniqueInput
-}
-
-export type TimetableUpdateOneRequiredWithoutUsersNestedInput = {
-  create?: Prisma.XOR<Prisma.TimetableCreateWithoutUsersInput, Prisma.TimetableUncheckedCreateWithoutUsersInput>
-  connectOrCreate?: Prisma.TimetableCreateOrConnectWithoutUsersInput
-  upsert?: Prisma.TimetableUpsertWithoutUsersInput
-  connect?: Prisma.TimetableWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.TimetableUpdateToOneWithWhereWithoutUsersInput, Prisma.TimetableUpdateWithoutUsersInput>, Prisma.TimetableUncheckedUpdateWithoutUsersInput>
-}
-
 export type EnumCourseDayFieldUpdateOperationsInput = {
   set?: $Enums.CourseDay
+}
+
+export type TimetableCreateNestedManyWithoutLabGroupInput = {
+  create?: Prisma.XOR<Prisma.TimetableCreateWithoutLabGroupInput, Prisma.TimetableUncheckedCreateWithoutLabGroupInput> | Prisma.TimetableCreateWithoutLabGroupInput[] | Prisma.TimetableUncheckedCreateWithoutLabGroupInput[]
+  connectOrCreate?: Prisma.TimetableCreateOrConnectWithoutLabGroupInput | Prisma.TimetableCreateOrConnectWithoutLabGroupInput[]
+  createMany?: Prisma.TimetableCreateManyLabGroupInputEnvelope
+  connect?: Prisma.TimetableWhereUniqueInput | Prisma.TimetableWhereUniqueInput[]
+}
+
+export type TimetableUncheckedCreateNestedManyWithoutLabGroupInput = {
+  create?: Prisma.XOR<Prisma.TimetableCreateWithoutLabGroupInput, Prisma.TimetableUncheckedCreateWithoutLabGroupInput> | Prisma.TimetableCreateWithoutLabGroupInput[] | Prisma.TimetableUncheckedCreateWithoutLabGroupInput[]
+  connectOrCreate?: Prisma.TimetableCreateOrConnectWithoutLabGroupInput | Prisma.TimetableCreateOrConnectWithoutLabGroupInput[]
+  createMany?: Prisma.TimetableCreateManyLabGroupInputEnvelope
+  connect?: Prisma.TimetableWhereUniqueInput | Prisma.TimetableWhereUniqueInput[]
+}
+
+export type TimetableUpdateManyWithoutLabGroupNestedInput = {
+  create?: Prisma.XOR<Prisma.TimetableCreateWithoutLabGroupInput, Prisma.TimetableUncheckedCreateWithoutLabGroupInput> | Prisma.TimetableCreateWithoutLabGroupInput[] | Prisma.TimetableUncheckedCreateWithoutLabGroupInput[]
+  connectOrCreate?: Prisma.TimetableCreateOrConnectWithoutLabGroupInput | Prisma.TimetableCreateOrConnectWithoutLabGroupInput[]
+  upsert?: Prisma.TimetableUpsertWithWhereUniqueWithoutLabGroupInput | Prisma.TimetableUpsertWithWhereUniqueWithoutLabGroupInput[]
+  createMany?: Prisma.TimetableCreateManyLabGroupInputEnvelope
+  set?: Prisma.TimetableWhereUniqueInput | Prisma.TimetableWhereUniqueInput[]
+  disconnect?: Prisma.TimetableWhereUniqueInput | Prisma.TimetableWhereUniqueInput[]
+  delete?: Prisma.TimetableWhereUniqueInput | Prisma.TimetableWhereUniqueInput[]
+  connect?: Prisma.TimetableWhereUniqueInput | Prisma.TimetableWhereUniqueInput[]
+  update?: Prisma.TimetableUpdateWithWhereUniqueWithoutLabGroupInput | Prisma.TimetableUpdateWithWhereUniqueWithoutLabGroupInput[]
+  updateMany?: Prisma.TimetableUpdateManyWithWhereWithoutLabGroupInput | Prisma.TimetableUpdateManyWithWhereWithoutLabGroupInput[]
+  deleteMany?: Prisma.TimetableScalarWhereInput | Prisma.TimetableScalarWhereInput[]
+}
+
+export type TimetableUncheckedUpdateManyWithoutLabGroupNestedInput = {
+  create?: Prisma.XOR<Prisma.TimetableCreateWithoutLabGroupInput, Prisma.TimetableUncheckedCreateWithoutLabGroupInput> | Prisma.TimetableCreateWithoutLabGroupInput[] | Prisma.TimetableUncheckedCreateWithoutLabGroupInput[]
+  connectOrCreate?: Prisma.TimetableCreateOrConnectWithoutLabGroupInput | Prisma.TimetableCreateOrConnectWithoutLabGroupInput[]
+  upsert?: Prisma.TimetableUpsertWithWhereUniqueWithoutLabGroupInput | Prisma.TimetableUpsertWithWhereUniqueWithoutLabGroupInput[]
+  createMany?: Prisma.TimetableCreateManyLabGroupInputEnvelope
+  set?: Prisma.TimetableWhereUniqueInput | Prisma.TimetableWhereUniqueInput[]
+  disconnect?: Prisma.TimetableWhereUniqueInput | Prisma.TimetableWhereUniqueInput[]
+  delete?: Prisma.TimetableWhereUniqueInput | Prisma.TimetableWhereUniqueInput[]
+  connect?: Prisma.TimetableWhereUniqueInput | Prisma.TimetableWhereUniqueInput[]
+  update?: Prisma.TimetableUpdateWithWhereUniqueWithoutLabGroupInput | Prisma.TimetableUpdateWithWhereUniqueWithoutLabGroupInput[]
+  updateMany?: Prisma.TimetableUpdateManyWithWhereWithoutLabGroupInput | Prisma.TimetableUpdateManyWithWhereWithoutLabGroupInput[]
+  deleteMany?: Prisma.TimetableScalarWhereInput | Prisma.TimetableScalarWhereInput[]
 }
 
 export type TimetableCreateWithoutCourseInput = {
   id?: string
   day?: $Enums.CourseDay
-  startTime: Date | string
-  endTime: Date | string
+  startTime: string
+  endTime: string
   location?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  users?: Prisma.UserTimetableCreateNestedManyWithoutTimetableInput
+  labGroup?: Prisma.LabGroupCreateNestedOneWithoutTimetablesInput
 }
 
 export type TimetableUncheckedCreateWithoutCourseInput = {
   id?: string
   day?: $Enums.CourseDay
-  startTime: Date | string
-  endTime: Date | string
+  startTime: string
+  endTime: string
   location?: string | null
+  labGroupId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  users?: Prisma.UserTimetableUncheckedCreateNestedManyWithoutTimetableInput
 }
 
 export type TimetableCreateOrConnectWithoutCourseInput = {
@@ -518,79 +559,69 @@ export type TimetableScalarWhereInput = {
   id?: Prisma.StringFilter<"Timetable"> | string
   courseId?: Prisma.StringFilter<"Timetable"> | string
   day?: Prisma.EnumCourseDayFilter<"Timetable"> | $Enums.CourseDay
-  startTime?: Prisma.DateTimeFilter<"Timetable"> | Date | string
-  endTime?: Prisma.DateTimeFilter<"Timetable"> | Date | string
+  startTime?: Prisma.StringFilter<"Timetable"> | string
+  endTime?: Prisma.StringFilter<"Timetable"> | string
   location?: Prisma.StringNullableFilter<"Timetable"> | string | null
+  labGroupId?: Prisma.StringNullableFilter<"Timetable"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Timetable"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Timetable"> | Date | string
 }
 
-export type TimetableCreateWithoutUsersInput = {
+export type TimetableCreateWithoutLabGroupInput = {
   id?: string
   day?: $Enums.CourseDay
-  startTime: Date | string
-  endTime: Date | string
+  startTime: string
+  endTime: string
   location?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   course: Prisma.CoursesCreateNestedOneWithoutTimetableInput
 }
 
-export type TimetableUncheckedCreateWithoutUsersInput = {
+export type TimetableUncheckedCreateWithoutLabGroupInput = {
   id?: string
   courseId: string
   day?: $Enums.CourseDay
-  startTime: Date | string
-  endTime: Date | string
+  startTime: string
+  endTime: string
   location?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
-export type TimetableCreateOrConnectWithoutUsersInput = {
+export type TimetableCreateOrConnectWithoutLabGroupInput = {
   where: Prisma.TimetableWhereUniqueInput
-  create: Prisma.XOR<Prisma.TimetableCreateWithoutUsersInput, Prisma.TimetableUncheckedCreateWithoutUsersInput>
+  create: Prisma.XOR<Prisma.TimetableCreateWithoutLabGroupInput, Prisma.TimetableUncheckedCreateWithoutLabGroupInput>
 }
 
-export type TimetableUpsertWithoutUsersInput = {
-  update: Prisma.XOR<Prisma.TimetableUpdateWithoutUsersInput, Prisma.TimetableUncheckedUpdateWithoutUsersInput>
-  create: Prisma.XOR<Prisma.TimetableCreateWithoutUsersInput, Prisma.TimetableUncheckedCreateWithoutUsersInput>
-  where?: Prisma.TimetableWhereInput
+export type TimetableCreateManyLabGroupInputEnvelope = {
+  data: Prisma.TimetableCreateManyLabGroupInput | Prisma.TimetableCreateManyLabGroupInput[]
+  skipDuplicates?: boolean
 }
 
-export type TimetableUpdateToOneWithWhereWithoutUsersInput = {
-  where?: Prisma.TimetableWhereInput
-  data: Prisma.XOR<Prisma.TimetableUpdateWithoutUsersInput, Prisma.TimetableUncheckedUpdateWithoutUsersInput>
+export type TimetableUpsertWithWhereUniqueWithoutLabGroupInput = {
+  where: Prisma.TimetableWhereUniqueInput
+  update: Prisma.XOR<Prisma.TimetableUpdateWithoutLabGroupInput, Prisma.TimetableUncheckedUpdateWithoutLabGroupInput>
+  create: Prisma.XOR<Prisma.TimetableCreateWithoutLabGroupInput, Prisma.TimetableUncheckedCreateWithoutLabGroupInput>
 }
 
-export type TimetableUpdateWithoutUsersInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  day?: Prisma.EnumCourseDayFieldUpdateOperationsInput | $Enums.CourseDay
-  startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  course?: Prisma.CoursesUpdateOneRequiredWithoutTimetableNestedInput
+export type TimetableUpdateWithWhereUniqueWithoutLabGroupInput = {
+  where: Prisma.TimetableWhereUniqueInput
+  data: Prisma.XOR<Prisma.TimetableUpdateWithoutLabGroupInput, Prisma.TimetableUncheckedUpdateWithoutLabGroupInput>
 }
 
-export type TimetableUncheckedUpdateWithoutUsersInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
-  day?: Prisma.EnumCourseDayFieldUpdateOperationsInput | $Enums.CourseDay
-  startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+export type TimetableUpdateManyWithWhereWithoutLabGroupInput = {
+  where: Prisma.TimetableScalarWhereInput
+  data: Prisma.XOR<Prisma.TimetableUpdateManyMutationInput, Prisma.TimetableUncheckedUpdateManyWithoutLabGroupInput>
 }
 
 export type TimetableCreateManyCourseInput = {
   id?: string
   day?: $Enums.CourseDay
-  startTime: Date | string
-  endTime: Date | string
+  startTime: string
+  endTime: string
   location?: string | null
+  labGroupId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -598,64 +629,80 @@ export type TimetableCreateManyCourseInput = {
 export type TimetableUpdateWithoutCourseInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   day?: Prisma.EnumCourseDayFieldUpdateOperationsInput | $Enums.CourseDay
-  startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  startTime?: Prisma.StringFieldUpdateOperationsInput | string
+  endTime?: Prisma.StringFieldUpdateOperationsInput | string
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  users?: Prisma.UserTimetableUpdateManyWithoutTimetableNestedInput
+  labGroup?: Prisma.LabGroupUpdateOneWithoutTimetablesNestedInput
 }
 
 export type TimetableUncheckedUpdateWithoutCourseInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   day?: Prisma.EnumCourseDayFieldUpdateOperationsInput | $Enums.CourseDay
-  startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  startTime?: Prisma.StringFieldUpdateOperationsInput | string
+  endTime?: Prisma.StringFieldUpdateOperationsInput | string
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  labGroupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  users?: Prisma.UserTimetableUncheckedUpdateManyWithoutTimetableNestedInput
 }
 
 export type TimetableUncheckedUpdateManyWithoutCourseInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   day?: Prisma.EnumCourseDayFieldUpdateOperationsInput | $Enums.CourseDay
-  startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  startTime?: Prisma.StringFieldUpdateOperationsInput | string
+  endTime?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  labGroupId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type TimetableCreateManyLabGroupInput = {
+  id?: string
+  courseId: string
+  day?: $Enums.CourseDay
+  startTime: string
+  endTime: string
+  location?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type TimetableUpdateWithoutLabGroupInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  day?: Prisma.EnumCourseDayFieldUpdateOperationsInput | $Enums.CourseDay
+  startTime?: Prisma.StringFieldUpdateOperationsInput | string
+  endTime?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  course?: Prisma.CoursesUpdateOneRequiredWithoutTimetableNestedInput
+}
+
+export type TimetableUncheckedUpdateWithoutLabGroupInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  courseId?: Prisma.StringFieldUpdateOperationsInput | string
+  day?: Prisma.EnumCourseDayFieldUpdateOperationsInput | $Enums.CourseDay
+  startTime?: Prisma.StringFieldUpdateOperationsInput | string
+  endTime?: Prisma.StringFieldUpdateOperationsInput | string
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-
-/**
- * Count Type TimetableCountOutputType
- */
-
-export type TimetableCountOutputType = {
-  users: number
+export type TimetableUncheckedUpdateManyWithoutLabGroupInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  courseId?: Prisma.StringFieldUpdateOperationsInput | string
+  day?: Prisma.EnumCourseDayFieldUpdateOperationsInput | $Enums.CourseDay
+  startTime?: Prisma.StringFieldUpdateOperationsInput | string
+  endTime?: Prisma.StringFieldUpdateOperationsInput | string
+  location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type TimetableCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  users?: boolean | TimetableCountOutputTypeCountUsersArgs
-}
-
-/**
- * TimetableCountOutputType without action
- */
-export type TimetableCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the TimetableCountOutputType
-   */
-  select?: Prisma.TimetableCountOutputTypeSelect<ExtArgs> | null
-}
-
-/**
- * TimetableCountOutputType without action
- */
-export type TimetableCountOutputTypeCountUsersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.UserTimetableWhereInput
-}
 
 
 export type TimetableSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -665,11 +712,11 @@ export type TimetableSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   startTime?: boolean
   endTime?: boolean
   location?: boolean
+  labGroupId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   course?: boolean | Prisma.CoursesDefaultArgs<ExtArgs>
-  users?: boolean | Prisma.Timetable$usersArgs<ExtArgs>
-  _count?: boolean | Prisma.TimetableCountOutputTypeDefaultArgs<ExtArgs>
+  labGroup?: boolean | Prisma.Timetable$labGroupArgs<ExtArgs>
 }, ExtArgs["result"]["timetable"]>
 
 export type TimetableSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -679,9 +726,11 @@ export type TimetableSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   startTime?: boolean
   endTime?: boolean
   location?: boolean
+  labGroupId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   course?: boolean | Prisma.CoursesDefaultArgs<ExtArgs>
+  labGroup?: boolean | Prisma.Timetable$labGroupArgs<ExtArgs>
 }, ExtArgs["result"]["timetable"]>
 
 export type TimetableSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -691,9 +740,11 @@ export type TimetableSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   startTime?: boolean
   endTime?: boolean
   location?: boolean
+  labGroupId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   course?: boolean | Prisma.CoursesDefaultArgs<ExtArgs>
+  labGroup?: boolean | Prisma.Timetable$labGroupArgs<ExtArgs>
 }, ExtArgs["result"]["timetable"]>
 
 export type TimetableSelectScalar = {
@@ -703,36 +754,39 @@ export type TimetableSelectScalar = {
   startTime?: boolean
   endTime?: boolean
   location?: boolean
+  labGroupId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type TimetableOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "courseId" | "day" | "startTime" | "endTime" | "location" | "createdAt" | "updatedAt", ExtArgs["result"]["timetable"]>
+export type TimetableOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "courseId" | "day" | "startTime" | "endTime" | "location" | "labGroupId" | "createdAt" | "updatedAt", ExtArgs["result"]["timetable"]>
 export type TimetableInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   course?: boolean | Prisma.CoursesDefaultArgs<ExtArgs>
-  users?: boolean | Prisma.Timetable$usersArgs<ExtArgs>
-  _count?: boolean | Prisma.TimetableCountOutputTypeDefaultArgs<ExtArgs>
+  labGroup?: boolean | Prisma.Timetable$labGroupArgs<ExtArgs>
 }
 export type TimetableIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   course?: boolean | Prisma.CoursesDefaultArgs<ExtArgs>
+  labGroup?: boolean | Prisma.Timetable$labGroupArgs<ExtArgs>
 }
 export type TimetableIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   course?: boolean | Prisma.CoursesDefaultArgs<ExtArgs>
+  labGroup?: boolean | Prisma.Timetable$labGroupArgs<ExtArgs>
 }
 
 export type $TimetablePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Timetable"
   objects: {
     course: Prisma.$CoursesPayload<ExtArgs>
-    users: Prisma.$UserTimetablePayload<ExtArgs>[]
+    labGroup: Prisma.$LabGroupPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     courseId: string
     day: $Enums.CourseDay
-    startTime: Date
-    endTime: Date
+    startTime: string
+    endTime: string
     location: string | null
+    labGroupId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["timetable"]>
@@ -1130,7 +1184,7 @@ readonly fields: TimetableFieldRefs;
 export interface Prisma__TimetableClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   course<T extends Prisma.CoursesDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CoursesDefaultArgs<ExtArgs>>): Prisma.Prisma__CoursesClient<runtime.Types.Result.GetResult<Prisma.$CoursesPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  users<T extends Prisma.Timetable$usersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Timetable$usersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserTimetablePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  labGroup<T extends Prisma.Timetable$labGroupArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Timetable$labGroupArgs<ExtArgs>>): Prisma.Prisma__LabGroupClient<runtime.Types.Result.GetResult<Prisma.$LabGroupPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1163,9 +1217,10 @@ export interface TimetableFieldRefs {
   readonly id: Prisma.FieldRef<"Timetable", 'String'>
   readonly courseId: Prisma.FieldRef<"Timetable", 'String'>
   readonly day: Prisma.FieldRef<"Timetable", 'CourseDay'>
-  readonly startTime: Prisma.FieldRef<"Timetable", 'DateTime'>
-  readonly endTime: Prisma.FieldRef<"Timetable", 'DateTime'>
+  readonly startTime: Prisma.FieldRef<"Timetable", 'String'>
+  readonly endTime: Prisma.FieldRef<"Timetable", 'String'>
   readonly location: Prisma.FieldRef<"Timetable", 'String'>
+  readonly labGroupId: Prisma.FieldRef<"Timetable", 'String'>
   readonly createdAt: Prisma.FieldRef<"Timetable", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Timetable", 'DateTime'>
 }
@@ -1564,27 +1619,22 @@ export type TimetableDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Int
 }
 
 /**
- * Timetable.users
+ * Timetable.labGroup
  */
-export type Timetable$usersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type Timetable$labGroupArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the UserTimetable
+   * Select specific fields to fetch from the LabGroup
    */
-  select?: Prisma.UserTimetableSelect<ExtArgs> | null
+  select?: Prisma.LabGroupSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the UserTimetable
+   * Omit specific fields from the LabGroup
    */
-  omit?: Prisma.UserTimetableOmit<ExtArgs> | null
+  omit?: Prisma.LabGroupOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.UserTimetableInclude<ExtArgs> | null
-  where?: Prisma.UserTimetableWhereInput
-  orderBy?: Prisma.UserTimetableOrderByWithRelationInput | Prisma.UserTimetableOrderByWithRelationInput[]
-  cursor?: Prisma.UserTimetableWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.UserTimetableScalarFieldEnum | Prisma.UserTimetableScalarFieldEnum[]
+  include?: Prisma.LabGroupInclude<ExtArgs> | null
+  where?: Prisma.LabGroupWhereInput
 }
 
 /**

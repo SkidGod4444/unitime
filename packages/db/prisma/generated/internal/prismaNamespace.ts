@@ -391,7 +391,6 @@ export const ModelName = {
   HistoryLog: 'HistoryLog',
   User: 'User',
   UserCourse: 'UserCourse',
-  UserTimetable: 'UserTimetable',
   Timetable: 'Timetable',
   AttendanceQRSession: 'AttendanceQRSession',
   AttendanceLogs: 'AttendanceLogs',
@@ -416,7 +415,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "courses" | "notification" | "feedback" | "supportTicket" | "historyLog" | "user" | "userCourse" | "userTimetable" | "timetable" | "attendanceQRSession" | "attendanceLogs" | "attendanceSummary" | "studentProfile" | "organization" | "alarm" | "labGroup" | "studentLabGroup"
+    modelProps: "courses" | "notification" | "feedback" | "supportTicket" | "historyLog" | "user" | "userCourse" | "timetable" | "attendanceQRSession" | "attendanceLogs" | "attendanceSummary" | "studentProfile" | "organization" | "alarm" | "labGroup" | "studentLabGroup"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -935,80 +934,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.UserCourseCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.UserCourseCountAggregateOutputType> | number
-        }
-      }
-    }
-    UserTimetable: {
-      payload: Prisma.$UserTimetablePayload<ExtArgs>
-      fields: Prisma.UserTimetableFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.UserTimetableFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserTimetablePayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.UserTimetableFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserTimetablePayload>
-        }
-        findFirst: {
-          args: Prisma.UserTimetableFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserTimetablePayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.UserTimetableFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserTimetablePayload>
-        }
-        findMany: {
-          args: Prisma.UserTimetableFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserTimetablePayload>[]
-        }
-        create: {
-          args: Prisma.UserTimetableCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserTimetablePayload>
-        }
-        createMany: {
-          args: Prisma.UserTimetableCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.UserTimetableCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserTimetablePayload>[]
-        }
-        delete: {
-          args: Prisma.UserTimetableDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserTimetablePayload>
-        }
-        update: {
-          args: Prisma.UserTimetableUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserTimetablePayload>
-        }
-        deleteMany: {
-          args: Prisma.UserTimetableDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.UserTimetableUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.UserTimetableUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserTimetablePayload>[]
-        }
-        upsert: {
-          args: Prisma.UserTimetableUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserTimetablePayload>
-        }
-        aggregate: {
-          args: Prisma.UserTimetableAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateUserTimetable>
-        }
-        groupBy: {
-          args: Prisma.UserTimetableGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.UserTimetableGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.UserTimetableCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.UserTimetableCountAggregateOutputType> | number
         }
       }
     }
@@ -1830,17 +1755,6 @@ export const UserCourseScalarFieldEnum = {
 export type UserCourseScalarFieldEnum = (typeof UserCourseScalarFieldEnum)[keyof typeof UserCourseScalarFieldEnum]
 
 
-export const UserTimetableScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  timetableId: 'timetableId',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type UserTimetableScalarFieldEnum = (typeof UserTimetableScalarFieldEnum)[keyof typeof UserTimetableScalarFieldEnum]
-
-
 export const TimetableScalarFieldEnum = {
   id: 'id',
   courseId: 'courseId',
@@ -1848,6 +1762,7 @@ export const TimetableScalarFieldEnum = {
   startTime: 'startTime',
   endTime: 'endTime',
   location: 'location',
+  labGroupId: 'labGroupId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1950,11 +1865,12 @@ export type AlarmScalarFieldEnum = (typeof AlarmScalarFieldEnum)[keyof typeof Al
 
 export const LabGroupScalarFieldEnum = {
   id: 'id',
-  organizationId: 'organizationId',
+  courseId: 'courseId',
   name: 'name',
   createdBy: 'createdBy',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  organizationId: 'organizationId'
 } as const
 
 export type LabGroupScalarFieldEnum = (typeof LabGroupScalarFieldEnum)[keyof typeof LabGroupScalarFieldEnum]
@@ -1963,6 +1879,7 @@ export type LabGroupScalarFieldEnum = (typeof LabGroupScalarFieldEnum)[keyof typ
 export const StudentLabGroupScalarFieldEnum = {
   id: 'id',
   studentId: 'studentId',
+  courseId: 'courseId',
   labGroupId: 'labGroupId',
   joinedAt: 'joinedAt'
 } as const
@@ -2374,7 +2291,6 @@ export type GlobalOmitConfig = {
   historyLog?: Prisma.HistoryLogOmit
   user?: Prisma.UserOmit
   userCourse?: Prisma.UserCourseOmit
-  userTimetable?: Prisma.UserTimetableOmit
   timetable?: Prisma.TimetableOmit
   attendanceQRSession?: Prisma.AttendanceQRSessionOmit
   attendanceLogs?: Prisma.AttendanceLogsOmit

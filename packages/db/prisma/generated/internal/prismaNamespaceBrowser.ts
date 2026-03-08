@@ -58,7 +58,6 @@ export const ModelName = {
   HistoryLog: 'HistoryLog',
   User: 'User',
   UserCourse: 'UserCourse',
-  UserTimetable: 'UserTimetable',
   Timetable: 'Timetable',
   AttendanceQRSession: 'AttendanceQRSession',
   AttendanceLogs: 'AttendanceLogs',
@@ -199,17 +198,6 @@ export const UserCourseScalarFieldEnum = {
 export type UserCourseScalarFieldEnum = (typeof UserCourseScalarFieldEnum)[keyof typeof UserCourseScalarFieldEnum]
 
 
-export const UserTimetableScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  timetableId: 'timetableId',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type UserTimetableScalarFieldEnum = (typeof UserTimetableScalarFieldEnum)[keyof typeof UserTimetableScalarFieldEnum]
-
-
 export const TimetableScalarFieldEnum = {
   id: 'id',
   courseId: 'courseId',
@@ -217,6 +205,7 @@ export const TimetableScalarFieldEnum = {
   startTime: 'startTime',
   endTime: 'endTime',
   location: 'location',
+  labGroupId: 'labGroupId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -319,11 +308,12 @@ export type AlarmScalarFieldEnum = (typeof AlarmScalarFieldEnum)[keyof typeof Al
 
 export const LabGroupScalarFieldEnum = {
   id: 'id',
-  organizationId: 'organizationId',
+  courseId: 'courseId',
   name: 'name',
   createdBy: 'createdBy',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  organizationId: 'organizationId'
 } as const
 
 export type LabGroupScalarFieldEnum = (typeof LabGroupScalarFieldEnum)[keyof typeof LabGroupScalarFieldEnum]
@@ -332,6 +322,7 @@ export type LabGroupScalarFieldEnum = (typeof LabGroupScalarFieldEnum)[keyof typ
 export const StudentLabGroupScalarFieldEnum = {
   id: 'id',
   studentId: 'studentId',
+  courseId: 'courseId',
   labGroupId: 'labGroupId',
   joinedAt: 'joinedAt'
 } as const

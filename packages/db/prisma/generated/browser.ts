@@ -53,11 +53,6 @@ export type User = Prisma.UserModel
  */
 export type UserCourse = Prisma.UserCourseModel
 /**
- * Model UserTimetable
- * 
- */
-export type UserTimetable = Prisma.UserTimetableModel
-/**
  * Model Timetable
  * 
  */

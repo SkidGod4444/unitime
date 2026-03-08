@@ -69,6 +69,8 @@ model Courses {
   updatedAt           DateTime              @updatedAt @map("updated_at")
   organizationId      String?               @map("organization_id")
   organization        Organization?         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  labGroups           LabGroup[]
+
   @@index([organizationId])
   @@map("courses")
 }
@@ -163,20 +165,20 @@ model Feedback {
 }
 
 model SupportTicket {
-  id             String       @id @default(uuid())
-  userId         String       @map("user_id")
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organizationId String?      @map("organization_id")
+  id             String        @id @default(uuid())
+  userId         String        @map("user_id")
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String?       @map("organization_id")
   organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   title          String
   description    String
-  status         TicketStatus @default(OPEN)
-  resolutionNote String?      @map("resolution_note")
-  assigneeId     String?      @map("assignee_id")
-  assignee       User?        @relation("TicketAssignee", fields: [assigneeId], references: [id])
-  resolvedAt     DateTime?    @map("resolved_at")
-  createdAt      DateTime     @default(now()) @map("created_at")
-  updatedAt      DateTime     @updatedAt @map("updated_at")
+  status         TicketStatus  @default(OPEN)
+  resolutionNote String?       @map("resolution_note")
+  assigneeId     String?       @map("assignee_id")
+  assignee       User?         @relation("TicketAssignee", fields: [assigneeId], references: [id])
+  resolvedAt     DateTime?     @map("resolved_at")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
 
   @@index([userId])
   @@index([organizationId])
@@ -214,7 +216,6 @@ model User {
   banReason            String?
   banExpires           DateTime?
   courses              UserCourse[]
-  timetables           UserTimetable[]
   attendanceQRSessions AttendanceQRSession[]
   attendances          AttendanceLogs[]
   attendanceSummary    AttendanceSummary[]
@@ -253,20 +254,6 @@ model UserCourse {
   @@map("user_courses")
 }
 
-// Junction table for many-to-many relationship between User and Timetable
-model UserTimetable {
-  id          String    @id @default(uuid())
-  userId      String    @map("user_id")
-  timetableId String    @map("timetable_id")
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  timetable   Timetable @relation(fields: [timetableId], references: [id], onDelete: Cascade)
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-
-  @@unique([userId, timetableId])
-  @@map("user_timetable")
-}
-
 enum CourseDay {
   MONDAY
   TUESDAY
@@ -278,18 +265,19 @@ enum CourseDay {
 }
 
 model Timetable {
-  id        String          @id @default(uuid())
-  courseId  String          @map("course_id")
-  course    Courses         @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  day       CourseDay       @default(MONDAY)
-  startTime DateTime        @map("start_time")
-  endTime   DateTime        @map("end_time")
-  location  String?
-  users     UserTimetable[]
-  createdAt DateTime        @default(now()) @map("created_at")
-  updatedAt DateTime        @updatedAt @map("updated_at")
+  id         String    @id @default(uuid())
+  courseId   String    @map("course_id")
+  course     Courses   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  day        CourseDay @default(MONDAY)
+  startTime  String    @map("start_time")
+  endTime    String    @map("end_time")
+  location   String?
+  labGroupId String?   @map("lab_group_id")
+  labGroup   LabGroup? @relation(fields: [labGroupId], references: [id], onDelete: Cascade)
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
 
-  @@unique([courseId, day, startTime, endTime])
+  @@unique([courseId, day, startTime, endTime, labGroupId])
   @@index([day])
   @@map("timetable")
 }
@@ -300,21 +288,21 @@ enum AttendanceQRStatus {
 }
 
 model AttendanceQRSession {
-  id            String             @id @default(uuid())
-  courseId      String             @map("course_id")
-  createdBy     String             @map("created_by")
-  user          User               @relation(fields: [createdBy], references: [id], onDelete: Cascade)
-  course        Courses            @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  status        AttendanceQRStatus @default(ACTIVE)
-  markedUsers   String[]           @default([]) @map("marked_users") // Array of user IDs who have marked attendance
-  startTime     DateTime           @map("start_time")
-  endTime       DateTime           @map("end_time")
-  geofenceRadius Int?              @default(75) @map("geofence_radius") // Radius in meters for location validation
+  id             String             @id @default(uuid())
+  courseId       String             @map("course_id")
+  createdBy      String             @map("created_by")
+  user           User               @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  course         Courses            @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  status         AttendanceQRStatus @default(ACTIVE)
+  markedUsers    String[]           @default([]) @map("marked_users") // Array of user IDs who have marked attendance
+  startTime      DateTime           @map("start_time")
+  endTime        DateTime           @map("end_time")
+  geofenceRadius Int?               @default(75) @map("geofence_radius") // Radius in meters for location validation
   // When set, this attendance session targets a specific lab group for a LAB course.
-  labGroupId    String?            @map("lab_group_id")
-  labGroup      LabGroup?          @relation(fields: [labGroupId], references: [id])
-  createdAt     DateTime           @default(now()) @map("created_at")
-  updatedAt     DateTime           @updatedAt @map("updated_at")
+  labGroupId     String?            @map("lab_group_id")
+  labGroup       LabGroup?          @relation(fields: [labGroupId], references: [id])
+  createdAt      DateTime           @default(now()) @map("created_at")
+  updatedAt      DateTime           @updatedAt @map("updated_at")
 
   @@index([courseId])
   @@index([status])
@@ -397,7 +385,8 @@ model Organization {
   createdAt      DateTime         @default(now()) @map("created_at")
   updatedAt      DateTime         @updatedAt @map("updated_at")
 
-  labGroups    LabGroup[]
+  labGroups LabGroup[]
+
   @@map("organizations")
 }
 
@@ -423,30 +412,36 @@ model Alarm {
 // ============================
 
 model LabGroup {
-  id             String              @id @default(uuid())
-  organizationId String             @map("organization_id")
-  organization   Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  name           String
-  createdBy      String             @map("created_by")
-  creator        User               @relation(fields: [createdBy], references: [id], onDelete: Cascade)
-  students       StudentLabGroup[]
+  id              String                @id @default(uuid())
+  courseId        String                @map("course_id")
+  course          Courses               @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  name            String
+  createdBy       String                @map("created_by")
+  creator         User                  @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  students        StudentLabGroup[]
   studentProfiles StudentProfile[]
-  sessions       AttendanceQRSession[]
-  createdAt      DateTime           @default(now()) @map("created_at")
-  updatedAt      DateTime           @updatedAt @map("updated_at")
+  sessions        AttendanceQRSession[]
+  timetables      Timetable[]
+  createdAt       DateTime              @default(now()) @map("created_at")
+  updatedAt       DateTime              @updatedAt @map("updated_at")
+  organization    Organization?         @relation(fields: [organizationId], references: [id])
+  organizationId  String?
 
-  @@index([organizationId])
+  @@index([courseId])
   @@map("lab_groups")
 }
 
 model StudentLabGroup {
   id         String   @id @default(uuid())
-  studentId  String   @map("student_id")  @unique
+  studentId  String   @map("student_id")
   student    User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  courseId   String   @map("course_id")
   labGroupId String   @map("lab_group_id")
   labGroup   LabGroup @relation(fields: [labGroupId], references: [id], onDelete: Cascade)
   joinedAt   DateTime @default(now()) @map("joined_at")
 
+  @@unique([studentId, courseId])
   @@index([labGroupId])
+  @@index([courseId])
   @@map("student_lab_groups")
 }

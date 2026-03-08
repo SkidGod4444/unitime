@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-export type LabGroup = { id: string; name: string; organizationId: string };
+export type LabGroup = { id: string; name: string; courseId: string };
 export type LabGroupMember = {
   id: string;
   name: string;
@@ -13,15 +13,15 @@ export type LabGroupMember = {
 };
 
 type LabGroupsState = {
-  byOrg: Record<string, LabGroup[]>;
+  byCourse: Record<string, LabGroup[]>;
   myLabGroupId: string | null;
   membersByGroup: Record<string, LabGroupMember[]>;
-  /** Fetch all groups for a given organization */
-  fetchOrgLabGroups: (organizationId: string) => Promise<LabGroup[]>;
-  /** ADMIN/REP: Create a new lab group for an org */
-  createLabGroup: (organizationId: string, name: string) => Promise<LabGroup | null>;
+  /** Fetch all groups for a given course */
+  fetchCourseLabGroups: (courseId: string) => Promise<LabGroup[]>;
+  /** ADMIN/REP: Create a new lab group for a course */
+  createLabGroup: (courseId: string, name: string) => Promise<LabGroup | null>;
   /** ADMIN/REP: Delete an empty lab group */
-  deleteLabGroup: (groupId: string, organizationId: string) => Promise<boolean>;
+  deleteLabGroup: (groupId: string, courseId: string) => Promise<boolean>;
   /** STUDENT: Join (or switch) their global lab group */
   joinLabGroup: (groupId: string) => Promise<boolean>;
   /** ADMIN/REP: View group members */
@@ -31,17 +31,17 @@ type LabGroupsState = {
 export const useLabGroupsStore = create<LabGroupsState>()(
   persist(
     (set, get) => ({
-      byOrg: {},
+      byCourse: {},
       myLabGroupId: null,
       membersByGroup: {},
 
-      fetchOrgLabGroups: async (organizationId) => {
+      fetchCourseLabGroups: async (courseId) => {
         const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-        const res = await fetch(`${origin}/lab-groups?organizationId=${encodeURIComponent(organizationId)}`);
+        const res = await fetch(`${origin}/lab-groups?courseId=${encodeURIComponent(courseId)}`);
         if (!res.ok) return [];
         const data = await res.json();
         const groups: LabGroup[] = data.groups || [];
-        set((s) => ({ byOrg: { ...s.byOrg, [organizationId]: groups } }));
+        set((s) => ({ byCourse: { ...s.byCourse, [courseId]: groups } }));
         return groups;
       },
 
@@ -61,7 +61,7 @@ export const useLabGroupsStore = create<LabGroupsState>()(
         }
       },
 
-      createLabGroup: async (organizationId, name) => {
+      createLabGroup: async (courseId, name) => {
         try {
           const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
           const res = await fetch(
@@ -69,12 +69,12 @@ export const useLabGroupsStore = create<LabGroupsState>()(
             withAuth({
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ name, organizationId }),
+              body: JSON.stringify({ name, courseId }),
             }),
           );
           const data = await res.json();
           if (res.ok && data.success) {
-            await get().fetchOrgLabGroups(organizationId);
+            await get().fetchCourseLabGroups(courseId);
             return data.group as LabGroup;
           }
           return null;
@@ -84,12 +84,12 @@ export const useLabGroupsStore = create<LabGroupsState>()(
         }
       },
 
-      deleteLabGroup: async (groupId, organizationId) => {
+      deleteLabGroup: async (groupId, courseId) => {
         try {
           const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
           const res = await fetch(`${origin}/lab-groups/${groupId}`, withAuth({ method: "DELETE" }));
           if (res.ok) {
-            await get().fetchOrgLabGroups(organizationId);
+            await get().fetchCourseLabGroups(courseId);
             return true;
           }
           return false;

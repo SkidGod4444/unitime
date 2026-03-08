@@ -8,18 +8,18 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ManageLabGroupsScreen() {
   const router = useRouter();
-  const { organizationId } = useLocalSearchParams<{ organizationId?: string }>();
+  const { courseId } = useLocalSearchParams<{ courseId?: string }>();
   const { loggedInUser } = useAuth();
   const canManage = useMemo(() => loggedInUser?.role === "ADMIN" || loggedInUser?.role === "REPRESENTATIVE", [loggedInUser]);
 
-  const { byOrg, fetchOrgLabGroups, createLabGroup, deleteLabGroup, fetchLabGroupMembers, membersByGroup } = useLabGroupsStore();
-  const groups = (organizationId && byOrg[organizationId]) || [];
+  const { byCourse, fetchCourseLabGroups, createLabGroup, deleteLabGroup, fetchLabGroupMembers, membersByGroup } = useLabGroupsStore();
+  const groups = (courseId && byCourse[courseId]) || [];
   const [newName, setNewName] = useState("");
   const [membersModal, setMembersModal] = useState<{ groupId: string | null; visible: boolean }>({ groupId: null, visible: false });
 
   useEffect(() => {
-    if (organizationId) fetchOrgLabGroups(organizationId);
-  }, [organizationId, fetchOrgLabGroups]);
+    if (courseId) fetchCourseLabGroups(courseId);
+  }, [courseId, fetchCourseLabGroups]);
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50 dark:bg-zinc-900">
@@ -48,8 +48,8 @@ export default function ManageLabGroupsScreen() {
             />
             <TouchableOpacity
               onPress={async () => {
-                if (!organizationId || !newName.trim()) return;
-                const created = await createLabGroup(organizationId, newName.trim());
+                if (!courseId || !newName.trim()) return;
+                const created = await createLabGroup(courseId, newName.trim());
                 if (!created) Alert.alert("Error", "Failed to create lab group.");
                 setNewName("");
               }}
@@ -88,8 +88,8 @@ export default function ManageLabGroupsScreen() {
                 {canManage && (
                   <TouchableOpacity
                     onPress={async () => {
-                      if (!organizationId) return;
-                      const ok = await deleteLabGroup(g.id, organizationId);
+                      if (!courseId) return;
+                      const ok = await deleteLabGroup(g.id, courseId);
                       if (!ok) Alert.alert("Cannot Delete", "Group has members or request failed.");
                     }}
                     className="p-2 rounded-lg bg-red-50"

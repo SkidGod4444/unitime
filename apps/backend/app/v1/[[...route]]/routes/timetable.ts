@@ -13,21 +13,31 @@ const timetable = new Hono();
 timetable.get("/week/:userId", async (c) => {
   const userId = c.req.param("userId");
 
-  // Find the user's lab group (if any)
-  const studentGroup = await prisma.studentLabGroup.findUnique({
+  // 1. Get user's approved courses
+  const userCourses = await prisma.userCourse.findMany({
+    where: { userId, status: "APPROVED" },
+    select: { courseId: true },
+  });
+  const courseIds = userCourses.map((uc) => uc.courseId);
+
+  // 2. Get user's lab groups
+  const studentGroups = await prisma.studentLabGroup.findMany({
     where: { studentId: userId },
     select: { labGroupId: true },
   });
-  const labGroupId = studentGroup?.labGroupId ?? null;
+  const labGroupIds = studentGroups.map((sg) => sg.labGroupId);
 
+  const cacheKey = `timetable:week:${userId}:${labGroupIds.join(",") || "none"}`;
   const timetables = await getOrSetCache(
-    `timetable:week:${userId}:${labGroupId ?? "none"}`,
+    cacheKey,
     () =>
       prisma.timetable.findMany({
         where: {
-          users: {
-            some: { userId },
-          },
+          courseId: { in: courseIds },
+          OR: [
+            { labGroupId: null },
+            { labGroupId: { in: labGroupIds } }
+          ]
         },
         include: {
           course: true,
@@ -36,7 +46,7 @@ timetable.get("/week/:userId", async (c) => {
     120,
   );
 
-  const week: Record<string, { startTime: Date | string; [key: string]: unknown }[]> = {
+  const week: Record<string, { startTime: string; [key: string]: unknown }[]> = {
     MONDAY: [],
     TUESDAY: [],
     WEDNESDAY: [],
@@ -54,8 +64,10 @@ timetable.get("/week/:userId", async (c) => {
 
   for (const day in week) {
     week[day].sort(
-      (a: { startTime: Date | string }, b: { startTime: Date | string }) =>
-        new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
+      // We assume startTime is a string like "09:00" and can be sorted alphabetically,
+      // which corresponds to chronological sorting for 24-hr time strings.
+      (a: { startTime: string }, b: { startTime: string }) =>
+        a.startTime.localeCompare(b.startTime)
     );
   }
 
@@ -64,7 +76,7 @@ timetable.get("/week/:userId", async (c) => {
       success: true,
       status_code: 200,
       week,
-      userLabGroupId: labGroupId,
+      userLabGroupIds: labGroupIds,
       timetables, // flat list for convenience
     },
     200,
@@ -86,19 +98,34 @@ timetable.get("/:userId", async (c) => {
     | "SUNDAY"
     | undefined;
 
+  // 1. Get user's approved courses
+  const userCourses = await prisma.userCourse.findMany({
+    where: { userId, status: "APPROVED" },
+    select: { courseId: true },
+  });
+  const courseIds = userCourses.map((uc) => uc.courseId);
+
+  // 2. Get user's lab groups
+  const studentGroups = await prisma.studentLabGroup.findMany({
+    where: { studentId: userId },
+    select: { labGroupId: true },
+  });
+  const labGroupIds = studentGroups.map((sg) => sg.labGroupId);
+
   const timetables = await getOrSetCache(
     `timetable:${userId}:${day ?? "all"}`,
     () =>
       prisma.timetable.findMany({
         where: {
+          courseId: { in: courseIds },
+          OR: [
+            { labGroupId: null },
+            { labGroupId: { in: labGroupIds } }
+          ],
           ...(day && { day }),
-          users: {
-            some: { userId },
-          },
         },
         include: {
           course: true,
-          users: true,
         },
       }),
     120,
@@ -118,7 +145,6 @@ timetable.get("/", async (c) => {
     () =>
       prisma.timetable.findMany({
         include: {
-          users: true,
           course: true,
         },
       }),
@@ -146,38 +172,12 @@ timetable.post("/", requireRole("ADMIN", "REPRESENTATIVE"), async (c) => {
       data: {
         courseId,
         day,
-        startTime: new Date(startTime),
-        endTime: new Date(endTime),
+        startTime,
+        endTime,
         location,
+        labGroupId,
       },
     });
-
-    let targetUserIds: string[] = [];
-    if (labGroupId) {
-      // Distribute ONLY to students in the specified lab group
-      const labStudents = await prisma.studentLabGroup.findMany({
-        where: { labGroupId },
-        select: { studentId: true },
-      });
-      targetUserIds = labStudents.map((s) => s.studentId);
-    } else {
-      // No lab group — distribute to all approved course students
-      const courseStudents = await prisma.userCourse.findMany({
-        where: { courseId, status: "APPROVED" },
-        select: { userId: true },
-      });
-      targetUserIds = courseStudents.map((s) => s.userId);
-    }
-
-    if (targetUserIds.length > 0) {
-      await prisma.userTimetable.createMany({
-        data: targetUserIds.map((userId) => ({
-          userId,
-          timetableId: newEntry.id,
-        })),
-        skipDuplicates: true,
-      });
-    }
 
     await invalidateCache("timetable:all");
 
@@ -200,8 +200,8 @@ timetable.put("/:id", requireRole("ADMIN", "REPRESENTATIVE"), async (c) => {
     const updated = await prisma.timetable.update({
       where: { id },
       data: {
-        ...(startTime && { startTime: new Date(startTime) }),
-        ...(endTime && { endTime: new Date(endTime) }),
+        ...(startTime && { startTime }),
+        ...(endTime && { endTime }),
         ...(location !== undefined && { location }),
       },
     });

@@ -98,7 +98,7 @@ export default function AttendanceSessionForm() {
   const { loggedInUser, refreshJwt } = useAuth();
   const { courses: allCourses } = useCoursesStore();
   const { orgs: allOrgs } = useOrgsStore();
-  const { fetchOrgLabGroups, fetchLabGroupMembers } = useLabGroupsStore();
+  const { fetchCourseLabGroups, fetchLabGroupMembers } = useLabGroupsStore();
 
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [selectedClass, setSelectedClass] = useState<OrgT | null>(null);
@@ -223,8 +223,8 @@ export default function AttendanceSessionForm() {
   // Fetch lab groups when LAB course selected
   useEffect(() => {
     (async () => {
-      if (selectedCourse && (selectedCourse as any).classType === "LAB" && selectedClass) {
-        const groups = await fetchOrgLabGroups(selectedClass.id);
+      if (selectedCourse && (selectedCourse as any).classType === "LAB") {
+        const groups = await fetchCourseLabGroups(selectedCourse.id);
         setLabGroups(groups);
         setSelectedLabGroupId(groups[0]?.id ?? null);
       } else {
@@ -232,7 +232,7 @@ export default function AttendanceSessionForm() {
         setSelectedLabGroupId(null);
       }
     })();
-  }, [selectedCourse, selectedClass, fetchOrgLabGroups]);
+  }, [selectedCourse, fetchCourseLabGroups]);
 
   // Refresh JWT proactively when the form mounts — Appwrite JWTs expire in 15 min.
   // Professors often keeps the app open well beyond that before creating a session.

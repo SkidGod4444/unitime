@@ -1,7 +1,6 @@
 import { useAuth } from "@/contexts/auth.cntxt";
-import { useProfilesStore } from "@/lib/store";
 import { useCoursesStore } from "@/lib/store/courses";
-import { LabGroup, useLabGroupsStore } from "@/lib/store/lab-groups";
+import { useLabGroupsStore } from "@/lib/store/lab-groups";
 import { TimetableEntry, useTimetableStore } from "@/lib/store/timetable";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -30,23 +29,11 @@ export default function ManageTimetableScreen() {
   const { loggedInUser, refreshJwt } = useAuth();
   const { createTimetableEntry, deleteTimetableEntry } = useTimetableStore();
   const { courses, fetchCourses } = useCoursesStore();
-  const { profiles } = useProfilesStore();
-  const { byOrg, fetchOrgLabGroups, createLabGroup } = useLabGroupsStore();
+  const { byCourse, fetchCourseLabGroups, createLabGroup } = useLabGroupsStore();
 
   const [selectedDay, setSelectedDay] = useState(DAYS[0]);
   const [allEntries, setAllEntries] = useState<TimetableEntry[]>([]);
   const [refreshing, setRefreshing] = useState(false);
-
-  // Resolve admin's org
-  const adminProfile = profiles.find((p) => p.userId === loggedInUser?.id);
-  const organizationId = adminProfile?.organizationId ?? null;
-
-  // All lab groups for this org
-  const orgLabGroups: LabGroup[] = organizationId ? (byOrg[organizationId] ?? []) : [];
-
-  // Which lab group are we currently mapping for?
-  const [activeGroupId, setActiveGroupId] = useState<string | null>(null); // null = "All Students"
-  const [showGroupPicker, setShowGroupPicker] = useState(false);
 
   // Create group state
   const [showCreateGroup, setShowCreateGroup] = useState(false);
@@ -56,6 +43,8 @@ export default function ManageTimetableScreen() {
   // Add-slot modal
   const [isAddModalOpen, setAddModalOpen] = useState(false);
   const [formCourseId, setFormCourseId] = useState("");
+  const [activeGroupId, setActiveGroupId] = useState<string | null>(null); // null = "All Students"
+  const [showGroupPicker, setShowGroupPicker] = useState(false);
   const [formDay, setFormDay] = useState<string>("MONDAY");
   const [formStartTime, setFormStartTime] = useState<string>("");
   const [formEndTime, setFormEndTime] = useState<string>("");
@@ -84,15 +73,23 @@ export default function ManageTimetableScreen() {
     }
     loadAll();
     fetchCourses();
-    if (organizationId) {
-      fetchOrgLabGroups(organizationId);
+  }, [loggedInUser]);
+
+  useEffect(() => {
+    if (formCourseId) {
+      const course = courses.find((c) => c.id === formCourseId);
+      if (course?.classType === "LAB") {
+        fetchCourseLabGroups(formCourseId);
+      } else {
+        setActiveGroupId(null);
+      }
     }
-  }, [organizationId]);
+  }, [formCourseId]);
 
   const handleCreateGroup = async () => {
-    if (!newGroupName.trim() || !organizationId) return;
+    if (!newGroupName.trim() || !formCourseId) return;
     setCreatingGroup(true);
-    const created = await createLabGroup(organizationId, newGroupName.trim());
+    const created = await createLabGroup(formCourseId, newGroupName.trim());
     setCreatingGroup(false);
     if (created) {
       setNewGroupName("");
@@ -109,15 +106,11 @@ export default function ManageTimetableScreen() {
       return;
     }
 
-    const todayStr = new Date().toISOString().split("T")[0];
-    const startTimeISO = new Date(`${todayStr}T${formStartTime}:00`).toISOString();
-    const endTimeISO = new Date(`${todayStr}T${formEndTime}:00`).toISOString();
-
     const entry = {
       courseId: formCourseId,
       day: formDay,
-      startTime: startTimeISO,
-      endTime: endTimeISO,
+      startTime: formStartTime,
+      endTime: formEndTime,
       location: formLocation,
       // auto-attach the currently selected lab group (or undefined for all students)
       labGroupId: activeGroupId ?? undefined,
@@ -161,16 +154,10 @@ export default function ManageTimetableScreen() {
     .filter((e) => e.day === selectedDay)
     .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
 
-  const activeGroupName = activeGroupId
-    ? orgLabGroups.find((g) => g.id === activeGroupId)?.name ?? "Unknown Group"
-    : "All Students";
-
   const renderItem = ({ item, drag, isActive }: RenderItemParams<TimetableEntry>) => {
     const course = item.course || courses.find((c) => c.id === item.courseId);
 
-    const startObj = new Date(item.startTime);
-    const endObj = new Date(item.endTime);
-    const timeStr = `${startObj.getHours().toString().padStart(2, "0")}:${startObj.getMinutes().toString().padStart(2, "0")} - ${endObj.getHours().toString().padStart(2, "0")}:${endObj.getMinutes().toString().padStart(2, "0")}`;
+    const timeStr = `${item.startTime} - ${item.endTime}`;
 
     return (
       <ScaleDecorator>
@@ -225,29 +212,6 @@ export default function ManageTimetableScreen() {
         <View className="w-8" />
       </View>
 
-      {/* ── Lab Group Picker Banner ── */}
-      <View className="mx-6 mb-4 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-2xl px-4 py-3">
-        <Text className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Mapping for Group</Text>
-        <View className="flex-row items-center justify-between">
-          <TouchableOpacity
-            onPress={() => setShowGroupPicker(true)}
-            className="flex-row items-center gap-2 flex-1"
-          >
-            <View className="w-7 h-7 rounded-full bg-indigo-100 items-center justify-center">
-              <Ionicons name="people-outline" size={14} color="#4f46e5" />
-            </View>
-            <Text className="text-base font-bold text-zinc-900 dark:text-zinc-100 flex-1">{activeGroupName}</Text>
-            <Ionicons name="chevron-down" size={16} color="#6B7280" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setShowCreateGroup(true)}
-            className="ml-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg px-3 py-1.5"
-          >
-            <Text className="text-xs text-indigo-600 dark:text-indigo-400 font-bold">+ New Group</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
       {/* Days Tabs */}
       <View className="px-6 mb-4">
         <View className="flex-row justify-between bg-white dark:bg-zinc-900 p-1.5 rounded-full border border-gray-100 dark:border-zinc-800">
@@ -297,7 +261,7 @@ export default function ManageTimetableScreen() {
             <View className="items-center justify-center py-20">
               <Ionicons name="calendar-outline" size={64} color="#E5E7EB" />
               <Text className="text-gray-400 font-medium mt-4 text-center">
-                No slots mapped for {activeGroupName} on {selectedDay.charAt(0) + selectedDay.slice(1).toLowerCase()}.
+                No slots mapped on {selectedDay.charAt(0) + selectedDay.slice(1).toLowerCase()}.
               </Text>
             </View>
           }
@@ -333,21 +297,28 @@ export default function ManageTimetableScreen() {
                 {activeGroupId === null && <Ionicons name="checkmark-circle" size={18} color="#4f46e5" style={{ marginLeft: "auto" }} />}
               </TouchableOpacity>
 
-              {orgLabGroups.map((g) => (
-                <TouchableOpacity
-                  key={g.id}
-                  onPress={() => { setActiveGroupId(g.id); setShowGroupPicker(false); }}
-                  className={`flex-row items-center gap-3 px-4 py-3.5 rounded-2xl border mb-2 ${activeGroupId === g.id ? "bg-indigo-50 border-indigo-500" : "bg-gray-50 dark:bg-zinc-800 border-gray-100 dark:border-zinc-700"}`}
-                >
-                  <Ionicons name="flask-outline" size={18} color={activeGroupId === g.id ? "#4f46e5" : "#6B7280"} />
-                  <Text className={`font-semibold text-base ${activeGroupId === g.id ? "text-indigo-700" : "text-gray-700 dark:text-zinc-200"}`}>{g.name}</Text>
-                  {activeGroupId === g.id && <Ionicons name="checkmark-circle" size={18} color="#4f46e5" style={{ marginLeft: "auto" }} />}
-                </TouchableOpacity>
-              ))}
+              {(() => {
+                const courseLabGroups = formCourseId ? (byCourse[formCourseId] ?? []) : [];
+                return (
+                  <>
+                    {courseLabGroups.map((g) => (
+                      <TouchableOpacity
+                        key={g.id}
+                        onPress={() => { setActiveGroupId(g.id); setShowGroupPicker(false); }}
+                        className={`flex-row items-center gap-3 px-4 py-3.5 rounded-2xl border mb-2 ${activeGroupId === g.id ? "bg-indigo-50 border-indigo-500" : "bg-gray-50 dark:bg-zinc-800 border-gray-100 dark:border-zinc-700"}`}
+                      >
+                        <Ionicons name="flask-outline" size={18} color={activeGroupId === g.id ? "#4f46e5" : "#6B7280"} />
+                        <Text className={`font-semibold text-base ${activeGroupId === g.id ? "text-indigo-700" : "text-gray-700 dark:text-zinc-200"}`}>{g.name}</Text>
+                        {activeGroupId === g.id && <Ionicons name="checkmark-circle" size={18} color="#4f46e5" style={{ marginLeft: "auto" }} />}
+                      </TouchableOpacity>
+                    ))}
 
-              {orgLabGroups.length === 0 && (
-                <Text className="text-gray-400 text-center py-4">No groups yet. Tap "+ New Group" to create one.</Text>
-              )}
+                    {courseLabGroups.length === 0 && (
+                      <Text className="text-gray-400 text-center py-4">No groups yet. Tap &quot;+ New Group&quot; to create one.</Text>
+                    )}
+                  </>
+                );
+              })()}
             </View>
           </Pressable>
         </Pressable>
@@ -388,15 +359,6 @@ export default function ManageTimetableScreen() {
               <View className="items-center mb-6">
                 <View className="w-12 h-1.5 bg-gray-200 dark:bg-zinc-700 rounded-full mb-4" />
                 <Text className="text-xl font-bold font-lora text-zinc-900 dark:text-white">Add Slot</Text>
-                {activeGroupId ? (
-                  <View className="mt-2 bg-indigo-50 px-3 py-1 rounded-full">
-                    <Text className="text-xs font-bold text-indigo-600">For: {activeGroupName}</Text>
-                  </View>
-                ) : (
-                  <View className="mt-2 bg-gray-100 px-3 py-1 rounded-full">
-                    <Text className="text-xs text-gray-500 font-bold">For: All Students</Text>
-                  </View>
-                )}
               </View>
 
               <View className="mb-4">
@@ -423,6 +385,40 @@ export default function ManageTimetableScreen() {
                   ))}
                 </View>
               </View>
+
+              {/* Lab Group Picker Logic - Show only if selected course is LAB */}
+              {(() => {
+                const selectedCourse = courses.find(c => c.id === formCourseId);
+                if (selectedCourse?.classType === "LAB") {
+                  const courseLabGroups = byCourse[formCourseId] || [];
+                  const activeGroupName = activeGroupId
+                    ? courseLabGroups.find((g) => g.id === activeGroupId)?.name ?? "Unknown Group"
+                    : "All Students";
+
+                  return (
+                    <View className="mb-4">
+                      <Text className="text-sm font-semibold text-gray-700 dark:text-zinc-300 mb-2">Select Lab Group</Text>
+                      <View className="flex-row items-center justify-between border border-gray-200 dark:border-zinc-700 rounded-xl px-4 py-3 bg-gray-50 dark:bg-zinc-800">
+                        <TouchableOpacity
+                          onPress={() => setShowGroupPicker(true)}
+                          className="flex-row items-center gap-2 flex-1"
+                        >
+                          <Ionicons name="people-outline" size={16} color="#4f46e5" />
+                          <Text className="flex-1 font-semibold text-zinc-900 dark:text-zinc-100">{activeGroupName}</Text>
+                          <Ionicons name="chevron-down" size={16} color="#6B7280" />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                           onPress={() => setShowCreateGroup(true)}
+                           className="ml-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg px-2 py-1"
+                        >
+                          <Text className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold px-1">+ NEW</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  );
+                }
+                return null;
+              })()}
 
               <View className="flex-row gap-4 mb-4">
                 <View className="flex-1">

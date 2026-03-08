@@ -8,19 +8,19 @@ import { Hono } from "hono";
 const labGroups = new Hono<AppEnv>();
 
 // ---------------------------------------------------------------------------
-// GET /lab-groups?organizationId=xxx — list all groups for an org (public within auth)
+// GET /lab-groups?courseId=xxx — list all groups for a course
 // ---------------------------------------------------------------------------
 labGroups.get("/", async (c) => {
-  const organizationId = c.req.query("organizationId");
-  if (!organizationId) return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT, "organizationId is required");
+  const courseId = c.req.query("courseId");
+  if (!courseId) return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT, "courseId is required");
 
   try {
     const groups = await getOrSetCache(
-      `labGroups:org:${organizationId}`,
+      `labGroups:course:${courseId}`,
       () =>
         prisma.labGroup.findMany({
-          where: { organizationId },
-          select: { id: true, name: true, organizationId: true, createdAt: true },
+          where: { courseId },
+          select: { id: true, name: true, courseId: true, createdAt: true },
           orderBy: { name: "asc" },
         }),
       120,
@@ -34,28 +34,28 @@ labGroups.get("/", async (c) => {
 });
 
 // ---------------------------------------------------------------------------
-// POST /lab-groups — create a lab group for an org (ADMIN/REPRESENTATIVE)
+// POST /lab-groups — create a lab group for a course (ADMIN/REPRESENTATIVE)
 // ---------------------------------------------------------------------------
 labGroups.post("/", requireRole("ADMIN", "REPRESENTATIVE"), async (c) => {
   const requesterId = c.get("requesterId");
   if (!requesterId) return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
 
   const body = await c.req.json();
-  const { name, organizationId } = body;
+  const { name, courseId } = body;
 
-  if (!name || !organizationId) {
-    return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT, "name and organizationId are required");
+  if (!name || !courseId) {
+    return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT, "name and courseId are required");
   }
 
   try {
-    const org = await prisma.organization.findUnique({ where: { id: organizationId } });
-    if (!org) return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND, "Organization not found");
+    const course = await prisma.courses.findUnique({ where: { id: courseId } });
+    if (!course) return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND, "Course not found");
 
     const group = await prisma.labGroup.create({
-      data: { name, organizationId, createdBy: requesterId },
+      data: { name, courseId, createdBy: requesterId },
     });
 
-    await invalidateCache(`labGroups:org:${organizationId}`);
+    await invalidateCache(`labGroups:course:${courseId}`);
 
     return c.json({ success: true, status_code: 201, group }, 201);
   } catch (error) {
@@ -80,7 +80,7 @@ labGroups.delete("/:id", requireRole("ADMIN", "REPRESENTATIVE"), async (c) => {
     }
 
     await prisma.labGroup.delete({ where: { id: groupId } });
-    await invalidateCache(`labGroups:org:${group.organizationId}`, `labGroupMembers:${groupId}`);
+    await invalidateCache(`labGroups:course:${group.courseId}`, `labGroupMembers:${groupId}`);
 
     return c.json({ success: true, status_code: 200, message: "Lab group deleted" });
   } catch (error) {
@@ -101,11 +101,20 @@ labGroups.post("/:groupId/join", requireRole("STUDENT"), async (c) => {
     const group = await prisma.labGroup.findUnique({ where: { id: groupId } });
     if (!group) return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND, "Lab group not found");
 
-    // Upsert: student has one global lab group — allow switching
+    // Upsert: student has one lab group per course — allow switching
     const mapping = await prisma.studentLabGroup.upsert({
-      where: { studentId: requesterId },
+      where: { 
+        studentId_courseId: {
+          studentId: requesterId,
+          courseId: group.courseId
+        }
+      },
       update: { labGroupId: groupId },
-      create: { studentId: requesterId, labGroupId: groupId },
+      create: { 
+        studentId: requesterId, 
+        courseId: group.courseId,
+        labGroupId: groupId 
+      },
     });
 
     await invalidateCache(`studentGroup:${requesterId}`, `labGroupMembers:${groupId}`);

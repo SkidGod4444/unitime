@@ -1,25 +1,24 @@
 import { useAuth } from "@/contexts/auth.cntxt";
 import {
-  profileSchema,
-  type ProfileFormErrors,
+    profileSchema,
+    type ProfileFormErrors,
 } from "@/lib/schemas/profile.schema";
 import { useOrgsStore } from "@/lib/store";
-import { useLabGroupsStore } from "@/lib/store/lab-groups";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -49,12 +48,6 @@ export default function StudentProfileForm() {
   // Validation errors
   const [errors, setErrors] = useState<ProfileFormErrors>({});
   const [loading, setLoading] = useState(false);
-
-  // Lab group
-  const DEFAULT_LAB_GROUPS = ["P-1", "P-2"];
-  const [selectedLabGroup, setSelectedLabGroup] = useState<string | null>(null);
-  const [showLabGroupDropdown, setShowLabGroupDropdown] = useState(false);
-  const { fetchOrgLabGroups, byOrg, joinLabGroup } = useLabGroupsStore();
 
   const { orgs, fetchOrgs } = useOrgsStore();
 
@@ -98,15 +91,6 @@ export default function StudentProfileForm() {
   const matchedOrgPreview = (department && course && semister && section)
     ? orgs.find((o) => cleanStr(o.departmentName) === department && cleanStr(o.courseName) === course && o.semester === semister && o.section.toString() === section)
     : null;
-
-  // Fetch lab groups whenever the matched org resolves
-  React.useEffect(() => {
-    if (matchedOrgPreview?.id) {
-      fetchOrgLabGroups(matchedOrgPreview.id);
-    }
-  }, [matchedOrgPreview?.id]);
-
-  const orgLabGroups = matchedOrgPreview?.id ? (byOrg[matchedOrgPreview.id] ?? []) : [];
 
   // ---------------------------------------------------------------------------
   // Helpers
@@ -175,9 +159,6 @@ export default function StudentProfileForm() {
           yearOfStudy: parseInt(yearOfAdmission, 10),
           semester: semister,
           organizationId: matchedOrg.id,
-          labGroupId: selectedLabGroup 
-            ? orgLabGroups.find((g) => g.name === selectedLabGroup)?.id || null
-            : null,
         }),
       });
 
@@ -208,16 +189,6 @@ export default function StudentProfileForm() {
       }
 
       Alert.alert("Success", "Profile saved successfully!");
-
-      // Join the selected lab group (global, semester-wide)
-      if (selectedLabGroup) {
-        const matchedGroup = orgLabGroups.find((g) => g.name === selectedLabGroup);
-        if (matchedGroup) {
-          await joinLabGroup(matchedGroup.id);
-        }
-        // If it's a default group (P-1/P-2) not yet in DB, it's stored as a profile preference
-        // and will be automatically created by admin before semester maps
-      }
 
       router.replace("/(tabs)");
     } catch (error: any) {
@@ -676,54 +647,6 @@ export default function StudentProfileForm() {
                         className="px-4 py-3 border-b border-gray-100"
                       >
                         <Text className="text-gray-900 font-medium">{s}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                )}
-              </View>
-
-              {/* Lab Group — always shown, P-1 & P-2 by default */}
-              <View>
-                <Text className="text-xs font-bold text-gray-500 mb-2 ml-1 uppercase tracking-wide">
-                  Lab Group (Batch)*
-                </Text>
-                <TouchableOpacity
-                  onPress={() => setShowLabGroupDropdown(!showLabGroupDropdown)}
-                  className={`flex-row items-center border rounded-2xl px-4 py-3.5 bg-white ${selectedLabGroup ? "border-indigo-400" : "border-gray-200"}`}
-                >
-                  <Ionicons name="flask-outline" size={20} color={selectedLabGroup ? "#4f46e5" : "#9CA3AF"} style={{ marginRight: 12 }} />
-                  <Text className={`flex-1 text-base font-semibold ${selectedLabGroup ? "text-indigo-700" : "text-gray-400"}`}>
-                    {selectedLabGroup ?? "Select your Lab Group"}
-                  </Text>
-                  <Ionicons name={showLabGroupDropdown ? "chevron-up" : "chevron-down"} size={20} color="#9CA3AF" />
-                </TouchableOpacity>
-                <Text className="text-xs text-gray-400 mt-1.5 ml-1">
-                  This applies to all lab classes for the whole semester.
-                </Text>
-                {showLabGroupDropdown && (
-                  <View className="mt-2 border border-gray-200 rounded-xl bg-white overflow-hidden">
-                    {/* Merge default groups with any org-fetched groups (deduplicate by name) */}
-                    {Array.from(
-                      new Set([
-                        ...DEFAULT_LAB_GROUPS,
-                        ...orgLabGroups.map((g) => g.name),
-                      ])
-                    ).map((name) => (
-                      <TouchableOpacity
-                        key={name}
-                        onPress={() => {
-                          setSelectedLabGroup(name);
-                          setShowLabGroupDropdown(false);
-                        }}
-                        className={`flex-row items-center px-4 py-3 border-b border-gray-100 ${
-                          selectedLabGroup === name ? "bg-indigo-50" : ""
-                        }`}
-                      >
-                        <View className={`w-2 h-2 rounded-full mr-3 ${selectedLabGroup === name ? "bg-indigo-500" : "bg-gray-300"}`} />
-                        <Text className={`text-base font-medium ${selectedLabGroup === name ? "text-indigo-700" : "text-gray-900"}`}>{name}</Text>
-                        {selectedLabGroup === name && (
-                          <Ionicons name="checkmark" size={16} color="#4f46e5" style={{ marginLeft: "auto" }} />
-                        )}
                       </TouchableOpacity>
                     ))}
                   </View>
