@@ -1,9 +1,9 @@
+import { apiFetch } from "@/lib/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { OrgT, ProfileT, Theme, UserT } from "@unitime/types";
 import type { FeedbackT, SupportTicketT } from "@unitime/types";
+import { OrgT, ProfileT, Theme, UserT } from "@unitime/types";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { apiFetch } from "@/lib/api";
 
 type ThemeState = {
   theme: Theme;
@@ -230,6 +230,7 @@ export const useOrgsStore = create<OrgsState>()(
 export * from "./attendance";
 export * from "./courses";
 export * from "./history";
+export * from "./lab-groups";
 export * from "./notifications";
 export * from "./timetable";
 

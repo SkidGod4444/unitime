@@ -11,13 +11,10 @@ import {
     RefreshControl,
     Text,
     TouchableOpacity,
-    View,
-    Modal,
-    Pressable,
+    View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Course } from "../lib/store/timetable";
-import { useLabGroupsStore } from "@/lib/store/lab-groups";
 
 const CLASS_TYPE_COLORS: Record<string, string> = {
   LECTURE: "bg-blue-100 text-blue-800",
@@ -47,17 +44,6 @@ export default function MyCoursesScreen() {
   const { courses, loading, fetchCourses } = useCoursesStore();
   const [refreshing, setRefreshing] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
-  const {
-    fetchLabGroups,
-    joinLabGroup,
-  } = useLabGroupsStore();
-  const [groupPicker, setGroupPicker] = useState<{
-    course: Course | null;
-    groups: { id: string; name: string }[];
-    selectedGroupId: string | null;
-    visible: boolean;
-  }>({ course: null, groups: [], selectedGroupId: null, visible: false });
-
   const userProfile = profiles.find((p) => p.userId === loggedInUser?.id);
   const organizationId = userProfile?.organizationId;
 
@@ -70,15 +56,6 @@ export default function MyCoursesScreen() {
 
   const handleEnroll = async (course: Course) => {
     try {
-      // If LAB, prompt for lab group selection before enrolling
-      if ((course as any).classType === "LAB") {
-        setActionLoadingId(course.id);
-        const groups = await fetchLabGroups(course.id);
-        setGroupPicker({ course, groups, selectedGroupId: groups[0]?.id ?? null, visible: true });
-        setActionLoadingId(null);
-        return;
-      }
-
       // LECTURE/TUTORIAL: direct enroll
       setActionLoadingId(course.id);
       const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
@@ -272,21 +249,6 @@ export default function MyCoursesScreen() {
               <Text className="text-gray-500 font-bold">Enrollment Closed</Text>
             </View>
           )}
-
-          {/* Change Lab Group (if LAB course and enrolled) */}
-          {userEnrollment && typeLabel === 'LAB' && (
-            <TouchableOpacity
-              onPress={async () => {
-                setActionLoadingId(item.id + "_groups");
-                const groups = await fetchLabGroups(item.id);
-                setGroupPicker({ course: item, groups, selectedGroupId: groups[0]?.id ?? null, visible: true });
-                setActionLoadingId(null);
-              }}
-              className="px-3 py-2 rounded-lg border border-indigo-200 bg-indigo-50"
-            >
-              <Text className="text-indigo-700 text-xs font-bold">Change Lab Group</Text>
-            </TouchableOpacity>
-          )}
         </View>
       </View>
     );
@@ -351,78 +313,6 @@ export default function MyCoursesScreen() {
         />
       )}
     </SafeAreaView>
-    {groupPicker.visible && (
-      <Modal
-        transparent
-        animationType="fade"
-        visible={groupPicker.visible}
-        onRequestClose={() => setGroupPicker((s) => ({ ...s, visible: false }))}
-      >
-        <TouchableOpacity
-          activeOpacity={1}
-          onPress={() => setGroupPicker((s) => ({ ...s, visible: false }))}
-          className="flex-1 bg-black/60 justify-center px-6"
-        >
-          <TouchableOpacity activeOpacity={1} className="bg-white rounded-2xl p-5">
-            <Text className="text-lg font-bold text-gray-900 mb-2">Select Lab Group</Text>
-            {groupPicker.groups.length === 0 ? (
-              <Text className="text-gray-500">No groups yet. Contact your CR/Admin.</Text>
-            ) : (
-              <View>
-                {groupPicker.groups.map((g) => (
-                  <Pressable
-                    key={g.id}
-                    onPress={() => setGroupPicker((s) => ({ ...s, selectedGroupId: g.id }))}
-                    className={`px-3 py-3 rounded-xl border mb-2 ${groupPicker.selectedGroupId === g.id ? "border-indigo-500 bg-indigo-50" : "border-gray-200 bg-white"}`}
-                  >
-                    <Text className={`font-semibold ${groupPicker.selectedGroupId === g.id ? "text-indigo-700" : "text-gray-700"}`}>{g.name}</Text>
-                  </Pressable>
-                ))}
-              </View>
-            )}
-
-            <View className="flex-row gap-3 mt-3">
-              <TouchableOpacity
-                onPress={() => setGroupPicker((s) => ({ ...s, visible: false }))}
-                className="flex-1 py-3 rounded-xl bg-gray-100 items-center"
-              >
-                <Text className="text-gray-700 font-bold">Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={async () => {
-                  if (!groupPicker.course) return;
-                  // First enroll (creates userCourse row)
-                  const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
-                  const res = await fetch(`${origin}/courses/${groupPicker.course.id}/enroll`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ userId: loggedInUser?.id }),
-                  });
-                  if (!res.ok) {
-                    Alert.alert("Error", "Could not enroll. Please try again.");
-                    return;
-                  }
-                  // Then join group (upsert; allows switching later)
-                  if (groupPicker.selectedGroupId) {
-                    const ok = await joinLabGroup(groupPicker.selectedGroupId, groupPicker.course.id);
-                    if (!ok) {
-                      Alert.alert("Warning", "Enrolled, but failed to set lab group. You can change it later.");
-                    }
-                  }
-                  setGroupPicker({ course: null, groups: [], selectedGroupId: null, visible: false });
-                  Alert.alert("Success", "Enrollment request sent. Waiting for approval.");
-                  fetchCourses();
-                }}
-                disabled={!groupPicker.selectedGroupId}
-                className={`flex-1 py-3 rounded-xl items-center ${groupPicker.selectedGroupId ? "bg-indigo-600" : "bg-indigo-300"}`}
-              >
-                <Text className="text-white font-bold">Join Group</Text>
-              </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
-        </TouchableOpacity>
-      </Modal>
-    )}
     </>
   );
 }

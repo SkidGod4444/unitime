@@ -41,9 +41,20 @@ profile.post("/create", async (c) => {
         yearOfStudy: body.yearOfStudy,
         semester: body.semester,
         organizationId: body.organizationId,
+        labGroupId: body.labGroupId || null,
       },
     });
     console.log("Profile created successfully:", newProfile);
+
+    // Additionally, establish the official StudentLabGroup global mapping (as requested)
+    if (body.labGroupId) {
+      await prisma.studentLabGroup.upsert({
+        where: { studentId: body.userId },
+        update: { labGroupId: body.labGroupId },
+        create: { studentId: body.userId, labGroupId: body.labGroupId }
+      });
+      console.log(`Global lab group ${body.labGroupId} assigned to student ${body.userId}`);
+    }
 
     await invalidateCache("profiles:all", `profile:${body.userId}`);
 
@@ -64,7 +75,7 @@ profile.post("/create", async (c) => {
 profile.get("/all", async (c) => {
   const studentProfiles = await getOrSetCache(
     "profiles:all",
-    () => prisma.studentProfile.findMany(),
+    () => prisma.studentProfile.findMany({ include: { labGroup: true } }),
     120,
   );
   // console.log("Fetched student profiles:", studentProfiles);

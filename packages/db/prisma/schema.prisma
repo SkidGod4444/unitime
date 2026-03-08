@@ -371,6 +371,8 @@ model StudentProfile {
   department       String
   course           String
   yearOfStudy      Int
+  labGroupId       String?         @map("lab_group_id")
+  labGroup         LabGroup?       @relation(fields: [labGroupId], references: [id])
   semester         CourseSemester?
   createdAt        DateTime        @default(now()) @map("created_at")
   updatedAt        DateTime        @updatedAt @map("updated_at")
@@ -428,6 +430,7 @@ model LabGroup {
   createdBy      String             @map("created_by")
   creator        User               @relation(fields: [createdBy], references: [id], onDelete: Cascade)
   students       StudentLabGroup[]
+  studentProfiles StudentProfile[]
   sessions       AttendanceQRSession[]
   createdAt      DateTime           @default(now()) @map("created_at")
   updatedAt      DateTime           @updatedAt @map("updated_at")

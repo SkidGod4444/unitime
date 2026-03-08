@@ -43,6 +43,7 @@ type ProfileT = {
   createdAt: Date;
   updatedAt: Date;
   organizationId: string;
+  labGroupId: string | null;
 };
 
 type OrgT = {

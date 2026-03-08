@@ -92,12 +92,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         method: "GET",
         headers,
       });
-      if (!response.ok) {
+      // 404 means the user simply doesn't exist in the DB yet — fall through to create them
+      if (!response.ok && response.status !== 404) {
         const text = await response.text();
         console.error("DB user fetch failed:", response.status, text);
         return null;
       }
-      const data = await response.json();
+
+      const data = response.status === 404 ? {} : await response.json();
       console.log("DB user fetch response:", data);
       if (data.user) {
         return data.user as UserT;

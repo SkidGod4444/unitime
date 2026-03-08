@@ -1,15 +1,17 @@
 import {
-  useAttendanceStore,
-  useCoursesStore,
-  useOrgsStore,
-  useProfilesStore,
-  useTimetableStore,
-  useUsersStore,
+    useAttendanceStore,
+    useCoursesStore,
+    useFeedbacksStore,
+    useLabGroupsStore,
+    useOrgsStore,
+    useProfilesStore,
+    useTicketsStore,
+    useTimetableStore,
+    useUsersStore,
 } from "@/lib/store";
 import { useEnrollmentStore } from "@/lib/store/enrollment";
 import { useHistoryStore } from "@/lib/store/history";
 import { useNotificationsStore } from "@/lib/store/notifications";
-import { useFeedbacksStore, useTicketsStore } from "@/lib/store";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, useSegments } from "expo-router";
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
@@ -132,16 +134,24 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
       ...(adminOrProf ? [fetchOrgs(), fetchSessions()] : []),
     ]);
 
-    // Fetch enrollments if applicable (depends on profiles resolving first)
-    if (loggedInUser?.role === 'ADMIN' || loggedInUser?.role === 'REPRESENTATIVE') {
+    // Fetch enrollments and set lab group if applicable (depends on profiles resolving first)
+    if (loggedInUser) {
       const uProfiles = useProfilesStore.getState().profiles;
       const userProfile = uProfiles.find((p) => p.userId === loggedInUser.id);
-      const organizationId = userProfile?.organizationId || null;
+      
+      // 1. Sync the logged-in user's assigned lab group to the local store
+      if (userProfile?.labGroupId) {
+        useLabGroupsStore.setState({ myLabGroupId: userProfile.labGroupId });
+      }
 
-      if (!organizationId && loggedInUser.role === 'ADMIN') {
-         await fetchEnrollments();
-      } else if (organizationId) {
-         await fetchEnrollments(organizationId);
+      // 2. Fetch enrollments for admins/reps based on their organization
+      if (loggedInUser.role === 'ADMIN' || loggedInUser.role === 'REPRESENTATIVE') {
+        const organizationId = userProfile?.organizationId || null;
+        if (!organizationId && loggedInUser.role === 'ADMIN') {
+          await fetchEnrollments();
+        } else if (organizationId) {
+          await fetchEnrollments(organizationId);
+        }
       }
     }
 
