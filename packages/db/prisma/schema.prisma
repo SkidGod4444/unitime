@@ -69,9 +69,6 @@ model Courses {
   updatedAt           DateTime              @updatedAt @map("updated_at")
   organizationId      String?               @map("organization_id")
   organization        Organization?         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  labGroups           LabGroup[]
-  studentLabGroups    StudentLabGroup[]
-
   @@index([organizationId])
   @@map("courses")
 }
@@ -233,8 +230,8 @@ model User {
   isOnboarded          Boolean               @default(false) @map("is_onboarded") // To track if user has completed onboarding
   role                 UserRole              @default(STUDENT)
   status               UserStatus            @default(ACTIVE)
-  labGroups            LabGroup[]
   studentLabGroups     StudentLabGroup[]
+  createdLabGroups     LabGroup[]
 
   @@unique([email])
   @@map("user")
@@ -398,6 +395,7 @@ model Organization {
   createdAt      DateTime         @default(now()) @map("created_at")
   updatedAt      DateTime         @updatedAt @map("updated_at")
 
+  labGroups    LabGroup[]
   @@map("organizations")
 }
 
@@ -423,33 +421,29 @@ model Alarm {
 // ============================
 
 model LabGroup {
-  id        String                @id @default(uuid())
-  courseId  String                @map("course_id")
-  course    Courses               @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  name      String
-  createdBy String                @map("created_by")
-  creator   User                  @relation(fields: [createdBy], references: [id], onDelete: Cascade)
-  students  StudentLabGroup[]
-  sessions  AttendanceQRSession[]
-  createdAt DateTime              @default(now()) @map("created_at")
-  updatedAt DateTime              @updatedAt @map("updated_at")
+  id             String              @id @default(uuid())
+  organizationId String             @map("organization_id")
+  organization   Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name           String
+  createdBy      String             @map("created_by")
+  creator        User               @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  students       StudentLabGroup[]
+  sessions       AttendanceQRSession[]
+  createdAt      DateTime           @default(now()) @map("created_at")
+  updatedAt      DateTime           @updatedAt @map("updated_at")
 
-  @@index([courseId])
+  @@index([organizationId])
   @@map("lab_groups")
 }
 
 model StudentLabGroup {
   id         String   @id @default(uuid())
-  studentId  String   @map("student_id")
+  studentId  String   @map("student_id")  @unique
   student    User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
   labGroupId String   @map("lab_group_id")
   labGroup   LabGroup @relation(fields: [labGroupId], references: [id], onDelete: Cascade)
-  courseId   String   @map("course_id")
-  course     Courses  @relation(fields: [courseId], references: [id], onDelete: Cascade)
   joinedAt   DateTime @default(now()) @map("joined_at")
 
-  @@unique([studentId, courseId])
   @@index([labGroupId])
-  @@index([courseId])
   @@map("student_lab_groups")
 }

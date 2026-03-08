@@ -4,11 +4,69 @@ import type { AppEnv } from "@/types/app-env";
 import { getOrSetCache, invalidateCache } from "@unitime/cache";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
-import { joinLabGroupSchema } from "@/lib/validation";
 
 const labGroups = new Hono<AppEnv>();
 
-// Delete a lab group if it has no members — ADMIN/REPRESENTATIVE
+// ---------------------------------------------------------------------------
+// GET /lab-groups?organizationId=xxx — list all groups for an org (public within auth)
+// ---------------------------------------------------------------------------
+labGroups.get("/", async (c) => {
+  const organizationId = c.req.query("organizationId");
+  if (!organizationId) return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT, "organizationId is required");
+
+  try {
+    const groups = await getOrSetCache(
+      `labGroups:org:${organizationId}`,
+      () =>
+        prisma.labGroup.findMany({
+          where: { organizationId },
+          select: { id: true, name: true, organizationId: true, createdAt: true },
+          orderBy: { name: "asc" },
+        }),
+      120,
+    );
+
+    return c.json({ success: true, status_code: 200, groups });
+  } catch (error) {
+    console.error("Error fetching lab groups:", error);
+    return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
+  }
+});
+
+// ---------------------------------------------------------------------------
+// POST /lab-groups — create a lab group for an org (ADMIN/REPRESENTATIVE)
+// ---------------------------------------------------------------------------
+labGroups.post("/", requireRole("ADMIN", "REPRESENTATIVE"), async (c) => {
+  const requesterId = c.get("requesterId");
+  if (!requesterId) return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
+
+  const body = await c.req.json();
+  const { name, organizationId } = body;
+
+  if (!name || !organizationId) {
+    return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT, "name and organizationId are required");
+  }
+
+  try {
+    const org = await prisma.organization.findUnique({ where: { id: organizationId } });
+    if (!org) return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND, "Organization not found");
+
+    const group = await prisma.labGroup.create({
+      data: { name, organizationId, createdBy: requesterId },
+    });
+
+    await invalidateCache(`labGroups:org:${organizationId}`);
+
+    return c.json({ success: true, status_code: 201, group }, 201);
+  } catch (error) {
+    console.error("Error creating lab group:", error);
+    return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
+  }
+});
+
+// ---------------------------------------------------------------------------
+// DELETE /lab-groups/:id — delete an empty group (ADMIN/REPRESENTATIVE)
+// ---------------------------------------------------------------------------
 labGroups.delete("/:id", requireRole("ADMIN", "REPRESENTATIVE"), async (c) => {
   const groupId = c.req.param("id");
 
@@ -22,8 +80,7 @@ labGroups.delete("/:id", requireRole("ADMIN", "REPRESENTATIVE"), async (c) => {
     }
 
     await prisma.labGroup.delete({ where: { id: groupId } });
-
-    await invalidateCache(`labGroups:course:${group.courseId}`, `labGroupMembers:${groupId}`);
+    await invalidateCache(`labGroups:org:${group.organizationId}`, `labGroupMembers:${groupId}`);
 
     return c.json({ success: true, status_code: 200, message: "Lab group deleted" });
   } catch (error) {
@@ -32,46 +89,26 @@ labGroups.delete("/:id", requireRole("ADMIN", "REPRESENTATIVE"), async (c) => {
   }
 });
 
-// Student joins (or switches to) a lab group for a course — STUDENT
+// ---------------------------------------------------------------------------
+// POST /lab-groups/:groupId/join — student joins (or switches) their global lab group
+// ---------------------------------------------------------------------------
 labGroups.post("/:groupId/join", requireRole("STUDENT"), async (c) => {
   const groupId = c.req.param("groupId");
   const requesterId = c.get("requesterId");
   if (!requesterId) return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
 
-  const parsed = joinLabGroupSchema.safeParse(await c.req.json());
-  if (!parsed.success) return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT);
-  const { courseId } = parsed.data;
-
   try {
-    const [course, group] = await Promise.all([
-      prisma.courses.findUnique({ where: { id: courseId } }),
-      prisma.labGroup.findUnique({ where: { id: groupId } }),
-    ]);
+    const group = await prisma.labGroup.findUnique({ where: { id: groupId } });
+    if (!group) return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND, "Lab group not found");
 
-    if (!course || !group) return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
-    if (course.classType !== "LAB") {
-      return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT, "Only LAB courses support lab groups");
-    }
-    if (group.courseId !== courseId) {
-      return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT, "Group does not belong to the specified course");
-    }
-
-    // Student must belong to course (at least PENDING)
-    const enrollment = await prisma.userCourse.findUnique({
-      where: { userId_courseId: { userId: requesterId, courseId } },
-    });
-    if (!enrollment) {
-      return createHonoErrorResponse(c, ERROR_CODES.UNAUTHORIZED, "You are not enrolled in this course");
-    }
-
-    // Upsert mapping (allow switching groups)
+    // Upsert: student has one global lab group — allow switching
     const mapping = await prisma.studentLabGroup.upsert({
-      where: { studentId_courseId: { studentId: requesterId, courseId } },
+      where: { studentId: requesterId },
       update: { labGroupId: groupId },
-      create: { studentId: requesterId, courseId, labGroupId: groupId },
+      create: { studentId: requesterId, labGroupId: groupId },
     });
 
-    await invalidateCache(`studentGroup:${requesterId}:${courseId}`, `labGroupMembers:${groupId}`);
+    await invalidateCache(`studentGroup:${requesterId}`, `labGroupMembers:${groupId}`);
     return c.json({ success: true, status_code: 200, mapping });
   } catch (error) {
     console.error("Error joining lab group:", error);
@@ -79,7 +116,9 @@ labGroups.post("/:groupId/join", requireRole("STUDENT"), async (c) => {
   }
 });
 
-// View members — ADMIN/REPRESENTATIVE/PROFESSOR
+// ---------------------------------------------------------------------------
+// GET /lab-groups/:groupId/members — view members (ADMIN/REPRESENTATIVE/PROFESSOR)
+// ---------------------------------------------------------------------------
 labGroups.get("/:groupId/members", requireRole("ADMIN", "REPRESENTATIVE", "PROFESSOR"), async (c) => {
   const groupId = c.req.param("groupId");
   try {
@@ -90,12 +129,7 @@ labGroups.get("/:groupId/members", requireRole("ADMIN", "REPRESENTATIVE", "PROFE
           where: { labGroupId: groupId },
           include: {
             student: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-                studentProfile: true,
-              },
+              select: { id: true, name: true, email: true, studentProfile: true },
             },
           },
         }),
@@ -120,4 +154,3 @@ labGroups.get("/:groupId/members", requireRole("ADMIN", "REPRESENTATIVE", "PROFE
 });
 
 export default labGroups;
-

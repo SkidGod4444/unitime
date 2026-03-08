@@ -318,7 +318,7 @@ export type AlarmScalarFieldEnum = (typeof AlarmScalarFieldEnum)[keyof typeof Al
 
 export const LabGroupScalarFieldEnum = {
   id: 'id',
-  courseId: 'courseId',
+  organizationId: 'organizationId',
   name: 'name',
   createdBy: 'createdBy',
   createdAt: 'createdAt',
@@ -332,7 +332,6 @@ export const StudentLabGroupScalarFieldEnum = {
   id: 'id',
   studentId: 'studentId',
   labGroupId: 'labGroupId',
-  courseId: 'courseId',
   joinedAt: 'joinedAt'
 } as const
 

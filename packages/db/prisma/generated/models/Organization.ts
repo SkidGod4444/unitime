@@ -238,6 +238,7 @@ export type OrganizationWhereInput = {
   historyLogs?: Prisma.HistoryLogListRelationFilter
   feedbacks?: Prisma.FeedbackListRelationFilter
   tickets?: Prisma.SupportTicketListRelationFilter
+  labGroups?: Prisma.LabGroupListRelationFilter
 }
 
 export type OrganizationOrderByWithRelationInput = {
@@ -254,6 +255,7 @@ export type OrganizationOrderByWithRelationInput = {
   historyLogs?: Prisma.HistoryLogOrderByRelationAggregateInput
   feedbacks?: Prisma.FeedbackOrderByRelationAggregateInput
   tickets?: Prisma.SupportTicketOrderByRelationAggregateInput
+  labGroups?: Prisma.LabGroupOrderByRelationAggregateInput
 }
 
 export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
@@ -273,6 +275,7 @@ export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
   historyLogs?: Prisma.HistoryLogListRelationFilter
   feedbacks?: Prisma.FeedbackListRelationFilter
   tickets?: Prisma.SupportTicketListRelationFilter
+  labGroups?: Prisma.LabGroupListRelationFilter
 }, "id" | "section">
 
 export type OrganizationOrderByWithAggregationInput = {
@@ -317,6 +320,7 @@ export type OrganizationCreateInput = {
   historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutOrganizationInput
   feedbacks?: Prisma.FeedbackCreateNestedManyWithoutOrganizationInput
   tickets?: Prisma.SupportTicketCreateNestedManyWithoutOrganizationInput
+  labGroups?: Prisma.LabGroupCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateInput = {
@@ -333,6 +337,7 @@ export type OrganizationUncheckedCreateInput = {
   historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutOrganizationInput
   feedbacks?: Prisma.FeedbackUncheckedCreateNestedManyWithoutOrganizationInput
   tickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutOrganizationInput
+  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUpdateInput = {
@@ -349,6 +354,7 @@ export type OrganizationUpdateInput = {
   historyLogs?: Prisma.HistoryLogUpdateManyWithoutOrganizationNestedInput
   feedbacks?: Prisma.FeedbackUpdateManyWithoutOrganizationNestedInput
   tickets?: Prisma.SupportTicketUpdateManyWithoutOrganizationNestedInput
+  labGroups?: Prisma.LabGroupUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateInput = {
@@ -365,6 +371,7 @@ export type OrganizationUncheckedUpdateInput = {
   historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutOrganizationNestedInput
   feedbacks?: Prisma.FeedbackUncheckedUpdateManyWithoutOrganizationNestedInput
   tickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutOrganizationNestedInput
+  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateManyInput = {
@@ -539,6 +546,20 @@ export type OrganizationUpdateOneRequiredWithoutStudentsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutStudentsInput, Prisma.OrganizationUpdateWithoutStudentsInput>, Prisma.OrganizationUncheckedUpdateWithoutStudentsInput>
 }
 
+export type OrganizationCreateNestedOneWithoutLabGroupsInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutLabGroupsInput, Prisma.OrganizationUncheckedCreateWithoutLabGroupsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutLabGroupsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+}
+
+export type OrganizationUpdateOneRequiredWithoutLabGroupsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrganizationCreateWithoutLabGroupsInput, Prisma.OrganizationUncheckedCreateWithoutLabGroupsInput>
+  connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutLabGroupsInput
+  upsert?: Prisma.OrganizationUpsertWithoutLabGroupsInput
+  connect?: Prisma.OrganizationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutLabGroupsInput, Prisma.OrganizationUpdateWithoutLabGroupsInput>, Prisma.OrganizationUncheckedUpdateWithoutLabGroupsInput>
+}
+
 export type OrganizationCreateWithoutCoursesInput = {
   id?: string
   departmentName: string
@@ -552,6 +573,7 @@ export type OrganizationCreateWithoutCoursesInput = {
   historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutOrganizationInput
   feedbacks?: Prisma.FeedbackCreateNestedManyWithoutOrganizationInput
   tickets?: Prisma.SupportTicketCreateNestedManyWithoutOrganizationInput
+  labGroups?: Prisma.LabGroupCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutCoursesInput = {
@@ -567,6 +589,7 @@ export type OrganizationUncheckedCreateWithoutCoursesInput = {
   historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutOrganizationInput
   feedbacks?: Prisma.FeedbackUncheckedCreateNestedManyWithoutOrganizationInput
   tickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutOrganizationInput
+  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutCoursesInput = {
@@ -598,6 +621,7 @@ export type OrganizationUpdateWithoutCoursesInput = {
   historyLogs?: Prisma.HistoryLogUpdateManyWithoutOrganizationNestedInput
   feedbacks?: Prisma.FeedbackUpdateManyWithoutOrganizationNestedInput
   tickets?: Prisma.SupportTicketUpdateManyWithoutOrganizationNestedInput
+  labGroups?: Prisma.LabGroupUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutCoursesInput = {
@@ -613,6 +637,7 @@ export type OrganizationUncheckedUpdateWithoutCoursesInput = {
   historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutOrganizationNestedInput
   feedbacks?: Prisma.FeedbackUncheckedUpdateManyWithoutOrganizationNestedInput
   tickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutOrganizationNestedInput
+  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutNotificationsInput = {
@@ -628,6 +653,7 @@ export type OrganizationCreateWithoutNotificationsInput = {
   historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutOrganizationInput
   feedbacks?: Prisma.FeedbackCreateNestedManyWithoutOrganizationInput
   tickets?: Prisma.SupportTicketCreateNestedManyWithoutOrganizationInput
+  labGroups?: Prisma.LabGroupCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutNotificationsInput = {
@@ -643,6 +669,7 @@ export type OrganizationUncheckedCreateWithoutNotificationsInput = {
   historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutOrganizationInput
   feedbacks?: Prisma.FeedbackUncheckedCreateNestedManyWithoutOrganizationInput
   tickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutOrganizationInput
+  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutNotificationsInput = {
@@ -674,6 +701,7 @@ export type OrganizationUpdateWithoutNotificationsInput = {
   historyLogs?: Prisma.HistoryLogUpdateManyWithoutOrganizationNestedInput
   feedbacks?: Prisma.FeedbackUpdateManyWithoutOrganizationNestedInput
   tickets?: Prisma.SupportTicketUpdateManyWithoutOrganizationNestedInput
+  labGroups?: Prisma.LabGroupUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutNotificationsInput = {
@@ -689,6 +717,7 @@ export type OrganizationUncheckedUpdateWithoutNotificationsInput = {
   historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutOrganizationNestedInput
   feedbacks?: Prisma.FeedbackUncheckedUpdateManyWithoutOrganizationNestedInput
   tickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutOrganizationNestedInput
+  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutFeedbacksInput = {
@@ -704,6 +733,7 @@ export type OrganizationCreateWithoutFeedbacksInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutOrganizationInput
   historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutOrganizationInput
   tickets?: Prisma.SupportTicketCreateNestedManyWithoutOrganizationInput
+  labGroups?: Prisma.LabGroupCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutFeedbacksInput = {
@@ -719,6 +749,7 @@ export type OrganizationUncheckedCreateWithoutFeedbacksInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutOrganizationInput
   historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutOrganizationInput
   tickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutOrganizationInput
+  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutFeedbacksInput = {
@@ -750,6 +781,7 @@ export type OrganizationUpdateWithoutFeedbacksInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutOrganizationNestedInput
   historyLogs?: Prisma.HistoryLogUpdateManyWithoutOrganizationNestedInput
   tickets?: Prisma.SupportTicketUpdateManyWithoutOrganizationNestedInput
+  labGroups?: Prisma.LabGroupUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutFeedbacksInput = {
@@ -765,6 +797,7 @@ export type OrganizationUncheckedUpdateWithoutFeedbacksInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutOrganizationNestedInput
   historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutOrganizationNestedInput
   tickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutOrganizationNestedInput
+  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutTicketsInput = {
@@ -780,6 +813,7 @@ export type OrganizationCreateWithoutTicketsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutOrganizationInput
   historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutOrganizationInput
   feedbacks?: Prisma.FeedbackCreateNestedManyWithoutOrganizationInput
+  labGroups?: Prisma.LabGroupCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutTicketsInput = {
@@ -795,6 +829,7 @@ export type OrganizationUncheckedCreateWithoutTicketsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutOrganizationInput
   historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutOrganizationInput
   feedbacks?: Prisma.FeedbackUncheckedCreateNestedManyWithoutOrganizationInput
+  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutTicketsInput = {
@@ -826,6 +861,7 @@ export type OrganizationUpdateWithoutTicketsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutOrganizationNestedInput
   historyLogs?: Prisma.HistoryLogUpdateManyWithoutOrganizationNestedInput
   feedbacks?: Prisma.FeedbackUpdateManyWithoutOrganizationNestedInput
+  labGroups?: Prisma.LabGroupUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutTicketsInput = {
@@ -841,6 +877,7 @@ export type OrganizationUncheckedUpdateWithoutTicketsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutOrganizationNestedInput
   historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutOrganizationNestedInput
   feedbacks?: Prisma.FeedbackUncheckedUpdateManyWithoutOrganizationNestedInput
+  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutHistoryLogsInput = {
@@ -856,6 +893,7 @@ export type OrganizationCreateWithoutHistoryLogsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutOrganizationInput
   feedbacks?: Prisma.FeedbackCreateNestedManyWithoutOrganizationInput
   tickets?: Prisma.SupportTicketCreateNestedManyWithoutOrganizationInput
+  labGroups?: Prisma.LabGroupCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutHistoryLogsInput = {
@@ -871,6 +909,7 @@ export type OrganizationUncheckedCreateWithoutHistoryLogsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutOrganizationInput
   feedbacks?: Prisma.FeedbackUncheckedCreateNestedManyWithoutOrganizationInput
   tickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutOrganizationInput
+  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutHistoryLogsInput = {
@@ -902,6 +941,7 @@ export type OrganizationUpdateWithoutHistoryLogsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutOrganizationNestedInput
   feedbacks?: Prisma.FeedbackUpdateManyWithoutOrganizationNestedInput
   tickets?: Prisma.SupportTicketUpdateManyWithoutOrganizationNestedInput
+  labGroups?: Prisma.LabGroupUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutHistoryLogsInput = {
@@ -917,6 +957,7 @@ export type OrganizationUncheckedUpdateWithoutHistoryLogsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutOrganizationNestedInput
   feedbacks?: Prisma.FeedbackUncheckedUpdateManyWithoutOrganizationNestedInput
   tickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutOrganizationNestedInput
+  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationCreateWithoutStudentsInput = {
@@ -932,6 +973,7 @@ export type OrganizationCreateWithoutStudentsInput = {
   historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutOrganizationInput
   feedbacks?: Prisma.FeedbackCreateNestedManyWithoutOrganizationInput
   tickets?: Prisma.SupportTicketCreateNestedManyWithoutOrganizationInput
+  labGroups?: Prisma.LabGroupCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationUncheckedCreateWithoutStudentsInput = {
@@ -947,6 +989,7 @@ export type OrganizationUncheckedCreateWithoutStudentsInput = {
   historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutOrganizationInput
   feedbacks?: Prisma.FeedbackUncheckedCreateNestedManyWithoutOrganizationInput
   tickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutOrganizationInput
+  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutOrganizationInput
 }
 
 export type OrganizationCreateOrConnectWithoutStudentsInput = {
@@ -978,6 +1021,7 @@ export type OrganizationUpdateWithoutStudentsInput = {
   historyLogs?: Prisma.HistoryLogUpdateManyWithoutOrganizationNestedInput
   feedbacks?: Prisma.FeedbackUpdateManyWithoutOrganizationNestedInput
   tickets?: Prisma.SupportTicketUpdateManyWithoutOrganizationNestedInput
+  labGroups?: Prisma.LabGroupUpdateManyWithoutOrganizationNestedInput
 }
 
 export type OrganizationUncheckedUpdateWithoutStudentsInput = {
@@ -988,6 +1032,87 @@ export type OrganizationUncheckedUpdateWithoutStudentsInput = {
   section?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  courses?: Prisma.CoursesUncheckedUpdateManyWithoutOrganizationNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutOrganizationNestedInput
+  historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutOrganizationNestedInput
+  feedbacks?: Prisma.FeedbackUncheckedUpdateManyWithoutOrganizationNestedInput
+  tickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutOrganizationNestedInput
+  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationCreateWithoutLabGroupsInput = {
+  id?: string
+  departmentName: string
+  courseName: string
+  semester: $Enums.CourseSemester
+  section: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  students?: Prisma.StudentProfileCreateNestedManyWithoutOrganizationInput
+  courses?: Prisma.CoursesCreateNestedManyWithoutOrganizationInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutOrganizationInput
+  historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutOrganizationInput
+  feedbacks?: Prisma.FeedbackCreateNestedManyWithoutOrganizationInput
+  tickets?: Prisma.SupportTicketCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationUncheckedCreateWithoutLabGroupsInput = {
+  id?: string
+  departmentName: string
+  courseName: string
+  semester: $Enums.CourseSemester
+  section: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  students?: Prisma.StudentProfileUncheckedCreateNestedManyWithoutOrganizationInput
+  courses?: Prisma.CoursesUncheckedCreateNestedManyWithoutOrganizationInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutOrganizationInput
+  historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutOrganizationInput
+  feedbacks?: Prisma.FeedbackUncheckedCreateNestedManyWithoutOrganizationInput
+  tickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutOrganizationInput
+}
+
+export type OrganizationCreateOrConnectWithoutLabGroupsInput = {
+  where: Prisma.OrganizationWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutLabGroupsInput, Prisma.OrganizationUncheckedCreateWithoutLabGroupsInput>
+}
+
+export type OrganizationUpsertWithoutLabGroupsInput = {
+  update: Prisma.XOR<Prisma.OrganizationUpdateWithoutLabGroupsInput, Prisma.OrganizationUncheckedUpdateWithoutLabGroupsInput>
+  create: Prisma.XOR<Prisma.OrganizationCreateWithoutLabGroupsInput, Prisma.OrganizationUncheckedCreateWithoutLabGroupsInput>
+  where?: Prisma.OrganizationWhereInput
+}
+
+export type OrganizationUpdateToOneWithWhereWithoutLabGroupsInput = {
+  where?: Prisma.OrganizationWhereInput
+  data: Prisma.XOR<Prisma.OrganizationUpdateWithoutLabGroupsInput, Prisma.OrganizationUncheckedUpdateWithoutLabGroupsInput>
+}
+
+export type OrganizationUpdateWithoutLabGroupsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  departmentName?: Prisma.StringFieldUpdateOperationsInput | string
+  courseName?: Prisma.StringFieldUpdateOperationsInput | string
+  semester?: Prisma.EnumCourseSemesterFieldUpdateOperationsInput | $Enums.CourseSemester
+  section?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  students?: Prisma.StudentProfileUpdateManyWithoutOrganizationNestedInput
+  courses?: Prisma.CoursesUpdateManyWithoutOrganizationNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutOrganizationNestedInput
+  historyLogs?: Prisma.HistoryLogUpdateManyWithoutOrganizationNestedInput
+  feedbacks?: Prisma.FeedbackUpdateManyWithoutOrganizationNestedInput
+  tickets?: Prisma.SupportTicketUpdateManyWithoutOrganizationNestedInput
+}
+
+export type OrganizationUncheckedUpdateWithoutLabGroupsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  departmentName?: Prisma.StringFieldUpdateOperationsInput | string
+  courseName?: Prisma.StringFieldUpdateOperationsInput | string
+  semester?: Prisma.EnumCourseSemesterFieldUpdateOperationsInput | $Enums.CourseSemester
+  section?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  students?: Prisma.StudentProfileUncheckedUpdateManyWithoutOrganizationNestedInput
   courses?: Prisma.CoursesUncheckedUpdateManyWithoutOrganizationNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutOrganizationNestedInput
   historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutOrganizationNestedInput
@@ -1007,6 +1132,7 @@ export type OrganizationCountOutputType = {
   historyLogs: number
   feedbacks: number
   tickets: number
+  labGroups: number
 }
 
 export type OrganizationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1016,6 +1142,7 @@ export type OrganizationCountOutputTypeSelect<ExtArgs extends runtime.Types.Exte
   historyLogs?: boolean | OrganizationCountOutputTypeCountHistoryLogsArgs
   feedbacks?: boolean | OrganizationCountOutputTypeCountFeedbacksArgs
   tickets?: boolean | OrganizationCountOutputTypeCountTicketsArgs
+  labGroups?: boolean | OrganizationCountOutputTypeCountLabGroupsArgs
 }
 
 /**
@@ -1070,6 +1197,13 @@ export type OrganizationCountOutputTypeCountTicketsArgs<ExtArgs extends runtime.
   where?: Prisma.SupportTicketWhereInput
 }
 
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountLabGroupsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LabGroupWhereInput
+}
+
 
 export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1085,6 +1219,7 @@ export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   historyLogs?: boolean | Prisma.Organization$historyLogsArgs<ExtArgs>
   feedbacks?: boolean | Prisma.Organization$feedbacksArgs<ExtArgs>
   tickets?: boolean | Prisma.Organization$ticketsArgs<ExtArgs>
+  labGroups?: boolean | Prisma.Organization$labGroupsArgs<ExtArgs>
   _count?: boolean | Prisma.OrganizationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["organization"]>
 
@@ -1126,6 +1261,7 @@ export type OrganizationInclude<ExtArgs extends runtime.Types.Extensions.Interna
   historyLogs?: boolean | Prisma.Organization$historyLogsArgs<ExtArgs>
   feedbacks?: boolean | Prisma.Organization$feedbacksArgs<ExtArgs>
   tickets?: boolean | Prisma.Organization$ticketsArgs<ExtArgs>
+  labGroups?: boolean | Prisma.Organization$labGroupsArgs<ExtArgs>
   _count?: boolean | Prisma.OrganizationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type OrganizationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1140,6 +1276,7 @@ export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     historyLogs: Prisma.$HistoryLogPayload<ExtArgs>[]
     feedbacks: Prisma.$FeedbackPayload<ExtArgs>[]
     tickets: Prisma.$SupportTicketPayload<ExtArgs>[]
+    labGroups: Prisma.$LabGroupPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1549,6 +1686,7 @@ export interface Prisma__OrganizationClient<T, Null = never, ExtArgs extends run
   historyLogs<T extends Prisma.Organization$historyLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$historyLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$HistoryLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   feedbacks<T extends Prisma.Organization$feedbacksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$feedbacksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FeedbackPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   tickets<T extends Prisma.Organization$ticketsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$ticketsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SupportTicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  labGroups<T extends Prisma.Organization$labGroupsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$labGroupsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LabGroupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2114,6 +2252,30 @@ export type Organization$ticketsArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.SupportTicketScalarFieldEnum | Prisma.SupportTicketScalarFieldEnum[]
+}
+
+/**
+ * Organization.labGroups
+ */
+export type Organization$labGroupsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LabGroup
+   */
+  select?: Prisma.LabGroupSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LabGroup
+   */
+  omit?: Prisma.LabGroupOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LabGroupInclude<ExtArgs> | null
+  where?: Prisma.LabGroupWhereInput
+  orderBy?: Prisma.LabGroupOrderByWithRelationInput | Prisma.LabGroupOrderByWithRelationInput[]
+  cursor?: Prisma.LabGroupWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LabGroupScalarFieldEnum | Prisma.LabGroupScalarFieldEnum[]
 }
 
 /**

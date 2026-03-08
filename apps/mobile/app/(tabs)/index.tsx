@@ -100,8 +100,17 @@ export default function Index() {
   };
 
   const { summary } = useAttendanceStore();
-  const { timetables, loading } = useTimetableStore();
+  const { timetables, loading, fetchTimetable } = useTimetableStore();
   const { createFeedback } = useFeedbacksStore();
+
+  // Fetch today's timetable for home screen dashboard
+  useEffect(() => {
+    if (loggedInUser?.id) {
+      const dayNames = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+      const todayDay = dayNames[new Date().getDay()];
+      fetchTimetable(loggedInUser.id, todayDay);
+    }
+  }, [loggedInUser?.id]);
 
   const validSummary = summary.filter((s) => s.total > 0);
   const totalAttended = validSummary.reduce((acc, curr) => acc + curr.attended, 0);
@@ -444,6 +453,62 @@ export default function Index() {
                       />
                     </View>
                     <Text className="font-semibold text-gray-700">
+                      {action.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          )}
+
+        {/* Timetable Management Grid */}
+        {loggedInUser &&
+          (loggedInUser.role === "REPRESENTATIVE" ||
+            loggedInUser.role === "ADMIN") && (
+            <View>
+              <Text className="text-lg font-bold text-zinc-900 dark:text-zinc-100 mb-4 font-lora">
+                Manage Timetable
+              </Text>
+              <View className="flex-row flex-wrap justify-between gap-y-4">
+                {[
+                  {
+                    icon: "calendar-number-outline",
+                    label: "Manage",
+                    color: "text-indigo-600",
+                    bg: "bg-indigo-50",
+                    route: "/manage-timetable",
+                  },
+                  {
+                    icon: "list-outline",
+                    label: "View Week",
+                    color: "text-teal-600",
+                    bg: "bg-teal-50",
+                    route: "/schedule",
+                  },
+                ].map((action, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    className="w-[48%] bg-white dark:bg-zinc-900 p-4 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-sm flex-row items-center gap-3"
+                    onPress={() =>
+                      action.route && router.push(action.route as any)
+                    }
+                  >
+                    <View
+                      className={`h-10 w-10 ${action.bg} rounded-full justify-center items-center`}
+                    >
+                      <Ionicons
+                        name={action.icon as any}
+                        size={20}
+                        className={action.color}
+                        style={{
+                          color:
+                            action.color === "text-indigo-600"
+                              ? "#4F46E5"
+                              : "#0D9488",
+                        }}
+                      />
+                    </View>
+                    <Text className="font-semibold text-gray-700 dark:text-zinc-200">
                       {action.label}
                     </Text>
                   </TouchableOpacity>

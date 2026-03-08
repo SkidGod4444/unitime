@@ -28,7 +28,6 @@ export type StudentLabGroupMinAggregateOutputType = {
   id: string | null
   studentId: string | null
   labGroupId: string | null
-  courseId: string | null
   joinedAt: Date | null
 }
 
@@ -36,7 +35,6 @@ export type StudentLabGroupMaxAggregateOutputType = {
   id: string | null
   studentId: string | null
   labGroupId: string | null
-  courseId: string | null
   joinedAt: Date | null
 }
 
@@ -44,7 +42,6 @@ export type StudentLabGroupCountAggregateOutputType = {
   id: number
   studentId: number
   labGroupId: number
-  courseId: number
   joinedAt: number
   _all: number
 }
@@ -54,7 +51,6 @@ export type StudentLabGroupMinAggregateInputType = {
   id?: true
   studentId?: true
   labGroupId?: true
-  courseId?: true
   joinedAt?: true
 }
 
@@ -62,7 +58,6 @@ export type StudentLabGroupMaxAggregateInputType = {
   id?: true
   studentId?: true
   labGroupId?: true
-  courseId?: true
   joinedAt?: true
 }
 
@@ -70,7 +65,6 @@ export type StudentLabGroupCountAggregateInputType = {
   id?: true
   studentId?: true
   labGroupId?: true
-  courseId?: true
   joinedAt?: true
   _all?: true
 }
@@ -151,7 +145,6 @@ export type StudentLabGroupGroupByOutputType = {
   id: string
   studentId: string
   labGroupId: string
-  courseId: string
   joinedAt: Date
   _count: StudentLabGroupCountAggregateOutputType | null
   _min: StudentLabGroupMinAggregateOutputType | null
@@ -180,44 +173,36 @@ export type StudentLabGroupWhereInput = {
   id?: Prisma.StringFilter<"StudentLabGroup"> | string
   studentId?: Prisma.StringFilter<"StudentLabGroup"> | string
   labGroupId?: Prisma.StringFilter<"StudentLabGroup"> | string
-  courseId?: Prisma.StringFilter<"StudentLabGroup"> | string
   joinedAt?: Prisma.DateTimeFilter<"StudentLabGroup"> | Date | string
   student?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   labGroup?: Prisma.XOR<Prisma.LabGroupScalarRelationFilter, Prisma.LabGroupWhereInput>
-  course?: Prisma.XOR<Prisma.CoursesScalarRelationFilter, Prisma.CoursesWhereInput>
 }
 
 export type StudentLabGroupOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   studentId?: Prisma.SortOrder
   labGroupId?: Prisma.SortOrder
-  courseId?: Prisma.SortOrder
   joinedAt?: Prisma.SortOrder
   student?: Prisma.UserOrderByWithRelationInput
   labGroup?: Prisma.LabGroupOrderByWithRelationInput
-  course?: Prisma.CoursesOrderByWithRelationInput
 }
 
 export type StudentLabGroupWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  studentId_courseId?: Prisma.StudentLabGroupStudentIdCourseIdCompoundUniqueInput
+  studentId?: string
   AND?: Prisma.StudentLabGroupWhereInput | Prisma.StudentLabGroupWhereInput[]
   OR?: Prisma.StudentLabGroupWhereInput[]
   NOT?: Prisma.StudentLabGroupWhereInput | Prisma.StudentLabGroupWhereInput[]
-  studentId?: Prisma.StringFilter<"StudentLabGroup"> | string
   labGroupId?: Prisma.StringFilter<"StudentLabGroup"> | string
-  courseId?: Prisma.StringFilter<"StudentLabGroup"> | string
   joinedAt?: Prisma.DateTimeFilter<"StudentLabGroup"> | Date | string
   student?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   labGroup?: Prisma.XOR<Prisma.LabGroupScalarRelationFilter, Prisma.LabGroupWhereInput>
-  course?: Prisma.XOR<Prisma.CoursesScalarRelationFilter, Prisma.CoursesWhereInput>
-}, "id" | "studentId_courseId">
+}, "id" | "studentId">
 
 export type StudentLabGroupOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   studentId?: Prisma.SortOrder
   labGroupId?: Prisma.SortOrder
-  courseId?: Prisma.SortOrder
   joinedAt?: Prisma.SortOrder
   _count?: Prisma.StudentLabGroupCountOrderByAggregateInput
   _max?: Prisma.StudentLabGroupMaxOrderByAggregateInput
@@ -231,7 +216,6 @@ export type StudentLabGroupScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"StudentLabGroup"> | string
   studentId?: Prisma.StringWithAggregatesFilter<"StudentLabGroup"> | string
   labGroupId?: Prisma.StringWithAggregatesFilter<"StudentLabGroup"> | string
-  courseId?: Prisma.StringWithAggregatesFilter<"StudentLabGroup"> | string
   joinedAt?: Prisma.DateTimeWithAggregatesFilter<"StudentLabGroup"> | Date | string
 }
 
@@ -240,14 +224,12 @@ export type StudentLabGroupCreateInput = {
   joinedAt?: Date | string
   student: Prisma.UserCreateNestedOneWithoutStudentLabGroupsInput
   labGroup: Prisma.LabGroupCreateNestedOneWithoutStudentsInput
-  course: Prisma.CoursesCreateNestedOneWithoutStudentLabGroupsInput
 }
 
 export type StudentLabGroupUncheckedCreateInput = {
   id?: string
   studentId: string
   labGroupId: string
-  courseId: string
   joinedAt?: Date | string
 }
 
@@ -256,14 +238,12 @@ export type StudentLabGroupUpdateInput = {
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   student?: Prisma.UserUpdateOneRequiredWithoutStudentLabGroupsNestedInput
   labGroup?: Prisma.LabGroupUpdateOneRequiredWithoutStudentsNestedInput
-  course?: Prisma.CoursesUpdateOneRequiredWithoutStudentLabGroupsNestedInput
 }
 
 export type StudentLabGroupUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
   labGroupId?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -271,7 +251,6 @@ export type StudentLabGroupCreateManyInput = {
   id?: string
   studentId: string
   labGroupId: string
-  courseId: string
   joinedAt?: Date | string
 }
 
@@ -284,7 +263,6 @@ export type StudentLabGroupUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
   labGroupId?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -298,16 +276,10 @@ export type StudentLabGroupOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
-export type StudentLabGroupStudentIdCourseIdCompoundUniqueInput = {
-  studentId: string
-  courseId: string
-}
-
 export type StudentLabGroupCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   studentId?: Prisma.SortOrder
   labGroupId?: Prisma.SortOrder
-  courseId?: Prisma.SortOrder
   joinedAt?: Prisma.SortOrder
 }
 
@@ -315,7 +287,6 @@ export type StudentLabGroupMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   studentId?: Prisma.SortOrder
   labGroupId?: Prisma.SortOrder
-  courseId?: Prisma.SortOrder
   joinedAt?: Prisma.SortOrder
 }
 
@@ -323,50 +294,7 @@ export type StudentLabGroupMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   studentId?: Prisma.SortOrder
   labGroupId?: Prisma.SortOrder
-  courseId?: Prisma.SortOrder
   joinedAt?: Prisma.SortOrder
-}
-
-export type StudentLabGroupCreateNestedManyWithoutCourseInput = {
-  create?: Prisma.XOR<Prisma.StudentLabGroupCreateWithoutCourseInput, Prisma.StudentLabGroupUncheckedCreateWithoutCourseInput> | Prisma.StudentLabGroupCreateWithoutCourseInput[] | Prisma.StudentLabGroupUncheckedCreateWithoutCourseInput[]
-  connectOrCreate?: Prisma.StudentLabGroupCreateOrConnectWithoutCourseInput | Prisma.StudentLabGroupCreateOrConnectWithoutCourseInput[]
-  createMany?: Prisma.StudentLabGroupCreateManyCourseInputEnvelope
-  connect?: Prisma.StudentLabGroupWhereUniqueInput | Prisma.StudentLabGroupWhereUniqueInput[]
-}
-
-export type StudentLabGroupUncheckedCreateNestedManyWithoutCourseInput = {
-  create?: Prisma.XOR<Prisma.StudentLabGroupCreateWithoutCourseInput, Prisma.StudentLabGroupUncheckedCreateWithoutCourseInput> | Prisma.StudentLabGroupCreateWithoutCourseInput[] | Prisma.StudentLabGroupUncheckedCreateWithoutCourseInput[]
-  connectOrCreate?: Prisma.StudentLabGroupCreateOrConnectWithoutCourseInput | Prisma.StudentLabGroupCreateOrConnectWithoutCourseInput[]
-  createMany?: Prisma.StudentLabGroupCreateManyCourseInputEnvelope
-  connect?: Prisma.StudentLabGroupWhereUniqueInput | Prisma.StudentLabGroupWhereUniqueInput[]
-}
-
-export type StudentLabGroupUpdateManyWithoutCourseNestedInput = {
-  create?: Prisma.XOR<Prisma.StudentLabGroupCreateWithoutCourseInput, Prisma.StudentLabGroupUncheckedCreateWithoutCourseInput> | Prisma.StudentLabGroupCreateWithoutCourseInput[] | Prisma.StudentLabGroupUncheckedCreateWithoutCourseInput[]
-  connectOrCreate?: Prisma.StudentLabGroupCreateOrConnectWithoutCourseInput | Prisma.StudentLabGroupCreateOrConnectWithoutCourseInput[]
-  upsert?: Prisma.StudentLabGroupUpsertWithWhereUniqueWithoutCourseInput | Prisma.StudentLabGroupUpsertWithWhereUniqueWithoutCourseInput[]
-  createMany?: Prisma.StudentLabGroupCreateManyCourseInputEnvelope
-  set?: Prisma.StudentLabGroupWhereUniqueInput | Prisma.StudentLabGroupWhereUniqueInput[]
-  disconnect?: Prisma.StudentLabGroupWhereUniqueInput | Prisma.StudentLabGroupWhereUniqueInput[]
-  delete?: Prisma.StudentLabGroupWhereUniqueInput | Prisma.StudentLabGroupWhereUniqueInput[]
-  connect?: Prisma.StudentLabGroupWhereUniqueInput | Prisma.StudentLabGroupWhereUniqueInput[]
-  update?: Prisma.StudentLabGroupUpdateWithWhereUniqueWithoutCourseInput | Prisma.StudentLabGroupUpdateWithWhereUniqueWithoutCourseInput[]
-  updateMany?: Prisma.StudentLabGroupUpdateManyWithWhereWithoutCourseInput | Prisma.StudentLabGroupUpdateManyWithWhereWithoutCourseInput[]
-  deleteMany?: Prisma.StudentLabGroupScalarWhereInput | Prisma.StudentLabGroupScalarWhereInput[]
-}
-
-export type StudentLabGroupUncheckedUpdateManyWithoutCourseNestedInput = {
-  create?: Prisma.XOR<Prisma.StudentLabGroupCreateWithoutCourseInput, Prisma.StudentLabGroupUncheckedCreateWithoutCourseInput> | Prisma.StudentLabGroupCreateWithoutCourseInput[] | Prisma.StudentLabGroupUncheckedCreateWithoutCourseInput[]
-  connectOrCreate?: Prisma.StudentLabGroupCreateOrConnectWithoutCourseInput | Prisma.StudentLabGroupCreateOrConnectWithoutCourseInput[]
-  upsert?: Prisma.StudentLabGroupUpsertWithWhereUniqueWithoutCourseInput | Prisma.StudentLabGroupUpsertWithWhereUniqueWithoutCourseInput[]
-  createMany?: Prisma.StudentLabGroupCreateManyCourseInputEnvelope
-  set?: Prisma.StudentLabGroupWhereUniqueInput | Prisma.StudentLabGroupWhereUniqueInput[]
-  disconnect?: Prisma.StudentLabGroupWhereUniqueInput | Prisma.StudentLabGroupWhereUniqueInput[]
-  delete?: Prisma.StudentLabGroupWhereUniqueInput | Prisma.StudentLabGroupWhereUniqueInput[]
-  connect?: Prisma.StudentLabGroupWhereUniqueInput | Prisma.StudentLabGroupWhereUniqueInput[]
-  update?: Prisma.StudentLabGroupUpdateWithWhereUniqueWithoutCourseInput | Prisma.StudentLabGroupUpdateWithWhereUniqueWithoutCourseInput[]
-  updateMany?: Prisma.StudentLabGroupUpdateManyWithWhereWithoutCourseInput | Prisma.StudentLabGroupUpdateManyWithWhereWithoutCourseInput[]
-  deleteMany?: Prisma.StudentLabGroupScalarWhereInput | Prisma.StudentLabGroupScalarWhereInput[]
 }
 
 export type StudentLabGroupCreateNestedManyWithoutStudentInput = {
@@ -453,68 +381,15 @@ export type StudentLabGroupUncheckedUpdateManyWithoutLabGroupNestedInput = {
   deleteMany?: Prisma.StudentLabGroupScalarWhereInput | Prisma.StudentLabGroupScalarWhereInput[]
 }
 
-export type StudentLabGroupCreateWithoutCourseInput = {
-  id?: string
-  joinedAt?: Date | string
-  student: Prisma.UserCreateNestedOneWithoutStudentLabGroupsInput
-  labGroup: Prisma.LabGroupCreateNestedOneWithoutStudentsInput
-}
-
-export type StudentLabGroupUncheckedCreateWithoutCourseInput = {
-  id?: string
-  studentId: string
-  labGroupId: string
-  joinedAt?: Date | string
-}
-
-export type StudentLabGroupCreateOrConnectWithoutCourseInput = {
-  where: Prisma.StudentLabGroupWhereUniqueInput
-  create: Prisma.XOR<Prisma.StudentLabGroupCreateWithoutCourseInput, Prisma.StudentLabGroupUncheckedCreateWithoutCourseInput>
-}
-
-export type StudentLabGroupCreateManyCourseInputEnvelope = {
-  data: Prisma.StudentLabGroupCreateManyCourseInput | Prisma.StudentLabGroupCreateManyCourseInput[]
-  skipDuplicates?: boolean
-}
-
-export type StudentLabGroupUpsertWithWhereUniqueWithoutCourseInput = {
-  where: Prisma.StudentLabGroupWhereUniqueInput
-  update: Prisma.XOR<Prisma.StudentLabGroupUpdateWithoutCourseInput, Prisma.StudentLabGroupUncheckedUpdateWithoutCourseInput>
-  create: Prisma.XOR<Prisma.StudentLabGroupCreateWithoutCourseInput, Prisma.StudentLabGroupUncheckedCreateWithoutCourseInput>
-}
-
-export type StudentLabGroupUpdateWithWhereUniqueWithoutCourseInput = {
-  where: Prisma.StudentLabGroupWhereUniqueInput
-  data: Prisma.XOR<Prisma.StudentLabGroupUpdateWithoutCourseInput, Prisma.StudentLabGroupUncheckedUpdateWithoutCourseInput>
-}
-
-export type StudentLabGroupUpdateManyWithWhereWithoutCourseInput = {
-  where: Prisma.StudentLabGroupScalarWhereInput
-  data: Prisma.XOR<Prisma.StudentLabGroupUpdateManyMutationInput, Prisma.StudentLabGroupUncheckedUpdateManyWithoutCourseInput>
-}
-
-export type StudentLabGroupScalarWhereInput = {
-  AND?: Prisma.StudentLabGroupScalarWhereInput | Prisma.StudentLabGroupScalarWhereInput[]
-  OR?: Prisma.StudentLabGroupScalarWhereInput[]
-  NOT?: Prisma.StudentLabGroupScalarWhereInput | Prisma.StudentLabGroupScalarWhereInput[]
-  id?: Prisma.StringFilter<"StudentLabGroup"> | string
-  studentId?: Prisma.StringFilter<"StudentLabGroup"> | string
-  labGroupId?: Prisma.StringFilter<"StudentLabGroup"> | string
-  courseId?: Prisma.StringFilter<"StudentLabGroup"> | string
-  joinedAt?: Prisma.DateTimeFilter<"StudentLabGroup"> | Date | string
-}
-
 export type StudentLabGroupCreateWithoutStudentInput = {
   id?: string
   joinedAt?: Date | string
   labGroup: Prisma.LabGroupCreateNestedOneWithoutStudentsInput
-  course: Prisma.CoursesCreateNestedOneWithoutStudentLabGroupsInput
 }
 
 export type StudentLabGroupUncheckedCreateWithoutStudentInput = {
   id?: string
   labGroupId: string
-  courseId: string
   joinedAt?: Date | string
 }
 
@@ -544,17 +419,25 @@ export type StudentLabGroupUpdateManyWithWhereWithoutStudentInput = {
   data: Prisma.XOR<Prisma.StudentLabGroupUpdateManyMutationInput, Prisma.StudentLabGroupUncheckedUpdateManyWithoutStudentInput>
 }
 
+export type StudentLabGroupScalarWhereInput = {
+  AND?: Prisma.StudentLabGroupScalarWhereInput | Prisma.StudentLabGroupScalarWhereInput[]
+  OR?: Prisma.StudentLabGroupScalarWhereInput[]
+  NOT?: Prisma.StudentLabGroupScalarWhereInput | Prisma.StudentLabGroupScalarWhereInput[]
+  id?: Prisma.StringFilter<"StudentLabGroup"> | string
+  studentId?: Prisma.StringFilter<"StudentLabGroup"> | string
+  labGroupId?: Prisma.StringFilter<"StudentLabGroup"> | string
+  joinedAt?: Prisma.DateTimeFilter<"StudentLabGroup"> | Date | string
+}
+
 export type StudentLabGroupCreateWithoutLabGroupInput = {
   id?: string
   joinedAt?: Date | string
   student: Prisma.UserCreateNestedOneWithoutStudentLabGroupsInput
-  course: Prisma.CoursesCreateNestedOneWithoutStudentLabGroupsInput
 }
 
 export type StudentLabGroupUncheckedCreateWithoutLabGroupInput = {
   id?: string
   studentId: string
-  courseId: string
   joinedAt?: Date | string
 }
 
@@ -584,38 +467,9 @@ export type StudentLabGroupUpdateManyWithWhereWithoutLabGroupInput = {
   data: Prisma.XOR<Prisma.StudentLabGroupUpdateManyMutationInput, Prisma.StudentLabGroupUncheckedUpdateManyWithoutLabGroupInput>
 }
 
-export type StudentLabGroupCreateManyCourseInput = {
-  id?: string
-  studentId: string
-  labGroupId: string
-  joinedAt?: Date | string
-}
-
-export type StudentLabGroupUpdateWithoutCourseInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  student?: Prisma.UserUpdateOneRequiredWithoutStudentLabGroupsNestedInput
-  labGroup?: Prisma.LabGroupUpdateOneRequiredWithoutStudentsNestedInput
-}
-
-export type StudentLabGroupUncheckedUpdateWithoutCourseInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  studentId?: Prisma.StringFieldUpdateOperationsInput | string
-  labGroupId?: Prisma.StringFieldUpdateOperationsInput | string
-  joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-}
-
-export type StudentLabGroupUncheckedUpdateManyWithoutCourseInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  studentId?: Prisma.StringFieldUpdateOperationsInput | string
-  labGroupId?: Prisma.StringFieldUpdateOperationsInput | string
-  joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-}
-
 export type StudentLabGroupCreateManyStudentInput = {
   id?: string
   labGroupId: string
-  courseId: string
   joinedAt?: Date | string
 }
 
@@ -623,27 +477,23 @@ export type StudentLabGroupUpdateWithoutStudentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   labGroup?: Prisma.LabGroupUpdateOneRequiredWithoutStudentsNestedInput
-  course?: Prisma.CoursesUpdateOneRequiredWithoutStudentLabGroupsNestedInput
 }
 
 export type StudentLabGroupUncheckedUpdateWithoutStudentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   labGroupId?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type StudentLabGroupUncheckedUpdateManyWithoutStudentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   labGroupId?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type StudentLabGroupCreateManyLabGroupInput = {
   id?: string
   studentId: string
-  courseId: string
   joinedAt?: Date | string
 }
 
@@ -651,20 +501,17 @@ export type StudentLabGroupUpdateWithoutLabGroupInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   student?: Prisma.UserUpdateOneRequiredWithoutStudentLabGroupsNestedInput
-  course?: Prisma.CoursesUpdateOneRequiredWithoutStudentLabGroupsNestedInput
 }
 
 export type StudentLabGroupUncheckedUpdateWithoutLabGroupInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type StudentLabGroupUncheckedUpdateManyWithoutLabGroupInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
-  courseId?: Prisma.StringFieldUpdateOperationsInput | string
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -674,58 +521,48 @@ export type StudentLabGroupSelect<ExtArgs extends runtime.Types.Extensions.Inter
   id?: boolean
   studentId?: boolean
   labGroupId?: boolean
-  courseId?: boolean
   joinedAt?: boolean
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   labGroup?: boolean | Prisma.LabGroupDefaultArgs<ExtArgs>
-  course?: boolean | Prisma.CoursesDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["studentLabGroup"]>
 
 export type StudentLabGroupSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   studentId?: boolean
   labGroupId?: boolean
-  courseId?: boolean
   joinedAt?: boolean
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   labGroup?: boolean | Prisma.LabGroupDefaultArgs<ExtArgs>
-  course?: boolean | Prisma.CoursesDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["studentLabGroup"]>
 
 export type StudentLabGroupSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   studentId?: boolean
   labGroupId?: boolean
-  courseId?: boolean
   joinedAt?: boolean
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   labGroup?: boolean | Prisma.LabGroupDefaultArgs<ExtArgs>
-  course?: boolean | Prisma.CoursesDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["studentLabGroup"]>
 
 export type StudentLabGroupSelectScalar = {
   id?: boolean
   studentId?: boolean
   labGroupId?: boolean
-  courseId?: boolean
   joinedAt?: boolean
 }
 
-export type StudentLabGroupOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "labGroupId" | "courseId" | "joinedAt", ExtArgs["result"]["studentLabGroup"]>
+export type StudentLabGroupOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "labGroupId" | "joinedAt", ExtArgs["result"]["studentLabGroup"]>
 export type StudentLabGroupInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   labGroup?: boolean | Prisma.LabGroupDefaultArgs<ExtArgs>
-  course?: boolean | Prisma.CoursesDefaultArgs<ExtArgs>
 }
 export type StudentLabGroupIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   labGroup?: boolean | Prisma.LabGroupDefaultArgs<ExtArgs>
-  course?: boolean | Prisma.CoursesDefaultArgs<ExtArgs>
 }
 export type StudentLabGroupIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   student?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   labGroup?: boolean | Prisma.LabGroupDefaultArgs<ExtArgs>
-  course?: boolean | Prisma.CoursesDefaultArgs<ExtArgs>
 }
 
 export type $StudentLabGroupPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -733,13 +570,11 @@ export type $StudentLabGroupPayload<ExtArgs extends runtime.Types.Extensions.Int
   objects: {
     student: Prisma.$UserPayload<ExtArgs>
     labGroup: Prisma.$LabGroupPayload<ExtArgs>
-    course: Prisma.$CoursesPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     studentId: string
     labGroupId: string
-    courseId: string
     joinedAt: Date
   }, ExtArgs["result"]["studentLabGroup"]>
   composites: {}
@@ -1137,7 +972,6 @@ export interface Prisma__StudentLabGroupClient<T, Null = never, ExtArgs extends 
   readonly [Symbol.toStringTag]: "PrismaPromise"
   student<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   labGroup<T extends Prisma.LabGroupDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LabGroupDefaultArgs<ExtArgs>>): Prisma.Prisma__LabGroupClient<runtime.Types.Result.GetResult<Prisma.$LabGroupPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  course<T extends Prisma.CoursesDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CoursesDefaultArgs<ExtArgs>>): Prisma.Prisma__CoursesClient<runtime.Types.Result.GetResult<Prisma.$CoursesPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1170,7 +1004,6 @@ export interface StudentLabGroupFieldRefs {
   readonly id: Prisma.FieldRef<"StudentLabGroup", 'String'>
   readonly studentId: Prisma.FieldRef<"StudentLabGroup", 'String'>
   readonly labGroupId: Prisma.FieldRef<"StudentLabGroup", 'String'>
-  readonly courseId: Prisma.FieldRef<"StudentLabGroup", 'String'>
   readonly joinedAt: Prisma.FieldRef<"StudentLabGroup", 'DateTime'>
 }
     

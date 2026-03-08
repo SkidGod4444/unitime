@@ -4,6 +4,7 @@ import {
     type ProfileFormErrors,
 } from "@/lib/schemas/profile.schema";
 import { useOrgsStore } from "@/lib/store";
+import { useLabGroupsStore } from "@/lib/store/lab-groups";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -47,8 +48,12 @@ export default function StudentProfileForm() {
 
   // Validation errors
   const [errors, setErrors] = useState<ProfileFormErrors>({});
-
   const [loading, setLoading] = useState(false);
+
+  // Lab group
+  const [selectedLabGroupId, setSelectedLabGroupId] = useState<string | null>(null);
+  const [showLabGroupDropdown, setShowLabGroupDropdown] = useState(false);
+  const { fetchOrgLabGroups, byOrg, joinLabGroup } = useLabGroupsStore();
 
   const { orgs, fetchOrgs } = useOrgsStore();
 
@@ -87,6 +92,20 @@ export default function StudentProfileForm() {
   const sections = (department && course && semister)
     ? Array.from(new Set(orgs.filter((o) => cleanStr(o.departmentName) === department && cleanStr(o.courseName) === course && o.semester === semister).map((o) => o.section.toString())))
     : [];
+
+  // Dynamically resolved org (once section is picked)
+  const matchedOrgPreview = (department && course && semister && section)
+    ? orgs.find((o) => cleanStr(o.departmentName) === department && cleanStr(o.courseName) === course && o.semester === semister && o.section.toString() === section)
+    : null;
+
+  // Fetch lab groups whenever the matched org resolves
+  React.useEffect(() => {
+    if (matchedOrgPreview?.id) {
+      fetchOrgLabGroups(matchedOrgPreview.id);
+    }
+  }, [matchedOrgPreview?.id]);
+
+  const orgLabGroups = matchedOrgPreview?.id ? (byOrg[matchedOrgPreview.id] ?? []) : [];
 
   // ---------------------------------------------------------------------------
   // Helpers
@@ -185,6 +204,12 @@ export default function StudentProfileForm() {
       }
 
       Alert.alert("Success", "Profile saved successfully!");
+
+      // Join the selected lab group (global, semester-wide)
+      if (selectedLabGroupId) {
+        await joinLabGroup(selectedLabGroupId);
+      }
+
       router.replace("/(tabs)");
     } catch (error: any) {
       console.error("Profile save failed:", error);
@@ -647,6 +672,46 @@ export default function StudentProfileForm() {
                   </View>
                 )}
               </View>
+
+              {/* Lab Group Dropdown — shown once section + org are resolved */}
+              {orgLabGroups.length > 0 && (
+                <View>
+                  <Text className="text-xs font-bold text-gray-500 mb-2 ml-1 uppercase tracking-wide">
+                    Lab Group (Batch)*
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => setShowLabGroupDropdown(!showLabGroupDropdown)}
+                    className="flex-row items-center border border-gray-200 rounded-2xl px-4 py-3.5 bg-white"
+                  >
+                    <Ionicons name="flask-outline" size={20} color="#9CA3AF" style={{ marginRight: 12 }} />
+                    <Text className={`flex-1 text-base font-semibold ${selectedLabGroupId ? "text-gray-900" : "text-gray-400"}`}>
+                      {selectedLabGroupId
+                        ? orgLabGroups.find((g) => g.id === selectedLabGroupId)?.name ?? "Select your Lab Group"
+                        : "Select your Lab Group"}
+                    </Text>
+                    <Ionicons name={showLabGroupDropdown ? "chevron-up" : "chevron-down"} size={20} color="#9CA3AF" />
+                  </TouchableOpacity>
+                  <Text className="text-xs text-gray-400 mt-1.5 ml-1">
+                    This applies to all lab classes for the whole semester.
+                  </Text>
+                  {showLabGroupDropdown && (
+                    <View className="mt-2 border border-gray-200 rounded-xl bg-white overflow-hidden">
+                      {orgLabGroups.map((g) => (
+                        <TouchableOpacity
+                          key={g.id}
+                          onPress={() => {
+                            setSelectedLabGroupId(g.id);
+                            setShowLabGroupDropdown(false);
+                          }}
+                          className="px-4 py-3 border-b border-gray-100"
+                        >
+                          <Text className="text-gray-900 font-medium">{g.name}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  )}
+                </View>
+              )}
 
               {/* Year of Admission */}
               <View>

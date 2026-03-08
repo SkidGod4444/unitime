@@ -67,7 +67,7 @@ profile.get("/all", async (c) => {
     () => prisma.studentProfile.findMany(),
     120,
   );
-  console.log("Fetched student profiles:", studentProfiles);
+  // console.log("Fetched student profiles:", studentProfiles);
   if (studentProfiles.length === 0) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
   }

@@ -274,8 +274,8 @@ export type UserWhereInput = {
   feedbacks?: Prisma.FeedbackListRelationFilter
   tickets?: Prisma.SupportTicketListRelationFilter
   assignedTickets?: Prisma.SupportTicketListRelationFilter
-  labGroups?: Prisma.LabGroupListRelationFilter
   studentLabGroups?: Prisma.StudentLabGroupListRelationFilter
+  createdLabGroups?: Prisma.LabGroupListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -306,8 +306,8 @@ export type UserOrderByWithRelationInput = {
   feedbacks?: Prisma.FeedbackOrderByRelationAggregateInput
   tickets?: Prisma.SupportTicketOrderByRelationAggregateInput
   assignedTickets?: Prisma.SupportTicketOrderByRelationAggregateInput
-  labGroups?: Prisma.LabGroupOrderByRelationAggregateInput
   studentLabGroups?: Prisma.StudentLabGroupOrderByRelationAggregateInput
+  createdLabGroups?: Prisma.LabGroupOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -341,8 +341,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   feedbacks?: Prisma.FeedbackListRelationFilter
   tickets?: Prisma.SupportTicketListRelationFilter
   assignedTickets?: Prisma.SupportTicketListRelationFilter
-  labGroups?: Prisma.LabGroupListRelationFilter
   studentLabGroups?: Prisma.StudentLabGroupListRelationFilter
+  createdLabGroups?: Prisma.LabGroupListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -415,8 +415,8 @@ export type UserCreateInput = {
   feedbacks?: Prisma.FeedbackCreateNestedManyWithoutUserInput
   tickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
   assignedTickets?: Prisma.SupportTicketCreateNestedManyWithoutAssigneeInput
-  labGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
   studentLabGroups?: Prisma.StudentLabGroupCreateNestedManyWithoutStudentInput
+  createdLabGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -447,8 +447,8 @@ export type UserUncheckedCreateInput = {
   feedbacks?: Prisma.FeedbackUncheckedCreateNestedManyWithoutUserInput
   tickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
   assignedTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutAssigneeInput
-  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
   studentLabGroups?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutStudentInput
+  createdLabGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
 }
 
 export type UserUpdateInput = {
@@ -479,8 +479,8 @@ export type UserUpdateInput = {
   feedbacks?: Prisma.FeedbackUpdateManyWithoutUserNestedInput
   tickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
   assignedTickets?: Prisma.SupportTicketUpdateManyWithoutAssigneeNestedInput
-  labGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
   studentLabGroups?: Prisma.StudentLabGroupUpdateManyWithoutStudentNestedInput
+  createdLabGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -511,8 +511,8 @@ export type UserUncheckedUpdateInput = {
   feedbacks?: Prisma.FeedbackUncheckedUpdateManyWithoutUserNestedInput
   tickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
   assignedTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutAssigneeNestedInput
-  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
   studentLabGroups?: Prisma.StudentLabGroupUncheckedUpdateManyWithoutStudentNestedInput
+  createdLabGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -819,18 +819,18 @@ export type UserUpdateOneRequiredWithoutAlarmsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAlarmsInput, Prisma.UserUpdateWithoutAlarmsInput>, Prisma.UserUncheckedUpdateWithoutAlarmsInput>
 }
 
-export type UserCreateNestedOneWithoutLabGroupsInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutLabGroupsInput, Prisma.UserUncheckedCreateWithoutLabGroupsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutLabGroupsInput
+export type UserCreateNestedOneWithoutCreatedLabGroupsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCreatedLabGroupsInput, Prisma.UserUncheckedCreateWithoutCreatedLabGroupsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCreatedLabGroupsInput
   connect?: Prisma.UserWhereUniqueInput
 }
 
-export type UserUpdateOneRequiredWithoutLabGroupsNestedInput = {
-  create?: Prisma.XOR<Prisma.UserCreateWithoutLabGroupsInput, Prisma.UserUncheckedCreateWithoutLabGroupsInput>
-  connectOrCreate?: Prisma.UserCreateOrConnectWithoutLabGroupsInput
-  upsert?: Prisma.UserUpsertWithoutLabGroupsInput
+export type UserUpdateOneRequiredWithoutCreatedLabGroupsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCreatedLabGroupsInput, Prisma.UserUncheckedCreateWithoutCreatedLabGroupsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCreatedLabGroupsInput
+  upsert?: Prisma.UserUpsertWithoutCreatedLabGroupsInput
   connect?: Prisma.UserWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutLabGroupsInput, Prisma.UserUpdateWithoutLabGroupsInput>, Prisma.UserUncheckedUpdateWithoutLabGroupsInput>
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCreatedLabGroupsInput, Prisma.UserUpdateWithoutCreatedLabGroupsInput>, Prisma.UserUncheckedUpdateWithoutCreatedLabGroupsInput>
 }
 
 export type UserCreateNestedOneWithoutStudentLabGroupsInput = {
@@ -874,8 +874,8 @@ export type UserCreateWithoutNotificationsInput = {
   feedbacks?: Prisma.FeedbackCreateNestedManyWithoutUserInput
   tickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
   assignedTickets?: Prisma.SupportTicketCreateNestedManyWithoutAssigneeInput
-  labGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
   studentLabGroups?: Prisma.StudentLabGroupCreateNestedManyWithoutStudentInput
+  createdLabGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -905,8 +905,8 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   feedbacks?: Prisma.FeedbackUncheckedCreateNestedManyWithoutUserInput
   tickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
   assignedTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutAssigneeInput
-  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
   studentLabGroups?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutStudentInput
+  createdLabGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -952,8 +952,8 @@ export type UserUpdateWithoutNotificationsInput = {
   feedbacks?: Prisma.FeedbackUpdateManyWithoutUserNestedInput
   tickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
   assignedTickets?: Prisma.SupportTicketUpdateManyWithoutAssigneeNestedInput
-  labGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
   studentLabGroups?: Prisma.StudentLabGroupUpdateManyWithoutStudentNestedInput
+  createdLabGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -983,8 +983,8 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   feedbacks?: Prisma.FeedbackUncheckedUpdateManyWithoutUserNestedInput
   tickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
   assignedTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutAssigneeNestedInput
-  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
   studentLabGroups?: Prisma.StudentLabGroupUncheckedUpdateManyWithoutStudentNestedInput
+  createdLabGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserCreateWithoutFeedbacksInput = {
@@ -1014,8 +1014,8 @@ export type UserCreateWithoutFeedbacksInput = {
   historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutUserInput
   tickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
   assignedTickets?: Prisma.SupportTicketCreateNestedManyWithoutAssigneeInput
-  labGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
   studentLabGroups?: Prisma.StudentLabGroupCreateNestedManyWithoutStudentInput
+  createdLabGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
 }
 
 export type UserUncheckedCreateWithoutFeedbacksInput = {
@@ -1045,8 +1045,8 @@ export type UserUncheckedCreateWithoutFeedbacksInput = {
   historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutUserInput
   tickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
   assignedTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutAssigneeInput
-  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
   studentLabGroups?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutStudentInput
+  createdLabGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
 }
 
 export type UserCreateOrConnectWithoutFeedbacksInput = {
@@ -1092,8 +1092,8 @@ export type UserUpdateWithoutFeedbacksInput = {
   historyLogs?: Prisma.HistoryLogUpdateManyWithoutUserNestedInput
   tickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
   assignedTickets?: Prisma.SupportTicketUpdateManyWithoutAssigneeNestedInput
-  labGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
   studentLabGroups?: Prisma.StudentLabGroupUpdateManyWithoutStudentNestedInput
+  createdLabGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutFeedbacksInput = {
@@ -1123,8 +1123,8 @@ export type UserUncheckedUpdateWithoutFeedbacksInput = {
   historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutUserNestedInput
   tickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
   assignedTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutAssigneeNestedInput
-  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
   studentLabGroups?: Prisma.StudentLabGroupUncheckedUpdateManyWithoutStudentNestedInput
+  createdLabGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserCreateWithoutTicketsInput = {
@@ -1154,8 +1154,8 @@ export type UserCreateWithoutTicketsInput = {
   historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutUserInput
   feedbacks?: Prisma.FeedbackCreateNestedManyWithoutUserInput
   assignedTickets?: Prisma.SupportTicketCreateNestedManyWithoutAssigneeInput
-  labGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
   studentLabGroups?: Prisma.StudentLabGroupCreateNestedManyWithoutStudentInput
+  createdLabGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
 }
 
 export type UserUncheckedCreateWithoutTicketsInput = {
@@ -1185,8 +1185,8 @@ export type UserUncheckedCreateWithoutTicketsInput = {
   historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutUserInput
   feedbacks?: Prisma.FeedbackUncheckedCreateNestedManyWithoutUserInput
   assignedTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutAssigneeInput
-  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
   studentLabGroups?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutStudentInput
+  createdLabGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
 }
 
 export type UserCreateOrConnectWithoutTicketsInput = {
@@ -1221,8 +1221,8 @@ export type UserCreateWithoutAssignedTicketsInput = {
   historyLogs?: Prisma.HistoryLogCreateNestedManyWithoutUserInput
   feedbacks?: Prisma.FeedbackCreateNestedManyWithoutUserInput
   tickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
-  labGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
   studentLabGroups?: Prisma.StudentLabGroupCreateNestedManyWithoutStudentInput
+  createdLabGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
 }
 
 export type UserUncheckedCreateWithoutAssignedTicketsInput = {
@@ -1252,8 +1252,8 @@ export type UserUncheckedCreateWithoutAssignedTicketsInput = {
   historyLogs?: Prisma.HistoryLogUncheckedCreateNestedManyWithoutUserInput
   feedbacks?: Prisma.FeedbackUncheckedCreateNestedManyWithoutUserInput
   tickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
-  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
   studentLabGroups?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutStudentInput
+  createdLabGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
 }
 
 export type UserCreateOrConnectWithoutAssignedTicketsInput = {
@@ -1299,8 +1299,8 @@ export type UserUpdateWithoutTicketsInput = {
   historyLogs?: Prisma.HistoryLogUpdateManyWithoutUserNestedInput
   feedbacks?: Prisma.FeedbackUpdateManyWithoutUserNestedInput
   assignedTickets?: Prisma.SupportTicketUpdateManyWithoutAssigneeNestedInput
-  labGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
   studentLabGroups?: Prisma.StudentLabGroupUpdateManyWithoutStudentNestedInput
+  createdLabGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTicketsInput = {
@@ -1330,8 +1330,8 @@ export type UserUncheckedUpdateWithoutTicketsInput = {
   historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutUserNestedInput
   feedbacks?: Prisma.FeedbackUncheckedUpdateManyWithoutUserNestedInput
   assignedTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutAssigneeNestedInput
-  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
   studentLabGroups?: Prisma.StudentLabGroupUncheckedUpdateManyWithoutStudentNestedInput
+  createdLabGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserUpsertWithoutAssignedTicketsInput = {
@@ -1372,8 +1372,8 @@ export type UserUpdateWithoutAssignedTicketsInput = {
   historyLogs?: Prisma.HistoryLogUpdateManyWithoutUserNestedInput
   feedbacks?: Prisma.FeedbackUpdateManyWithoutUserNestedInput
   tickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
-  labGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
   studentLabGroups?: Prisma.StudentLabGroupUpdateManyWithoutStudentNestedInput
+  createdLabGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAssignedTicketsInput = {
@@ -1403,8 +1403,8 @@ export type UserUncheckedUpdateWithoutAssignedTicketsInput = {
   historyLogs?: Prisma.HistoryLogUncheckedUpdateManyWithoutUserNestedInput
   feedbacks?: Prisma.FeedbackUncheckedUpdateManyWithoutUserNestedInput
   tickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
-  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
   studentLabGroups?: Prisma.StudentLabGroupUncheckedUpdateManyWithoutStudentNestedInput
+  createdLabGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserCreateWithoutHistoryLogsInput = {
@@ -1434,8 +1434,8 @@ export type UserCreateWithoutHistoryLogsInput = {
   feedbacks?: Prisma.FeedbackCreateNestedManyWithoutUserInput
   tickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
   assignedTickets?: Prisma.SupportTicketCreateNestedManyWithoutAssigneeInput
-  labGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
   studentLabGroups?: Prisma.StudentLabGroupCreateNestedManyWithoutStudentInput
+  createdLabGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
 }
 
 export type UserUncheckedCreateWithoutHistoryLogsInput = {
@@ -1465,8 +1465,8 @@ export type UserUncheckedCreateWithoutHistoryLogsInput = {
   feedbacks?: Prisma.FeedbackUncheckedCreateNestedManyWithoutUserInput
   tickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
   assignedTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutAssigneeInput
-  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
   studentLabGroups?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutStudentInput
+  createdLabGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
 }
 
 export type UserCreateOrConnectWithoutHistoryLogsInput = {
@@ -1512,8 +1512,8 @@ export type UserUpdateWithoutHistoryLogsInput = {
   feedbacks?: Prisma.FeedbackUpdateManyWithoutUserNestedInput
   tickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
   assignedTickets?: Prisma.SupportTicketUpdateManyWithoutAssigneeNestedInput
-  labGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
   studentLabGroups?: Prisma.StudentLabGroupUpdateManyWithoutStudentNestedInput
+  createdLabGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutHistoryLogsInput = {
@@ -1543,8 +1543,8 @@ export type UserUncheckedUpdateWithoutHistoryLogsInput = {
   feedbacks?: Prisma.FeedbackUncheckedUpdateManyWithoutUserNestedInput
   tickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
   assignedTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutAssigneeNestedInput
-  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
   studentLabGroups?: Prisma.StudentLabGroupUncheckedUpdateManyWithoutStudentNestedInput
+  createdLabGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserCreateWithoutCoursesInput = {
@@ -1574,8 +1574,8 @@ export type UserCreateWithoutCoursesInput = {
   feedbacks?: Prisma.FeedbackCreateNestedManyWithoutUserInput
   tickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
   assignedTickets?: Prisma.SupportTicketCreateNestedManyWithoutAssigneeInput
-  labGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
   studentLabGroups?: Prisma.StudentLabGroupCreateNestedManyWithoutStudentInput
+  createdLabGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
 }
 
 export type UserUncheckedCreateWithoutCoursesInput = {
@@ -1605,8 +1605,8 @@ export type UserUncheckedCreateWithoutCoursesInput = {
   feedbacks?: Prisma.FeedbackUncheckedCreateNestedManyWithoutUserInput
   tickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
   assignedTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutAssigneeInput
-  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
   studentLabGroups?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutStudentInput
+  createdLabGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
 }
 
 export type UserCreateOrConnectWithoutCoursesInput = {
@@ -1652,8 +1652,8 @@ export type UserUpdateWithoutCoursesInput = {
   feedbacks?: Prisma.FeedbackUpdateManyWithoutUserNestedInput
   tickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
   assignedTickets?: Prisma.SupportTicketUpdateManyWithoutAssigneeNestedInput
-  labGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
   studentLabGroups?: Prisma.StudentLabGroupUpdateManyWithoutStudentNestedInput
+  createdLabGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCoursesInput = {
@@ -1683,8 +1683,8 @@ export type UserUncheckedUpdateWithoutCoursesInput = {
   feedbacks?: Prisma.FeedbackUncheckedUpdateManyWithoutUserNestedInput
   tickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
   assignedTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutAssigneeNestedInput
-  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
   studentLabGroups?: Prisma.StudentLabGroupUncheckedUpdateManyWithoutStudentNestedInput
+  createdLabGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserCreateWithoutTimetablesInput = {
@@ -1714,8 +1714,8 @@ export type UserCreateWithoutTimetablesInput = {
   feedbacks?: Prisma.FeedbackCreateNestedManyWithoutUserInput
   tickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
   assignedTickets?: Prisma.SupportTicketCreateNestedManyWithoutAssigneeInput
-  labGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
   studentLabGroups?: Prisma.StudentLabGroupCreateNestedManyWithoutStudentInput
+  createdLabGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
 }
 
 export type UserUncheckedCreateWithoutTimetablesInput = {
@@ -1745,8 +1745,8 @@ export type UserUncheckedCreateWithoutTimetablesInput = {
   feedbacks?: Prisma.FeedbackUncheckedCreateNestedManyWithoutUserInput
   tickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
   assignedTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutAssigneeInput
-  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
   studentLabGroups?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutStudentInput
+  createdLabGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
 }
 
 export type UserCreateOrConnectWithoutTimetablesInput = {
@@ -1792,8 +1792,8 @@ export type UserUpdateWithoutTimetablesInput = {
   feedbacks?: Prisma.FeedbackUpdateManyWithoutUserNestedInput
   tickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
   assignedTickets?: Prisma.SupportTicketUpdateManyWithoutAssigneeNestedInput
-  labGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
   studentLabGroups?: Prisma.StudentLabGroupUpdateManyWithoutStudentNestedInput
+  createdLabGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutTimetablesInput = {
@@ -1823,8 +1823,8 @@ export type UserUncheckedUpdateWithoutTimetablesInput = {
   feedbacks?: Prisma.FeedbackUncheckedUpdateManyWithoutUserNestedInput
   tickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
   assignedTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutAssigneeNestedInput
-  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
   studentLabGroups?: Prisma.StudentLabGroupUncheckedUpdateManyWithoutStudentNestedInput
+  createdLabGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserCreateWithoutAttendanceQRSessionsInput = {
@@ -1854,8 +1854,8 @@ export type UserCreateWithoutAttendanceQRSessionsInput = {
   feedbacks?: Prisma.FeedbackCreateNestedManyWithoutUserInput
   tickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
   assignedTickets?: Prisma.SupportTicketCreateNestedManyWithoutAssigneeInput
-  labGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
   studentLabGroups?: Prisma.StudentLabGroupCreateNestedManyWithoutStudentInput
+  createdLabGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
 }
 
 export type UserUncheckedCreateWithoutAttendanceQRSessionsInput = {
@@ -1885,8 +1885,8 @@ export type UserUncheckedCreateWithoutAttendanceQRSessionsInput = {
   feedbacks?: Prisma.FeedbackUncheckedCreateNestedManyWithoutUserInput
   tickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
   assignedTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutAssigneeInput
-  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
   studentLabGroups?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutStudentInput
+  createdLabGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
 }
 
 export type UserCreateOrConnectWithoutAttendanceQRSessionsInput = {
@@ -1932,8 +1932,8 @@ export type UserUpdateWithoutAttendanceQRSessionsInput = {
   feedbacks?: Prisma.FeedbackUpdateManyWithoutUserNestedInput
   tickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
   assignedTickets?: Prisma.SupportTicketUpdateManyWithoutAssigneeNestedInput
-  labGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
   studentLabGroups?: Prisma.StudentLabGroupUpdateManyWithoutStudentNestedInput
+  createdLabGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAttendanceQRSessionsInput = {
@@ -1963,8 +1963,8 @@ export type UserUncheckedUpdateWithoutAttendanceQRSessionsInput = {
   feedbacks?: Prisma.FeedbackUncheckedUpdateManyWithoutUserNestedInput
   tickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
   assignedTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutAssigneeNestedInput
-  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
   studentLabGroups?: Prisma.StudentLabGroupUncheckedUpdateManyWithoutStudentNestedInput
+  createdLabGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserCreateWithoutAttendancesInput = {
@@ -1994,8 +1994,8 @@ export type UserCreateWithoutAttendancesInput = {
   feedbacks?: Prisma.FeedbackCreateNestedManyWithoutUserInput
   tickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
   assignedTickets?: Prisma.SupportTicketCreateNestedManyWithoutAssigneeInput
-  labGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
   studentLabGroups?: Prisma.StudentLabGroupCreateNestedManyWithoutStudentInput
+  createdLabGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
 }
 
 export type UserUncheckedCreateWithoutAttendancesInput = {
@@ -2025,8 +2025,8 @@ export type UserUncheckedCreateWithoutAttendancesInput = {
   feedbacks?: Prisma.FeedbackUncheckedCreateNestedManyWithoutUserInput
   tickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
   assignedTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutAssigneeInput
-  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
   studentLabGroups?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutStudentInput
+  createdLabGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
 }
 
 export type UserCreateOrConnectWithoutAttendancesInput = {
@@ -2072,8 +2072,8 @@ export type UserUpdateWithoutAttendancesInput = {
   feedbacks?: Prisma.FeedbackUpdateManyWithoutUserNestedInput
   tickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
   assignedTickets?: Prisma.SupportTicketUpdateManyWithoutAssigneeNestedInput
-  labGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
   studentLabGroups?: Prisma.StudentLabGroupUpdateManyWithoutStudentNestedInput
+  createdLabGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAttendancesInput = {
@@ -2103,8 +2103,8 @@ export type UserUncheckedUpdateWithoutAttendancesInput = {
   feedbacks?: Prisma.FeedbackUncheckedUpdateManyWithoutUserNestedInput
   tickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
   assignedTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutAssigneeNestedInput
-  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
   studentLabGroups?: Prisma.StudentLabGroupUncheckedUpdateManyWithoutStudentNestedInput
+  createdLabGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserCreateWithoutAttendanceSummaryInput = {
@@ -2134,8 +2134,8 @@ export type UserCreateWithoutAttendanceSummaryInput = {
   feedbacks?: Prisma.FeedbackCreateNestedManyWithoutUserInput
   tickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
   assignedTickets?: Prisma.SupportTicketCreateNestedManyWithoutAssigneeInput
-  labGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
   studentLabGroups?: Prisma.StudentLabGroupCreateNestedManyWithoutStudentInput
+  createdLabGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
 }
 
 export type UserUncheckedCreateWithoutAttendanceSummaryInput = {
@@ -2165,8 +2165,8 @@ export type UserUncheckedCreateWithoutAttendanceSummaryInput = {
   feedbacks?: Prisma.FeedbackUncheckedCreateNestedManyWithoutUserInput
   tickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
   assignedTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutAssigneeInput
-  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
   studentLabGroups?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutStudentInput
+  createdLabGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
 }
 
 export type UserCreateOrConnectWithoutAttendanceSummaryInput = {
@@ -2212,8 +2212,8 @@ export type UserUpdateWithoutAttendanceSummaryInput = {
   feedbacks?: Prisma.FeedbackUpdateManyWithoutUserNestedInput
   tickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
   assignedTickets?: Prisma.SupportTicketUpdateManyWithoutAssigneeNestedInput
-  labGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
   studentLabGroups?: Prisma.StudentLabGroupUpdateManyWithoutStudentNestedInput
+  createdLabGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAttendanceSummaryInput = {
@@ -2243,8 +2243,8 @@ export type UserUncheckedUpdateWithoutAttendanceSummaryInput = {
   feedbacks?: Prisma.FeedbackUncheckedUpdateManyWithoutUserNestedInput
   tickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
   assignedTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutAssigneeNestedInput
-  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
   studentLabGroups?: Prisma.StudentLabGroupUncheckedUpdateManyWithoutStudentNestedInput
+  createdLabGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserCreateWithoutStudentProfileInput = {
@@ -2274,8 +2274,8 @@ export type UserCreateWithoutStudentProfileInput = {
   feedbacks?: Prisma.FeedbackCreateNestedManyWithoutUserInput
   tickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
   assignedTickets?: Prisma.SupportTicketCreateNestedManyWithoutAssigneeInput
-  labGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
   studentLabGroups?: Prisma.StudentLabGroupCreateNestedManyWithoutStudentInput
+  createdLabGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
 }
 
 export type UserUncheckedCreateWithoutStudentProfileInput = {
@@ -2305,8 +2305,8 @@ export type UserUncheckedCreateWithoutStudentProfileInput = {
   feedbacks?: Prisma.FeedbackUncheckedCreateNestedManyWithoutUserInput
   tickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
   assignedTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutAssigneeInput
-  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
   studentLabGroups?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutStudentInput
+  createdLabGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
 }
 
 export type UserCreateOrConnectWithoutStudentProfileInput = {
@@ -2352,8 +2352,8 @@ export type UserUpdateWithoutStudentProfileInput = {
   feedbacks?: Prisma.FeedbackUpdateManyWithoutUserNestedInput
   tickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
   assignedTickets?: Prisma.SupportTicketUpdateManyWithoutAssigneeNestedInput
-  labGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
   studentLabGroups?: Prisma.StudentLabGroupUpdateManyWithoutStudentNestedInput
+  createdLabGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStudentProfileInput = {
@@ -2383,8 +2383,8 @@ export type UserUncheckedUpdateWithoutStudentProfileInput = {
   feedbacks?: Prisma.FeedbackUncheckedUpdateManyWithoutUserNestedInput
   tickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
   assignedTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutAssigneeNestedInput
-  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
   studentLabGroups?: Prisma.StudentLabGroupUncheckedUpdateManyWithoutStudentNestedInput
+  createdLabGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserCreateWithoutAlarmsInput = {
@@ -2414,8 +2414,8 @@ export type UserCreateWithoutAlarmsInput = {
   feedbacks?: Prisma.FeedbackCreateNestedManyWithoutUserInput
   tickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
   assignedTickets?: Prisma.SupportTicketCreateNestedManyWithoutAssigneeInput
-  labGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
   studentLabGroups?: Prisma.StudentLabGroupCreateNestedManyWithoutStudentInput
+  createdLabGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
 }
 
 export type UserUncheckedCreateWithoutAlarmsInput = {
@@ -2445,8 +2445,8 @@ export type UserUncheckedCreateWithoutAlarmsInput = {
   feedbacks?: Prisma.FeedbackUncheckedCreateNestedManyWithoutUserInput
   tickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
   assignedTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutAssigneeInput
-  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
   studentLabGroups?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutStudentInput
+  createdLabGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
 }
 
 export type UserCreateOrConnectWithoutAlarmsInput = {
@@ -2492,8 +2492,8 @@ export type UserUpdateWithoutAlarmsInput = {
   feedbacks?: Prisma.FeedbackUpdateManyWithoutUserNestedInput
   tickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
   assignedTickets?: Prisma.SupportTicketUpdateManyWithoutAssigneeNestedInput
-  labGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
   studentLabGroups?: Prisma.StudentLabGroupUpdateManyWithoutStudentNestedInput
+  createdLabGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAlarmsInput = {
@@ -2523,11 +2523,11 @@ export type UserUncheckedUpdateWithoutAlarmsInput = {
   feedbacks?: Prisma.FeedbackUncheckedUpdateManyWithoutUserNestedInput
   tickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
   assignedTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutAssigneeNestedInput
-  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
   studentLabGroups?: Prisma.StudentLabGroupUncheckedUpdateManyWithoutStudentNestedInput
+  createdLabGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
 }
 
-export type UserCreateWithoutLabGroupsInput = {
+export type UserCreateWithoutCreatedLabGroupsInput = {
   id: string
   name: string
   email: string
@@ -2558,7 +2558,7 @@ export type UserCreateWithoutLabGroupsInput = {
   studentLabGroups?: Prisma.StudentLabGroupCreateNestedManyWithoutStudentInput
 }
 
-export type UserUncheckedCreateWithoutLabGroupsInput = {
+export type UserUncheckedCreateWithoutCreatedLabGroupsInput = {
   id: string
   name: string
   email: string
@@ -2589,23 +2589,23 @@ export type UserUncheckedCreateWithoutLabGroupsInput = {
   studentLabGroups?: Prisma.StudentLabGroupUncheckedCreateNestedManyWithoutStudentInput
 }
 
-export type UserCreateOrConnectWithoutLabGroupsInput = {
+export type UserCreateOrConnectWithoutCreatedLabGroupsInput = {
   where: Prisma.UserWhereUniqueInput
-  create: Prisma.XOR<Prisma.UserCreateWithoutLabGroupsInput, Prisma.UserUncheckedCreateWithoutLabGroupsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCreatedLabGroupsInput, Prisma.UserUncheckedCreateWithoutCreatedLabGroupsInput>
 }
 
-export type UserUpsertWithoutLabGroupsInput = {
-  update: Prisma.XOR<Prisma.UserUpdateWithoutLabGroupsInput, Prisma.UserUncheckedUpdateWithoutLabGroupsInput>
-  create: Prisma.XOR<Prisma.UserCreateWithoutLabGroupsInput, Prisma.UserUncheckedCreateWithoutLabGroupsInput>
+export type UserUpsertWithoutCreatedLabGroupsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCreatedLabGroupsInput, Prisma.UserUncheckedUpdateWithoutCreatedLabGroupsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCreatedLabGroupsInput, Prisma.UserUncheckedCreateWithoutCreatedLabGroupsInput>
   where?: Prisma.UserWhereInput
 }
 
-export type UserUpdateToOneWithWhereWithoutLabGroupsInput = {
+export type UserUpdateToOneWithWhereWithoutCreatedLabGroupsInput = {
   where?: Prisma.UserWhereInput
-  data: Prisma.XOR<Prisma.UserUpdateWithoutLabGroupsInput, Prisma.UserUncheckedUpdateWithoutLabGroupsInput>
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCreatedLabGroupsInput, Prisma.UserUncheckedUpdateWithoutCreatedLabGroupsInput>
 }
 
-export type UserUpdateWithoutLabGroupsInput = {
+export type UserUpdateWithoutCreatedLabGroupsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2636,7 +2636,7 @@ export type UserUpdateWithoutLabGroupsInput = {
   studentLabGroups?: Prisma.StudentLabGroupUpdateManyWithoutStudentNestedInput
 }
 
-export type UserUncheckedUpdateWithoutLabGroupsInput = {
+export type UserUncheckedUpdateWithoutCreatedLabGroupsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.StringFieldUpdateOperationsInput | string
@@ -2695,7 +2695,7 @@ export type UserCreateWithoutStudentLabGroupsInput = {
   feedbacks?: Prisma.FeedbackCreateNestedManyWithoutUserInput
   tickets?: Prisma.SupportTicketCreateNestedManyWithoutUserInput
   assignedTickets?: Prisma.SupportTicketCreateNestedManyWithoutAssigneeInput
-  labGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
+  createdLabGroups?: Prisma.LabGroupCreateNestedManyWithoutCreatorInput
 }
 
 export type UserUncheckedCreateWithoutStudentLabGroupsInput = {
@@ -2726,7 +2726,7 @@ export type UserUncheckedCreateWithoutStudentLabGroupsInput = {
   feedbacks?: Prisma.FeedbackUncheckedCreateNestedManyWithoutUserInput
   tickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutUserInput
   assignedTickets?: Prisma.SupportTicketUncheckedCreateNestedManyWithoutAssigneeInput
-  labGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
+  createdLabGroups?: Prisma.LabGroupUncheckedCreateNestedManyWithoutCreatorInput
 }
 
 export type UserCreateOrConnectWithoutStudentLabGroupsInput = {
@@ -2773,7 +2773,7 @@ export type UserUpdateWithoutStudentLabGroupsInput = {
   feedbacks?: Prisma.FeedbackUpdateManyWithoutUserNestedInput
   tickets?: Prisma.SupportTicketUpdateManyWithoutUserNestedInput
   assignedTickets?: Prisma.SupportTicketUpdateManyWithoutAssigneeNestedInput
-  labGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
+  createdLabGroups?: Prisma.LabGroupUpdateManyWithoutCreatorNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStudentLabGroupsInput = {
@@ -2804,7 +2804,7 @@ export type UserUncheckedUpdateWithoutStudentLabGroupsInput = {
   feedbacks?: Prisma.FeedbackUncheckedUpdateManyWithoutUserNestedInput
   tickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutUserNestedInput
   assignedTickets?: Prisma.SupportTicketUncheckedUpdateManyWithoutAssigneeNestedInput
-  labGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
+  createdLabGroups?: Prisma.LabGroupUncheckedUpdateManyWithoutCreatorNestedInput
 }
 
 
@@ -2824,8 +2824,8 @@ export type UserCountOutputType = {
   feedbacks: number
   tickets: number
   assignedTickets: number
-  labGroups: number
   studentLabGroups: number
+  createdLabGroups: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2840,8 +2840,8 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   feedbacks?: boolean | UserCountOutputTypeCountFeedbacksArgs
   tickets?: boolean | UserCountOutputTypeCountTicketsArgs
   assignedTickets?: boolean | UserCountOutputTypeCountAssignedTicketsArgs
-  labGroups?: boolean | UserCountOutputTypeCountLabGroupsArgs
   studentLabGroups?: boolean | UserCountOutputTypeCountStudentLabGroupsArgs
+  createdLabGroups?: boolean | UserCountOutputTypeCountCreatedLabGroupsArgs
 }
 
 /**
@@ -2934,15 +2934,15 @@ export type UserCountOutputTypeCountAssignedTicketsArgs<ExtArgs extends runtime.
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountLabGroupsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.LabGroupWhereInput
+export type UserCountOutputTypeCountStudentLabGroupsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.StudentLabGroupWhereInput
 }
 
 /**
  * UserCountOutputType without action
  */
-export type UserCountOutputTypeCountStudentLabGroupsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.StudentLabGroupWhereInput
+export type UserCountOutputTypeCountCreatedLabGroupsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LabGroupWhereInput
 }
 
 
@@ -2974,8 +2974,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   feedbacks?: boolean | Prisma.User$feedbacksArgs<ExtArgs>
   tickets?: boolean | Prisma.User$ticketsArgs<ExtArgs>
   assignedTickets?: boolean | Prisma.User$assignedTicketsArgs<ExtArgs>
-  labGroups?: boolean | Prisma.User$labGroupsArgs<ExtArgs>
   studentLabGroups?: boolean | Prisma.User$studentLabGroupsArgs<ExtArgs>
+  createdLabGroups?: boolean | Prisma.User$createdLabGroupsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -3047,8 +3047,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   feedbacks?: boolean | Prisma.User$feedbacksArgs<ExtArgs>
   tickets?: boolean | Prisma.User$ticketsArgs<ExtArgs>
   assignedTickets?: boolean | Prisma.User$assignedTicketsArgs<ExtArgs>
-  labGroups?: boolean | Prisma.User$labGroupsArgs<ExtArgs>
   studentLabGroups?: boolean | Prisma.User$studentLabGroupsArgs<ExtArgs>
+  createdLabGroups?: boolean | Prisma.User$createdLabGroupsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -3069,8 +3069,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     feedbacks: Prisma.$FeedbackPayload<ExtArgs>[]
     tickets: Prisma.$SupportTicketPayload<ExtArgs>[]
     assignedTickets: Prisma.$SupportTicketPayload<ExtArgs>[]
-    labGroups: Prisma.$LabGroupPayload<ExtArgs>[]
     studentLabGroups: Prisma.$StudentLabGroupPayload<ExtArgs>[]
+    createdLabGroups: Prisma.$LabGroupPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -3494,8 +3494,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   feedbacks<T extends Prisma.User$feedbacksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$feedbacksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FeedbackPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   tickets<T extends Prisma.User$ticketsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$ticketsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SupportTicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   assignedTickets<T extends Prisma.User$assignedTicketsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$assignedTicketsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SupportTicketPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  labGroups<T extends Prisma.User$labGroupsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$labGroupsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LabGroupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   studentLabGroups<T extends Prisma.User$studentLabGroupsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$studentLabGroupsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StudentLabGroupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  createdLabGroups<T extends Prisma.User$createdLabGroupsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$createdLabGroupsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LabGroupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4211,30 +4211,6 @@ export type User$assignedTicketsArgs<ExtArgs extends runtime.Types.Extensions.In
 }
 
 /**
- * User.labGroups
- */
-export type User$labGroupsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the LabGroup
-   */
-  select?: Prisma.LabGroupSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the LabGroup
-   */
-  omit?: Prisma.LabGroupOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.LabGroupInclude<ExtArgs> | null
-  where?: Prisma.LabGroupWhereInput
-  orderBy?: Prisma.LabGroupOrderByWithRelationInput | Prisma.LabGroupOrderByWithRelationInput[]
-  cursor?: Prisma.LabGroupWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.LabGroupScalarFieldEnum | Prisma.LabGroupScalarFieldEnum[]
-}
-
-/**
  * User.studentLabGroups
  */
 export type User$studentLabGroupsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -4256,6 +4232,30 @@ export type User$studentLabGroupsArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.StudentLabGroupScalarFieldEnum | Prisma.StudentLabGroupScalarFieldEnum[]
+}
+
+/**
+ * User.createdLabGroups
+ */
+export type User$createdLabGroupsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LabGroup
+   */
+  select?: Prisma.LabGroupSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LabGroup
+   */
+  omit?: Prisma.LabGroupOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LabGroupInclude<ExtArgs> | null
+  where?: Prisma.LabGroupWhereInput
+  orderBy?: Prisma.LabGroupOrderByWithRelationInput | Prisma.LabGroupOrderByWithRelationInput[]
+  cursor?: Prisma.LabGroupWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LabGroupScalarFieldEnum | Prisma.LabGroupScalarFieldEnum[]
 }
 
 /**

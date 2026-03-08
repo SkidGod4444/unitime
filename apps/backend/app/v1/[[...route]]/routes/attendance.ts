@@ -34,8 +34,8 @@ attendance.post("/qr/session/create", async (c) => {
   // Optional lab-group validation
   if (labGroupId) {
     const group = await prisma.labGroup.findUnique({ where: { id: labGroupId } });
-    if (!group || group.courseId !== courseId) {
-      return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT, "Invalid lab group for this course");
+    if (!group) {
+      return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT, "Invalid lab group");
     }
   }
 
@@ -339,7 +339,7 @@ attendance.post("/checkin", async (c) => {
     // If session targets a lab group, verify student's mapping
     if (session.labGroupId) {
       const mapping = await prisma.studentLabGroup.findUnique({
-        where: { studentId_courseId: { studentId: requesterId, courseId: session.courseId } },
+        where: { studentId: requesterId },
       });
       if (!mapping || mapping.labGroupId !== session.labGroupId) {
         return c.json({ success: false, message: "You are not in the targeted lab group for this session" }, 403);
@@ -391,7 +391,7 @@ attendance.post("/checkin", async (c) => {
         const courseId = session.courseId;
         // Determine student's lab group (if any) for this course
         const myGroup = await prisma.studentLabGroup.findUnique({
-          where: { studentId_courseId: { studentId: requesterId, courseId } },
+          where: { studentId: requesterId },
           select: { labGroupId: true },
         });
 
@@ -494,7 +494,7 @@ attendance.get("/summary/:userId", async (c) => {
 
         // Determine student's lab group for this course (if any)
         const myGroup = await prisma.studentLabGroup.findUnique({
-          where: { studentId_courseId: { studentId: userId, courseId } },
+          where: { studentId: userId },
           select: { labGroupId: true },
         });
 
