@@ -26,7 +26,6 @@ orgs.get("/all", async (c) => {
 });
 
 orgs.post("/create", async (c) => {
-  const requesterId = c.get("requesterId") as string | undefined;
   const { departmentName, courseName, semester, section } = await c.req.json();
   const newOrg = await prisma.organization.create({
     data: {
@@ -38,17 +37,6 @@ orgs.post("/create", async (c) => {
   });
   if (!newOrg) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
-  }
-
-  // Auto-seed default lab groups P-1 and P-2 for every new org
-  if (requesterId) {
-    await prisma.labGroup.createMany({
-      data: [
-        { name: "P-1", organizationId: newOrg.id, createdBy: requesterId },
-        { name: "P-2", organizationId: newOrg.id, createdBy: requesterId },
-      ],
-      skipDuplicates: true,
-    });
   }
 
   await invalidateCache("orgs:all", `labGroups:org:${newOrg.id}`);
