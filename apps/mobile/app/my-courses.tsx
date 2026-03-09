@@ -1,7 +1,7 @@
 import { useAuth } from "@/contexts/auth.cntxt";
 import { useStore } from "@/contexts/store.cntxt";
 import { apiFetch } from "@/lib/api";
-import { useCoursesStore, useOrgsStore, useProfilesStore } from "@/lib/store";
+import { useAttendanceStore, useCoursesStore, useOrgsStore, useProfilesStore } from "@/lib/store";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -43,6 +43,7 @@ export default function MyCoursesScreen() {
   const { orgs } = useOrgsStore();
   const { profiles } = useProfilesStore();
   const { courses, loading, fetchCourses } = useCoursesStore();
+  const { summary } = useAttendanceStore();
   const [refreshing, setRefreshing] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const userProfile = profiles.find((p) => p.userId === loggedInUser?.id);
@@ -254,11 +255,11 @@ export default function MyCoursesScreen() {
           </View>
         </View>
 
-        {/* Actions */}
-        <View className="flex-row gap-3 items-center">
+        {/* Actions / Attendance Bar */}
+        <View className="flex-col gap-3">
           {userEnrollment ? (
             userEnrollment.status === "REJECTED" ? (
-              <View className="flex-1 py-3.5 rounded-xl border border-red-200 bg-red-50 flex-row justify-center items-center gap-2">
+              <View className="w-full py-3.5 rounded-xl border border-red-200 bg-red-50 flex-row justify-center items-center gap-2">
                 <Ionicons
                   name="close-circle-outline"
                   size={18}
@@ -268,33 +269,66 @@ export default function MyCoursesScreen() {
                   Enrollment Rejected
                 </Text>
               </View>
-            ) : (
+            ) : userEnrollment.status === "PENDING" ? (
               <TouchableOpacity
                 onPress={() => handleDeEnroll(item.id, userEnrollment.status)}
                 disabled={actionLoadingId === item.id}
-                className="flex-1 py-3.5 rounded-xl border border-red-200 bg-red-50 flex-row justify-center items-center gap-2"
+                className="w-full py-3.5 rounded-xl border border-amber-200 bg-amber-50 flex-row justify-center items-center gap-2"
               >
                 {actionLoadingId === item.id ? (
-                  <ActivityIndicator color="#ef4444" size="small" />
+                  <ActivityIndicator color="#d97706" size="small" />
                 ) : (
                   <>
                     <Ionicons
-                      name={
-                        userEnrollment.status === "PENDING"
-                          ? "close-circle-outline"
-                          : "log-out-outline"
-                      }
+                      name="close-circle-outline"
                       size={18}
-                      color="#ef4444"
+                      color="#d97706"
                     />
-                    <Text className="text-red-600 font-bold">
-                      {userEnrollment.status === "PENDING"
-                        ? "Cancel Request"
-                        : "Opt-Out"}
+                    <Text className="text-amber-700 font-bold">
+                      Cancel Request
                     </Text>
                   </>
                 )}
               </TouchableOpacity>
+            ) : (
+              /* Approved User - Show Attendance Bar */
+              <View className="w-full pt-1">
+                {(() => {
+                  const summaryItem = summary.find(
+                    (s) => s.courseId === item.id,
+                  );
+                  if (!summaryItem) return null;
+
+                  return (
+                    <View className="bg-gray-50 dark:bg-zinc-800 p-3 rounded-2xl border border-gray-100 dark:border-zinc-700">
+                      <View className="flex-row justify-between items-center mb-2">
+                        <Text className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">
+                          Total Attendance
+                        </Text>
+                        <Text
+                          className={`text-xs font-bold ${summaryItem.total === 0 ? "text-gray-400" : summaryItem.percentage >= 75 ? "text-green-600" : "text-red-500"}`}
+                        >
+                          {summaryItem.total === 0
+                            ? 0
+                            : summaryItem.percentage}
+                          %
+                        </Text>
+                      </View>
+                      <View className="h-1.5 bg-gray-200 dark:bg-zinc-700 rounded-full overflow-hidden mb-1.5">
+                        <View
+                          className={`h-full rounded-full ${summaryItem.total === 0 ? "bg-gray-400" : summaryItem.percentage >= 75 ? "bg-green-500" : "bg-red-500"}`}
+                          style={{
+                            width: `${summaryItem.total === 0 ? 0 : summaryItem.percentage}%`,
+                          }}
+                        />
+                      </View>
+                      <Text className="text-[10px] text-gray-400 dark:text-zinc-500 text-right">
+                        {summaryItem.attended}/{summaryItem.total} Classes
+                      </Text>
+                    </View>
+                  );
+                })()}
+              </View>
             )
           ) : isEnrollmentOpen ? (
             <TouchableOpacity

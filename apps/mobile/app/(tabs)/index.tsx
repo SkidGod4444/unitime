@@ -2,26 +2,26 @@ import { useAuth } from "@/contexts/auth.cntxt";
 import { useLocalStore } from "@/contexts/localstore.cntxt";
 import { useRefresh } from "@/hooks/use-refresh";
 import {
-  useAttendanceStore,
-  useFeedbacksStore,
-  useTimetableStore,
+    useAttendanceStore,
+    useFeedbacksStore,
+    useTimetableStore,
 } from "@/lib/store";
 import { Ionicons } from "@expo/vector-icons";
 import * as LocalAuthentication from "expo-local-authentication";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  Alert,
-  Image,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  RefreshControl,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    Image,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    RefreshControl,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -266,10 +266,23 @@ export default function Index() {
                     className="flex-row items-center justify-between"
                   >
                     <View className="flex-1 mr-4">
-                      <View className="flex-row justify-between mb-1">
-                        <Text className="text-sm font-semibold text-gray-700">
-                          {item.courseName}
-                        </Text>
+                      <View className="flex-row justify-between mb-1 items-center">
+                        <View className="flex-row items-center flex-1 pr-2">
+                          <Text
+                            className="text-sm font-semibold text-gray-700 dark:text-zinc-200"
+                            numberOfLines={1}
+                            style={{ flexShrink: 1 }}
+                          >
+                            {item.courseName}
+                          </Text>
+                          {item.classType === "LAB" && (
+                            <View className="bg-purple-100 dark:bg-purple-500/20 px-1.5 py-0.5 rounded ml-2">
+                              <Text className="text-[10px] font-bold text-purple-700 dark:text-purple-400">
+                                LAB
+                              </Text>
+                            </View>
+                          )}
+                        </View>
                         <Text
                           className={`text-xs font-bold ${item.total === 0 ? "text-gray-400" : item.percentage >= 75 ? "text-green-600" : "text-red-500"}`}
                         >

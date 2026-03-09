@@ -1,20 +1,24 @@
 import { useAuth } from "@/contexts/auth.cntxt";
 import { useThemeStore } from "@/lib/store";
 import { isInstitutionalEmail } from "@/utils/email.validator";
+import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
-import { Linking, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Image, Linking, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Auth() {
   const { theme } = useThemeStore();
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  
   const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [password, setPassword] = useState("");
+  
   const { register, login } = useAuth();
+  const isDark = theme === "dark";
 
   const handleLogin = async () => {
     try {
@@ -32,13 +36,14 @@ export default function Auth() {
     if (!isInstitutionalEmail(email)) {
       alert("Please use your institutional email address.");
     }
-    if (!name.trim()) {
+    const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
+    if (!isLogin && !fullName) {
       alert("Please enter your name.");
       return;
     }
 
     try {
-      await register(email, password, name);
+      await register(email, password, fullName);
     } catch (err) {
       console.error("Signup failed:", err);
       alert("Signup failed. Please check your details and try again.");
@@ -46,154 +51,152 @@ export default function Auth() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white dark:bg-zinc-900">
-      <StatusBar style={theme === "dark" ? "light" : "dark"} />
+    <View className="flex-1 bg-indigo-600 dark:bg-zinc-950">
+      <StatusBar style="light" />
+      
       <KeyboardAwareScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         enableOnAndroid={true}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="interactive"
         showsVerticalScrollIndicator={false}
-        className="flex-1"
+        bounces={false}
       >
-        {/* Hero Section */}
-        <View className="flex-1 justify-center items-center px-8 pt-14 pb-6">
-          {/* Decorative Pills */}
-          <View className="flex-row items-center gap-3 mb-6">
-            <View className="bg-blue-50 rounded-full px-4 py-2 border border-blue-100">
-              <Text className="text-blue-600 font-lato-bold text-xs">
-                Attendance
-              </Text>
-            </View>
-            <View className="bg-purple-50 rounded-full px-4 py-2 border border-purple-100">
-              <Text className="text-purple-600 font-lato-bold text-xs">
-                Calendar
-              </Text>
-            </View>
-            <View className="bg-emerald-50 rounded-full px-4 py-2 border border-emerald-100">
-              <Text className="text-emerald-600 font-lato-bold text-xs">
-                Classes
-              </Text>
-            </View>
+        {/* Top Header Background Area */}
+        <View className="pt-24 pb-20 overflow-hidden relative" style={{ minHeight: 280 }}>
+          {/* Decorative Blobs */}
+          <View className="absolute top-10 -left-16 w-56 h-56 bg-indigo-500/40 dark:bg-indigo-900/40 rounded-full opacity-90" />
+          <View className="absolute -bottom-12 -right-12 w-64 h-64 bg-purple-500/30 dark:bg-purple-900/30 rounded-full opacity-90" />
+          
+          <View className="flex-1 justify-center items-center px-6 relative z-10">
+            <Text className="text-white text-[38px] font-bold text-center tracking-tight leading-tight">
+              {isLogin ? "Welcome\nback" : "Create an\naccount"}
+            </Text>
           </View>
-
-          {/* Tagline */}
-          <Text className="text-base text-center font-lora text-gray-400 dark:text-zinc-400 leading-6 mx-auto">
-            Effortless class management, seamlessly organized—with UNiTIME.
-          </Text>
         </View>
 
-        {/* Form Card */}
-        <View className="mx-5 mb-10 bg-gray-50/80 dark:bg-zinc-800/60 rounded-3xl p-4 shadow-2xl shadow-black/10 border border-gray-200/90 dark:border-zinc-700/80">
-          {!isLogin && (
-            <View className="mb-5">
-              <Text className="text-gray-800 dark:text-zinc-100 font-lora font-bold mb-2 text-base tracking-wide">
-                Name
-              </Text>
-              <TextInput
-                className="bg-white/90 dark:bg-zinc-800/90 text-black dark:text-zinc-100 px-4 py-4 rounded-xl font-lato-regular text-base border border-blue-300 dark:border-zinc-700"
-                placeholder="Student"
-                placeholderTextColor="#b0b0b0"
-                autoCapitalize="none"
-                value={name}
-                onChangeText={setName}
-              />
-            </View>
-          )}
-          {/* Email */}
-          <View className="mb-5">
-            <Text className="text-gray-800 dark:text-zinc-100 font-lora font-bold mb-2 text-base tracking-wide">
-              Email
-            </Text>
+        {/* Bottom Form Card */}
+        <View className="flex-1 bg-white dark:bg-[#09090B] -mt-10 rounded-t-[40px] px-6 pt-10 pb-10 shadow-2xl shadow-indigo-500/10">
+          
+          <View className="items-center mb-10">
+            <Image 
+              source={require("@/assets/icons/logo.png")} 
+              className="w-16 h-16"
+              resizeMode="contain"
+            />
+          </View>
+
+          {/* Form Fields */}
+          <View className="gap-y-4">
+            {!isLogin && (
+              <View className="flex-row gap-x-3">
+                <TextInput
+                  className="flex-1 bg-slate-50 dark:bg-zinc-900/50 rounded-2xl px-5 py-4 border border-slate-200/60 dark:border-zinc-800/80 text-[15px] font-medium text-slate-900 dark:text-white"
+                  placeholder="First Name"
+                  placeholderTextColor={isDark ? "#71717A" : "#94A3B8"}
+                  autoCapitalize="words"
+                  value={firstName}
+                  onChangeText={setFirstName}
+                />
+                <TextInput
+                  className="flex-1 bg-slate-50 dark:bg-zinc-900/50 rounded-2xl px-5 py-4 border border-slate-200/60 dark:border-zinc-800/80 text-[15px] font-medium text-slate-900 dark:text-white"
+                  placeholder="Last Name"
+                  placeholderTextColor={isDark ? "#71717A" : "#94A3B8"}
+                  autoCapitalize="words"
+                  value={lastName}
+                  onChangeText={setLastName}
+                />
+              </View>
+            )}
+
             <TextInput
-              className="bg-white/90 dark:bg-zinc-800/90 text-black dark:text-zinc-100 px-4 py-4 rounded-xl font-lato-regular text-base border border-blue-300 dark:border-zinc-700"
-              placeholder="student@university.edu"
-              placeholderTextColor="#b0b0b0"
+              className="bg-slate-50 dark:bg-zinc-900/50 rounded-2xl px-5 py-4 border border-slate-200/60 dark:border-zinc-800/80 text-[15px] font-medium text-slate-900 dark:text-white"
+              placeholder="Email"
+              placeholderTextColor={isDark ? "#71717A" : "#94A3B8"}
               keyboardType="email-address"
               autoCapitalize="none"
               value={email}
               onChangeText={setEmail}
             />
-          </View>
 
-          {/* Password */}
-          <View className="mb-6">
-            <Text className="text-gray-800 dark:text-zinc-100 font-lora font-bold mb-2 text-base tracking-wide">
-              Password
-            </Text>
-            <View className="flex-row items-center bg-white/90 dark:bg-zinc-800/90 rounded-xl border border-blue-300 dark:border-zinc-700">
+            <View className="flex-row gap-x-3">
               <TextInput
-                className="flex-1 text-black dark:text-zinc-100 px-4 py-4 font-lato-regular text-base"
-                placeholder="••••••••"
-                placeholderTextColor="#b0b0b0"
+                className="flex-1 bg-slate-50 dark:bg-zinc-900/50 rounded-2xl px-5 py-4 border border-slate-200/60 dark:border-zinc-800/80 text-[15px] font-medium text-slate-900 dark:text-white"
+                placeholder="Password"
+                placeholderTextColor={isDark ? "#71717A" : "#94A3B8"}
                 secureTextEntry={!showPassword}
                 value={password}
                 onChangeText={setPassword}
               />
               <TouchableOpacity
+                activeOpacity={0.8}
                 onPress={() => setShowPassword(!showPassword)}
-                className="px-4 py-4"
+                className="bg-slate-50 dark:bg-zinc-900/50 rounded-2xl border border-slate-200/60 dark:border-zinc-800/80 w-[60px] items-center justify-center"
               >
-                <Text className="text-gray-500 dark:text-zinc-400 text-sm font-lato-bold">
-                  {showPassword ? "Hide" : "Show"}
-                </Text>
+                <Ionicons
+                  name={showPassword ? "eye" : "eye-off"}
+                  size={20}
+                  color={isDark ? "#71717A" : "#94A3B8"}
+                />
               </TouchableOpacity>
             </View>
+            
             {isLogin && (
-              <TouchableOpacity className="self-end mt-2">
-                <Text className="text-blue-600 font-lato-bold text-sm">
-                  Forgot Password?
+              <TouchableOpacity className="self-end mt-1 px-1">
+                <Text className="text-indigo-600 dark:text-indigo-400 font-bold text-[13px]">
+                  Forgot password?
                 </Text>
               </TouchableOpacity>
             )}
           </View>
 
           {/* Submit Button */}
-          <TouchableOpacity
-            activeOpacity={0.85}
-            className="mb-5 rounded-xl py-4 bg-blue-600 shadow-lg shadow-blue-500/20"
-            onPress={isLogin ? handleLogin : handleSignUp}
-          >
-            <View className="flex-row items-center justify-center">
-              <Text className="font-lato-bold text-lg text-center text-white">
-                {isLogin ? "Sign In" : "Sign Up"}
+          <View className="mt-8 mb-6">
+            <TouchableOpacity
+              activeOpacity={0.85}
+              className="bg-indigo-600 dark:bg-indigo-500 rounded-full py-[18px] items-center justify-center shadow-[0_8px_30px_rgb(79,70,229,0.3)]"
+              onPress={isLogin ? handleLogin : handleSignUp}
+            >
+              <Text className="text-white font-bold text-[17px] tracking-wide">
+                {isLogin ? "Log in" : "Create account"}
               </Text>
-            </View>
-          </TouchableOpacity>
+            </TouchableOpacity>
+          </View>
 
-          {/* Toggle Login/Signup */}
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => setIsLogin(!isLogin)}
-          >
-            <Text className="text-blue-700 font-lato-bold text-center underline text-base">
-              {isLogin
-                ? "Don't have an account? Sign Up"
-                : "Already have an account? Sign In"}
+          {/* Terms text */}
+          <View className="items-center px-4 mb-8">
+            <Text className="text-slate-400 dark:text-zinc-500 text-[13px] text-center font-medium leading-[20px]">
+              {isLogin ? "By logging in you agree to our" : "Signing up for an account means you\nagree to the"} {" "}
+              <Text
+                className="text-slate-600 dark:text-zinc-400 font-bold underline"
+                onPress={() => Linking.openURL("https://unitime.devwtf.in/")}
+              >
+                Privacy Policy
+              </Text>
+              {" "}and{" "}
+              <Text
+                className="text-slate-600 dark:text-zinc-400 font-bold underline"
+                onPress={() => Linking.openURL("https://unitime.devwtf.in/")}
+              >
+                Terms of Service
+              </Text>.
             </Text>
-          </TouchableOpacity>
-        </View>
+          </View>
 
-        {/* Footer */}
-        <View className="flex-row items-center justify-center mb-10 px-16 mt-auto">
-          <Text className="text-gray-400 dark:text-zinc-500 font-lato-regular text-base text-center">
-            By continuing, you agree to our{" "}
-            <Text
-              className="text-gray-500 dark:text-zinc-400 font-lato-bold text-base text-center underline"
-              onPress={() => Linking.openURL("https://l.devwtf.in/unitime")}
-            >
-              Terms of Service
-            </Text>{" "}
-            and{" "}
-            <Text
-              className="text-gray-500 dark:text-zinc-400 underline font-lato-bold text-base text-center"
-              onPress={() => Linking.openURL("https://l.devwtf.in/unitime")}
-            >
-              Privacy Policy
+          {/* Bottom Switch */}
+          <View className="flex-row justify-center items-center mt-auto pb-4">
+            <Text className="text-slate-500 dark:text-zinc-400 text-[15px] font-medium">
+              {isLogin ? "Don't have an account? " : "Have an account? "}
             </Text>
-          </Text>
+            <TouchableOpacity onPress={() => setIsLogin(!isLogin)} className="px-1">
+              <Text className="text-indigo-600 dark:text-indigo-400 font-bold text-[15px] underline">
+                {isLogin ? "Sign up here" : "Log in here"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          
         </View>
       </KeyboardAwareScrollView>
-    </SafeAreaView>
+    </View>
   );
 }

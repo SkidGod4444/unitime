@@ -7,6 +7,7 @@ export type AttendanceSummary = {
   courseId: string;
   courseName: string;
   courseCode: string;
+  classType?: string;
   attended: number;
   total: number;
   percentage: number;

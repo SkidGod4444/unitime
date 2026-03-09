@@ -1,13 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  Alert,
   FlatList,
   Modal,
   ScrollView,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import Animated, { FadeInDown, Layout } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -200,7 +199,7 @@ const ClassCard = ({ session, index }: { session: any; index: number }) => {
                   {session.courseCode} • {session.type}
                 </Text>
               </View>
-              <TouchableOpacity
+{/* <TouchableOpacity
                 onPress={() => {
                   Alert.alert(
                     "Set Alarm",
@@ -220,7 +219,7 @@ const ClassCard = ({ session, index }: { session: any; index: number }) => {
                 className="w-8 h-8 rounded-full items-center justify-center bg-gray-50 dark:bg-gray-800"
               >
                 <Ionicons name="alarm-outline" size={16} color="#6b7280" />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
 
             <Text className="text-lg font-bold text-gray-900 dark:text-white mb-1">

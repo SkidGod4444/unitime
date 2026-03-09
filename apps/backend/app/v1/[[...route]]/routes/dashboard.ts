@@ -240,6 +240,7 @@ dashboard.get("/:userId/bundle", async (c) => {
               courseId,
               courseName: enrollment.course.name,
               courseCode: enrollment.course.code,
+              classType: enrollment.course.classType,
               attended: attendedSessions,
               total: totalSessions,
               percentage,
