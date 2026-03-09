@@ -138,6 +138,7 @@ export default function StudentProfileForm() {
       yearOfAdmission,
       dob,
       gender,
+      labGroupId: labGroupId || "",
     });
 
     if (!result.success) {
@@ -678,51 +679,73 @@ export default function StudentProfileForm() {
                 )}
               </View>
 
-              {/* Lab Group Dropdown (Optional but shown if available) */}
-              {availableLabGroups.length > 0 && (
-                <View>
-                  <Text className="text-xs font-bold text-gray-500 mb-2 ml-1 uppercase tracking-wide">
-                    Lab Group (Optional)
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => setShowLabGroupDropdown(!showLabGroupDropdown)}
-                    className="flex-row items-center border border-gray-200 rounded-2xl px-4 py-3.5 bg-white"
+              {/* Lab Group Dropdown */}
+              <View>
+                <Text className="text-xs font-bold text-gray-500 mb-2 ml-1 uppercase tracking-wide">
+                  Lab Group*
+                </Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    if (availableLabGroups.length > 0) {
+                      setShowLabGroupDropdown(!showLabGroupDropdown);
+                    }
+                  }}
+                  activeOpacity={availableLabGroups.length > 0 ? 0.2 : 1}
+                  className={`flex-row items-center border rounded-2xl px-4 py-3.5 ${
+                    availableLabGroups.length > 0
+                      ? fieldBorder("labGroupId")
+                      : "bg-gray-50 border-red-400 opacity-70"
+                  }`}
+                >
+                  <Ionicons
+                    name="flask-outline"
+                    size={20}
+                    color={hasError("labGroupId") || availableLabGroups.length === 0 ? "#F87171" : "#9CA3AF"}
+                    style={{ marginRight: 12 }}
+                  />
+                  <Text
+                    className={`flex-1 text-base font-semibold ${
+                      labGroupId
+                        ? "text-gray-900"
+                        : availableLabGroups.length > 0
+                          ? "text-gray-400"
+                          : "text-gray-400"
+                    }`}
                   >
-                    <Ionicons
-                      name="flask-outline"
-                      size={20}
-                      color="#9CA3AF"
-                      style={{ marginRight: 12 }}
-                    />
-                    <Text
-                      className={`flex-1 text-base font-semibold ${labGroupId ? "text-gray-900" : "text-gray-400"}`}
-                    >
-                      {labGroupId ? availableLabGroups.find(g => g.id === labGroupId)?.name : "Select your Lab Group"}
-                    </Text>
-                    <Ionicons
-                      name={showLabGroupDropdown ? "chevron-up" : "chevron-down"}
-                      size={20}
-                      color="#9CA3AF"
-                    />
-                  </TouchableOpacity>
-                  {showLabGroupDropdown && (
-                    <View className="mt-2 border border-gray-200 rounded-xl bg-white overflow-hidden">
-                      {availableLabGroups.map((g) => (
-                        <TouchableOpacity
-                          key={g.id}
-                          onPress={() => {
-                            setLabGroupId(g.id);
-                            setShowLabGroupDropdown(false);
-                          }}
-                          className="px-4 py-3 border-b border-gray-100"
-                        >
-                          <Text className="text-gray-900 font-medium">{g.name}</Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                  )}
-                </View>
-              )}
+                    {labGroupId
+                      ? availableLabGroups.find((g) => g.id === labGroupId)?.name
+                      : availableLabGroups.length > 0
+                        ? "Select your Lab Group"
+                        : "No Lab Groups available"}
+                  </Text>
+                  <Ionicons
+                    name={showLabGroupDropdown ? "chevron-up" : "chevron-down"}
+                    size={20}
+                    color="#9CA3AF"
+                  />
+                </TouchableOpacity>
+                {showLabGroupDropdown && availableLabGroups.length > 0 && (
+                  <View className="mt-2 border border-gray-200 rounded-xl bg-white overflow-hidden">
+                    {availableLabGroups.map((g) => (
+                      <TouchableOpacity
+                        key={g.id}
+                        onPress={() => {
+                          setLabGroupId(g.id);
+                          setShowLabGroupDropdown(false);
+                        }}
+                        className="px-4 py-3 border-b border-gray-100"
+                      >
+                        <Text className="text-gray-900 font-medium">{g.name}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+                {errors.labGroupId && (
+                  <Text className="text-xs text-red-500 mt-1 ml-1">
+                    {errors.labGroupId}
+                  </Text>
+                )}
+              </View>
 
               {/* Date of Birth */}
               <View>

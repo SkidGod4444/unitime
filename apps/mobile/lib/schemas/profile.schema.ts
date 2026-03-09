@@ -23,6 +23,7 @@ export const profileSchema = z.object({
   gender: z.enum(["MALE", "FEMALE", "OTHER"], {
     message: "Gender is required",
   }),
+  labGroupId: z.string().min(1, "Lab Group is required"),
   yearOfAdmission: z
     .string()
     .min(1, "Year of admission is required")

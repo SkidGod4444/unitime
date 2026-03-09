@@ -32,6 +32,7 @@ type UsersState = {
   setUsers: (users: UserT[]) => void;
   loading: boolean;
   fetchUsers: () => Promise<void>;
+  toggleBan: (id: string, banned: boolean, banReason?: string) => Promise<void>;
 };
 
 export const useUsersStore = create<UsersState>()(
@@ -69,6 +70,26 @@ export const useUsersStore = create<UsersState>()(
         set((state) => ({
           users: state.users.filter((user) => user.id !== userId),
         })),
+      toggleBan: async (id, banned, banReason) => {
+        try {
+          const res = await apiFetch(`/admin/users/${id}/ban`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ banned, banReason }),
+          });
+          if (!res.ok) {
+            throw new Error("Failed to update ban status");
+          }
+          set((state) => ({
+            users: state.users.map((u) =>
+              u.id === id ? { ...u, banned, banReason } : u
+            ),
+          }));
+        } catch (error) {
+          console.error("Failed to toggle ban:", error);
+          throw error;
+        }
+      },
     }),
     {
       name: "users-store",
@@ -240,7 +261,7 @@ export * from "./timetable";
 
 type FeedbacksState = {
   myFeedbacks: FeedbackT[];
-  adminFeedbacks: Array<FeedbackT & { user?: { id: string; name: string; email: string } | null }>;
+  adminFeedbacks: (FeedbackT & { user?: { id: string; name: string; email: string } | null })[];
   loading: boolean;
   fetchMyFeedbacks: () => Promise<void>;
   createFeedback: (message: string, category?: FeedbackT["category"]) => Promise<FeedbackT | null>;
@@ -323,7 +344,7 @@ export const useFeedbacksStore = create<FeedbacksState>()(
 
 type TicketsState = {
   myTickets: SupportTicketT[];
-  adminTickets: Array<SupportTicketT & { user?: { id: string; name: string; email: string } | null }>;
+  adminTickets: (SupportTicketT & { user?: { id: string; name: string; email: string } | null })[];
   loading: boolean;
   fetchMyTickets: () => Promise<void>;
   createTicket: (title: string, description: string) => Promise<SupportTicketT | null>;

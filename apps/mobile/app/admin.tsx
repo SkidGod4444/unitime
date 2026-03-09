@@ -4,28 +4,28 @@ import { Ionicons } from "@expo/vector-icons";
 import { Stack } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  Alert,
-  FlatList,
-  Modal,
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  Switch,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    FlatList,
+    Modal,
+    Pressable,
+    RefreshControl,
+    ScrollView,
+    Switch,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../contexts/auth.cntxt";
 import { useRefresh } from "../hooks/use-refresh";
 import {
-  useCoursesStore,
-  useFeedbacksStore,
-  useOrgsStore,
-  useProfilesStore,
-  useTicketsStore,
-  useUsersStore,
+    useCoursesStore,
+    useFeedbacksStore,
+    useOrgsStore,
+    useProfilesStore,
+    useTicketsStore,
+    useUsersStore,
 } from "../lib/store";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -142,6 +142,7 @@ const emitAdminNotification = async (
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
 
 type TabKey =
+  | "users"
   | "roles"
   | "classes"
   | "professors"
@@ -151,6 +152,7 @@ type TabKey =
   | "tickets";
 
 const TABS: { key: TabKey; label: string; icon: string }[] = [
+  { key: "users", label: "Users", icon: "people" },
   { key: "roles", label: "Roles", icon: "shield-outline" },
   { key: "classes", label: "Classes", icon: "school-outline" },
   { key: "professors", label: "Professors", icon: "person-circle-outline" },
@@ -1557,9 +1559,109 @@ function AttendanceTab() {
   );
 }
 
+// ─── Users Tab ────────────────────────────────────────────────────────────────
+
+function UsersTab() {
+  const { users, toggleBan } = useUsersStore();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredUsers = React.useMemo(() => {
+    if (!searchQuery.trim()) return users;
+    const lowerQ = searchQuery.toLowerCase();
+    return users.filter(
+      (u) =>
+        u.name?.toLowerCase().includes(lowerQ) ||
+        u.email?.toLowerCase().includes(lowerQ)
+    );
+  }, [users, searchQuery]);
+
+  const handleToggleBan = (user: any) => {
+    const isBanned = user.banned;
+    const action = isBanned ? "Unban" : "Ban";
+    Alert.alert(`${action} User`, `Are you sure you want to ${action.toLowerCase()} ${user.name}?`, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: action,
+        style: isBanned ? "default" : "destructive",
+        onPress: async () => {
+          try {
+            await toggleBan(user.id, !isBanned, isBanned ? undefined : "Banned by admin");
+            Alert.alert("Success", `User ${action.toLowerCase()}ned successfully`);
+          } catch (e: any) {
+            Alert.alert("Error", e.message || `Failed to ${action.toLowerCase()} user`);
+          }
+        },
+      },
+    ]);
+  };
+
+  return (
+    <View className="flex-1">
+      <View className="bg-white rounded-xl flex-row items-center px-4 py-2 mb-4 border border-gray-100 shadow-sm">
+        <Ionicons name="search" size={20} color="#9ca3af" />
+        <TextInput
+          className="flex-1 ml-2 text-base text-gray-800"
+          placeholder="Search by name or email..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          autoCapitalize="none"
+          autoCorrect={false}
+        />
+        {searchQuery.length > 0 && (
+          <TouchableOpacity onPress={() => setSearchQuery("")}>
+            <Ionicons name="close-circle" size={20} color="#9ca3af" />
+          </TouchableOpacity>
+        )}
+      </View>
+      <FlatList
+        data={filteredUsers}
+        keyExtractor={(u) => u.id}
+        scrollEnabled={false}
+        renderItem={({ item: user }) => (
+          <View className="bg-white rounded-2xl p-4 mb-3 border border-gray-100 shadow-sm">
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center gap-x-3 flex-1">
+                <View className="w-10 h-10 rounded-full bg-indigo-100 items-center justify-center">
+                  <Text className="text-indigo-600 font-bold text-base">
+                    {user.name?.charAt(0) || "?"}
+                  </Text>
+                </View>
+                <View className="flex-1">
+                  <Text className="text-base font-bold text-gray-900">
+                    {user.name}
+                  </Text>
+                  <Text className="text-xs text-indigo-500 mt-0.5">
+                    {user.email}
+                  </Text>
+                </View>
+              </View>
+              <View className="flex-row items-center gap-x-3">
+                <View className={`px-2 py-1 rounded border ${user.banned ? "bg-red-50 border-red-200" : "bg-green-50 border-green-200"}`}>
+                  <Text className={`text-[10px] font-bold uppercase ${user.banned ? "text-red-600" : "text-green-600"}`}>
+                    {user.banned ? "Banned" : "Active"}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => handleToggleBan(user)}
+                  className={`px-3 py-1.5 rounded-lg ${user.banned ? "bg-gray-100" : "bg-red-50"}`}
+                >
+                  <Text className={`text-xs font-bold ${user.banned ? "text-gray-700" : "text-red-600"}`}>
+                    {user.banned ? "Unban" : "Ban"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        )}
+      />
+    </View>
+  );
+}
+
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
 const TAB_ADD_LABELS: Record<TabKey, string> = {
+  users: "",
   roles: "Add User",
   classes: "Add Class",
   professors: "Add Professor",
@@ -1798,6 +1900,7 @@ export default function AdminPage() {
 
         {/* Active Tab Content */}
         <View className="px-4">
+          {activeTab === "users" && <UsersTab />}
           {activeTab === "roles" && (
             <RolesTab onAddUserPress={() => setAddUserVisible(true)} />
           )}

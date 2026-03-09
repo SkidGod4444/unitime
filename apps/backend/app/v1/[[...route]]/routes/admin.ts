@@ -1,9 +1,9 @@
 import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
+import { requireRole } from "@/middleware/check.auth";
+import type { AppEnv } from "@/types/app-env";
 import { invalidateCache } from "@unitime/cache";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
-import { requireRole } from "@/middleware/check.auth";
-import type { AppEnv } from "@/types/app-env";
 
 const admin = new Hono<AppEnv>();
 // Only ADMINs can access anything under /admin
@@ -69,6 +69,41 @@ admin.patch("/users/:id/status", async (c) => {
     });
   } catch (error) {
     console.error("Error updating user status:", error);
+    return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
+  }
+});
+
+admin.patch("/users/:id/ban", async (c) => {
+  const id = c.req.param("id");
+  let body: { banned: boolean; banReason?: string };
+
+  try {
+    body = await c.req.json();
+    if (typeof body.banned !== "boolean") {
+      return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT);
+    }
+  } catch {
+    return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT);
+  }
+
+  try {
+    const user = await prisma.user.update({
+      where: { id },
+      data: {
+        banned: body.banned,
+        banReason: body.banned ? body.banReason : null,
+      },
+    });
+
+    await invalidateCache("users:all", `user:${id}`);
+
+    return c.json({
+      success: true,
+      status_code: 200,
+      user,
+    });
+  } catch (error) {
+    console.error("Error updating user ban status:", error);
     return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
   }
 });

@@ -1,25 +1,28 @@
 import { useAuth } from "@/contexts/auth.cntxt";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { usePathname, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { BackHandler, Modal, Text, TouchableOpacity, View } from "react-native";
 
 export default function ProfileCompletionPopup() {
   const { loggedInUser } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     if (!loggedInUser) return;
     const isOnboarded = loggedInUser.isOnboarded ?? false;
 
-    if (!isOnboarded) {
+    if (!isOnboarded && pathname !== "/student-profile-form") {
       const timer = setTimeout(() => {
         setVisible(true);
       }, 1000);
       return () => clearTimeout(timer);
+    } else {
+      setVisible(false);
     }
-  }, [loggedInUser]);
+  }, [loggedInUser, pathname]);
 
   // Block Android hardware back button while popup is visible
   useEffect(() => {
@@ -29,7 +32,6 @@ export default function ProfileCompletionPopup() {
   }, [visible]);
 
   const handleCompleteNow = () => {
-    setVisible(false);
     router.push("/student-profile-form");
   };
 
