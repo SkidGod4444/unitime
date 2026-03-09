@@ -19,7 +19,9 @@ profile.post("/create", async (c) => {
       !body.course ||
       !body.yearOfStudy ||
       !body.semester ||
-      !body.organizationId
+      !body.organizationId ||
+      !body.dob ||
+      !body.gender
     ) {
       return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT);
     }
@@ -42,6 +44,8 @@ profile.post("/create", async (c) => {
         semester: body.semester,
         organizationId: body.organizationId,
         labGroupId: body.labGroupId || null,
+        dob: new Date(body.dob.split("/").reverse().join("-")), // DD/MM/YYYY -> YYYY-MM-DD
+        gender: body.gender,
       },
     });
     console.log("Profile created successfully:", newProfile);

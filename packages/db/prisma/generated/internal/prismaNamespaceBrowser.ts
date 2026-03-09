@@ -267,6 +267,8 @@ export const StudentProfileScalarFieldEnum = {
   yearOfStudy: 'yearOfStudy',
   labGroupId: 'labGroupId',
   semester: 'semester',
+  dob: 'dob',
+  gender: 'gender',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   organizationId: 'organizationId'

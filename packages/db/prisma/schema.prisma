@@ -141,6 +141,12 @@ model Notification {
   @@map("notifications")
 }
 
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
 // ============================
 // Feedbacks & Support Tickets
 // ============================
@@ -361,6 +367,8 @@ model StudentProfile {
   labGroupId       String?         @map("lab_group_id")
   labGroup         LabGroup?       @relation(fields: [labGroupId], references: [id])
   semester         CourseSemester?
+  dob              DateTime?       @map("dob")
+  gender           Gender?         @map("gender")
   createdAt        DateTime        @default(now()) @map("created_at")
   updatedAt        DateTime        @updatedAt @map("updated_at")
   organizationId   String          @map("organization_id")

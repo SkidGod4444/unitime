@@ -1750,6 +1750,8 @@ export const StudentProfileScalarFieldEnum = {
   yearOfStudy: 'yearOfStudy',
   labGroupId: 'labGroupId',
   semester: 'semester',
+  dob: 'dob',
+  gender: 'gender',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   organizationId: 'organizationId'
@@ -2101,6 +2103,20 @@ export type EnumAttendanceSessionTypeFieldRefInput<$PrismaModel> = FieldRefInput
  * Reference to a field of type 'AttendanceSessionType[]'
  */
 export type ListEnumAttendanceSessionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AttendanceSessionType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Gender'
+ */
+export type EnumGenderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Gender'>
+    
+
+
+/**
+ * Reference to a field of type 'Gender[]'
+ */
+export type ListEnumGenderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Gender[]'>
     
 
 /**

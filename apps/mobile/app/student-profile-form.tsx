@@ -40,6 +40,8 @@ export default function StudentProfileForm() {
   const [semister, setSemister] = useState("");
   const [section, setSection] = useState("");
   const [labGroupId, setLabGroupId] = useState<string | null>(null);
+  const [dob, setDob] = useState("");
+  const [gender, setGender] = useState("");
 
   // Dropdown visibility
   const [showDepartmentDropdown, setShowDepartmentDropdown] = useState(false);
@@ -47,6 +49,10 @@ export default function StudentProfileForm() {
   const [showSemDropdown, setShowSemDropdown] = useState(false);
   const [showSectionDropdown, setShowSectionDropdown] = useState(false);
   const [showLabGroupDropdown, setShowLabGroupDropdown] = useState(false);
+  const [showGenderDropdown, setShowGenderDropdown] = useState(false);
+
+  // Constants
+  const GENDERS = ["MALE", "FEMALE", "OTHER"];
 
   // Validation errors
   const [errors, setErrors] = useState<ProfileFormErrors>({});
@@ -130,6 +136,8 @@ export default function StudentProfileForm() {
       semister,
       section,
       yearOfAdmission,
+      dob,
+      gender,
     });
 
     if (!result.success) {
@@ -174,6 +182,8 @@ export default function StudentProfileForm() {
           semester: semister,
           organizationId: matchedOrg.id,
           labGroupId,
+          dob,
+          gender,
         }),
       });
 
@@ -713,6 +723,95 @@ export default function StudentProfileForm() {
                   )}
                 </View>
               )}
+
+              {/* Date of Birth */}
+              <View>
+                <Text className="text-xs font-bold text-gray-500 mb-2 ml-1 uppercase tracking-wide">
+                  Date of Birth*
+                </Text>
+                <View
+                  className={`flex-row items-center border rounded-2xl px-4 py-3.5 bg-white ${fieldBorder("dob")}`}
+                >
+                  <Ionicons
+                    name="calendar-outline"
+                    size={20}
+                    color={hasError("dob") ? "#F87171" : "#9CA3AF"}
+                    style={{ marginRight: 12 }}
+                  />
+                  <TextInput
+                    value={dob}
+                    onChangeText={(v) => {
+                      setDob(v);
+                      setErrors((e) => ({ ...e, dob: undefined }));
+                    }}
+                    placeholder="DD/MM/YYYY"
+                    placeholderTextColor="#9CA3AF"
+                    selectionColor="#2563EB"
+                    cursorColor="#2563EB"
+                    multiline={false}
+                    numberOfLines={1}
+                    className="flex-1 text-base text-gray-900 font-semibold py-0 min-h-[20px]"
+                    style={{ includeFontPadding: false }}
+                    keyboardType="numbers-and-punctuation"
+                    maxLength={10}
+                  />
+                </View>
+                {errors.dob && (
+                  <Text className="text-xs text-red-500 mt-1 ml-1">
+                    {errors.dob}
+                  </Text>
+                )}
+              </View>
+
+              {/* Gender Dropdown */}
+              <View>
+                <Text className="text-xs font-bold text-gray-500 mb-2 ml-1 uppercase tracking-wide">
+                  Gender*
+                </Text>
+                <TouchableOpacity
+                  onPress={() => setShowGenderDropdown(!showGenderDropdown)}
+                  className={`flex-row items-center border rounded-2xl px-4 py-3.5 bg-white ${fieldBorder("gender")}`}
+                >
+                  <Ionicons
+                    name="male-female-outline"
+                    size={20}
+                    color={hasError("gender") ? "#F87171" : "#9CA3AF"}
+                    style={{ marginRight: 12 }}
+                  />
+                  <Text
+                    className={`flex-1 text-base font-semibold ${gender ? "text-gray-900" : "text-gray-400"}`}
+                  >
+                    {gender || "Select your Gender"}
+                  </Text>
+                  <Ionicons
+                    name={showGenderDropdown ? "chevron-up" : "chevron-down"}
+                    size={20}
+                    color="#9CA3AF"
+                  />
+                </TouchableOpacity>
+                {errors.gender && (
+                  <Text className="text-xs text-red-500 mt-1 ml-1">
+                    {errors.gender}
+                  </Text>
+                )}
+                {showGenderDropdown && (
+                  <View className="mt-2 border border-gray-200 rounded-xl bg-white overflow-hidden">
+                    {GENDERS.map((g) => (
+                      <TouchableOpacity
+                        key={g}
+                        onPress={() => {
+                          setGender(g);
+                          setShowGenderDropdown(false);
+                          setErrors((e) => ({ ...e, gender: undefined }));
+                        }}
+                        className="px-4 py-3 border-b border-gray-100"
+                      >
+                        <Text className="text-gray-900 font-medium">{g}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+              </View>
 
               {/* Year of Admission */}
               <View>

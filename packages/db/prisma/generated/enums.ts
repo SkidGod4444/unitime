@@ -125,6 +125,15 @@ export const HistoryLogType = {
 export type HistoryLogType = (typeof HistoryLogType)[keyof typeof HistoryLogType]
 
 
+export const Gender = {
+  MALE: 'MALE',
+  FEMALE: 'FEMALE',
+  OTHER: 'OTHER'
+} as const
+
+export type Gender = (typeof Gender)[keyof typeof Gender]
+
+
 export const CourseDay = {
   MONDAY: 'MONDAY',
   TUESDAY: 'TUESDAY',

@@ -16,6 +16,13 @@ export const profileSchema = z.object({
   course: z.string().min(1, "Course is required"),
   semister: z.string().min(1, "Semester is required"),
   section: z.string().min(1, "Section is required"),
+  dob: z
+    .string()
+    .min(1, "Date of birth is required")
+    .regex(/^\d{2}\/\d{2}\/\d{4}$/, "Enter a valid date (DD/MM/YYYY)"),
+  gender: z.enum(["MALE", "FEMALE", "OTHER"], {
+    message: "Gender is required",
+  }),
   yearOfAdmission: z
     .string()
     .min(1, "Year of admission is required")

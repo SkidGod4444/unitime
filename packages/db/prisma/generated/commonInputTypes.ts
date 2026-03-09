@@ -504,6 +504,13 @@ export type EnumCourseSemesterNullableFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumCourseSemesterNullableFilter<$PrismaModel> | $Enums.CourseSemester | null
 }
 
+export type EnumGenderNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.Gender | Prisma.EnumGenderFieldRefInput<$PrismaModel> | null
+  in?: $Enums.Gender[] | Prisma.ListEnumGenderFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.Gender[] | Prisma.ListEnumGenderFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumGenderNullableFilter<$PrismaModel> | $Enums.Gender | null
+}
+
 export type EnumCourseSemesterNullableWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.CourseSemester | Prisma.EnumCourseSemesterFieldRefInput<$PrismaModel> | null
   in?: $Enums.CourseSemester[] | Prisma.ListEnumCourseSemesterFieldRefInput<$PrismaModel> | null
@@ -512,6 +519,16 @@ export type EnumCourseSemesterNullableWithAggregatesFilter<$PrismaModel = never>
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedEnumCourseSemesterNullableFilter<$PrismaModel>
   _max?: Prisma.NestedEnumCourseSemesterNullableFilter<$PrismaModel>
+}
+
+export type EnumGenderNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.Gender | Prisma.EnumGenderFieldRefInput<$PrismaModel> | null
+  in?: $Enums.Gender[] | Prisma.ListEnumGenderFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.Gender[] | Prisma.ListEnumGenderFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumGenderNullableWithAggregatesFilter<$PrismaModel> | $Enums.Gender | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumGenderNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumGenderNullableFilter<$PrismaModel>
 }
 
 export type NestedStringFilter<$PrismaModel = never> = {
@@ -1006,6 +1023,13 @@ export type NestedEnumCourseSemesterNullableFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumCourseSemesterNullableFilter<$PrismaModel> | $Enums.CourseSemester | null
 }
 
+export type NestedEnumGenderNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.Gender | Prisma.EnumGenderFieldRefInput<$PrismaModel> | null
+  in?: $Enums.Gender[] | Prisma.ListEnumGenderFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.Gender[] | Prisma.ListEnumGenderFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumGenderNullableFilter<$PrismaModel> | $Enums.Gender | null
+}
+
 export type NestedEnumCourseSemesterNullableWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.CourseSemester | Prisma.EnumCourseSemesterFieldRefInput<$PrismaModel> | null
   in?: $Enums.CourseSemester[] | Prisma.ListEnumCourseSemesterFieldRefInput<$PrismaModel> | null
@@ -1014,6 +1038,16 @@ export type NestedEnumCourseSemesterNullableWithAggregatesFilter<$PrismaModel = 
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedEnumCourseSemesterNullableFilter<$PrismaModel>
   _max?: Prisma.NestedEnumCourseSemesterNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumGenderNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.Gender | Prisma.EnumGenderFieldRefInput<$PrismaModel> | null
+  in?: $Enums.Gender[] | Prisma.ListEnumGenderFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.Gender[] | Prisma.ListEnumGenderFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumGenderNullableWithAggregatesFilter<$PrismaModel> | $Enums.Gender | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumGenderNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumGenderNullableFilter<$PrismaModel>
 }
 
 
