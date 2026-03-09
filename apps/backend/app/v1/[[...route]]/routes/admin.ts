@@ -95,7 +95,7 @@ admin.patch("/users/:id/ban", async (c) => {
       },
     });
 
-    await invalidateCache("users:all", `user:${id}`);
+    await invalidateCache("users:all", `user:${id}`, `user:${user.email}`);
 
     return c.json({
       success: true,
@@ -189,6 +189,48 @@ admin.patch("/enrollments/:id/status", async (c) => {
     });
   } catch (error) {
     console.error("Error updating enrollment status:", error);
+    return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
+  }
+});
+
+admin.get("/stats", async (c) => {
+  try {
+    const [
+      users,
+      studentProfiles,
+      organizations,
+      courses,
+      labGroups,
+      attendanceSessions,
+      feedbacks,
+      tickets,
+    ] = await Promise.all([
+      prisma.user.count(),
+      prisma.studentProfile.count(),
+      prisma.organization.count(),
+      prisma.courses.count(),
+      prisma.labGroup.count(),
+      prisma.attendanceQRSession.count(),
+      prisma.feedback.count(),
+      prisma.supportTicket.count(),
+    ]);
+
+    return c.json({
+      success: true,
+      status_code: 200,
+      stats: {
+        users,
+        studentProfiles,
+        organizations,
+        courses,
+        labGroups,
+        attendanceSessions,
+        feedbacks,
+        tickets,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching admin stats:", error);
     return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
   }
 });

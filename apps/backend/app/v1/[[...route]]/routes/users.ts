@@ -130,7 +130,7 @@ users.put("/:id/update", async (c) => {
   if (!user) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
   }
-  await invalidateCache("users:all", `user:${id}`);
+  await invalidateCache("users:all", `user:${id}`, `user:${user.email}`);
   return c.json(
     {
       success: true,
@@ -150,7 +150,7 @@ users.patch("/:id/onboard", async (c) => {
   if (!user) {
     return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
   }
-  await invalidateCache("users:all", `user:${id}`);
+  await invalidateCache("users:all", `user:${id}`, `user:${user.email}`);
   return c.json(
     {
       success: true,

@@ -4,28 +4,28 @@ import { Ionicons } from "@expo/vector-icons";
 import { Stack } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-    Alert,
-    FlatList,
-    Modal,
-    Pressable,
-    RefreshControl,
-    ScrollView,
-    Switch,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  FlatList,
+  Modal,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../contexts/auth.cntxt";
 import { useRefresh } from "../hooks/use-refresh";
 import {
-    useCoursesStore,
-    useFeedbacksStore,
-    useOrgsStore,
-    useProfilesStore,
-    useTicketsStore,
-    useUsersStore,
+  useCoursesStore,
+  useFeedbacksStore,
+  useOrgsStore,
+  useProfilesStore,
+  useTicketsStore,
+  useUsersStore,
 } from "../lib/store";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -604,6 +604,145 @@ function TicketsTab() {
     </>
   );
 }
+// ─── Moderate User Modal ──────────────────────────────────────────────────────
+
+function ModerateUserModal({
+  visible,
+  onClose,
+  onBan,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  onBan: (user: any, reason: string) => void;
+}) {
+  const { users } = useUsersStore();
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<any | null>(null);
+  const [reason, setReason] = useState("");
+
+  const unbannedUsers = React.useMemo(
+    () => users.filter((u) => !u.banned),
+    [users]
+  );
+
+  const filtered = React.useMemo(
+    () =>
+      unbannedUsers.filter(
+        (u) =>
+          (u.name ?? "").toLowerCase().includes(search.toLowerCase()) ||
+          u.email.toLowerCase().includes(search.toLowerCase())
+      ),
+    [search, unbannedUsers]
+  );
+
+  const handleBan = () => {
+    if (!selected) return;
+    onBan(selected, reason || "Banned by admin");
+    setSearch("");
+    setSelected(null);
+    setReason("");
+  };
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
+    >
+      <SafeAreaView className="flex-1 bg-gray-50 dark:bg-zinc-900">
+        <View className="flex-row items-center justify-between px-4 py-3 bg-white border-b border-gray-100">
+          <TouchableOpacity onPress={onClose} className="p-1">
+            <Ionicons name="close" size={22} color="#6b7280" />
+          </TouchableOpacity>
+          <View style={{ flex: 1, alignItems: "center" }}>
+            <Text className="text-base font-bold text-gray-900">Moderate User</Text>
+          </View>
+          <TouchableOpacity
+            onPress={handleBan}
+            disabled={!selected}
+            className={`px-4 py-1.5 rounded-lg ${selected ? "bg-red-600" : "bg-gray-200"}`}
+          >
+            <Text className={`font-bold text-sm ${selected ? "text-white" : "text-gray-400"}`}>
+              Ban
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView className="flex-1 px-4 pt-4" keyboardShouldPersistTaps="handled">
+          <View className="flex-row items-center bg-white border border-gray-200 rounded-xl px-3 mb-4 gap-x-2">
+            <Ionicons name="search-outline" size={18} color="#9ca3af" />
+            <TextInput
+              value={search}
+              onChangeText={setSearch}
+              placeholder="Search by name or email…"
+              className="flex-1 py-3 text-gray-800 text-sm"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+            {search.length > 0 && (
+              <TouchableOpacity onPress={() => setSearch("")}>
+                <Ionicons name="close-circle" size={18} color="#9ca3af" />
+              </TouchableOpacity>
+            )}
+          </View>
+
+          <Text className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
+            {filtered.length} user{filtered.length !== 1 ? "s" : ""} found
+          </Text>
+
+          {filtered.slice(0, 50).map((user) => {
+            const isSelected = selected?.id === user.id;
+            return (
+              <Pressable
+                key={user.id}
+                onPress={() => setSelected(isSelected ? null : user)}
+                className={`flex-row items-center justify-between p-4 rounded-2xl mb-2 border ${
+                  isSelected ? "bg-red-50 border-red-300" : "bg-white border-gray-100"
+                }`}
+              >
+                <View className="flex-row items-center gap-x-3 flex-1">
+                  <View className={`w-9 h-9 rounded-full items-center justify-center ${isSelected ? "bg-red-200" : "bg-gray-100"}`}>
+                    <Text className={`font-bold text-base ${isSelected ? "text-red-700" : "text-gray-500"}`}>
+                      {user.name?.[0] || "?"}
+                    </Text>
+                  </View>
+                  <View className="flex-1">
+                    <Text className={`font-semibold ${isSelected ? "text-red-800" : "text-gray-800"}`}>
+                      {user.name}
+                    </Text>
+                    <Text className="text-xs text-gray-500 mt-0.5">{user.email}</Text>
+                  </View>
+                </View>
+                {isSelected ? (
+                  <Ionicons name="checkmark-circle" size={22} color="#dc2626" />
+                ) : (
+                  <View className="w-5 h-5 rounded-full border-2 border-gray-300" />
+                )}
+              </Pressable>
+            );
+          })}
+
+          {selected && (
+            <View className="mt-4 mb-6 relative z-10">
+              <Text className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
+                Ban Reason (Optional)
+              </Text>
+              <TextInput
+                value={reason}
+                onChangeText={setReason}
+                placeholder="e.g. Violation of community guidelines"
+                className="bg-white border border-gray-200 rounded-xl px-4 py-3 text-gray-800"
+              />
+            </View>
+          )}
+          <View className="h-10" />
+        </ScrollView>
+      </SafeAreaView>
+    </Modal>
+  );
+}
+
 // ─── Add User Modal ───────────────────────────────────────────────────────────
 
 function AddUserModal({
@@ -1563,105 +1702,84 @@ function AttendanceTab() {
 
 function UsersTab() {
   const { users, toggleBan } = useUsersStore();
-  const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredUsers = React.useMemo(() => {
-    if (!searchQuery.trim()) return users;
-    const lowerQ = searchQuery.toLowerCase();
-    return users.filter(
-      (u) =>
-        u.name?.toLowerCase().includes(lowerQ) ||
-        u.email?.toLowerCase().includes(lowerQ)
-    );
-  }, [users, searchQuery]);
+  const bannedUsers = React.useMemo(() => {
+    return users.filter((u) => u.banned);
+  }, [users]);
 
-  const handleToggleBan = (user: any) => {
-    const isBanned = user.banned;
-    const action = isBanned ? "Unban" : "Ban";
-    Alert.alert(`${action} User`, `Are you sure you want to ${action.toLowerCase()} ${user.name}?`, [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: action,
-        style: isBanned ? "default" : "destructive",
-        onPress: async () => {
-          try {
-            await toggleBan(user.id, !isBanned, isBanned ? undefined : "Banned by admin");
-            Alert.alert("Success", `User ${action.toLowerCase()}ned successfully`);
-          } catch (e: any) {
-            Alert.alert("Error", e.message || `Failed to ${action.toLowerCase()} user`);
-          }
+  const handleUnban = (user: any) => {
+    Alert.alert(
+      "Unban User",
+      `Are you sure you want to unban ${user.name}?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Unban",
+          style: "default",
+          onPress: async () => {
+            try {
+              await toggleBan(user.id, false);
+              Alert.alert("Success", "User unbanned successfully.");
+            } catch (e: any) {
+              Alert.alert("Error", e.message || "Failed to unban user");
+            }
+          },
         },
-      },
-    ]);
+      ]
+    );
   };
 
   return (
-    <View className="flex-1">
-      <View className="bg-white rounded-xl flex-row items-center px-4 py-2 mb-4 border border-gray-100 shadow-sm">
-        <Ionicons name="search" size={20} color="#9ca3af" />
-        <TextInput
-          className="flex-1 ml-2 text-base text-gray-800"
-          placeholder="Search by name or email..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-        {searchQuery.length > 0 && (
-          <TouchableOpacity onPress={() => setSearchQuery("")}>
-            <Ionicons name="close-circle" size={20} color="#9ca3af" />
-          </TouchableOpacity>
-        )}
-      </View>
-      <FlatList
-        data={filteredUsers}
-        keyExtractor={(u) => u.id}
-        scrollEnabled={false}
-        renderItem={({ item: user }) => (
-          <View className="bg-white rounded-2xl p-4 mb-3 border border-gray-100 shadow-sm">
-            <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center gap-x-3 flex-1">
-                <View className="w-10 h-10 rounded-full bg-indigo-100 items-center justify-center">
-                  <Text className="text-indigo-600 font-bold text-base">
-                    {user.name?.charAt(0) || "?"}
-                  </Text>
-                </View>
-                <View className="flex-1">
-                  <Text className="text-base font-bold text-gray-900">
-                    {user.name}
-                  </Text>
-                  <Text className="text-xs text-indigo-500 mt-0.5">
-                    {user.email}
-                  </Text>
-                </View>
+    <FlatList
+      data={bannedUsers}
+      keyExtractor={(u) => u.id}
+      scrollEnabled={false}
+      ListEmptyComponent={
+        <View className="items-center py-10">
+          <Ionicons name="shield-checkmark-outline" size={40} color="#d1d5db" />
+          <Text className="text-gray-400 mt-2 text-sm">
+            No banned users found.
+          </Text>
+        </View>
+      }
+      renderItem={({ item: user }) => (
+        <Pressable className="bg-white rounded-2xl p-4 mb-3 border border-gray-100 shadow-sm active:opacity-70">
+          <View className="flex-row items-center justify-between">
+            <View className="flex-1">
+              <Text className="text-base font-bold text-gray-900">
+                {user.name}
+              </Text>
+              <Text className="text-sm text-gray-500 mt-0.5">
+                {user.email}
+              </Text>
+              <View className="self-start mt-2 px-2.5 py-0.5 rounded-full bg-red-100">
+                <Text className="text-xs font-bold text-red-700">
+                  BANNED
+                </Text>
               </View>
-              <View className="flex-row items-center gap-x-3">
-                <View className={`px-2 py-1 rounded border ${user.banned ? "bg-red-50 border-red-200" : "bg-green-50 border-green-200"}`}>
-                  <Text className={`text-[10px] font-bold uppercase ${user.banned ? "text-red-600" : "text-green-600"}`}>
-                    {user.banned ? "Banned" : "Active"}
-                  </Text>
-                </View>
-                <TouchableOpacity
-                  onPress={() => handleToggleBan(user)}
-                  className={`px-3 py-1.5 rounded-lg ${user.banned ? "bg-gray-100" : "bg-red-50"}`}
-                >
-                  <Text className={`text-xs font-bold ${user.banned ? "text-gray-700" : "text-red-600"}`}>
-                    {user.banned ? "Unban" : "Ban"}
-                  </Text>
-                </TouchableOpacity>
-              </View>
+              {user.banReason && (
+                <Text className="text-xs text-gray-500 italic mt-2">
+                  Reason: {user.banReason}
+                </Text>
+              )}
             </View>
+            <TouchableOpacity
+              onPress={() => handleUnban(user)}
+              className="p-2 bg-gray-100 rounded-lg"
+            >
+              <Ionicons name="refresh-outline" size={16} color="#4b5563" />
+            </TouchableOpacity>
           </View>
-        )}
-      />
-    </View>
+        </Pressable>
+      )}
+    />
   );
 }
 
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
 const TAB_ADD_LABELS: Record<TabKey, string> = {
-  users: "",
+  users: "Moderate User",
   roles: "Add User",
   classes: "Add Class",
   professors: "Add Professor",
@@ -1676,6 +1794,7 @@ export default function AdminPage() {
   const [addUserVisible, setAddUserVisible] = useState(false);
   const [addClassVisible, setAddClassVisible] = useState(false);
   const [addCourseVisible, setAddCourseVisible] = useState(false);
+  const [moderateUserVisible, setModerateUserVisible] = useState(false);
   const { loggedInUser } = useAuth();
   const { createCourse, courses } = useCoursesStore();
   const { createOrg, orgs } = useOrgsStore();
@@ -1718,13 +1837,51 @@ export default function AdminPage() {
       setAddCourseVisible(true);
     } else if (activeTab === "classes") {
       setAddClassVisible(true);
+    } else if (activeTab === "users") {
+      setModerateUserVisible(true);
     } else {
       Alert.alert("Add", TAB_ADD_LABELS[activeTab]);
     }
   };
 
-  const { users: storeUsers, updateUser } = useUsersStore();
+  const { users: storeUsers, updateUser, toggleBan } = useUsersStore();
   const { refresh, refreshing } = useRefresh();
+
+  const [stats, setStats] = useState<{
+    users: number;
+    studentProfiles: number;
+    organizations: number;
+    courses: number;
+    labGroups: number;
+    attendanceSessions: number;
+    feedbacks: number;
+    tickets: number;
+  } | null>(null);
+
+  const fetchStats = async () => {
+    try {
+      const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
+      const token = getAuthToken();
+      const res = await fetch(`${origin}/admin/stats`, {
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setStats(data.stats);
+        }
+      }
+    } catch (error) {
+      console.warn("Failed to fetch admin stats", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
 
   const handleAddUser = async (user: User) => {
     try {
@@ -1757,16 +1914,26 @@ export default function AdminPage() {
     }
   };
 
+  const handleModerateUserBan = async (user: any, reason: string) => {
+    try {
+      await toggleBan(user.id, true, reason);
+      Alert.alert("Success", "User banned successfully!");
+      setModerateUserVisible(false);
+    } catch (e: any) {
+      Alert.alert("Error", e.message || "Failed to ban user");
+    }
+  };
+
   const STAT_CARDS = [
     {
       label: "Users",
-      value: storeUsers.length,
+      value: stats?.users ?? storeUsers.length,
       icon: "people-outline",
       color: "#4f46e5",
     },
     {
       label: "Classes",
-      value: orgs.length,
+      value: stats?.organizations ?? orgs.length,
       icon: "school-outline",
       color: "#0891b2",
     },
@@ -1778,9 +1945,33 @@ export default function AdminPage() {
     },
     {
       label: "Courses",
-      value: courses.length,
+      value: stats?.courses ?? courses.length,
       icon: "book-outline",
       color: "#059669",
+    },
+    {
+      label: "Lab Groups",
+      value: stats?.labGroups ?? 0,
+      icon: "flask-outline",
+      color: "#8b5cf6",
+    },
+    {
+      label: "Sessions",
+      value: stats?.attendanceSessions ?? 0,
+      icon: "qr-code-outline",
+      color: "#ec4899",
+    },
+    {
+      label: "Feedbacks",
+      value: stats?.feedbacks ?? 0,
+      icon: "chatbubble-ellipses-outline",
+      color: "#10b981",
+    },
+    {
+      label: "Tickets",
+      value: stats?.tickets ?? 0,
+      icon: "help-buoy-outline",
+      color: "#f59e0b",
     },
   ];
 
@@ -1798,7 +1989,13 @@ export default function AdminPage() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={refresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={async () => {
+              await refresh();
+              await fetchStats();
+            }}
+          />
         }
       >
         {/* Header */}
@@ -1878,7 +2075,7 @@ export default function AdminPage() {
           <Text className="text-base font-bold text-gray-800">
             {TABS.find((t) => t.key === activeTab)?.label}
           </Text>
-          {(activeTab === "roles" || activeTab === "classes" || activeTab === "courses" || activeTab === "attendance") && (
+          {(activeTab === "users" || activeTab === "roles" || activeTab === "classes" || activeTab === "courses" || activeTab === "attendance") && (
           <TouchableOpacity
             onPress={handleAdd}
             activeOpacity={0.8}
@@ -1912,6 +2109,13 @@ export default function AdminPage() {
           {activeTab === "tickets" && <TicketsTab />}
         </View>
       </ScrollView>
+
+      {/* Moderate User Modal */}
+      <ModerateUserModal
+        visible={moderateUserVisible}
+        onClose={() => setModerateUserVisible(false)}
+        onBan={handleModerateUserBan}
+      />
 
       {/* Add User Modal — active only for Roles tab */}
       <AddUserModal
