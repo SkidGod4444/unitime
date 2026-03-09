@@ -85,7 +85,7 @@ export default function Home() {
           {/* CTA Buttons */}
           <div className="flex flex-wrap gap-3 mt-8">
             <a
-              href="https://unitime.devwtf.in/beta"
+              href="https://l.devwtf.in/unitime-apk"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-red-600 text-white font-semibold text-sm hover:bg-red-700 active:scale-95 transition-all duration-150 shadow-lg shadow-red-600/20"
