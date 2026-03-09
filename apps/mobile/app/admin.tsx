@@ -2024,6 +2024,8 @@ export default function AdminPage() {
     attendanceSessions: number;
     feedbacks: number;
     tickets: number;
+    cacheMetrics?: { hits: number; misses: number };
+    dbMetrics?: { activeConnections: number, idleConnections: number, size: string };
   } | null>(null);
 
   const fetchStats = async () => {
@@ -2147,6 +2149,36 @@ export default function AdminPage() {
       icon: "help-buoy-outline",
       color: "#f59e0b",
     },
+    {
+      label: "Cache Hits",
+      value: stats?.cacheMetrics?.hits ?? 0,
+      icon: "server-outline",
+      color: "#4ade80",
+    },
+    {
+      label: "Cache Misses",
+      value: stats?.cacheMetrics?.misses ?? 0,
+      icon: "warning-outline",
+      color: "#f87171",
+    },
+    {
+      label: "DB Size",
+      value: stats?.dbMetrics?.size ?? "0 KB",
+      icon: "server-outline",
+      color: "#6b7280",
+    },
+    {
+      label: "DB Active Conns",
+      value: stats?.dbMetrics?.activeConnections ?? 0,
+      icon: "pulse-outline",
+      color: "#3b82f6",
+    },
+    // {
+    //   label: "DB Idle Conns",
+    //   value: stats?.dbMetrics?.idleConnections ?? 0,
+    //   icon: "pause-circle-outline",
+    //   color: "#9ca3af",
+    // },
   ];
 
   return (

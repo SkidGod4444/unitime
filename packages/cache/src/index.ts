@@ -48,6 +48,8 @@ export const getOrSetCache = async <T>(
 
   if (cachedData !== null) {
     console.log(`[CACHE HIT] returned from cache for key: ${sanitizedKey}`);
+    // Non-blocking counter increment
+    cache.incr("system:metrics:cache:hits").catch(() => {});
     return cachedData;
   }
 
@@ -55,8 +57,36 @@ export const getOrSetCache = async <T>(
   console.log(
     `[CACHE MISS] returned from db directly for key: ${sanitizedKey}`,
   );
+  // Non-blocking counter increment for misses
+  cache.incr("system:metrics:cache:misses").catch(() => {});
+  
   await cache.set(sanitizedKey, freshData, { ex: ttlSeconds });
   return freshData;
+};
+
+/**
+ * Retrieves the global cache hit and miss metrics.
+ *
+ * @returns An object containing hits and misses
+ */
+export const getCacheMetrics = async (): Promise<{
+  hits: number;
+  misses: number;
+}> => {
+  try {
+    const [hits, misses] = await Promise.all([
+      cache.get<number>("system:metrics:cache:hits"),
+      cache.get<number>("system:metrics:cache:misses"),
+    ]);
+
+    return {
+      hits: hits || 0,
+      misses: misses || 0,
+    };
+  } catch (error) {
+    console.warn("Failed to retrieve cache metrics", error);
+    return { hits: 0, misses: 0 };
+  }
 };
 
 /**

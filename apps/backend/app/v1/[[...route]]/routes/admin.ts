@@ -1,7 +1,7 @@
 import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
 import { requireRole } from "@/middleware/check.auth";
 import type { AppEnv } from "@/types/app-env";
-import { invalidateCache } from "@unitime/cache";
+import { getCacheMetrics, getOrSetCache, invalidateCache } from "@unitime/cache";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
 
@@ -199,39 +199,69 @@ admin.patch("/enrollments/:id/status", async (c) => {
 
 admin.get("/stats", async (c) => {
   try {
-    const [
-      users,
-      studentProfiles,
-      organizations,
-      courses,
-      labGroups,
-      attendanceSessions,
-      feedbacks,
-      tickets,
-    ] = await Promise.all([
-      prisma.user.count(),
-      prisma.studentProfile.count(),
-      prisma.organization.count(),
-      prisma.courses.count(),
-      prisma.labGroup.count(),
-      prisma.attendanceQRSession.count(),
-      prisma.feedback.count(),
-      prisma.supportTicket.count(),
-    ]);
+    const statsPayload = await getOrSetCache(
+      "system:admin:stats",
+      async () => {
+        const [
+          users,
+          studentProfiles,
+          organizations,
+          courses,
+          labGroups,
+          attendanceSessions,
+          feedbacks,
+          tickets,
+          cacheMetrics,
+          dbSizeRes,
+          connectionStates,
+        ] = await Promise.all([
+          prisma.user.count(),
+          prisma.studentProfile.count(),
+          prisma.organization.count(),
+          prisma.courses.count(),
+          prisma.labGroup.count(),
+          prisma.attendanceQRSession.count(),
+          prisma.feedback.count(),
+          prisma.supportTicket.count(),
+          getCacheMetrics(),
+          // Getting raw db metrics
+          prisma.$queryRaw<{pg_size_pretty: string}[]>`SELECT pg_size_pretty(pg_database_size(current_database()));`.catch(() => [{ pg_size_pretty: "0 KB" }]),
+          prisma.$queryRaw<{state: string, count: number}[]>`SELECT state, count(*)::int FROM pg_stat_activity GROUP BY state;`.catch(() => []),
+        ]);
+
+        // Parse the connection states
+        let activeConnections = 0;
+        let idleConnections = 0;
+        
+        connectionStates.forEach((row) => {
+          if (row.state === "active") activeConnections += row.count;
+          else if (row.state === "idle") idleConnections += row.count;
+        });
+
+        return {
+          users,
+          studentProfiles,
+          organizations,
+          courses,
+          labGroups,
+          attendanceSessions,
+          feedbacks,
+          tickets,
+          cacheMetrics,
+          dbMetrics: { 
+            size: dbSizeRes[0]?.pg_size_pretty || "0 KB",
+            activeConnections,
+            idleConnections,
+          },
+        };
+      },
+      120 // 2 minutes TTL
+    );
 
     return c.json({
       success: true,
       status_code: 200,
-      stats: {
-        users,
-        studentProfiles,
-        organizations,
-        courses,
-        labGroups,
-        attendanceSessions,
-        feedbacks,
-        tickets,
-      },
+      stats: statsPayload,
     });
   } catch (error) {
     console.error("Error fetching admin stats:", error);
