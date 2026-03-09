@@ -1,8 +1,11 @@
+import { requireAuth } from "@/middleware/check.auth";
+import type { AppEnv } from "@/types/app-env";
 import { getOrSetCache, invalidateCache } from "@unitime/cache";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
 
-const notifications = new Hono();
+const notifications = new Hono<AppEnv>();
+notifications.use("*", requireAuth);
 
 // Get notifications for a user (personal + organizational)
 notifications.get("/:userId", async (c) => {

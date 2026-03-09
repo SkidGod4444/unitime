@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/api";
 import { create } from "zustand";
 
 export interface HistoryLog {
@@ -24,12 +25,9 @@ export const useHistoryStore = create<HistoryState>((set) => ({
   fetchHistoryLogs: async (userId: string) => {
     try {
       set({ loading: true, error: null });
-      const origin =
-        process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-
       const [historyRes, attendanceRes] = await Promise.all([
-        fetch(`${origin}/history/${userId}`),
-        fetch(`${origin}/attendance/all-history/${userId}`),
+        apiFetch(`/history/${userId}`),
+        apiFetch(`/attendance/all-history/${userId}`),
       ]);
 
       const historyData = await historyRes.json();

@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/auth.cntxt";
-import { withAuth } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
 import { useCoursesStore, useOrgsStore } from "@/lib/store";
 import { useLabGroupsStore } from "@/lib/store/lab-groups";
 import { Course } from "@/lib/store/timetable";
@@ -9,13 +9,13 @@ import * as Location from "expo-location";
 import { Stack, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
-  Alert,
-  FlatList,
-  Pressable,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
+    Alert,
+    FlatList,
+    Pressable,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -214,10 +214,8 @@ export default function AttendanceSessionForm() {
         return;
       }
       try {
-        const origin =
-          process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-        const res = await fetch(
-          `${origin}/courses/${selectedCourse.id}/students`,
+        const res = await apiFetch(
+          `/courses/${selectedCourse.id}/students`,
         );
         if (res.ok) {
           const data = await res.json();
@@ -335,8 +333,6 @@ export default function AttendanceSessionForm() {
 
     setIsSubmitting(true);
     try {
-      const origin =
-        process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
       const startTime = new Date();
       const endTime = new Date(startTime.getTime() + selectedTime * 60000);
 
@@ -347,9 +343,9 @@ export default function AttendanceSessionForm() {
 
       // Helper: makes the session create POST and returns {res, data}
       const doCreateSession = async () => {
-        const r = await fetch(
-          `${origin}/attendance/qr/session/create`,
-          withAuth({
+        const r = await apiFetch(
+          "/attendance/qr/session/create",
+          {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -363,7 +359,7 @@ export default function AttendanceSessionForm() {
                   : undefined,
               geofenceRadius,
             }),
-          }),
+          },
         );
         const d = await r.json();
         return { res: r, data: d };
@@ -409,8 +405,8 @@ export default function AttendanceSessionForm() {
         // Push notification logic from frontend:
         try {
           // Fetch enrolled students for the created session's course
-          const studentsRes = await fetch(
-            `${origin}/courses/${selectedCourse.id}/students`,
+          const studentsRes = await apiFetch(
+            `/courses/${selectedCourse.id}/students`,
           );
 
           if (studentsRes.ok) {
@@ -422,12 +418,18 @@ export default function AttendanceSessionForm() {
                 (s: any) => s.id !== loggedInUser?.id,
               );
 
-              // If a specific section/class is selected (e.g by Admin), ensure we only notify those students.
-              // OrganizationId usually resides inside the studentProfile.
+              // 1. Filter by Organization (Class/Section)
               if (selectedClass) {
                 targetStudents = targetStudents.filter(
                   (s: any) =>
                     s.studentProfile?.organizationId === selectedClass.id,
+                );
+              }
+
+              // 2. Filter by Lab Group (if applicable)
+              if (selectedLabGroupId) {
+                targetStudents = targetStudents.filter(
+                  (s: any) => s.studentProfile?.labGroupId === selectedLabGroupId,
                 );
               }
 
@@ -485,11 +487,12 @@ export default function AttendanceSessionForm() {
                   actionUrl: "/tap-to-mark",
                 };
 
-                // If no specific class is selected, creating notifications one-by-one
-                if (!selectedClass && targetStudents.length > 0) {
+                // If a lab group is targetted, or no organization-wide class is selected, 
+                // we must notify students individually. 
+                if ((selectedLabGroupId || !selectedClass) && targetStudents.length > 0) {
                   await Promise.all(
                     targetStudents.map((s: any) =>
-                      fetch(`${origin}/notifications`, {
+                      apiFetch("/notifications", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
@@ -502,7 +505,7 @@ export default function AttendanceSessionForm() {
                   );
                 } else if (selectedClass) {
                   // Create one Organization-level notification
-                  await fetch(`${origin}/notifications`, {
+                  await apiFetch("/notifications", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(notifPayload),

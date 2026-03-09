@@ -1,5 +1,5 @@
+import { apiFetch } from "@/lib/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getAuthToken } from "@/lib/auth.token";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
@@ -41,19 +41,12 @@ export const useEnrollmentStore = create<EnrollmentState>()(
       fetchEnrollments: async (organizationId) => {
         set({ loading: true });
         try {
-          const origin =
-            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
-
-          let url = `${origin}/admin/enrollments/pending`;
+          let url = "/admin/enrollments/pending";
           if (organizationId) {
             url += `?organizationId=${organizationId}`;
           }
 
-          const headers: Record<string, string> = {};
-          const token = getAuthToken();
-          if (token) headers["Authorization"] = `Bearer ${token}`;
-
-          const res = await fetch(url, { headers });
+          const res = await apiFetch(url);
           const data = await res.json();
           if (res.ok && data.success) {
             set({ enrollments: data.enrollments });
@@ -68,18 +61,11 @@ export const useEnrollmentStore = create<EnrollmentState>()(
       },
       updateEnrollmentStatus: async (enrollmentId, status) => {
         try {
-          const origin =
-            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
-          const token = getAuthToken();
-          const headers: Record<string, string> = {
-            "Content-Type": "application/json",
-          };
-          if (token) headers["Authorization"] = `Bearer ${token}`;
-          const res = await fetch(
-            `${origin}/admin/enrollments/${enrollmentId}/status`,
+          const res = await apiFetch(
+            `/admin/enrollments/${enrollmentId}/status`,
             {
               method: "PATCH",
-              headers,
+              headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ status }),
             },
           );

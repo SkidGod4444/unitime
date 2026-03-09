@@ -44,9 +44,7 @@ export const useUsersStore = create<UsersState>()(
       fetchUsers: async () => {
         set({ loading: true });
         try {
-          const origin =
-            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
-          const res = await fetch(`${origin}/users/all`);
+          const res = await apiFetch("/users/all");
           const data = await res.json();
           if (res.ok && data.success && data.users) {
             set({ users: data.users });
@@ -116,9 +114,7 @@ export const useProfilesStore = create<ProfilesState>()(
       fetchProfiles: async () => {
         set({ loading: true });
         try {
-          const origin =
-            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
-          const res = await fetch(`${origin}/profiles/all`);
+          const res = await apiFetch("/profiles/all");
           const data = await res.json();
           if (res.ok && data.success && data.profiles) {
             set({ profiles: data.profiles });
@@ -170,9 +166,7 @@ export const useOrgsStore = create<OrgsState>()(
       setOrgs: (orgs) => set({ orgs }),
       createOrg: async (orgData) => {
         try {
-          const origin =
-            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-          const res = await fetch(`${origin}/orgs/create`, {
+          const res = await apiFetch("/orgs/create", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -192,9 +186,7 @@ export const useOrgsStore = create<OrgsState>()(
       },
       updateOrg: async (id, orgData) => {
         try {
-          const origin =
-            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-          const res = await fetch(`${origin}/orgs/${id}/update`, {
+          const res = await apiFetch(`/orgs/${id}/update`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -214,9 +206,7 @@ export const useOrgsStore = create<OrgsState>()(
       },
       deleteOrg: async (id) => {
         try {
-          const origin =
-            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-          const res = await fetch(`${origin}/orgs/${id}`, {
+          const res = await apiFetch(`/orgs/${id}`, {
             method: "DELETE",
           });
           const data = await res.json();
@@ -233,9 +223,7 @@ export const useOrgsStore = create<OrgsState>()(
       fetchOrgs: async () => {
         set({ loading: true });
         try {
-          const origin =
-            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
-          const res = await fetch(`${origin}/orgs/all`);
+          const res = await apiFetch("/orgs/all");
           const data = await res.json();
           if (res.ok && data.success && data.orgs) {
             set({ orgs: data.orgs });

@@ -6,6 +6,7 @@
  * "coming soon" notice while the feature is under development.
  */
 
+import { apiFetch } from "@/lib/api";
 import React, {
   createContext,
   ReactNode,
@@ -80,8 +81,6 @@ export function AlarmsProvider({
   const [alarms, setAlarms] = useState<Alarm[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3001";
-
   // ── Fetch alarms from server ─────────────────────────────────────────────
 
   const refreshAlarms = useCallback(async () => {
@@ -91,7 +90,7 @@ export function AlarmsProvider({
       return;
     }
     try {
-      const res = await fetch(`${origin}/alarms/${userId}`);
+      const res = await apiFetch(`/alarms/${userId}`);
       if (!res.ok) {
         setAlarms([]);
         return;
@@ -103,7 +102,7 @@ export function AlarmsProvider({
     } finally {
       setLoading(false);
     }
-  }, [userId, origin]);
+  }, [userId]);
 
   useEffect(() => {
     refreshAlarms();
@@ -115,7 +114,7 @@ export function AlarmsProvider({
     async (input: CreateAlarmInput): Promise<Alarm | null> => {
       if (!userId) return null;
       try {
-        const res = await fetch(`${origin}/alarms`, {
+        const res = await apiFetch("/alarms", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ...input, userId }),
@@ -135,13 +134,13 @@ export function AlarmsProvider({
         return null;
       }
     },
-    [userId, origin],
+    [userId],
   );
 
   const updateAlarm = useCallback(
     async (id: string, input: UpdateAlarmInput): Promise<Alarm | null> => {
       try {
-        const res = await fetch(`${origin}/alarms/${id}`, {
+        const res = await apiFetch(`/alarms/${id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(input),
@@ -161,13 +160,13 @@ export function AlarmsProvider({
         return null;
       }
     },
-    [origin],
+    [userId],
   );
 
   const deleteAlarm = useCallback(
     async (id: string): Promise<void> => {
       try {
-        const res = await fetch(`${origin}/alarms/${id}`, {
+        const res = await apiFetch(`/alarms/${id}`, {
           method: "DELETE",
         });
         if (!res.ok) throw new Error("Delete failed");
@@ -177,7 +176,7 @@ export function AlarmsProvider({
         Alert.alert("Error", "Failed to delete alarm. Please try again.");
       }
     },
-    [origin],
+    [],
   );
 
   const toggleAlarm = useCallback(

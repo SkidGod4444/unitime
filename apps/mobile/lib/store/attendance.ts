@@ -1,8 +1,7 @@
+import { apiFetch } from "@/lib/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
-import { withAuth } from "@/lib/api";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { getAuthToken } from "@/lib/auth.token";
 
 export type AttendanceSummary = {
   courseId: string;
@@ -69,9 +68,7 @@ export const useAttendanceStore = create<AttendanceState>()(
       fetchSummary: async (userId) => {
         set({ summaryLoading: true });
         try {
-          const origin =
-            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-          const res = await fetch(`${origin}/attendance/summary/${userId}`);
+          const res = await apiFetch(`/attendance/summary/${userId}`);
           const data = await res.json();
           if (res.ok && data.success) {
             set({ summary: data.summary });
@@ -88,9 +85,7 @@ export const useAttendanceStore = create<AttendanceState>()(
       fetchSessions: async () => {
         set({ sessionsLoading: true });
         try {
-          const origin =
-            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-          const res = await fetch(`${origin}/attendance/sessions/all`);
+          const res = await apiFetch("/attendance/sessions/all");
           const data = await res.json();
           if (res.ok && data.success) {
             set({ sessions: data.sessions });
@@ -106,15 +101,13 @@ export const useAttendanceStore = create<AttendanceState>()(
 
       updateSessionAttendance: async (sessionId, updates) => {
         try {
-          const origin =
-            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-          const res = await fetch(
-            `${origin}/attendance/sessions/${sessionId}/students`,
-            withAuth({
+          const res = await apiFetch(
+            `/attendance/sessions/${sessionId}/students`,
+            {
               method: "PATCH",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ students: updates }),
-            }),
+            },
           );
           const data = await res.json();
 
@@ -157,16 +150,11 @@ export const useAttendanceStore = create<AttendanceState>()(
 
       markAttendance: async (sessionId, coordinates) => {
         try {
-          const origin =
-            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-          const token = getAuthToken();
-          const headers: Record<string, string> = {
-            "Content-Type": "application/json",
-          };
-          if (token) headers["Authorization"] = `Bearer ${token}`;
-          const res = await fetch(`${origin}/attendance/checkin`, {
+          const res = await apiFetch("/attendance/checkin", {
             method: "POST",
-            headers,
+            headers: {
+              "Content-Type": "application/json",
+            },
             body: JSON.stringify({ sessionId, coordinates }),
           });
           const data = await res.json();

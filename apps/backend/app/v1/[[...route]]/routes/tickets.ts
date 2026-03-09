@@ -1,11 +1,12 @@
 import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
+import { requireAuth, requireRole } from "@/middleware/check.auth";
+import type { AppEnv } from "@/types/app-env";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
 import { z } from "zod";
-import type { AppEnv } from "@/types/app-env";
-import { requireRole } from "@/middleware/check.auth";
 
 const tickets = new Hono<AppEnv>();
+tickets.use("*", requireAuth);
 
 // Create support ticket
 tickets.post("/", async (c) => {

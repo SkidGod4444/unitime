@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -42,9 +43,7 @@ export const useCoursesStore = create<CoursesState>()(
       fetchCourses: async () => {
         set({ loading: true });
         try {
-          const origin =
-            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-          const res = await fetch(`${origin}/courses`);
+          const res = await apiFetch("/courses");
           const data = await res.json();
           if (res.ok && data.success) {
             set({ courses: data.courses });
@@ -59,9 +58,7 @@ export const useCoursesStore = create<CoursesState>()(
       },
       createCourse: async (courseData) => {
         try {
-          const origin =
-            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-          const res = await fetch(`${origin}/courses`, {
+          const res = await apiFetch("/courses", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -89,9 +86,7 @@ export const useCoursesStore = create<CoursesState>()(
             ) as Course[],
           }));
 
-          const origin =
-            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-          const res = await fetch(`${origin}/courses/${id}`, {
+          const res = await apiFetch(`/courses/${id}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -112,9 +107,7 @@ export const useCoursesStore = create<CoursesState>()(
       },
       deleteCourse: async (id) => {
         try {
-          const origin =
-            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-          const res = await fetch(`${origin}/courses/${id}`, {
+          const res = await apiFetch(`/courses/${id}`, {
             method: "DELETE",
           });
           const data = await res.json();

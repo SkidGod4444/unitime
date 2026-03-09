@@ -1,5 +1,4 @@
-import { withAuth } from "@/lib/api";
-import { getAuthToken } from "@/lib/auth.token";
+import { apiFetch } from "@/lib/api";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
@@ -115,14 +114,10 @@ const emitAdminNotification = async (
   actionUrl: string,
 ) => {
   try {
-    const origin =
-      process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-    const token = getAuthToken();
-    await fetch(`${origin}/notifications`, {
+    await apiFetch("/notifications", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: JSON.stringify({
         title,
@@ -209,13 +204,10 @@ function RolesTab({ onAddUserPress }: { onAddUserPress: () => void }) {
 
   const changeRole = async (userId: string, targetRole: Role) => {
     try {
-      const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
-      const token = getAuthToken();
-      const res = await fetch(`${origin}/admin/users/${userId}/role`, {
+      const res = await apiFetch(`/admin/users/${userId}/role`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({ role: targetRole }),
       });
@@ -255,19 +247,13 @@ function RolesTab({ onAddUserPress }: { onAddUserPress: () => void }) {
           style: "destructive",
           onPress: async () => {
             try {
-              const origin =
-                process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
-              const res = await fetch(
-                `${origin}/admin/users/${user.id}/status`,
+              const res = await apiFetch(
+                `/admin/users/${user.id}/status`,
                 {
                   method: "PATCH",
-                  headers: (() => {
-                    const t = getAuthToken();
-                    return {
-                      "Content-Type": "application/json",
-                      ...(t ? { Authorization: `Bearer ${t}` } : {}),
-                    };
-                  })(),
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
                   body: JSON.stringify({ status: "INACTIVE" }),
                 },
               );
@@ -2030,14 +2016,7 @@ export default function AdminPage() {
 
   const fetchStats = async () => {
     try {
-      const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
-      const token = getAuthToken();
-      const res = await fetch(`${origin}/admin/stats`, {
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-      });
+      const res = await apiFetch("/admin/stats");
       if (res.ok) {
         const data = await res.json();
         if (data.success) {
@@ -2055,15 +2034,11 @@ export default function AdminPage() {
 
   const handleAddUser = async (user: User) => {
     try {
-      const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
-      const res = await fetch(
-        `${origin}/admin/users/${user.id}/role`,
-        withAuth({
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ role: user.role }),
-        }),
-      );
+      const res = await apiFetch(`/admin/users/${user.id}/role`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: user.role }),
+      });
       if (res.status === 401) {
         Alert.alert(
           "Not Authenticated",

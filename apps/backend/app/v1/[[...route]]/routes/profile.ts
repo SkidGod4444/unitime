@@ -1,9 +1,12 @@
 import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
+import { requireAuth } from "@/middleware/check.auth";
+import type { AppEnv } from "@/types/app-env";
 import { getOrSetCache, invalidateCache } from "@unitime/cache";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
 
-const profile = new Hono();
+const profile = new Hono<AppEnv>();
+profile.use("*", requireAuth);
 
 profile.post("/create", async (c) => {
   let body;

@@ -1,9 +1,12 @@
 import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
+import { requireAuth } from "@/middleware/check.auth";
+import type { AppEnv } from "@/types/app-env";
 import { getOrSetCache, invalidateCache } from "@unitime/cache";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
 
-const alarms = new Hono();
+const alarms = new Hono<AppEnv>();
+alarms.use("*", requireAuth);
 
 // GET /alarms/:userId — fetch all alarms for a user
 alarms.get("/:userId", async (c) => {

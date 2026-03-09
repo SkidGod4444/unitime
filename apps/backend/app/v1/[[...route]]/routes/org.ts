@@ -1,10 +1,12 @@
 import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
+import { requireAuth } from "@/middleware/check.auth";
 import type { AppEnv } from "@/types/app-env";
 import { getOrSetCache, invalidateCache } from "@unitime/cache";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
 
 const orgs = new Hono<AppEnv>();
+orgs.use("*", requireAuth);
 
 orgs.get("/all", async (c) => {
   const orgss = await getOrSetCache(

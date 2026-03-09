@@ -1,10 +1,12 @@
 import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
-import { requireRole } from "@/middleware/check.auth";
+import { requireAuth, requireRole } from "@/middleware/check.auth";
+import type { AppEnv } from "@/types/app-env";
 import { getOrSetCache, invalidateCache } from "@unitime/cache";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
 
-const timetable = new Hono();
+const timetable = new Hono<AppEnv>();
+timetable.use("*", requireAuth);
 
 // ---------------------------------------------------------------------------
 // GET /timetable/week/:userId — personal weekly timetable, filtered by the

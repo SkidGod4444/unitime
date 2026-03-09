@@ -1,7 +1,7 @@
 import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
 import { generateQRToken, verifyQRToken } from "@/lib/qr.algo";
 import { checkinSchema, createQRSessionSchema } from "@/lib/validation";
-import { requireRole } from "@/middleware/check.auth";
+import { requireAuth, requireRole } from "@/middleware/check.auth";
 import type { AppEnv } from "@/types/app-env";
 import { getOrSetCache, invalidateCache } from "@unitime/cache";
 import { prisma } from "@unitime/db";
@@ -9,7 +9,10 @@ import { Hono } from "hono";
 
 const attendance = new Hono<AppEnv>();
 
-// Only professors/admins can create QR sessions
+// Basic protection for all attendance routes
+attendance.use("*", requireAuth);
+
+// More strict protection for specific routes
 attendance.use("/qr/session/create", requireRole("PROFESSOR", "ADMIN"));
 attendance.use("/sessions/:id/students", requireRole("PROFESSOR", "ADMIN"));
 

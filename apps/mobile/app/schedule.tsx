@@ -78,6 +78,16 @@ const generateDates = (startDate: Date, days: number = 15) => {
   }
   return dates;
 };
+ 
+ const FULL_DAY_NAMES = [
+   "SUNDAY",
+   "MONDAY",
+   "TUESDAY",
+   "WEDNESDAY",
+   "THURSDAY",
+   "FRIDAY",
+   "SATURDAY",
+ ];
 
 // --- Components ---
 
@@ -352,31 +362,20 @@ const CustomCalendar = ({
 
 export default function ScheduleScreen() {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [dates, setDates] = useState(
-    generateDates(addDays(new Date(), -15), 30),
-  );
+  const [dates] = useState(generateDates(addDays(new Date(), -15), 30));
   const [isCalendarOpen, setCalendarOpen] = useState(false);
   const flatListRef = useRef<FlatList>(null);
 
   const { loggedInUser } = useAuth();
   const { timetables, loading, fetchTimetable } = useTimetableStore();
 
-  const FULL_DAY_NAMES = [
-    "SUNDAY",
-    "MONDAY",
-    "TUESDAY",
-    "WEDNESDAY",
-    "THURSDAY",
-    "FRIDAY",
-    "SATURDAY",
-  ];
 
   useEffect(() => {
     if (loggedInUser?.id) {
       const dayStr = FULL_DAY_NAMES[selectedDate.getDay()];
       fetchTimetable(loggedInUser.id, dayStr);
     }
-  }, [selectedDate, loggedInUser?.id]);
+  }, [selectedDate, loggedInUser, fetchTimetable]);
 
   // Ensure scrolling works reliably
   const getItemLayout = (data: any, index: number) => ({

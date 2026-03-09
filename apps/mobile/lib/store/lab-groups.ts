@@ -1,4 +1,4 @@
-import { withAuth } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -37,10 +37,8 @@ export const useLabGroupsStore = create<LabGroupsState>()(
       membersByGroup: {},
 
       fetchOrgLabGroups: async (organizationId) => {
-        const origin =
-          process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-        const res = await fetch(
-          `${origin}/lab-groups?organizationId=${encodeURIComponent(organizationId)}`,
+        const res = await apiFetch(
+          `/lab-groups?organizationId=${encodeURIComponent(organizationId)}`,
         );
         if (!res.ok) return [];
         const data = await res.json();
@@ -51,16 +49,11 @@ export const useLabGroupsStore = create<LabGroupsState>()(
 
       createLabGroup: async (organizationId, name) => {
         try {
-          const origin =
-            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-          const res = await fetch(
-            `${origin}/lab-groups`,
-            withAuth({
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ name, organizationId }),
-            }),
-          );
+          const res = await apiFetch("/lab-groups", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, organizationId }),
+          });
           const data = await res.json();
           if (res.ok && data.success) {
             await get().fetchOrgLabGroups(organizationId);
@@ -75,12 +68,9 @@ export const useLabGroupsStore = create<LabGroupsState>()(
 
       deleteLabGroup: async (groupId, organizationId) => {
         try {
-          const origin =
-            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-          const res = await fetch(
-            `${origin}/lab-groups/${groupId}`,
-            withAuth({ method: "DELETE" }),
-          );
+          const res = await apiFetch(`/lab-groups/${groupId}`, {
+            method: "DELETE",
+          });
           if (res.ok) {
             await get().fetchOrgLabGroups(organizationId);
             return true;
@@ -93,12 +83,7 @@ export const useLabGroupsStore = create<LabGroupsState>()(
       },
 
       fetchLabGroupMembers: async (groupId) => {
-        const origin =
-          process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-        const res = await fetch(
-          `${origin}/lab-groups/${groupId}/members`,
-          withAuth({ method: "GET" }),
-        );
+        const res = await apiFetch(`/lab-groups/${groupId}/members`);
         if (!res.ok) return [];
         const data = await res.json();
         const members: LabGroupMember[] = data.members || [];

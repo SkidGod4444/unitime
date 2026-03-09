@@ -1,5 +1,6 @@
 import { useAuth } from "@/contexts/auth.cntxt";
 import { useLocalStore } from "@/contexts/localstore.cntxt";
+import { apiFetch } from "@/lib/api";
 import { useAttendanceStore } from "@/lib/store";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -8,16 +9,16 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
 import Animated, {
-  Easing,
-  FadeInDown,
-  FadeInUp,
-  interpolate,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withSequence,
-  withSpring,
-  withTiming,
+    Easing,
+    FadeInDown,
+    FadeInUp,
+    interpolate,
+    useAnimatedStyle,
+    useSharedValue,
+    withRepeat,
+    withSequence,
+    withSpring,
+    withTiming,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -86,9 +87,7 @@ export default function TapToMarkScreen() {
   // Fetch session details on mount via dashboard (already cached by listener)
   useEffect(() => {
     if (!loggedInUser?.id || !sessionId) return;
-    const origin =
-      process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-    fetch(`${origin}/dashboard/${loggedInUser.id}`, {
+    apiFetch(`/dashboard/${loggedInUser.id}`, {
       headers: { "Cache-Control": "no-cache" },
     })
       .then((r) => r.json())

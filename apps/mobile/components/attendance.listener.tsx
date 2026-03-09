@@ -1,5 +1,6 @@
 import { useAuth } from "@/contexts/auth.cntxt";
 import { useLocalStore } from "@/contexts/localstore.cntxt";
+import { apiFetch } from "@/lib/api";
 import * as Notifications from "expo-notifications";
 import { useRouter, useSegments } from "expo-router";
 import { useEffect, useRef } from "react";
@@ -45,10 +46,8 @@ export function AttendanceListener() {
             }
 
             try {
-              const origin =
-                process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-              const res = await fetch(
-                `${origin}/dashboard/${loggedInUser.id}`,
+              const res = await apiFetch(
+                `/dashboard/${loggedInUser.id}`,
                 {
                   headers: {
                     "Cache-Control": "no-cache",
@@ -154,9 +153,7 @@ export function AttendanceListener() {
 
     const checkActiveSessions = async () => {
       try {
-        const origin =
-          process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-        const res = await fetch(`${origin}/dashboard/${loggedInUser.id}`, {
+        const res = await apiFetch(`/dashboard/${loggedInUser.id}`, {
           headers: {
             "Cache-Control": "no-cache",
             Pragma: "no-cache",

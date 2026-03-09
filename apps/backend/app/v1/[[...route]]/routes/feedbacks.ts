@@ -1,11 +1,12 @@
 import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
-import { requireRole } from "@/middleware/check.auth";
+import { requireAuth, requireRole } from "@/middleware/check.auth";
 import type { AppEnv } from "@/types/app-env";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
 import { z } from "zod";
 
 const feedbacks = new Hono<AppEnv>();
+feedbacks.use("*", requireAuth);
 
 // Create feedback (authenticated user)
 feedbacks.post("/", async (c) => {

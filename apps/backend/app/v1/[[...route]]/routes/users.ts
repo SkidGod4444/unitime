@@ -1,5 +1,6 @@
 // Account access should be request-scoped via auth middleware; use context user instead
 import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
+import { requireAuth, requireRole } from "@/middleware/check.auth";
 import type { AppEnv } from "@/types/app-env";
 import { getOrSetCache, invalidateCache } from "@unitime/cache";
 import { prisma } from "@unitime/db";
@@ -37,6 +38,11 @@ users.get("/me", async (c) => {
     return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
   }
 });
+
+// Protect other routes
+users.use("/all", requireRole("ADMIN"));
+users.use("/:id/update", requireAuth);
+users.use("/:id/onboard", requireAuth);
 
 users.get("/all", async (c) => {
   try {

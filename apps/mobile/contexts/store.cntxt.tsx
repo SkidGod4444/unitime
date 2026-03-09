@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/api";
 import {
   useAttendanceStore,
   useCoursesStore,
@@ -93,14 +94,11 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
 
       setLoading(true);
 
-      const origin =
-        process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-
       // 1) Try dashboard bundle first
       if (loggedInUser?.id) {
         try {
-          const res = await fetch(
-            `${origin}/dashboard/${loggedInUser.id}/bundle`,
+          const res = await apiFetch(
+            `/dashboard/${loggedInUser.id}/bundle`,
             {
               headers: {
                 "Cache-Control": "no-cache",
@@ -197,10 +195,8 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
       // Active Session Fallback Check for "Pull to Refresh"
       if (loggedInUser?.id) {
         try {
-          const origin =
-            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-          const dashRes = await fetch(
-            `${origin}/dashboard/${loggedInUser.id}`,
+          const dashRes = await apiFetch(
+            `/dashboard/${loggedInUser.id}`,
             {
               headers: {
                 "Cache-Control": "no-cache",

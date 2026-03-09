@@ -1,9 +1,23 @@
 import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
+import { requireAuth } from "@/middleware/check.auth";
+import type { AppEnv } from "@/types/app-env";
 import { getOrSetCache } from "@unitime/cache";
+import type { UserRole } from "@unitime/db";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
 
-const dashboard = new Hono();
+const dashboard = new Hono<AppEnv>();
+dashboard.use("*", requireAuth);
+
+interface UserWithProfile {
+  id: string;
+  name: string;
+  role: UserRole; 
+  studentProfile: {
+    labGroupId: string | null;
+    organizationId: string | null;
+  } | null;
+}
 
 dashboard.get("/:userId", async (c) => {
   const userId = c.req.param("userId");
@@ -66,6 +80,10 @@ dashboard.get("/:userId", async (c) => {
             course: {
               users: { some: { userId: user.id, status: "APPROVED" } },
             },
+            OR: [
+              { labGroupId: null },
+              { labGroupId: (user as unknown as UserWithProfile).studentProfile?.labGroupId || undefined },
+            ],
           },
           include: {
             course: true,
@@ -131,6 +149,7 @@ dashboard.get("/:userId/bundle", async (c) => {
         const user = await prisma.user.findUnique({
           where: { id: userId },
           include: {
+            studentProfile: true,
             courses: {
               where: { status: "APPROVED" },
               include: { course: true },
@@ -154,7 +173,6 @@ dashboard.get("/:userId/bundle", async (c) => {
         };
 
         const minimalCourses = (userWithCourses.courses || []).map((uc) => ({
-          // return only the minimal subset used by the client home
           id: uc.course.id,
           code: uc.course.code,
           name: uc.course.name,
@@ -162,6 +180,9 @@ dashboard.get("/:userId/bundle", async (c) => {
           classType: uc.course.classType,
           organizationId: uc.course.organizationId,
         }));
+
+        const myLabGroupId =
+          (user as unknown as UserWithProfile).studentProfile?.labGroupId || undefined;
 
         // 2) Today timetable entries for the user
         const todayStr = new Date()
@@ -235,6 +256,10 @@ dashboard.get("/:userId/bundle", async (c) => {
             course: {
               users: { some: { userId: user.id, status: "APPROVED" } },
             },
+            OR: [
+              { labGroupId: null },
+              { labGroupId: myLabGroupId },
+            ],
           },
           include: { course: true },
           orderBy: { createdAt: "desc" },

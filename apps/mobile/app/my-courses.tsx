@@ -1,17 +1,18 @@
 import { useAuth } from "@/contexts/auth.cntxt";
 import { useStore } from "@/contexts/store.cntxt";
+import { apiFetch } from "@/lib/api";
 import { useCoursesStore, useOrgsStore, useProfilesStore } from "@/lib/store";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  RefreshControl,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    FlatList,
+    RefreshControl,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Course } from "../lib/store/timetable";
@@ -58,8 +59,7 @@ export default function MyCoursesScreen() {
     try {
       // LECTURE/TUTORIAL: direct enroll
       setActionLoadingId(course.id);
-      const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
-      const res = await fetch(`${origin}/courses/${course.id}/enroll`, {
+      const res = await apiFetch(`/courses/${course.id}/enroll`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: loggedInUser?.id }),
@@ -89,9 +89,7 @@ export default function MyCoursesScreen() {
           onPress: async () => {
             try {
               setActionLoadingId(courseId);
-              const origin =
-                process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
-              const res = await fetch(`${origin}/courses/${courseId}/enroll`, {
+              const res = await apiFetch(`/courses/${courseId}/enroll`, {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ userId: loggedInUser?.id }),

@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/api";
 import { create } from "zustand";
 
 export interface Notification {
@@ -30,9 +31,7 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
   fetchNotifications: async (userId: string) => {
     try {
       set({ loading: true, error: null });
-      const origin =
-        process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-      const res = await fetch(`${origin}/notifications/${userId}`);
+      const res = await apiFetch(`/notifications/${userId}`);
       const data = await res.json();
 
       if (res.ok && data.success) {
@@ -57,9 +56,7 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
         ),
       }));
 
-      const origin =
-        process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-      await fetch(`${origin}/notifications/${notificationId}/read`, {
+      await apiFetch(`/notifications/${notificationId}/read`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId }),
@@ -79,9 +76,7 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
         })),
       }));
 
-      const origin =
-        process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-      await fetch(`${origin}/notifications/user/${userId}/read-all`, {
+      await apiFetch(`/notifications/user/${userId}/read-all`, {
         method: "PUT",
       });
     } catch (err: any) {

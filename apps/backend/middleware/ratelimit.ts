@@ -1,4 +1,5 @@
 // import { auth } from "@unitime/auth";
+import { AppEnv } from "@/types/app-env";
 import { cache } from "@unitime/cache";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Context, Next } from "hono";
@@ -44,10 +45,13 @@ const ratelimit = {
   }),
 };
 
-export const rateLimitHandler = async (c: Context, next: Next) => {
-  // Try to get user from context (set by auth middleware if enabled)
-  const me = c.get("user") as { $id?: string } | null | undefined;
-  console.log(`Ratelimiting user: ${me?.$id || "anonymous"}`);
+export const rateLimitHandler = async (c: Context<AppEnv>, next: Next) => {
+  // Try to get user from context (set by auth middleware)
+  const user = c.get("user");
+  const requesterId = c.get("requesterId");
+  const userId = requesterId || user?.$id;
+
+  console.log(`Ratelimiting user: ${userId || "anonymous"}`);
   const ip = getClientIp(c);
   const userAgent = getUserAgent(c);
 
@@ -67,10 +71,10 @@ export const rateLimitHandler = async (c: Context, next: Next) => {
   let key: string | undefined;
   let limiter: Ratelimit;
 
-  if (me && me.$id) {
-    key = me.$id || ip || userAgent || "anonymous";
+  if (userId) {
+    key = userId;
   } else {
-    // fallback for completely anonymous users
+    // fallback for anonymous users
     key = ip || userAgent || "anonymous";
   }
 

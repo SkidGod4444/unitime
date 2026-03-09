@@ -1,9 +1,12 @@
 import { ERROR_CODES, createHonoErrorResponse } from "@/lib/error.codes";
+import { requireAuth } from "@/middleware/check.auth";
+import type { AppEnv } from "@/types/app-env";
 import { getOrSetCache, invalidateCache } from "@unitime/cache";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
 
-const courses = new Hono();
+const courses = new Hono<AppEnv>();
+courses.use("*", requireAuth);
 
 courses.get("/:id", async (c) => {
   const id = c.req.param("id");

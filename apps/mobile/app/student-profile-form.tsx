@@ -1,7 +1,8 @@
 import { useAuth } from "@/contexts/auth.cntxt";
+import { apiFetch } from "@/lib/api";
 import {
-  profileSchema,
-  type ProfileFormErrors,
+    profileSchema,
+    type ProfileFormErrors,
 } from "@/lib/schemas/profile.schema";
 import { useOrgsStore } from "@/lib/store";
 import { useLabGroupsStore } from "@/lib/store/lab-groups";
@@ -10,23 +11,22 @@ import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function StudentProfileForm() {
   const router = useRouter();
   const { loggedInUser, setLoggedInUser } = useAuth();
-  const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3001";
 
   // Form state
   const [name, setName] = useState(loggedInUser?.name || "");
@@ -211,7 +211,7 @@ export default function StudentProfileForm() {
     setLoading(true);
 
     try {
-      const response = await fetch(`${origin}/profiles/create`, {
+      const response = await apiFetch("/profiles/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -246,7 +246,7 @@ export default function StudentProfileForm() {
 
       // Mark the user as onboarded on the backend
       if (loggedInUser?.id) {
-        await fetch(`${origin}/users/${loggedInUser.id}/onboard`, {
+        await apiFetch(`/users/${loggedInUser.id}/onboard`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
         });

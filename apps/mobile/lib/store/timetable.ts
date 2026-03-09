@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -57,14 +58,12 @@ export const useTimetableStore = create<TimetablesState>()(
       fetchTimetable: async (userId, day) => {
         set({ loading: true, error: null });
         try {
-          const origin =
-            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-          let url = `${origin}/timetable/${userId}`;
+          let url = `/timetable/${userId}`;
           if (day) {
             url += `?day=${encodeURIComponent(day)}`;
           }
 
-          const res = await fetch(url);
+          const res = await apiFetch(url);
           const data = await res.json();
 
           if (res.ok && data.success) {
@@ -85,9 +84,7 @@ export const useTimetableStore = create<TimetablesState>()(
       fetchWeekTimetable: async (userId) => {
         set({ loading: true, error: null });
         try {
-          const origin =
-            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-          const res = await fetch(`${origin}/timetable/week/${userId}`);
+          const res = await apiFetch(`/timetable/week/${userId}`);
           const data = await res.json();
 
           if (res.ok && data.success) {
@@ -107,13 +104,10 @@ export const useTimetableStore = create<TimetablesState>()(
       createTimetableEntry: async (token, entry) => {
         set({ loading: true, error: null });
         try {
-          const origin =
-            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-          const res = await fetch(`${origin}/timetable`, {
+          const res = await apiFetch("/timetable", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify(entry),
           });
@@ -129,13 +123,8 @@ export const useTimetableStore = create<TimetablesState>()(
       deleteTimetableEntry: async (token, id) => {
         set({ loading: true, error: null });
         try {
-          const origin =
-            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-          const res = await fetch(`${origin}/timetable/${id}`, {
+          const res = await apiFetch(`/timetable/${id}`, {
             method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
           });
           const data = await res.json();
           set({ loading: false });

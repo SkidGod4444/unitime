@@ -1,8 +1,11 @@
+import { requireAuth } from "@/middleware/check.auth";
+import type { AppEnv } from "@/types/app-env";
 import { getOrSetCache } from "@unitime/cache";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
 
-const history = new Hono();
+const history = new Hono<AppEnv>();
+history.use("*", requireAuth);
 
 // Get history logs for a user (personal + organizational)
 history.get("/:userId", async (c) => {

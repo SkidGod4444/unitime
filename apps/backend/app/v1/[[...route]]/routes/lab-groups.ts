@@ -1,15 +1,16 @@
 import {
-  createHonoErrorResponse,
-  ERROR_CODES,
-  RESOURCE_ERRORS,
+    createHonoErrorResponse,
+    ERROR_CODES,
+    RESOURCE_ERRORS,
 } from "@/lib/error.codes";
-import { requireRole } from "@/middleware/check.auth";
+import { requireAuth, requireRole } from "@/middleware/check.auth";
 import type { AppEnv } from "@/types/app-env";
 import { getOrSetCache, invalidateCache } from "@unitime/cache";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
 
 const labGroups = new Hono<AppEnv>();
+labGroups.use("*", requireAuth);
 
 // ---------------------------------------------------------------------------
 // GET /lab-groups?organizationId=xxx — list all groups for an organization
@@ -50,7 +51,7 @@ labGroups.get("/", async (c) => {
 // ---------------------------------------------------------------------------
 // POST /lab-groups — create a lab group for an org (ADMIN/REPRESENTATIVE)
 // ---------------------------------------------------------------------------
-labGroups.post("/", requireRole("ADMIN", "REPRESENTATIVE"), async (c) => {
+labGroups.post("/", requireRole("REPRESENTATIVE", "PROFESSOR"), async (c) => {
   const requesterId = c.get("requesterId");
   if (!requesterId)
     return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
@@ -93,7 +94,7 @@ labGroups.post("/", requireRole("ADMIN", "REPRESENTATIVE"), async (c) => {
 // ---------------------------------------------------------------------------
 // DELETE /lab-groups/:id — delete an empty group (ADMIN/REPRESENTATIVE)
 // ---------------------------------------------------------------------------
-labGroups.delete("/:id", requireRole("ADMIN", "REPRESENTATIVE"), async (c) => {
+labGroups.delete("/:id", requireRole("REPRESENTATIVE"), async (c) => {
   const groupId = c.req.param("id");
 
   try {

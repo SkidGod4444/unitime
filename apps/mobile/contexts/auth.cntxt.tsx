@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/api";
 import { account, getUser } from "@/lib/auth";
 import { setAuthTokenProvider } from "@/lib/auth.token";
 import { isInstitutionalEmail } from "@/utils/email.validator";
@@ -5,11 +6,11 @@ import { UserT } from "@unitime/types";
 import { router } from "expo-router";
 import { usePostHog } from "posthog-react-native";
 import React, {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useState,
+    createContext,
+    ReactNode,
+    useContext,
+    useEffect,
+    useState,
 } from "react";
 import { ID } from "react-native-appwrite";
 
@@ -45,7 +46,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loggedInUser, setLoggedInUser] = useState<UserT | null>(null);
   const [error, setError] = useState("");
   const [jwt, setJwt] = useState<string | null>(null);
-  const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3001";
   const posthog = usePostHog();
 
   useEffect(() => {
@@ -88,7 +88,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (authToken) {
         headers["Authorization"] = `Bearer ${authToken}`;
       }
-      const response = await fetch(`${origin}/users?email=${email}`, {
+      const response = await apiFetch(`/users?email=${email}`, {
         method: "GET",
         headers,
       });
@@ -107,7 +107,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         // User is authenticated but not in DB — create them now
         if (appwriteUser) {
           console.log("User not in DB, creating...");
-          const createRes = await fetch(`${origin}/users/create`, {
+          const createRes = await apiFetch("/users/create", {
             method: "POST",
             headers,
             body: JSON.stringify({
@@ -206,7 +206,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (jwt) {
         headers["Authorization"] = `Bearer ${jwt}`;
       }
-      await fetch(`${origin}/user/update/${loggedInUser?.id}`, {
+      await apiFetch(`/user/update/${loggedInUser?.id}`, {
         method: "PUT",
         headers,
         body: JSON.stringify({

@@ -1,4 +1,5 @@
 import { useAuth } from "@/contexts/auth.cntxt";
+import { apiFetch } from "@/lib/api";
 import { useCoursesStore } from "@/lib/store/courses";
 import { useLabGroupsStore } from "@/lib/store/lab-groups";
 import { TimetableEntry, useTimetableStore } from "@/lib/store/timetable";
@@ -6,18 +7,18 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Modal,
-  Pressable,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Modal,
+    Pressable,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import DraggableFlatList, {
-  RenderItemParams,
-  ScaleDecorator,
+    RenderItemParams,
+    ScaleDecorator,
 } from "react-native-draggable-flatlist";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -61,9 +62,7 @@ export default function ManageTimetableScreen() {
   const loadAll = async () => {
     try {
       setRefreshing(true);
-      const origin =
-        process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-      const res = await fetch(`${origin}/timetable`);
+      const res = await apiFetch("/timetable");
       const data = await res.json();
       if (data.success) {
         setAllEntries(data.timetables || []);

@@ -1,8 +1,8 @@
+import type { AppEnv } from "@/types/app-env";
+import type { UserRole } from "@unitime/db";
+import { prisma } from "@unitime/db";
 import type { MiddlewareHandler } from "hono";
 import { Account, Client, Models } from "node-appwrite";
-import { prisma } from "@unitime/db";
-import type { UserRole } from "@unitime/db";
-import type { AppEnv } from "@/types/app-env";
 
 const APPWRITE_ENDPOINT = process.env.APPWRITE_ENDPOINT as string;
 const APPWRITE_PROJECT_ID = process.env.APPWRITE_PROJECT_ID as string;
@@ -22,10 +22,14 @@ function extractJwt(
 ): string | null {
   // 1. Try Authorization: Bearer <jwt> header first (for React Native / mobile clients)
   if (authHeader && authHeader.startsWith("Bearer ")) {
-    return authHeader.slice(7).trim();
+    const jwt = authHeader.slice(7).trim();
+    console.log(`[Auth] Extracted JWT from header (len: ${jwt.length})`);
+    return jwt;
   }
   // 2. Fall back to cookie (for browser clients)
-  return parseCookie(cookieHeader, APPWRITE_JWT_COOKIE);
+  const cookieJwt = parseCookie(cookieHeader, APPWRITE_JWT_COOKIE);
+  if (cookieJwt) console.log(`[Auth] Extracted JWT from cookie (len: ${cookieJwt.length})`);
+  return cookieJwt;
 }
 
 async function getCurrentUserFromRequest(
@@ -44,8 +48,10 @@ async function getCurrentUserFromRequest(
 
   try {
     const me = await account.get();
+    console.log(`[Auth] Appwrite user found: ${me.$id} (${me.email})`);
     return me;
-  } catch {
+  } catch (err) {
+    console.error(`[Auth] Appwrite account.get() failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
     return null;
   }
 }
@@ -53,8 +59,15 @@ async function getCurrentUserFromRequest(
 // Hono middleware: attaches `user` to context
 export const authMiddleware: MiddlewareHandler<AppEnv> = async (c, next) => {
   const cookieHeader = c.req.raw.headers.get("cookie");
-  const authHeader = c.req.raw.headers.get("authorization");
-  const user = await getCurrentUserFromRequest(cookieHeader, authHeader);
+  const authHeader = c.req.header("Authorization");
+  const token = authHeader?.split(" ")[1];
+
+  if (!token) {
+    console.log(`[Auth] Incoming request: ${c.req.method} ${c.req.path}`);
+    if (!authHeader && !cookieHeader) console.log("[Auth] No auth headers present");
+  }
+
+  const user = await getCurrentUserFromRequest(cookieHeader, authHeader || null);
 
   // Attach Appwrite user (or null)
   c.set("user", user);
@@ -79,7 +92,29 @@ export const authMiddleware: MiddlewareHandler<AppEnv> = async (c, next) => {
   await next();
 };
 
-// Role guard middleware: ensures the authenticated DB user has one of the required roles
+// Auth guard: ensures the user is authenticated and exists in the database
+export const requireAuth: MiddlewareHandler<AppEnv> = async (c, next) => {
+  const user = c.get("user") as Models.User<Models.Preferences> | null;
+  if (!user) {
+    return c.json({ error: "You are not authorized!" }, 401);
+  }
+  try {
+    let dbUser = await prisma.user.findUnique({ where: { id: user.$id } });
+    if (!dbUser && user.email) {
+      dbUser = await prisma.user.findUnique({ where: { email: user.email } });
+    }
+    if (!dbUser) {
+      return c.json({ error: "Account not linked" }, 403);
+    }
+    c.set("requesterId", dbUser.id);
+    c.set("requesterRole", dbUser.role);
+    await next();
+  } catch {
+    return c.json({ error: "Authentication check failed" }, 500);
+  }
+};
+
+// Role guard middleware: ensures the authenticated DB user has one of the required roles OR is an ADMIN
 export const requireRole = (
   ...roles: Array<UserRole>
 ): MiddlewareHandler<AppEnv> => {
@@ -89,7 +124,6 @@ export const requireRole = (
       return c.json({ error: "You are not authorized!" }, 401);
     }
     try {
-      // Try linking by Appwrite user ID first; fall back to email if needed.
       let dbUser = await prisma.user.findUnique({ where: { id: user.$id } });
       if (!dbUser && user.email) {
         dbUser = await prisma.user.findUnique({ where: { email: user.email } });
@@ -97,13 +131,15 @@ export const requireRole = (
       if (!dbUser) {
         return c.json({ error: "Account not linked" }, 403);
       }
-      if (!roles.includes(dbUser.role)) {
+      
+      // Implicitly allow ADMIN role for all guarded routes
+      if (dbUser.role === "ADMIN" || roles.includes(dbUser.role)) {
+        c.set("requesterId", dbUser.id);
+        c.set("requesterRole", dbUser.role);
+        await next();
+      } else {
         return c.json({ error: "Forbidden" }, 403);
       }
-      // useful for downstream handlers
-      c.set("requesterId", dbUser.id);
-      c.set("requesterRole", dbUser.role);
-      await next();
     } catch {
       return c.json({ error: "Authorization check failed" }, 500);
     }
