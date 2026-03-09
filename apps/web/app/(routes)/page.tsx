@@ -25,7 +25,8 @@ export default function Home() {
               New
             </span>
             <span className="text-sm text-[#3d3230] truncate">
-              Beta <span className="font-semibold text-[#1a1614]">v1.0.1</span> is released
+              Beta <span className="font-semibold text-[#1a1614]">v1.0.1</span>{" "}
+              is released
             </span>
           </div>
           <a
@@ -172,8 +173,8 @@ export default function Home() {
                   </VerifiedLink>
                 </div>
                 <p className="text-[#9d8f8a] text-xs mt-3 italic">
-                  If the link doesn&apos;t include devwtf.in — it&apos;s not
-                  the real app and doesn&apos;t belong to us.
+                  If the link doesn&apos;t include devwtf.in — it&apos;s not the
+                  real app and doesn&apos;t belong to us.
                 </p>
               </div>
             </div>
@@ -195,12 +196,13 @@ export default function Home() {
           </p>
 
           <p className="text-[#3d3230] leading-relaxed">
-            Name:{" "}
-            <strong className="text-[#1a1614]">Saidev Dhal</strong>
+            Name: <strong className="text-[#1a1614]">Saidev Dhal</strong>
           </p>
           <p className="text-[#3d3230] leading-relaxed mt-1">
             Admission No:{" "}
-            <code className="font-mono text-sm text-[#6b5f5a]">25SCSE1680001</code>
+            <code className="font-mono text-sm text-[#6b5f5a]">
+              25SCSE1680001
+            </code>
           </p>
           <p className="text-[#3d3230] leading-relaxed mt-1">
             University Email:{" "}
@@ -253,11 +255,9 @@ export default function Home() {
 
         <Divider />
 
-
         <footer className="text-center py-4">
           <p className="font-lora text-lg md:text-xl text-[#9d8f8a] italic leading-relaxed">
-            &ldquo;Made for the students,{" "}
-            <br className="hidden sm:block" />
+            &ldquo;Made for the students, <br className="hidden sm:block" />
             by the students of{" "}
             <span className="text-red-500/70">Galgotias University</span>
             .&rdquo;
@@ -341,8 +341,6 @@ function VerifiedLink({
   );
 }
 
-
-
 function GitIcon() {
   return (
     <svg
@@ -370,4 +368,3 @@ function WhatsAppIcon() {
     </svg>
   );
 }
-

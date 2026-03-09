@@ -127,7 +127,9 @@ export default function Chat() {
           <View className="flex-row items-center justify-end mt-1 space-x-1">
             <Text
               className={`text-[10px] ${
-                msg.isSent ? "text-blue-200" : "text-gray-400 dark:text-zinc-400"
+                msg.isSent
+                  ? "text-blue-200"
+                  : "text-gray-400 dark:text-zinc-400"
               }`}
             >
               {msg.timestamp}
@@ -173,7 +175,9 @@ export default function Chat() {
               <Text className="text-zinc-900 dark:text-zinc-100 text-base font-bold font-lora">
                 Dr. Sarah Wilson
               </Text>
-              <Text className="text-gray-400 dark:text-zinc-500 text-xs font-medium">Online</Text>
+              <Text className="text-gray-400 dark:text-zinc-500 text-xs font-medium">
+                Online
+              </Text>
             </View>
           </View>
           <View className="flex-row items-center space-x-4 gap-4">

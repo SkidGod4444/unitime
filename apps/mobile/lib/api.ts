@@ -1,6 +1,7 @@
 import { getAuthToken } from "@/lib/auth.token";
 
-export const apiOrigin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+export const apiOrigin =
+  process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
 
 export const withAuth = (init?: RequestInit): RequestInit => {
   const token = getAuthToken();
@@ -15,4 +16,3 @@ export const apiFetch = (path: string, init?: RequestInit) => {
     : `${apiOrigin}${path.startsWith("/") ? path : "/" + path}`;
   return fetch(url, withAuth(init));
 };
-

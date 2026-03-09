@@ -28,8 +28,8 @@ type EnrollmentState = {
   loading: boolean;
   fetchEnrollments: (organizationId?: string | null) => Promise<void>;
   updateEnrollmentStatus: (
-    enrollmentId: string, 
-    status: "APPROVED" | "REJECTED"
+    enrollmentId: string,
+    status: "APPROVED" | "REJECTED",
   ) => Promise<void>;
 };
 
@@ -41,8 +41,9 @@ export const useEnrollmentStore = create<EnrollmentState>()(
       fetchEnrollments: async (organizationId) => {
         set({ loading: true });
         try {
-          const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
-          
+          const origin =
+            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
+
           let url = `${origin}/admin/enrollments/pending`;
           if (organizationId) {
             url += `?organizationId=${organizationId}`;
@@ -67,29 +68,41 @@ export const useEnrollmentStore = create<EnrollmentState>()(
       },
       updateEnrollmentStatus: async (enrollmentId, status) => {
         try {
-          const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
+          const origin =
+            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
           const token = getAuthToken();
-          const headers: Record<string, string> = { "Content-Type": "application/json" };
+          const headers: Record<string, string> = {
+            "Content-Type": "application/json",
+          };
           if (token) headers["Authorization"] = `Bearer ${token}`;
-          const res = await fetch(`${origin}/admin/enrollments/${enrollmentId}/status`, {
-            method: "PATCH",
-            headers,
-            body: JSON.stringify({ status }),
-          });
+          const res = await fetch(
+            `${origin}/admin/enrollments/${enrollmentId}/status`,
+            {
+              method: "PATCH",
+              headers,
+              body: JSON.stringify({ status }),
+            },
+          );
           const data = await res.json();
           if (res.status === 401) {
             throw new Error("Session expired. Please sign in again.");
           }
           if (res.status === 403) {
-            throw new Error("Insufficient permissions to moderate enrollments.");
+            throw new Error(
+              "Insufficient permissions to moderate enrollments.",
+            );
           }
           if (res.ok && data.success) {
             // Optimistically remove the enrollment from the list
             set({
-              enrollments: get().enrollments.filter((e) => e.id !== enrollmentId),
+              enrollments: get().enrollments.filter(
+                (e) => e.id !== enrollmentId,
+              ),
             });
           } else {
-            throw new Error(data.message || "Failed to update enrollment status");
+            throw new Error(
+              data.message || "Failed to update enrollment status",
+            );
           }
         } catch (error) {
           console.error("Error updating enrollment status:", error);

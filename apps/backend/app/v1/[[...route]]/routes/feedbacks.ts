@@ -10,7 +10,8 @@ const feedbacks = new Hono<AppEnv>();
 // Create feedback (authenticated user)
 feedbacks.post("/", async (c) => {
   const requesterId = c.get("requesterId");
-  if (!requesterId) return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
+  if (!requesterId)
+    return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
 
   const schema = z
     .object({
@@ -51,7 +52,8 @@ feedbacks.post("/", async (c) => {
 // List current user's feedbacks
 feedbacks.get("/my", async (c) => {
   const requesterId = c.get("requesterId");
-  if (!requesterId) return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
+  if (!requesterId)
+    return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
 
   try {
     const list = await prisma.feedback.findMany({
@@ -88,7 +90,9 @@ feedbacks.get("/admin", requireRole("ADMIN"), async (c) => {
 // Admin: update feedback status
 feedbacks.patch("/:id/status", requireRole("ADMIN"), async (c) => {
   const id = c.req.param("id");
-  const schema = z.object({ status: z.enum(["NEW", "ACKNOWLEDGED", "RESOLVED"]) }).strict();
+  const schema = z
+    .object({ status: z.enum(["NEW", "ACKNOWLEDGED", "RESOLVED"]) })
+    .strict();
   let body: z.infer<typeof schema>;
   try {
     body = schema.parse(await c.req.json());

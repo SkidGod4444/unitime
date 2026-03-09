@@ -538,7 +538,10 @@ export default function AlarmScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-zinc-900" edges={["top"]}>
+    <SafeAreaView
+      className="flex-1 bg-gray-50 dark:bg-zinc-900"
+      edges={["top"]}
+    >
       {/* ── Header ── */}
       <View className="flex-row items-center justify-between px-5 pt-2 pb-4">
         <View className="flex-row items-center gap-3">

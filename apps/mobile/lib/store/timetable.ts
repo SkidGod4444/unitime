@@ -37,7 +37,10 @@ type TimetablesState = {
   setError: (error: string | null) => void;
   fetchTimetable: (userId: string, day?: string) => Promise<void>;
   fetchWeekTimetable: (userId: string) => Promise<void>;
-  createTimetableEntry: (token: string, entry: Omit<TimetableEntry, "id" | "course"> & { labGroupId?: string }) => Promise<boolean>;
+  createTimetableEntry: (
+    token: string,
+    entry: Omit<TimetableEntry, "id" | "course"> & { labGroupId?: string },
+  ) => Promise<boolean>;
   deleteTimetableEntry: (token: string, id: string) => Promise<boolean>;
 };
 

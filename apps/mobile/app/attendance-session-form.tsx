@@ -9,13 +9,13 @@ import * as Location from "expo-location";
 import { Stack, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
-    Alert,
-    FlatList,
-    Pressable,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  FlatList,
+  Pressable,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -102,13 +102,17 @@ export default function AttendanceSessionForm() {
 
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [selectedClass, setSelectedClass] = useState<OrgT | null>(null);
-  
+
   const [courses, setCourses] = useState<Course[]>([]);
   const [classesList, setClassesList] = useState<OrgT[]>([]);
 
   const [selectedTime, setSelectedTime] = useState(5);
-  const [labGroups, setLabGroups] = useState<{ id: string; name: string }[]>([]);
-  const [selectedLabGroupId, setSelectedLabGroupId] = useState<string | null>(null);
+  const [labGroups, setLabGroups] = useState<{ id: string; name: string }[]>(
+    [],
+  );
+  const [selectedLabGroupId, setSelectedLabGroupId] = useState<string | null>(
+    null,
+  );
   // Optional: keep students empty or load dynamically based on selected class
   const [students, setStudents] = useState<Student[]>([]);
 
@@ -116,8 +120,12 @@ export default function AttendanceSessionForm() {
   const [isClassDropdownOpen, setClassDropdownOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [location, setLocation] = useState<{ lat: number; lon: number } | null>(null);
-  const [locationStatus, setLocationStatus] = useState<"loading" | "ok" | "denied">("loading");
+  const [location, setLocation] = useState<{ lat: number; lon: number } | null>(
+    null,
+  );
+  const [locationStatus, setLocationStatus] = useState<
+    "loading" | "ok" | "denied"
+  >("loading");
   const [geofenceRadius, setGeofenceRadius] = useState(75);
 
   useEffect(() => {
@@ -126,15 +134,22 @@ export default function AttendanceSessionForm() {
       setClassesList(allOrgs);
       if (allCourses.length > 0) setSelectedCourse(allCourses[0]);
       if (allOrgs.length > 0) setSelectedClass(allOrgs[0]);
-    } else if (loggedInUser?.role === "REPRESENTATIVE" || loggedInUser?.role === "PROFESSOR") {
+    } else if (
+      loggedInUser?.role === "REPRESENTATIVE" ||
+      loggedInUser?.role === "PROFESSOR"
+    ) {
       const userAny = loggedInUser as any;
       const userOrgId = userAny.studentProfile?.organizationId;
       const userOrg = allOrgs.find((o) => o.id === userOrgId) || null;
       setSelectedClass(userOrg);
       setClassesList(userOrg ? [userOrg] : []);
 
-      const userEnrolledCourseIds = Array.isArray(userAny.courses) ? userAny.courses.map((c: any) => c.courseId) : [];
-      const userCourses = allCourses.filter((c: Course) => userEnrolledCourseIds.includes(c.id));
+      const userEnrolledCourseIds = Array.isArray(userAny.courses)
+        ? userAny.courses.map((c: any) => c.courseId)
+        : [];
+      const userCourses = allCourses.filter((c: Course) =>
+        userEnrolledCourseIds.includes(c.id),
+      );
       setCourses(userCourses);
       if (userCourses.length > 0) setSelectedCourse(userCourses[0]);
     }
@@ -144,38 +159,50 @@ export default function AttendanceSessionForm() {
   useEffect(() => {
     if (selectedClass) {
       if (loggedInUser?.role === "ADMIN") {
-         const filteredCourses = allCourses.filter(c => c.organizationId === selectedClass.id);
-         setCourses(filteredCourses);
-         
-         // If current selectedCourse is not in the new filtered list, reset it.
-         if (filteredCourses.length > 0) {
-            if (!selectedCourse || !filteredCourses.find(c => c.id === selectedCourse.id)) {
-               setSelectedCourse(filteredCourses[0]);
-            }
-         } else {
-            setSelectedCourse(null);
-         }
+        const filteredCourses = allCourses.filter(
+          (c) => c.organizationId === selectedClass.id,
+        );
+        setCourses(filteredCourses);
+
+        // If current selectedCourse is not in the new filtered list, reset it.
+        if (filteredCourses.length > 0) {
+          if (
+            !selectedCourse ||
+            !filteredCourses.find((c) => c.id === selectedCourse.id)
+          ) {
+            setSelectedCourse(filteredCourses[0]);
+          }
+        } else {
+          setSelectedCourse(null);
+        }
       } else {
-         // For REPRESENTATIVE and PROFESSOR, we also ensure enrolled courses match the org
-         const userAny = loggedInUser as any;
-         const userEnrolledCourseIds = Array.isArray(userAny.courses) ? userAny.courses.map((c: any) => c.courseId) : [];
-         const filteredCourses = allCourses.filter(
-            (c: Course) => userEnrolledCourseIds.includes(c.id) && c.organizationId === selectedClass.id
-         );
-         setCourses(filteredCourses);
-         
-         if (filteredCourses.length > 0) {
-            if (!selectedCourse || !filteredCourses.find(c => c.id === selectedCourse.id)) {
-               setSelectedCourse(filteredCourses[0]);
-            }
-         } else {
-            setSelectedCourse(null);
-         }
+        // For REPRESENTATIVE and PROFESSOR, we also ensure enrolled courses match the org
+        const userAny = loggedInUser as any;
+        const userEnrolledCourseIds = Array.isArray(userAny.courses)
+          ? userAny.courses.map((c: any) => c.courseId)
+          : [];
+        const filteredCourses = allCourses.filter(
+          (c: Course) =>
+            userEnrolledCourseIds.includes(c.id) &&
+            c.organizationId === selectedClass.id,
+        );
+        setCourses(filteredCourses);
+
+        if (filteredCourses.length > 0) {
+          if (
+            !selectedCourse ||
+            !filteredCourses.find((c) => c.id === selectedCourse.id)
+          ) {
+            setSelectedCourse(filteredCourses[0]);
+          }
+        } else {
+          setSelectedCourse(null);
+        }
       }
     } else {
-        // If no class selected, clear courses
-        setCourses([]);
-        setSelectedCourse(null);
+      // If no class selected, clear courses
+      setCourses([]);
+      setSelectedCourse(null);
     }
   }, [selectedClass, allCourses, loggedInUser, selectedCourse]);
 
@@ -187,21 +214,29 @@ export default function AttendanceSessionForm() {
         return;
       }
       try {
-        const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-        const res = await fetch(`${origin}/courses/${selectedCourse.id}/students`);
+        const origin =
+          process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+        const res = await fetch(
+          `${origin}/courses/${selectedCourse.id}/students`,
+        );
         if (res.ok) {
           const data = await res.json();
           if (data.success && Array.isArray(data.students)) {
-            let filteredStudents = data.students.filter((s: any) => s.id !== loggedInUser?.id);
+            let filteredStudents = data.students.filter(
+              (s: any) => s.id !== loggedInUser?.id,
+            );
             if (selectedClass) {
               filteredStudents = filteredStudents.filter(
-                (s: any) => s.studentProfile?.organizationId === selectedClass.id
+                (s: any) =>
+                  s.studentProfile?.organizationId === selectedClass.id,
               );
             }
             if (selectedLabGroupId) {
               const members = await fetchLabGroupMembers(selectedLabGroupId);
               const allowed = new Set(members.map((m) => m.id));
-              filteredStudents = filteredStudents.filter((s: any) => allowed.has(s.id));
+              filteredStudents = filteredStudents.filter((s: any) =>
+                allowed.has(s.id),
+              );
             }
             setStudents(
               filteredStudents.map((s: any) => ({
@@ -209,7 +244,7 @@ export default function AttendanceSessionForm() {
                 name: s.name,
                 rollNo: s.studentProfile?.admissionNumber || s.email,
                 status: null,
-              }))
+              })),
             );
           }
         }
@@ -218,12 +253,22 @@ export default function AttendanceSessionForm() {
       }
     };
     fetchStudents();
-  }, [selectedCourse, selectedClass, loggedInUser, selectedLabGroupId, fetchLabGroupMembers]);
+  }, [
+    selectedCourse,
+    selectedClass,
+    loggedInUser,
+    selectedLabGroupId,
+    fetchLabGroupMembers,
+  ]);
 
   // Fetch lab groups when LAB course selected
   useEffect(() => {
     (async () => {
-      if (selectedCourse && (selectedCourse as any).classType === "LAB" && selectedCourse.organizationId) {
+      if (
+        selectedCourse &&
+        (selectedCourse as any).classType === "LAB" &&
+        selectedCourse.organizationId
+      ) {
         const groups = await fetchOrgLabGroups(selectedCourse.organizationId);
         setLabGroups(groups);
         setSelectedLabGroupId(groups[0]?.id ?? null);
@@ -238,7 +283,7 @@ export default function AttendanceSessionForm() {
   // Professors often keeps the app open well beyond that before creating a session.
   useEffect(() => {
     refreshJwt().catch(() => {});
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -277,8 +322,11 @@ export default function AttendanceSessionForm() {
       return;
     }
     if (!selectedCourse) {
-       Alert.alert("Missing Details", "Please select a course to start a session.");
-       return;
+      Alert.alert(
+        "Missing Details",
+        "Please select a course to start a session.",
+      );
+      return;
     }
     if ((selectedCourse as any).classType === "LAB" && !selectedLabGroupId) {
       Alert.alert("Missing Details", "Please select a lab group.");
@@ -287,12 +335,15 @@ export default function AttendanceSessionForm() {
 
     setIsSubmitting(true);
     try {
-      const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+      const origin =
+        process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
       const startTime = new Date();
       const endTime = new Date(startTime.getTime() + selectedTime * 60000);
 
       // Create Session
-      const manualPresentIds = students.filter(s => s.status === "present").map(s => s.id);
+      const manualPresentIds = students
+        .filter((s) => s.status === "present")
+        .map((s) => s.id);
 
       // Helper: makes the session create POST and returns {res, data}
       const doCreateSession = async () => {
@@ -306,7 +357,10 @@ export default function AttendanceSessionForm() {
               startTime: startTime.toISOString(),
               endTime: endTime.toISOString(),
               manualPresentIds,
-              labGroupId: (selectedCourse as any).classType === "LAB" ? selectedLabGroupId : undefined,
+              labGroupId:
+                (selectedCourse as any).classType === "LAB"
+                  ? selectedLabGroupId
+                  : undefined,
               geofenceRadius,
             }),
           }),
@@ -323,116 +377,140 @@ export default function AttendanceSessionForm() {
         console.log("Got 401 on session create, attempting JWT refresh...");
         const newToken = await refreshJwt();
         if (!newToken) {
-          Alert.alert("Not Authenticated", "Could not refresh your session. Please sign in again.");
+          Alert.alert(
+            "Not Authenticated",
+            "Could not refresh your session. Please sign in again.",
+          );
           setIsSubmitting(false);
           return;
         }
         // Retry with the fresh token
         ({ res, data } = await doCreateSession());
         if (res.status === 401) {
-          Alert.alert("Not Authenticated", "Session expired. Please sign in again.");
+          Alert.alert(
+            "Not Authenticated",
+            "Session expired. Please sign in again.",
+          );
           setIsSubmitting(false);
           return;
         }
       }
 
       if (res.status === 403) {
-        Alert.alert("Insufficient permissions", "You do not have access to create sessions.");
+        Alert.alert(
+          "Insufficient permissions",
+          "You do not have access to create sessions.",
+        );
         setIsSubmitting(false);
         return;
       }
 
-
-
       if (res.ok && data.success) {
-        
         // Push notification logic from frontend:
         try {
           // Fetch enrolled students for the created session's course
-          const studentsRes = await fetch(`${origin}/courses/${selectedCourse.id}/students`);
-          
+          const studentsRes = await fetch(
+            `${origin}/courses/${selectedCourse.id}/students`,
+          );
+
           if (studentsRes.ok) {
             const studentsData = await studentsRes.json();
-            
-            if (studentsData.success && Array.isArray(studentsData.students)) {
-                // Filter out the professor themselves
-                let targetStudents = studentsData.students.filter((s: any) => s.id !== loggedInUser?.id);
-                
-                // If a specific section/class is selected (e.g by Admin), ensure we only notify those students.
-                // OrganizationId usually resides inside the studentProfile.
-                if (selectedClass) {
-                  targetStudents = targetStudents.filter(
-                    (s: any) => s.studentProfile?.organizationId === selectedClass.id
-                  );
-                }
 
-                // Skip sending ping/actionUrls into those who received manual attendance marks.
-                const manualAbsentIds = students.filter(s => s.status === "absent").map(s => s.id);
+            if (studentsData.success && Array.isArray(studentsData.students)) {
+              // Filter out the professor themselves
+              let targetStudents = studentsData.students.filter(
+                (s: any) => s.id !== loggedInUser?.id,
+              );
+
+              // If a specific section/class is selected (e.g by Admin), ensure we only notify those students.
+              // OrganizationId usually resides inside the studentProfile.
+              if (selectedClass) {
                 targetStudents = targetStudents.filter(
-                  (s: any) => !manualPresentIds.includes(s.id) && !manualAbsentIds.includes(s.id)
+                  (s: any) =>
+                    s.studentProfile?.organizationId === selectedClass.id,
+                );
+              }
+
+              // Skip sending ping/actionUrls into those who received manual attendance marks.
+              const manualAbsentIds = students
+                .filter((s) => s.status === "absent")
+                .map((s) => s.id);
+              targetStudents = targetStudents.filter(
+                (s: any) =>
+                  !manualPresentIds.includes(s.id) &&
+                  !manualAbsentIds.includes(s.id),
+              );
+
+              // Gather Expo tokens
+              const tokens = targetStudents
+                .map((s: any) => s.expoPushToken)
+                .filter(Boolean);
+
+              if (tokens.length > 0) {
+                console.log(
+                  `Sending explicit frontend notifications to ${tokens.length} devices...`,
                 );
 
-                // Gather Expo tokens
-                const tokens = targetStudents
-                  .map((s: any) => s.expoPushToken)
-                  .filter(Boolean);
+                const pushPayload = tokens.map((token: string) => ({
+                  to: token,
+                  sound: "default",
+                  title: "Attendance Started",
+                  body: `Attendance for ${selectedCourse.name} is now open! Please open the app or tap here to check in.`,
+                  data: {
+                    courseId: selectedCourse.id,
+                    sessionId: data.qrSession.id,
+                  },
+                }));
 
-                if (tokens.length > 0) {
-                  console.log(`Sending explicit frontend notifications to ${tokens.length} devices...`);
+                // Dispatch to Expo
+                await fetch("https://exp.host/--/api/v2/push/send", {
+                  method: "POST",
+                  headers: {
+                    Accept: "application/json",
+                    "Accept-encoding": "gzip, deflate",
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify(pushPayload),
+                });
+              }
 
-                  const pushPayload = tokens.map((token: string) => ({
-                    to: token,
-                    sound: 'default',
-                    title: 'Attendance Started',
-                    body: `Attendance for ${selectedCourse.name} is now open! Please open the app or tap here to check in.`,
-                    data: { courseId: selectedCourse.id, sessionId: data.qrSession.id }
-                  }));
+              // Dispatch native in-app notification
+              try {
+                const notifPayload = {
+                  title: "Attendance Started",
+                  body: `Attendance for ${selectedCourse.name} is now open! Tap here to check in.`,
+                  type: "ATTENDANCE",
+                  userId: null,
+                  organizationId: selectedClass ? selectedClass.id : null,
+                  actionUrl: "/tap-to-mark",
+                };
 
-                  // Dispatch to Expo
-                  await fetch('https://exp.host/--/api/v2/push/send', {
-                    method: 'POST',
-                    headers: {
-                      Accept: 'application/json',
-                      'Accept-encoding': 'gzip, deflate',
-                      'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(pushPayload),
+                // If no specific class is selected, creating notifications one-by-one
+                if (!selectedClass && targetStudents.length > 0) {
+                  await Promise.all(
+                    targetStudents.map((s: any) =>
+                      fetch(`${origin}/notifications`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          ...notifPayload,
+                          userId: s.id,
+                          organizationId: null,
+                        }),
+                      }),
+                    ),
+                  );
+                } else if (selectedClass) {
+                  // Create one Organization-level notification
+                  await fetch(`${origin}/notifications`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(notifPayload),
                   });
                 }
-                
-                // Dispatch native in-app notification
-                try {
-                  const notifPayload = {
-                    title: 'Attendance Started',
-                    body: `Attendance for ${selectedCourse.name} is now open! Tap here to check in.`,
-                    type: 'ATTENDANCE',
-                    userId: null,
-                    organizationId: selectedClass ? selectedClass.id : null,
-                    actionUrl: '/tap-to-mark'
-                  };
-
-                  // If no specific class is selected, creating notifications one-by-one
-                  if (!selectedClass && targetStudents.length > 0) {
-                     await Promise.all(
-                       targetStudents.map((s: any) => 
-                         fetch(`${origin}/notifications`, {
-                           method: "POST",
-                           headers: { "Content-Type": "application/json" },
-                           body: JSON.stringify({ ...notifPayload, userId: s.id, organizationId: null })
-                         })
-                       )
-                     );
-                  } else if (selectedClass) {
-                     // Create one Organization-level notification
-                     await fetch(`${origin}/notifications`, {
-                       method: "POST",
-                       headers: { "Content-Type": "application/json" },
-                       body: JSON.stringify(notifPayload)
-                     });
-                  }
-                } catch (notifErr) {
-                   console.log("Failed to create in-app notifications:", notifErr);
-                }
+              } catch (notifErr) {
+                console.log("Failed to create in-app notifications:", notifErr);
+              }
             }
           }
         } catch (pushErr) {
@@ -445,7 +523,9 @@ export default function AttendanceSessionForm() {
           [{ text: "OK", onPress: () => router.back() }],
         );
       } else {
-        throw new Error(data.error?.message || data.message || "Failed to create session");
+        throw new Error(
+          data.error?.message || data.message || "Failed to create session",
+        );
       }
     } catch (e: any) {
       console.error(e);
@@ -489,7 +569,9 @@ export default function AttendanceSessionForm() {
               Classes (Subjects)
             </Text>
             {courses.length === 0 ? (
-               <Text className="text-gray-500 italic my-2">No enrolled classes found.</Text>
+              <Text className="text-gray-500 italic my-2">
+                No enrolled classes found.
+              </Text>
             ) : (
               <Pressable
                 onPress={() => {
@@ -499,7 +581,9 @@ export default function AttendanceSessionForm() {
                 className="flex-row items-center justify-between bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl"
               >
                 <Text className="text-gray-800 font-medium">
-                  {selectedCourse ? `${selectedCourse.code} - ${selectedCourse.name} (${selectedCourse.classType})` : "Select Class..."}
+                  {selectedCourse
+                    ? `${selectedCourse.code} - ${selectedCourse.name} (${selectedCourse.classType})`
+                    : "Select Class..."}
                 </Text>
                 <Ionicons
                   name={isCourseDropdownOpen ? "chevron-up" : "chevron-down"}
@@ -549,76 +633,78 @@ export default function AttendanceSessionForm() {
           {/* Orgs Selector Dropdown (Organizations/Sections) */}
           {loggedInUser?.role === "ADMIN" && (
             <View className="mb-4">
-                <Text className="text-sm font-medium text-gray-700 mb-1.5 shrink-0">
-                  Course & Section
+              <Text className="text-sm font-medium text-gray-700 mb-1.5 shrink-0">
+                Course & Section
+              </Text>
+              <Pressable
+                onPress={() => {
+                  setClassDropdownOpen(!isClassDropdownOpen);
+                  setCourseDropdownOpen(false);
+                }}
+                className="flex-row items-center justify-between bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl"
+              >
+                <Text className="text-gray-800 font-medium">
+                  {selectedClass
+                    ? `${selectedClass.courseName} (Sec ${selectedClass.section})`
+                    : "Select Course..."}
                 </Text>
-                <Pressable
-                  onPress={() => {
-                    setClassDropdownOpen(!isClassDropdownOpen);
-                    setCourseDropdownOpen(false); 
-                  }}
-                  className="flex-row items-center justify-between bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl"
-                >
-                  <Text className="text-gray-800 font-medium">
-                    {selectedClass ? `${selectedClass.courseName} (Sec ${selectedClass.section})` : "Select Course..."}
-                  </Text>
-                  <Ionicons
-                    name={isClassDropdownOpen ? "chevron-up" : "chevron-down"}
-                    size={20}
-                    color="#6b7280"
-                  />
-                </Pressable>
+                <Ionicons
+                  name={isClassDropdownOpen ? "chevron-up" : "chevron-down"}
+                  size={20}
+                  color="#6b7280"
+                />
+              </Pressable>
 
-                {isClassDropdownOpen && (
-                  <View className="mt-2 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                    {classesList.map((cls, index) => (
-                      <Pressable
-                        key={cls.id}
-                        onPress={() => {
-                          setSelectedClass(cls);
-                          setClassDropdownOpen(false);
-                        }}
-                        className={`px-4 py-3 flex-row justify-between items-center ${
-                          index !== classesList.length - 1
-                            ? "border-b border-gray-100"
-                            : ""
-                        } ${selectedClass?.id === cls.id ? "bg-indigo-50/50" : "bg-white"}`}
+              {isClassDropdownOpen && (
+                <View className="mt-2 bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                  {classesList.map((cls, index) => (
+                    <Pressable
+                      key={cls.id}
+                      onPress={() => {
+                        setSelectedClass(cls);
+                        setClassDropdownOpen(false);
+                      }}
+                      className={`px-4 py-3 flex-row justify-between items-center ${
+                        index !== classesList.length - 1
+                          ? "border-b border-gray-100"
+                          : ""
+                      } ${selectedClass?.id === cls.id ? "bg-indigo-50/50" : "bg-white"}`}
+                    >
+                      <Text
+                        className={`font-medium flex-1 ${
+                          selectedClass?.id === cls.id
+                            ? "text-indigo-600"
+                            : "text-gray-700"
+                        }`}
                       >
-                        <Text
-                          className={`font-medium flex-1 ${
-                            selectedClass?.id === cls.id
-                              ? "text-indigo-600"
-                              : "text-gray-700"
-                          }`}
-                        >
-                          {cls.courseName} (Sec {cls.section})
-                        </Text>
-                        {selectedClass?.id === cls.id && (
-                          <Ionicons
-                            name="checkmark-circle"
-                            size={20}
-                            color="#4f46e5"
-                          />
-                        )}
-                      </Pressable>
-                    ))}
-                  </View>
-                )}
+                        {cls.courseName} (Sec {cls.section})
+                      </Text>
+                      {selectedClass?.id === cls.id && (
+                        <Ionicons
+                          name="checkmark-circle"
+                          size={20}
+                          color="#4f46e5"
+                        />
+                      )}
+                    </Pressable>
+                  ))}
+                </View>
+              )}
             </View>
           )}
 
           {/* For Representative, statically show their org without dropdown */}
           {loggedInUser?.role !== "ADMIN" && selectedClass && (
-             <View className="mb-4">
-                <Text className="text-sm font-medium text-gray-700 mb-1.5 shrink-0">
-                  Course & Section
+            <View className="mb-4">
+              <Text className="text-sm font-medium text-gray-700 mb-1.5 shrink-0">
+                Course & Section
+              </Text>
+              <View className="bg-gray-100 border border-gray-200 px-4 py-3 rounded-xl">
+                <Text className="text-gray-800 font-medium opacity-60">
+                  {selectedClass.courseName} (Sec {selectedClass.section})
                 </Text>
-                <View className="bg-gray-100 border border-gray-200 px-4 py-3 rounded-xl">
-                   <Text className="text-gray-800 font-medium opacity-60">
-                     {selectedClass.courseName} (Sec {selectedClass.section})
-                   </Text>
-                </View>
-             </View>
+              </View>
+            </View>
           )}
 
           {/* Target Lab Group for LAB courses */}
@@ -630,7 +716,8 @@ export default function AttendanceSessionForm() {
               {labGroups.length === 0 ? (
                 <View className="bg-yellow-50 border border-yellow-200 px-4 py-3 rounded-xl">
                   <Text className="text-yellow-700 text-xs">
-                    No lab groups found for this course. Ask CR/Admin to create groups.
+                    No lab groups found for this course. Ask CR/Admin to create
+                    groups.
                   </Text>
                 </View>
               ) : (
@@ -641,7 +728,11 @@ export default function AttendanceSessionForm() {
                       onPress={() => setSelectedLabGroupId(g.id)}
                       className={`px-3 py-2 rounded-lg border ${selectedLabGroupId === g.id ? "bg-indigo-50 border-indigo-300" : "bg-white border-gray-200"}`}
                     >
-                      <Text className={`text-sm font-semibold ${selectedLabGroupId === g.id ? "text-indigo-700" : "text-gray-700"}`}>{g.name}</Text>
+                      <Text
+                        className={`text-sm font-semibold ${selectedLabGroupId === g.id ? "text-indigo-700" : "text-gray-700"}`}
+                      >
+                        {g.name}
+                      </Text>
                     </Pressable>
                   ))}
                 </View>
@@ -727,13 +818,17 @@ export default function AttendanceSessionForm() {
           <View className="mt-4">
             <View className="flex-row items-center justify-between mb-2">
               <View>
-                <Text className="text-sm font-medium text-gray-700">Geofence Radius</Text>
+                <Text className="text-sm font-medium text-gray-700">
+                  Geofence Radius
+                </Text>
                 <Text className="text-xs text-gray-400 mt-0.5">
                   Students must be within this distance from you
                 </Text>
               </View>
               <View className="bg-indigo-100 px-2.5 py-1 rounded-full">
-                <Text className="text-indigo-700 text-sm font-bold">{geofenceRadius} m</Text>
+                <Text className="text-indigo-700 text-sm font-bold">
+                  {geofenceRadius} m
+                </Text>
               </View>
             </View>
             <View className="flex-row items-center bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
@@ -742,9 +837,7 @@ export default function AttendanceSessionForm() {
                   key={val}
                   onPress={() => setGeofenceRadius(val)}
                   className={`flex-1 items-center py-2.5 ${
-                    geofenceRadius === val
-                      ? "bg-indigo-600"
-                      : "bg-transparent"
+                    geofenceRadius === val ? "bg-indigo-600" : "bg-transparent"
                   } ${idx !== arr.length - 1 ? "border-r border-gray-200" : ""}`}
                 >
                   <Text
@@ -759,7 +852,6 @@ export default function AttendanceSessionForm() {
             </View>
           </View>
         </View>
-
 
         {students.length > 0 && (
           <View className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-8">
@@ -784,7 +876,10 @@ export default function AttendanceSessionForm() {
               scrollEnabled={false}
               removeClippedSubviews={false}
               renderItem={({ item }) => (
-                <StudentRow student={item} onStatusChange={handleStatusChange} />
+                <StudentRow
+                  student={item}
+                  onStatusChange={handleStatusChange}
+                />
               )}
             />
           </View>
@@ -796,12 +891,14 @@ export default function AttendanceSessionForm() {
           onPress={handleCreateSession}
           disabled={isSubmitting}
           activeOpacity={0.8}
-          className={`rounded-xl py-4 flex-row items-center justify-center gap-x-2 shadow-sm ${isSubmitting ? 'bg-indigo-400' : 'bg-indigo-600'}`}
+          className={`rounded-xl py-4 flex-row items-center justify-center gap-x-2 shadow-sm ${isSubmitting ? "bg-indigo-400" : "bg-indigo-600"}`}
         >
           <Text className="text-white font-bold text-lg">
             {isSubmitting ? "Initiating..." : "Initiate Session"}
           </Text>
-          {!isSubmitting && <Ionicons name="arrow-forward" size={20} color="#fff" />}
+          {!isSubmitting && (
+            <Ionicons name="arrow-forward" size={20} color="#fff" />
+          )}
         </TouchableOpacity>
       </View>
     </SafeAreaView>

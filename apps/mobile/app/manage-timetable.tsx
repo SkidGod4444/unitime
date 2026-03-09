@@ -6,22 +6,30 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Modal,
-    Pressable,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Modal,
+  Pressable,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import DraggableFlatList, {
-    RenderItemParams,
-    ScaleDecorator,
+  RenderItemParams,
+  ScaleDecorator,
 } from "react-native-draggable-flatlist";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const DAYS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
+const DAYS = [
+  "MONDAY",
+  "TUESDAY",
+  "WEDNESDAY",
+  "THURSDAY",
+  "FRIDAY",
+  "SATURDAY",
+  "SUNDAY",
+];
 const SHORT_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 export default function ManageTimetableScreen() {
@@ -53,7 +61,8 @@ export default function ManageTimetableScreen() {
   const loadAll = async () => {
     try {
       setRefreshing(true);
-      const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+      const origin =
+        process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
       const res = await fetch(`${origin}/timetable`);
       const data = await res.json();
       if (data.success) {
@@ -67,7 +76,10 @@ export default function ManageTimetableScreen() {
   };
 
   useEffect(() => {
-    if (loggedInUser?.role !== "ADMIN" && loggedInUser?.role !== "REPRESENTATIVE") {
+    if (
+      loggedInUser?.role !== "ADMIN" &&
+      loggedInUser?.role !== "REPRESENTATIVE"
+    ) {
       router.back();
       return;
     }
@@ -88,11 +100,14 @@ export default function ManageTimetableScreen() {
 
   const handleCreateGroup = async () => {
     if (!newGroupName.trim() || !formCourseId) return;
-    const course = courses.find(c => c.id === formCourseId);
+    const course = courses.find((c) => c.id === formCourseId);
     if (!course || !course.organizationId) return;
-    
+
     setCreatingGroup(true);
-    const created = await createLabGroup(course.organizationId, newGroupName.trim());
+    const created = await createLabGroup(
+      course.organizationId,
+      newGroupName.trim(),
+    );
     setCreatingGroup(false);
     if (created) {
       setNewGroupName("");
@@ -155,9 +170,16 @@ export default function ManageTimetableScreen() {
 
   const currentDayEntries = allEntries
     .filter((e) => e.day === selectedDay)
-    .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+    .sort(
+      (a, b) =>
+        new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
+    );
 
-  const renderItem = ({ item, drag, isActive }: RenderItemParams<TimetableEntry>) => {
+  const renderItem = ({
+    item,
+    drag,
+    isActive,
+  }: RenderItemParams<TimetableEntry>) => {
     const course = item.course || courses.find((c) => c.id === item.courseId);
 
     const timeStr = `${item.startTime} - ${item.endTime}`;
@@ -168,7 +190,9 @@ export default function ManageTimetableScreen() {
           onLongPress={drag}
           disabled={isActive}
           className={`flex-row bg-white dark:bg-zinc-900 rounded-2xl p-4 mb-3 mx-6 border shadow-sm ${
-            isActive ? "border-blue-500 scale-105 opacity-90 shadow-lg" : "border-gray-100 dark:border-zinc-800"
+            isActive
+              ? "border-blue-500 scale-105 opacity-90 shadow-lg"
+              : "border-gray-100 dark:border-zinc-800"
           }`}
         >
           <View className="mr-3 justify-center items-center">
@@ -196,7 +220,10 @@ export default function ManageTimetableScreen() {
               ) : null}
             </View>
           </View>
-          <TouchableOpacity onPress={() => handleDelete(item.id)} className="ml-3 justify-center">
+          <TouchableOpacity
+            onPress={() => handleDelete(item.id)}
+            className="ml-3 justify-center"
+          >
             <Ionicons name="trash-outline" size={20} color="#EF4444" />
           </TouchableOpacity>
         </TouchableOpacity>
@@ -209,9 +236,16 @@ export default function ManageTimetableScreen() {
       {/* Header */}
       <View className="flex-row items-center justify-between px-6 py-4">
         <TouchableOpacity onPress={() => router.back()} className="p-2 -ml-2">
-          <Ionicons name="chevron-back" size={24} color="#18181B" className="dark:color-white" />
+          <Ionicons
+            name="chevron-back"
+            size={24}
+            color="#18181B"
+            className="dark:color-white"
+          />
         </TouchableOpacity>
-        <Text className="text-xl font-bold font-lora text-zinc-900 dark:text-zinc-100">Manage Timetable</Text>
+        <Text className="text-xl font-bold font-lora text-zinc-900 dark:text-zinc-100">
+          Manage Timetable
+        </Text>
         <View className="w-8" />
       </View>
 
@@ -264,7 +298,8 @@ export default function ManageTimetableScreen() {
             <View className="items-center justify-center py-20">
               <Ionicons name="calendar-outline" size={64} color="#E5E7EB" />
               <Text className="text-gray-400 font-medium mt-4 text-center">
-                No slots mapped on {selectedDay.charAt(0) + selectedDay.slice(1).toLowerCase()}.
+                No slots mapped on{" "}
+                {selectedDay.charAt(0) + selectedDay.slice(1).toLowerCase()}.
               </Text>
             </View>
           }
@@ -283,42 +318,97 @@ export default function ManageTimetableScreen() {
       </TouchableOpacity>
 
       {/* ── Group Picker Modal ── */}
-      <Modal visible={showGroupPicker} animationType="slide" transparent onRequestClose={() => setShowGroupPicker(false)}>
-        <Pressable style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "flex-end" }} onPress={() => setShowGroupPicker(false)}>
+      <Modal
+        visible={showGroupPicker}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShowGroupPicker(false)}
+      >
+        <Pressable
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            justifyContent: "flex-end",
+          }}
+          onPress={() => setShowGroupPicker(false)}
+        >
           <Pressable onPress={(e) => e.stopPropagation()}>
             <View className="bg-white dark:bg-zinc-900 rounded-t-3xl p-6 pb-10">
               <View className="w-12 h-1.5 bg-gray-200 dark:bg-zinc-700 rounded-full mb-5 self-center" />
-              <Text className="text-lg font-bold text-zinc-900 dark:text-white mb-4">Select Lab Group</Text>
+              <Text className="text-lg font-bold text-zinc-900 dark:text-white mb-4">
+                Select Lab Group
+              </Text>
 
               {/* "All Students" option */}
               <TouchableOpacity
-                onPress={() => { setActiveGroupId(null); setShowGroupPicker(false); }}
+                onPress={() => {
+                  setActiveGroupId(null);
+                  setShowGroupPicker(false);
+                }}
                 className={`flex-row items-center gap-3 px-4 py-3.5 rounded-2xl border mb-2 ${activeGroupId === null ? "bg-indigo-50 border-indigo-500" : "bg-gray-50 dark:bg-zinc-800 border-gray-100 dark:border-zinc-700"}`}
               >
-                <Ionicons name="people" size={18} color={activeGroupId === null ? "#4f46e5" : "#6B7280"} />
-                <Text className={`font-semibold text-base ${activeGroupId === null ? "text-indigo-700" : "text-gray-700 dark:text-zinc-200"}`}>All Students</Text>
-                {activeGroupId === null && <Ionicons name="checkmark-circle" size={18} color="#4f46e5" style={{ marginLeft: "auto" }} />}
+                <Ionicons
+                  name="people"
+                  size={18}
+                  color={activeGroupId === null ? "#4f46e5" : "#6B7280"}
+                />
+                <Text
+                  className={`font-semibold text-base ${activeGroupId === null ? "text-indigo-700" : "text-gray-700 dark:text-zinc-200"}`}
+                >
+                  All Students
+                </Text>
+                {activeGroupId === null && (
+                  <Ionicons
+                    name="checkmark-circle"
+                    size={18}
+                    color="#4f46e5"
+                    style={{ marginLeft: "auto" }}
+                  />
+                )}
               </TouchableOpacity>
 
               {(() => {
-                const orgId = courses.find((c) => c.id === formCourseId)?.organizationId;
+                const orgId = courses.find(
+                  (c) => c.id === formCourseId,
+                )?.organizationId;
                 const courseLabGroups = orgId ? (byOrg[orgId] ?? []) : [];
                 return (
                   <>
                     {courseLabGroups.map((g) => (
                       <TouchableOpacity
                         key={g.id}
-                        onPress={() => { setActiveGroupId(g.id); setShowGroupPicker(false); }}
+                        onPress={() => {
+                          setActiveGroupId(g.id);
+                          setShowGroupPicker(false);
+                        }}
                         className={`flex-row items-center gap-3 px-4 py-3.5 rounded-2xl border mb-2 ${activeGroupId === g.id ? "bg-indigo-50 border-indigo-500" : "bg-gray-50 dark:bg-zinc-800 border-gray-100 dark:border-zinc-700"}`}
                       >
-                        <Ionicons name="flask-outline" size={18} color={activeGroupId === g.id ? "#4f46e5" : "#6B7280"} />
-                        <Text className={`font-semibold text-base ${activeGroupId === g.id ? "text-indigo-700" : "text-gray-700 dark:text-zinc-200"}`}>{g.name}</Text>
-                        {activeGroupId === g.id && <Ionicons name="checkmark-circle" size={18} color="#4f46e5" style={{ marginLeft: "auto" }} />}
+                        <Ionicons
+                          name="flask-outline"
+                          size={18}
+                          color={activeGroupId === g.id ? "#4f46e5" : "#6B7280"}
+                        />
+                        <Text
+                          className={`font-semibold text-base ${activeGroupId === g.id ? "text-indigo-700" : "text-gray-700 dark:text-zinc-200"}`}
+                        >
+                          {g.name}
+                        </Text>
+                        {activeGroupId === g.id && (
+                          <Ionicons
+                            name="checkmark-circle"
+                            size={18}
+                            color="#4f46e5"
+                            style={{ marginLeft: "auto" }}
+                          />
+                        )}
                       </TouchableOpacity>
                     ))}
 
                     {courseLabGroups.length === 0 && (
-                      <Text className="text-gray-400 text-center py-4">No groups yet. Tap &quot;+ New Group&quot; to create one.</Text>
+                      <Text className="text-gray-400 text-center py-4">
+                        No groups yet. Tap &quot;+ New Group&quot; to create
+                        one.
+                      </Text>
                     )}
                   </>
                 );
@@ -329,11 +419,26 @@ export default function ManageTimetableScreen() {
       </Modal>
 
       {/* ── Create New Group Modal ── */}
-      <Modal visible={showCreateGroup} animationType="fade" transparent onRequestClose={() => setShowCreateGroup(false)}>
-        <Pressable style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", paddingHorizontal: 24 }} onPress={() => setShowCreateGroup(false)}>
+      <Modal
+        visible={showCreateGroup}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setShowCreateGroup(false)}
+      >
+        <Pressable
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            justifyContent: "center",
+            paddingHorizontal: 24,
+          }}
+          onPress={() => setShowCreateGroup(false)}
+        >
           <Pressable onPress={(e) => e.stopPropagation()}>
             <View className="bg-white dark:bg-zinc-900 rounded-3xl p-6">
-              <Text className="text-lg font-bold text-zinc-900 dark:text-white mb-4">Create New Lab Group</Text>
+              <Text className="text-lg font-bold text-zinc-900 dark:text-white mb-4">
+                Create New Lab Group
+              </Text>
               <TextInput
                 value={newGroupName}
                 onChangeText={setNewGroupName}
@@ -343,11 +448,24 @@ export default function ManageTimetableScreen() {
                 autoFocus
               />
               <View className="flex-row gap-3">
-                <TouchableOpacity onPress={() => setShowCreateGroup(false)} className="flex-1 py-3 rounded-2xl bg-gray-100 dark:bg-zinc-800 items-center">
-                  <Text className="font-bold text-gray-700 dark:text-zinc-300">Cancel</Text>
+                <TouchableOpacity
+                  onPress={() => setShowCreateGroup(false)}
+                  className="flex-1 py-3 rounded-2xl bg-gray-100 dark:bg-zinc-800 items-center"
+                >
+                  <Text className="font-bold text-gray-700 dark:text-zinc-300">
+                    Cancel
+                  </Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={handleCreateGroup} disabled={creatingGroup || !newGroupName.trim()} className={`flex-1 py-3 rounded-2xl items-center ${newGroupName.trim() ? "bg-indigo-600" : "bg-indigo-300"}`}>
-                  {creatingGroup ? <ActivityIndicator color="white" /> : <Text className="font-bold text-white">Create</Text>}
+                <TouchableOpacity
+                  onPress={handleCreateGroup}
+                  disabled={creatingGroup || !newGroupName.trim()}
+                  className={`flex-1 py-3 rounded-2xl items-center ${newGroupName.trim() ? "bg-indigo-600" : "bg-indigo-300"}`}
+                >
+                  {creatingGroup ? (
+                    <ActivityIndicator color="white" />
+                  ) : (
+                    <Text className="font-bold text-white">Create</Text>
+                  )}
                 </TouchableOpacity>
               </View>
             </View>
@@ -356,17 +474,33 @@ export default function ManageTimetableScreen() {
       </Modal>
 
       {/* ── Add Slot Modal ── */}
-      <Modal visible={isAddModalOpen} animationType="slide" transparent onRequestClose={() => setAddModalOpen(false)}>
-        <Pressable style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.6)", justifyContent: "flex-end" }} onPress={() => setAddModalOpen(false)}>
+      <Modal
+        visible={isAddModalOpen}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setAddModalOpen(false)}
+      >
+        <Pressable
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.6)",
+            justifyContent: "flex-end",
+          }}
+          onPress={() => setAddModalOpen(false)}
+        >
           <Pressable onPress={(e) => e.stopPropagation()}>
             <View className="bg-white dark:bg-zinc-900 w-full rounded-t-[32px] p-6 shadow-2xl">
               <View className="items-center mb-6">
                 <View className="w-12 h-1.5 bg-gray-200 dark:bg-zinc-700 rounded-full mb-4" />
-                <Text className="text-xl font-bold font-lora text-zinc-900 dark:text-white">Add Slot</Text>
+                <Text className="text-xl font-bold font-lora text-zinc-900 dark:text-white">
+                  Add Slot
+                </Text>
               </View>
 
               <View className="mb-4">
-                <Text className="text-sm font-semibold text-gray-700 dark:text-zinc-300 mb-2">Select Course</Text>
+                <Text className="text-sm font-semibold text-gray-700 dark:text-zinc-300 mb-2">
+                  Select Course
+                </Text>
                 <View className="flex-row flex-wrap gap-2">
                   {courses.map((course) => (
                     <TouchableOpacity
@@ -380,7 +514,9 @@ export default function ManageTimetableScreen() {
                     >
                       <Text
                         className={`text-sm font-semibold ${
-                          formCourseId === course.id ? "text-blue-700" : "text-gray-700 dark:text-zinc-300"
+                          formCourseId === course.id
+                            ? "text-blue-700"
+                            : "text-gray-700 dark:text-zinc-300"
                         }`}
                       >
                         {course.code}
@@ -392,31 +528,48 @@ export default function ManageTimetableScreen() {
 
               {/* Lab Group Picker Logic - Show only if selected course is LAB */}
               {(() => {
-                const selectedCourse = courses.find(c => c.id === formCourseId);
+                const selectedCourse = courses.find(
+                  (c) => c.id === formCourseId,
+                );
                 if (selectedCourse?.classType === "LAB") {
                   const orgId = selectedCourse.organizationId;
-                  const courseLabGroups = orgId ? (byOrg[orgId] || []) : [];
+                  const courseLabGroups = orgId ? byOrg[orgId] || [] : [];
                   const activeGroupName = activeGroupId
-                    ? courseLabGroups.find((g) => g.id === activeGroupId)?.name ?? "Unknown Group"
+                    ? (courseLabGroups.find((g) => g.id === activeGroupId)
+                        ?.name ?? "Unknown Group")
                     : "All Students";
 
                   return (
                     <View className="mb-4">
-                      <Text className="text-sm font-semibold text-gray-700 dark:text-zinc-300 mb-2">Select Lab Group</Text>
+                      <Text className="text-sm font-semibold text-gray-700 dark:text-zinc-300 mb-2">
+                        Select Lab Group
+                      </Text>
                       <View className="flex-row items-center justify-between border border-gray-200 dark:border-zinc-700 rounded-xl px-4 py-3 bg-gray-50 dark:bg-zinc-800">
                         <TouchableOpacity
                           onPress={() => setShowGroupPicker(true)}
                           className="flex-row items-center gap-2 flex-1"
                         >
-                          <Ionicons name="people-outline" size={16} color="#4f46e5" />
-                          <Text className="flex-1 font-semibold text-zinc-900 dark:text-zinc-100">{activeGroupName}</Text>
-                          <Ionicons name="chevron-down" size={16} color="#6B7280" />
+                          <Ionicons
+                            name="people-outline"
+                            size={16}
+                            color="#4f46e5"
+                          />
+                          <Text className="flex-1 font-semibold text-zinc-900 dark:text-zinc-100">
+                            {activeGroupName}
+                          </Text>
+                          <Ionicons
+                            name="chevron-down"
+                            size={16}
+                            color="#6B7280"
+                          />
                         </TouchableOpacity>
                         <TouchableOpacity
-                           onPress={() => setShowCreateGroup(true)}
-                           className="ml-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg px-2 py-1"
+                          onPress={() => setShowCreateGroup(true)}
+                          className="ml-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg px-2 py-1"
                         >
-                          <Text className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold px-1">+ NEW</Text>
+                          <Text className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold px-1">
+                            + NEW
+                          </Text>
                         </TouchableOpacity>
                       </View>
                     </View>
@@ -427,7 +580,9 @@ export default function ManageTimetableScreen() {
 
               <View className="flex-row gap-4 mb-4">
                 <View className="flex-1">
-                  <Text className="text-sm font-semibold text-gray-700 dark:text-zinc-300 mb-2">Start Time</Text>
+                  <Text className="text-sm font-semibold text-gray-700 dark:text-zinc-300 mb-2">
+                    Start Time
+                  </Text>
                   <TextInput
                     value={formStartTime}
                     onChangeText={setFormStartTime}
@@ -437,7 +592,9 @@ export default function ManageTimetableScreen() {
                   />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-sm font-semibold text-gray-700 dark:text-zinc-300 mb-2">End Time</Text>
+                  <Text className="text-sm font-semibold text-gray-700 dark:text-zinc-300 mb-2">
+                    End Time
+                  </Text>
                   <TextInput
                     value={formEndTime}
                     onChangeText={setFormEndTime}
@@ -449,7 +606,9 @@ export default function ManageTimetableScreen() {
               </View>
 
               <View className="mb-6">
-                <Text className="text-sm font-semibold text-gray-700 dark:text-zinc-300 mb-2">Location (Room No.)</Text>
+                <Text className="text-sm font-semibold text-gray-700 dark:text-zinc-300 mb-2">
+                  Location (Room No.)
+                </Text>
                 <TextInput
                   value={formLocation}
                   onChangeText={setFormLocation}
@@ -463,7 +622,9 @@ export default function ManageTimetableScreen() {
                 onPress={handleAddSubmit}
                 className="bg-blue-600 rounded-2xl py-4 items-center mb-5 shadow-lg shadow-blue-500/20"
               >
-                <Text className="text-white font-bold text-base tracking-wide">Save Slot</Text>
+                <Text className="text-white font-bold text-base tracking-wide">
+                  Save Slot
+                </Text>
               </TouchableOpacity>
             </View>
           </Pressable>

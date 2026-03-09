@@ -10,7 +10,8 @@ const tickets = new Hono<AppEnv>();
 // Create support ticket
 tickets.post("/", async (c) => {
   const requesterId = c.get("requesterId");
-  if (!requesterId) return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
+  if (!requesterId)
+    return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
 
   const schema = z
     .object({
@@ -50,7 +51,8 @@ tickets.post("/", async (c) => {
 // List current user's tickets
 tickets.get("/my", async (c) => {
   const requesterId = c.get("requesterId");
-  if (!requesterId) return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
+  if (!requesterId)
+    return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
   try {
     const list = await prisma.supportTicket.findMany({
       where: { userId: requesterId },

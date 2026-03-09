@@ -18,28 +18,25 @@ history.get("/:userId", async (c) => {
           select: { organizationId: true },
         });
       },
-      3600
+      3600,
     );
 
     const organizationId = studentProfile?.organizationId;
 
     const query = {
       where: {
-        OR: [
-          { userId },
-          ...(organizationId ? [{ organizationId }] : []),
-        ],
+        OR: [{ userId }, ...(organizationId ? [{ organizationId }] : [])],
       },
       // Cast to satisfy Prisma orderBy explicit literal structure when using objects inline without Prisma.Query helper
       orderBy: { createdAt: "desc" as const },
     };
 
     const logs = await getOrSetCache(
-        `history:${userId}`,
-        async () => {
-             return await prisma.historyLog.findMany(query);
-         },
-        300 // 5 minutes cache
+      `history:${userId}`,
+      async () => {
+        return await prisma.historyLog.findMany(query);
+      },
+      300, // 5 minutes cache
     );
 
     return c.json({
@@ -50,7 +47,7 @@ history.get("/:userId", async (c) => {
     console.error("Error fetching history:", error);
     return c.json(
       { success: false, error: "Failed to fetch history" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 });

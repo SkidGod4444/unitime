@@ -19,7 +19,10 @@ type LabGroupsState = {
   /** Fetch all groups for a given org */
   fetchOrgLabGroups: (organizationId: string) => Promise<LabGroup[]>;
   /** ADMIN/REP: Create a new lab group for an org */
-  createLabGroup: (organizationId: string, name: string) => Promise<LabGroup | null>;
+  createLabGroup: (
+    organizationId: string,
+    name: string,
+  ) => Promise<LabGroup | null>;
   /** ADMIN/REP: Delete an empty lab group */
   deleteLabGroup: (groupId: string, organizationId: string) => Promise<boolean>;
   /** ADMIN/REP: View group members */
@@ -34,8 +37,11 @@ export const useLabGroupsStore = create<LabGroupsState>()(
       membersByGroup: {},
 
       fetchOrgLabGroups: async (organizationId) => {
-        const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-        const res = await fetch(`${origin}/lab-groups?organizationId=${encodeURIComponent(organizationId)}`);
+        const origin =
+          process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+        const res = await fetch(
+          `${origin}/lab-groups?organizationId=${encodeURIComponent(organizationId)}`,
+        );
         if (!res.ok) return [];
         const data = await res.json();
         const groups: LabGroup[] = data.groups || [];
@@ -45,7 +51,8 @@ export const useLabGroupsStore = create<LabGroupsState>()(
 
       createLabGroup: async (organizationId, name) => {
         try {
-          const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+          const origin =
+            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
           const res = await fetch(
             `${origin}/lab-groups`,
             withAuth({
@@ -68,8 +75,12 @@ export const useLabGroupsStore = create<LabGroupsState>()(
 
       deleteLabGroup: async (groupId, organizationId) => {
         try {
-          const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-          const res = await fetch(`${origin}/lab-groups/${groupId}`, withAuth({ method: "DELETE" }));
+          const origin =
+            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+          const res = await fetch(
+            `${origin}/lab-groups/${groupId}`,
+            withAuth({ method: "DELETE" }),
+          );
           if (res.ok) {
             await get().fetchOrgLabGroups(organizationId);
             return true;
@@ -82,12 +93,18 @@ export const useLabGroupsStore = create<LabGroupsState>()(
       },
 
       fetchLabGroupMembers: async (groupId) => {
-        const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-        const res = await fetch(`${origin}/lab-groups/${groupId}/members`, withAuth({ method: "GET" }));
+        const origin =
+          process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+        const res = await fetch(
+          `${origin}/lab-groups/${groupId}/members`,
+          withAuth({ method: "GET" }),
+        );
         if (!res.ok) return [];
         const data = await res.json();
         const members: LabGroupMember[] = data.members || [];
-        set((s) => ({ membersByGroup: { ...s.membersByGroup, [groupId]: members } }));
+        set((s) => ({
+          membersByGroup: { ...s.membersByGroup, [groupId]: members },
+        }));
         return members;
       },
     }),

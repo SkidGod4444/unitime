@@ -1,7 +1,7 @@
 import { useAuth } from "@/contexts/auth.cntxt";
 import {
-    profileSchema,
-    type ProfileFormErrors,
+  profileSchema,
+  type ProfileFormErrors,
 } from "@/lib/schemas/profile.schema";
 import { useOrgsStore } from "@/lib/store";
 import { useLabGroupsStore } from "@/lib/store/lab-groups";
@@ -10,16 +10,16 @@ import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Image,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -60,7 +60,9 @@ export default function StudentProfileForm() {
 
   const { orgs, fetchOrgs } = useOrgsStore();
   const { fetchOrgLabGroups } = useLabGroupsStore();
-  const [availableLabGroups, setAvailableLabGroups] = useState<{ id: string; name: string }[]>([]);
+  const [availableLabGroups, setAvailableLabGroups] = useState<
+    { id: string; name: string }[]
+  >([]);
 
   React.useEffect(() => {
     fetchOrgs();
@@ -84,24 +86,62 @@ export default function StudentProfileForm() {
   // ---------------------------------------------------------------------------
   const cleanStr = (s?: string) => (s || "").trim().replace(/\s+/g, " ");
 
-  const departments = Array.from(new Set(orgs.map((o) => cleanStr(o.departmentName))));
+  const departments = Array.from(
+    new Set(orgs.map((o) => cleanStr(o.departmentName))),
+  );
 
   const courses = department
-    ? Array.from(new Set(orgs.filter((o) => cleanStr(o.departmentName) === department).map((o) => cleanStr(o.courseName))))
+    ? Array.from(
+        new Set(
+          orgs
+            .filter((o) => cleanStr(o.departmentName) === department)
+            .map((o) => cleanStr(o.courseName)),
+        ),
+      )
     : [];
 
-  const sem = (department && course)
-    ? Array.from(new Set(orgs.filter((o) => cleanStr(o.departmentName) === department && cleanStr(o.courseName) === course).map((o) => o.semester)))
-    : [];
+  const sem =
+    department && course
+      ? Array.from(
+          new Set(
+            orgs
+              .filter(
+                (o) =>
+                  cleanStr(o.departmentName) === department &&
+                  cleanStr(o.courseName) === course,
+              )
+              .map((o) => o.semester),
+          ),
+        )
+      : [];
 
-  const sections = (department && course && semister)
-    ? Array.from(new Set(orgs.filter((o) => cleanStr(o.departmentName) === department && cleanStr(o.courseName) === course && o.semester === semister).map((o) => o.section.toString())))
-    : [];
+  const sections =
+    department && course && semister
+      ? Array.from(
+          new Set(
+            orgs
+              .filter(
+                (o) =>
+                  cleanStr(o.departmentName) === department &&
+                  cleanStr(o.courseName) === course &&
+                  o.semester === semister,
+              )
+              .map((o) => o.section.toString()),
+          ),
+        )
+      : [];
 
   // Dynamically resolved org (once section is picked)
-  const matchedOrgPreview = (department && course && semister && section)
-    ? orgs.find((o) => cleanStr(o.departmentName) === department && cleanStr(o.courseName) === course && o.semester === semister && o.section.toString() === section)
-    : null;
+  const matchedOrgPreview =
+    department && course && semister && section
+      ? orgs.find(
+          (o) =>
+            cleanStr(o.departmentName) === department &&
+            cleanStr(o.courseName) === course &&
+            o.semester === semister &&
+            o.section.toString() === section,
+        )
+      : null;
 
   React.useEffect(() => {
     if (matchedOrgPreview) {
@@ -156,10 +196,13 @@ export default function StudentProfileForm() {
         cleanStr(o.departmentName) === department &&
         cleanStr(o.courseName) === course &&
         o.semester === semister &&
-        o.section.toString() === section
+        o.section.toString() === section,
     );
     if (!matchedOrg) {
-      Alert.alert("Error", "Could not find a valid matching active Class/Organization for these selections.");
+      Alert.alert(
+        "Error",
+        "Could not find a valid matching active Class/Organization for these selections.",
+      );
       return;
     }
 
@@ -513,7 +556,13 @@ export default function StudentProfileForm() {
                           setSemister("");
                           setSection("");
                           setShowDepartmentDropdown(false);
-                          setErrors((e) => ({ ...e, department: undefined, course: undefined, semister: undefined, section: undefined }));
+                          setErrors((e) => ({
+                            ...e,
+                            department: undefined,
+                            course: undefined,
+                            semister: undefined,
+                            section: undefined,
+                          }));
                         }}
                         className="px-4 py-3 border-b border-gray-100"
                       >
@@ -567,7 +616,12 @@ export default function StudentProfileForm() {
                           setSemister("");
                           setSection("");
                           setShowCourseDropdown(false);
-                          setErrors((e) => ({ ...e, course: undefined, semister: undefined, section: undefined }));
+                          setErrors((e) => ({
+                            ...e,
+                            course: undefined,
+                            semister: undefined,
+                            section: undefined,
+                          }));
                         }}
                         className="px-4 py-3 border-b border-gray-100"
                       >
@@ -596,7 +650,9 @@ export default function StudentProfileForm() {
                   <Text
                     className={`flex-1 text-base font-semibold ${semister ? "text-gray-900" : "text-gray-400"}`}
                   >
-                    {SEMESTER_MAP[semister] || semister || "Select your Semister"}
+                    {SEMESTER_MAP[semister] ||
+                      semister ||
+                      "Select your Semister"}
                   </Text>
                   <Ionicons
                     name={showSemDropdown ? "chevron-up" : "chevron-down"}
@@ -618,11 +674,17 @@ export default function StudentProfileForm() {
                           setSemister(s);
                           setSection("");
                           setShowSemDropdown(false);
-                          setErrors((e) => ({ ...e, semister: undefined, section: undefined }));
+                          setErrors((e) => ({
+                            ...e,
+                            semister: undefined,
+                            section: undefined,
+                          }));
                         }}
                         className="px-4 py-3 border-b border-gray-100"
                       >
-                        <Text className="text-gray-900 font-medium">{SEMESTER_MAP[s] || s}</Text>
+                        <Text className="text-gray-900 font-medium">
+                          {SEMESTER_MAP[s] || s}
+                        </Text>
                       </TouchableOpacity>
                     ))}
                   </View>
@@ -700,7 +762,11 @@ export default function StudentProfileForm() {
                   <Ionicons
                     name="flask-outline"
                     size={20}
-                    color={hasError("labGroupId") || availableLabGroups.length === 0 ? "#F87171" : "#9CA3AF"}
+                    color={
+                      hasError("labGroupId") || availableLabGroups.length === 0
+                        ? "#F87171"
+                        : "#9CA3AF"
+                    }
                     style={{ marginRight: 12 }}
                   />
                   <Text
@@ -713,7 +779,8 @@ export default function StudentProfileForm() {
                     }`}
                   >
                     {labGroupId
-                      ? availableLabGroups.find((g) => g.id === labGroupId)?.name
+                      ? availableLabGroups.find((g) => g.id === labGroupId)
+                          ?.name
                       : availableLabGroups.length > 0
                         ? "Select your Lab Group"
                         : "No Lab Groups available"}
@@ -735,7 +802,9 @@ export default function StudentProfileForm() {
                         }}
                         className="px-4 py-3 border-b border-gray-100"
                       >
-                        <Text className="text-gray-900 font-medium">{g.name}</Text>
+                        <Text className="text-gray-900 font-medium">
+                          {g.name}
+                        </Text>
                       </TouchableOpacity>
                     ))}
                   </View>

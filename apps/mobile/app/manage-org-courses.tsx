@@ -5,14 +5,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    FlatList,
-    RefreshControl,
-    Switch,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  RefreshControl,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Course } from "../lib/store/timetable";
@@ -53,7 +53,7 @@ export default function ManageOrgCoursesScreen() {
     if (!loggedInUser) return [];
     if (organizationId) {
       return courses.filter((c: any) => c.organizationId === organizationId);
-    } else if (loggedInUser.role === 'ADMIN') {
+    } else if (loggedInUser.role === "ADMIN") {
       return courses;
     }
     return [];
@@ -70,7 +70,15 @@ export default function ManageOrgCoursesScreen() {
     } finally {
       setRefreshing(false);
     }
-  }, [loggedInUser, fetchProfiles, profiles.length, fetchOrgs, orgs.length, courses.length, fetchCourses]);
+  }, [
+    loggedInUser,
+    fetchProfiles,
+    profiles.length,
+    fetchOrgs,
+    orgs.length,
+    courses.length,
+    fetchCourses,
+  ]);
 
   useEffect(() => {
     loadData();
@@ -79,19 +87,25 @@ export default function ManageOrgCoursesScreen() {
   const toggleEnrollment = async (courseId: string, currentStatus: boolean) => {
     try {
       setActionLoadingId(courseId + "_toggle");
-      
+
       const course = courses.find((c) => c.id === courseId);
-      if(!course) return;
+      if (!course) return;
 
       await updateCourse(courseId, {
-         // @ts-ignore
-         ...course, 
-         enrollmentEnabled: !currentStatus
+        // @ts-ignore
+        ...course,
+        enrollmentEnabled: !currentStatus,
       });
-      
-      Alert.alert("Success", `Enrollment is now ${!currentStatus ? 'open' : 'closed'} for ${course.code}.`);
+
+      Alert.alert(
+        "Success",
+        `Enrollment is now ${!currentStatus ? "open" : "closed"} for ${course.code}.`,
+      );
     } catch {
-      Alert.alert("Error", "Could not update course settings. Please try again.");
+      Alert.alert(
+        "Error",
+        "Could not update course settings. Please try again.",
+      );
     } finally {
       setActionLoadingId(null);
     }
@@ -100,107 +114,152 @@ export default function ManageOrgCoursesScreen() {
   const renderItem = ({ item }: { item: Course }) => {
     // Type casting because the base Course type from timetable.ts might not have this field declared depending on earlier edits
     const isEnrollmentOpen = (item as any).enrollmentEnabled ?? true;
-    
-    const professor = item.professorId ? users.find(u => u.id === item.professorId) : null;
-    const org = item.organizationId ? orgs.find((o: any) => o.id === item.organizationId) : null;
+
+    const professor = item.professorId
+      ? users.find((u) => u.id === item.professorId)
+      : null;
+    const org = item.organizationId
+      ? orgs.find((o: any) => o.id === item.organizationId)
+      : null;
     const rawSemester = org ? org.semester : (item as any).semester; // Fallback to item.semester just in case it's populated from backend
-    const semesterDisplay = rawSemester ? (SEMESTER_MAP[rawSemester] || rawSemester) : "N/A";
+    const semesterDisplay = rawSemester
+      ? SEMESTER_MAP[rawSemester] || rawSemester
+      : "N/A";
 
     const typeLabel = item.classType || "LECTURE";
-    const typeColor = CLASS_TYPE_COLORS[typeLabel] || "bg-gray-100 text-gray-800";
+    const typeColor =
+      CLASS_TYPE_COLORS[typeLabel] || "bg-gray-100 text-gray-800";
 
     return (
       <View className="bg-white p-5 rounded-3xl border border-gray-100 shadow-sm mb-5">
         <View className="flex-row items-start justify-between mb-5">
           <View className="flex-row flex-1 mr-3">
-             <View className="h-12 w-12 bg-indigo-50 rounded-2xl justify-center items-center mr-3 mt-1">
-               <Ionicons name="book" size={22} color="#4f46e5" />
-             </View>
-             <View className="flex-1 pr-1">
-               <Text className="text-lg font-bold text-gray-900 mb-1 leading-6" numberOfLines={2}>
-                 {item.name}
-               </Text>
-               <View className="flex-row flex-wrap items-center gap-2">
-                 <Text className="text-sm font-bold text-indigo-600">
-                   {item.code}
-                 </Text>
-                 <View className="w-1 h-1 rounded-full bg-gray-300" />
-                 <View className={`px-2 py-0.5 rounded-md ${typeColor.split(' ')[0]}`}>
-                   <Text className={`text-[10px] font-bold ${typeColor.split(' ')[1]}`}>
-                     {typeLabel}
-                   </Text>
-                 </View>
-               </View>
-             </View>
+            <View className="h-12 w-12 bg-indigo-50 rounded-2xl justify-center items-center mr-3 mt-1">
+              <Ionicons name="book" size={22} color="#4f46e5" />
+            </View>
+            <View className="flex-1 pr-1">
+              <Text
+                className="text-lg font-bold text-gray-900 mb-1 leading-6"
+                numberOfLines={2}
+              >
+                {item.name}
+              </Text>
+              <View className="flex-row flex-wrap items-center gap-2">
+                <Text className="text-sm font-bold text-indigo-600">
+                  {item.code}
+                </Text>
+                <View className="w-1 h-1 rounded-full bg-gray-300" />
+                <View
+                  className={`px-2 py-0.5 rounded-md ${typeColor.split(" ")[0]}`}
+                >
+                  <Text
+                    className={`text-[10px] font-bold ${typeColor.split(" ")[1]}`}
+                  >
+                    {typeLabel}
+                  </Text>
+                </View>
+              </View>
+            </View>
           </View>
         </View>
 
         <View className="bg-gray-50 p-4 rounded-2xl border border-gray-100 mb-5 flex-row flex-wrap justify-between items-center gap-y-3">
-            <View className="flex-row items-center w-[48%]">
-              <View className="w-7 h-7 rounded-full bg-white items-center justify-center mr-2 shadow-sm border border-gray-100">
-                <Ionicons name="person" size={12} color="#4b5563" />
-              </View>
-              <Text className="text-xs text-gray-700 font-bold flex-1" numberOfLines={1}>
-                {professor ? professor.name : 'Unassigned'}
-              </Text>
+          <View className="flex-row items-center w-[48%]">
+            <View className="w-7 h-7 rounded-full bg-white items-center justify-center mr-2 shadow-sm border border-gray-100">
+              <Ionicons name="person" size={12} color="#4b5563" />
             </View>
-            
-            <View className="flex-row items-center w-[48%] pl-2">
-              <View className="w-7 h-7 rounded-full bg-white items-center justify-center mr-2 shadow-sm border border-gray-100">
-                <Ionicons name="calendar" size={12} color="#4b5563" />
-              </View>
-              <Text className="text-xs text-gray-700 font-bold flex-1" numberOfLines={1}>
-                {semesterDisplay || 'N/A'}
-              </Text>
-            </View>
+            <Text
+              className="text-xs text-gray-700 font-bold flex-1"
+              numberOfLines={1}
+            >
+              {professor ? professor.name : "Unassigned"}
+            </Text>
+          </View>
 
-            <View className="flex-row items-center w-[48%]">
-              <View className="w-7 h-7 rounded-full bg-white items-center justify-center mr-2 shadow-sm border border-gray-100">
-                <Ionicons name="grid" size={12} color="#4b5563" />
-              </View>
-              <Text className="text-xs text-gray-700 font-bold flex-1" numberOfLines={1}>
-                {org ? `Sec ${org.section}` : 'N/A'}
-              </Text>
+          <View className="flex-row items-center w-[48%] pl-2">
+            <View className="w-7 h-7 rounded-full bg-white items-center justify-center mr-2 shadow-sm border border-gray-100">
+              <Ionicons name="calendar" size={12} color="#4b5563" />
             </View>
-            
-            <View className="flex-row items-center w-[48%] pl-2">
-              <View className="w-7 h-7 rounded-full bg-white items-center justify-center mr-2 shadow-sm border border-gray-100">
-                <Ionicons name="star" size={12} color="#4b5563" />
-              </View>
-              <Text className="text-xs text-gray-700 font-bold flex-1" numberOfLines={1}>
-                {item.credit ? `${item.credit} Credits` : 'No Credits'}
-              </Text>
+            <Text
+              className="text-xs text-gray-700 font-bold flex-1"
+              numberOfLines={1}
+            >
+              {semesterDisplay || "N/A"}
+            </Text>
+          </View>
+
+          <View className="flex-row items-center w-[48%]">
+            <View className="w-7 h-7 rounded-full bg-white items-center justify-center mr-2 shadow-sm border border-gray-100">
+              <Ionicons name="grid" size={12} color="#4b5563" />
             </View>
+            <Text
+              className="text-xs text-gray-700 font-bold flex-1"
+              numberOfLines={1}
+            >
+              {org ? `Sec ${org.section}` : "N/A"}
+            </Text>
+          </View>
+
+          <View className="flex-row items-center w-[48%] pl-2">
+            <View className="w-7 h-7 rounded-full bg-white items-center justify-center mr-2 shadow-sm border border-gray-100">
+              <Ionicons name="star" size={12} color="#4b5563" />
+            </View>
+            <Text
+              className="text-xs text-gray-700 font-bold flex-1"
+              numberOfLines={1}
+            >
+              {item.credit ? `${item.credit} Credits` : "No Credits"}
+            </Text>
+          </View>
         </View>
 
-        <View className={`p-4 rounded-2xl border flex-row justify-between items-center ${isEnrollmentOpen ? 'bg-indigo-50 border-indigo-100' : 'bg-gray-50 border-gray-100'}`}>
-           <View className="flex-1 pr-4">
-             <Text className="text-sm font-bold text-gray-800 mb-0.5">Enrollment</Text>
-             <Text className="text-xs text-gray-500">
-               {isEnrollmentOpen ? 'Students can request to join this course.' : 'Enrollment is currently closed.'}
-             </Text>
-           </View>
-           <View className="items-end">
-             {actionLoadingId === item.id + "_toggle" ? (
-               <ActivityIndicator color="#4f46e5" size="small" className="mr-2" />
-             ) : (
-               <Switch
-                  value={isEnrollmentOpen}
-                  onValueChange={() => toggleEnrollment(item.id, isEnrollmentOpen)}
-                  trackColor={{ false: "#d1d5db", true: "#c7d2fe" }}
-                  thumbColor={isEnrollmentOpen ? "#4f46e5" : "#fbfbfc"}
-                />
-             )}
-             <Text className={`text-[10px] font-bold mt-1 uppercase ${isEnrollmentOpen ? 'text-indigo-600' : 'text-gray-400'}`}>
-               {isEnrollmentOpen ? 'Open' : 'Closed'}
-             </Text>
-           </View>
+        <View
+          className={`p-4 rounded-2xl border flex-row justify-between items-center ${isEnrollmentOpen ? "bg-indigo-50 border-indigo-100" : "bg-gray-50 border-gray-100"}`}
+        >
+          <View className="flex-1 pr-4">
+            <Text className="text-sm font-bold text-gray-800 mb-0.5">
+              Enrollment
+            </Text>
+            <Text className="text-xs text-gray-500">
+              {isEnrollmentOpen
+                ? "Students can request to join this course."
+                : "Enrollment is currently closed."}
+            </Text>
+          </View>
+          <View className="items-end">
+            {actionLoadingId === item.id + "_toggle" ? (
+              <ActivityIndicator
+                color="#4f46e5"
+                size="small"
+                className="mr-2"
+              />
+            ) : (
+              <Switch
+                value={isEnrollmentOpen}
+                onValueChange={() =>
+                  toggleEnrollment(item.id, isEnrollmentOpen)
+                }
+                trackColor={{ false: "#d1d5db", true: "#c7d2fe" }}
+                thumbColor={isEnrollmentOpen ? "#4f46e5" : "#fbfbfc"}
+              />
+            )}
+            <Text
+              className={`text-[10px] font-bold mt-1 uppercase ${isEnrollmentOpen ? "text-indigo-600" : "text-gray-400"}`}
+            >
+              {isEnrollmentOpen ? "Open" : "Closed"}
+            </Text>
+          </View>
         </View>
 
         {/* Lab Groups management for LAB courses */}
-        {typeLabel === 'LAB' && (
+        {typeLabel === "LAB" && (
           <TouchableOpacity
-            onPress={() => router.push({ pathname: "/manage-lab-groups", params: { courseId: item.id } } as any)}
+            onPress={() =>
+              router.push({
+                pathname: "/manage-lab-groups",
+                params: { courseId: item.id },
+              } as any)
+            }
             className="mt-3 flex-row items-center justify-center gap-2 px-4 py-3 rounded-xl border border-purple-200 bg-purple-50"
           >
             <Ionicons name="people-outline" size={18} color="#7c3aed" />
@@ -214,7 +273,7 @@ export default function ManageOrgCoursesScreen() {
   return (
     <SafeAreaView className="flex-1 bg-gray-50 dark:bg-zinc-900">
       <Stack.Screen options={{ headerShown: false }} />
-      
+
       <View className="flex-row items-center px-6 pt-2 pb-4">
         <TouchableOpacity
           onPress={() => router.back()}
@@ -231,7 +290,7 @@ export default function ManageOrgCoursesScreen() {
           </Text>
         </View>
       </View>
-      
+
       {loading && !refreshing ? (
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color="#4f46e5" />
@@ -241,31 +300,31 @@ export default function ManageOrgCoursesScreen() {
           data={filteredCourses}
           keyExtractor={(item) => item.id}
           className="flex-1 px-4 pt-4"
-            contentContainerStyle={{ paddingBottom: 100 }}
-            refreshControl={
-              <RefreshControl 
-                refreshing={refreshing} 
-                onRefresh={() => {
-                  setRefreshing(true);
-                  loadData();
-                }} 
-              />
-            }
-            ListEmptyComponent={
-              <View className="items-center py-20 px-4 flex-1 justify-center">
-                <View className="h-20 w-20 bg-gray-100 rounded-full justify-center items-center mb-4">
-                  <Ionicons name="school-outline" size={40} color="#9ca3af" />
-                </View>
-                <Text className="text-lg font-bold text-gray-800 text-center mb-2">
-                  No Courses Found
-                </Text>
-                <Text className="text-gray-500 text-center text-sm px-6">
-                  Your organization does not have any courses set up yet.
-                </Text>
+          contentContainerStyle={{ paddingBottom: 100 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => {
+                setRefreshing(true);
+                loadData();
+              }}
+            />
+          }
+          ListEmptyComponent={
+            <View className="items-center py-20 px-4 flex-1 justify-center">
+              <View className="h-20 w-20 bg-gray-100 rounded-full justify-center items-center mb-4">
+                <Ionicons name="school-outline" size={40} color="#9ca3af" />
               </View>
-            }
-            renderItem={renderItem}
-          />
+              <Text className="text-lg font-bold text-gray-800 text-center mb-2">
+                No Courses Found
+              </Text>
+              <Text className="text-gray-500 text-center text-sm px-6">
+                Your organization does not have any courses set up yet.
+              </Text>
+            </View>
+          }
+          renderItem={renderItem}
+        />
       )}
     </SafeAreaView>
   );

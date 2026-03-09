@@ -51,7 +51,7 @@ type AttendanceState = {
 
   markAttendance: (
     sessionId: string,
-    coordinates: { lat: number; lng: number }
+    coordinates: { lat: number; lng: number },
   ) => Promise<{ success: boolean; message?: string }>;
 };
 
@@ -90,9 +90,7 @@ export const useAttendanceStore = create<AttendanceState>()(
         try {
           const origin =
             process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-          const res = await fetch(
-            `${origin}/attendance/sessions/all`,
-          );
+          const res = await fetch(`${origin}/attendance/sessions/all`);
           const data = await res.json();
           if (res.ok && data.success) {
             set({ sessions: data.sessions });
@@ -125,7 +123,9 @@ export const useAttendanceStore = create<AttendanceState>()(
             return false;
           }
           if (res.status === 403) {
-            console.warn("Insufficient permissions to update session attendance");
+            console.warn(
+              "Insufficient permissions to update session attendance",
+            );
             return false;
           }
 
@@ -157,20 +157,26 @@ export const useAttendanceStore = create<AttendanceState>()(
 
       markAttendance: async (sessionId, coordinates) => {
         try {
-          const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+          const origin =
+            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
           const token = getAuthToken();
-          const headers: Record<string, string> = { "Content-Type": "application/json" };
+          const headers: Record<string, string> = {
+            "Content-Type": "application/json",
+          };
           if (token) headers["Authorization"] = `Bearer ${token}`;
           const res = await fetch(`${origin}/attendance/checkin`, {
             method: "POST",
             headers,
-            body: JSON.stringify({ sessionId, coordinates })
+            body: JSON.stringify({ sessionId, coordinates }),
           });
           const data = await res.json();
           return { success: res.ok && data.success, message: data.message };
         } catch (error: any) {
           console.error("Error marking attendance:", error);
-          return { success: false, message: error.message || "Failed to mark attendance" };
+          return {
+            success: false,
+            message: error.message || "Failed to mark attendance",
+          };
         }
       },
     }),

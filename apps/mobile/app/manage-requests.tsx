@@ -3,15 +3,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    FlatList,
-    Modal,
-    RefreshControl,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Modal,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useProfilesStore } from "../lib/store";
@@ -57,8 +57,8 @@ export default function ManageRequestsScreen() {
       setActionLoadingId(id);
       await updateEnrollmentStatus(id, status);
       Alert.alert(
-        "Success", 
-        `Enrollment ${status === "APPROVED" ? "approved" : "rejected"}.`
+        "Success",
+        `Enrollment ${status === "APPROVED" ? "approved" : "rejected"}.`,
       );
     } catch {
       Alert.alert("Error", "Could not complete the action. Please try again.");
@@ -70,12 +70,16 @@ export default function ManageRequestsScreen() {
 
   const renderItem = ({ item }: { item: PendingEnrollment }) => {
     const courseOrg = item.course.organization;
-    const semesterDisplay = courseOrg && (courseOrg as any).semester ? SEMESTER_MAP[(courseOrg as any).semester] || (courseOrg as any).semester : null;
-    
+    const semesterDisplay =
+      courseOrg && (courseOrg as any).semester
+        ? SEMESTER_MAP[(courseOrg as any).semester] ||
+          (courseOrg as any).semester
+        : null;
+
     return (
       <View className="bg-white dark:bg-zinc-900 p-5 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-sm mb-5">
         {/* Student Header */}
-        <TouchableOpacity 
+        <TouchableOpacity
           className="flex-row justify-between items-start mb-5"
           onPress={() => setSelectedUser(item.user)}
           activeOpacity={0.7}
@@ -87,7 +91,10 @@ export default function ManageRequestsScreen() {
               </Text>
             </View>
             <View className="flex-1 pr-2">
-              <Text className="text-lg font-bold text-gray-900 dark:text-zinc-100 mb-0.5" numberOfLines={1}>
+              <Text
+                className="text-lg font-bold text-gray-900 dark:text-zinc-100 mb-0.5"
+                numberOfLines={1}
+              >
                 {item.user.name}
               </Text>
               <Text className="text-sm font-semibold text-gray-500 dark:text-zinc-400">
@@ -96,52 +103,69 @@ export default function ManageRequestsScreen() {
             </View>
           </View>
           <View className="bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200 mt-1">
-            <Text className="text-[10px] font-bold text-amber-700 uppercase">Pending</Text>
+            <Text className="text-[10px] font-bold text-amber-700 uppercase">
+              Pending
+            </Text>
           </View>
         </TouchableOpacity>
 
         {/* Detailed Grid Info */}
         <View className="bg-gray-50 dark:bg-zinc-800 p-4 rounded-2xl border border-gray-100 dark:border-zinc-800 mb-5 flex-row flex-wrap justify-between items-start gap-y-4">
-            <View className="flex-row items-start w-[48%]">
-              <View className="w-7 h-7 rounded-full bg-white dark:bg-zinc-900 items-center justify-center mr-2 shadow-sm border border-gray-100 dark:border-zinc-800 mt-0.5">
-                <Ionicons name="book" size={12} color="#4b5563" />
-              </View>
-              <View className="flex-1">
-                 <Text className="text-xs text-gray-700 dark:text-zinc-200 font-bold" numberOfLines={1}>
-                   {item.course.name}
-                 </Text>
-                 <Text className="text-[10px] font-semibold text-indigo-600 mt-0.5" numberOfLines={1}>
-                   {item.course.code}
-                 </Text>
-              </View>
+          <View className="flex-row items-start w-[48%]">
+            <View className="w-7 h-7 rounded-full bg-white dark:bg-zinc-900 items-center justify-center mr-2 shadow-sm border border-gray-100 dark:border-zinc-800 mt-0.5">
+              <Ionicons name="book" size={12} color="#4b5563" />
             </View>
+            <View className="flex-1">
+              <Text
+                className="text-xs text-gray-700 dark:text-zinc-200 font-bold"
+                numberOfLines={1}
+              >
+                {item.course.name}
+              </Text>
+              <Text
+                className="text-[10px] font-semibold text-indigo-600 mt-0.5"
+                numberOfLines={1}
+              >
+                {item.course.code}
+              </Text>
+            </View>
+          </View>
 
-            <View className="flex-row items-start w-[48%] pl-2">
-              <View className="w-7 h-7 rounded-full bg-white dark:bg-zinc-900 items-center justify-center mr-2 shadow-sm border border-gray-100 dark:border-zinc-800 mt-0.5">
-                <Ionicons name="business" size={12} color="#4b5563" />
-              </View>
-              <Text className="text-xs text-gray-700 dark:text-zinc-200 font-bold flex-1 mt-1" numberOfLines={2}>
-                {courseOrg ? courseOrg.departmentName : 'No Dept'}
-              </Text>
+          <View className="flex-row items-start w-[48%] pl-2">
+            <View className="w-7 h-7 rounded-full bg-white dark:bg-zinc-900 items-center justify-center mr-2 shadow-sm border border-gray-100 dark:border-zinc-800 mt-0.5">
+              <Ionicons name="business" size={12} color="#4b5563" />
             </View>
-            
-            <View className="flex-row items-center w-[48%]">
-              <View className="w-7 h-7 rounded-full bg-white dark:bg-zinc-900 items-center justify-center mr-2 shadow-sm border border-gray-100 dark:border-zinc-800">
-                <Ionicons name="calendar" size={12} color="#4b5563" />
-              </View>
-              <Text className="text-xs text-gray-700 font-bold flex-1" numberOfLines={1}>
-                {semesterDisplay || 'N/A'}
-              </Text>
-            </View>
+            <Text
+              className="text-xs text-gray-700 dark:text-zinc-200 font-bold flex-1 mt-1"
+              numberOfLines={2}
+            >
+              {courseOrg ? courseOrg.departmentName : "No Dept"}
+            </Text>
+          </View>
 
-            <View className="flex-row items-center w-[48%] pl-2">
-              <View className="w-7 h-7 rounded-full bg-white items-center justify-center mr-2 shadow-sm border border-gray-100">
-                <Ionicons name="grid" size={12} color="#4b5563" />
-              </View>
-              <Text className="text-xs text-gray-700 dark:text-zinc-200 font-bold flex-1" numberOfLines={1}>
-                {courseOrg ? `Sec ${courseOrg.section}` : 'N/A'}
-              </Text>
+          <View className="flex-row items-center w-[48%]">
+            <View className="w-7 h-7 rounded-full bg-white dark:bg-zinc-900 items-center justify-center mr-2 shadow-sm border border-gray-100 dark:border-zinc-800">
+              <Ionicons name="calendar" size={12} color="#4b5563" />
             </View>
+            <Text
+              className="text-xs text-gray-700 font-bold flex-1"
+              numberOfLines={1}
+            >
+              {semesterDisplay || "N/A"}
+            </Text>
+          </View>
+
+          <View className="flex-row items-center w-[48%] pl-2">
+            <View className="w-7 h-7 rounded-full bg-white items-center justify-center mr-2 shadow-sm border border-gray-100">
+              <Ionicons name="grid" size={12} color="#4b5563" />
+            </View>
+            <Text
+              className="text-xs text-gray-700 dark:text-zinc-200 font-bold flex-1"
+              numberOfLines={1}
+            >
+              {courseOrg ? `Sec ${courseOrg.section}` : "N/A"}
+            </Text>
+          </View>
         </View>
 
         {/* Action Buttons */}
@@ -176,7 +200,7 @@ export default function ManageRequestsScreen() {
   return (
     <SafeAreaView className="flex-1 bg-gray-50 dark:bg-zinc-900">
       <Stack.Screen options={{ headerShown: false }} />
-      
+
       <View className="flex-row items-center px-6 pt-2 pb-4">
         <TouchableOpacity
           onPress={() => router.back()}
@@ -193,7 +217,7 @@ export default function ManageRequestsScreen() {
           </Text>
         </View>
       </View>
-      
+
       {loading && !refreshing ? (
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color="#4f46e5" />
@@ -205,12 +229,12 @@ export default function ManageRequestsScreen() {
           className="flex-1 px-4 pt-4"
           contentContainerStyle={{ paddingBottom: 100 }}
           refreshControl={
-            <RefreshControl 
-              refreshing={refreshing} 
+            <RefreshControl
+              refreshing={refreshing}
               onRefresh={() => {
                 setRefreshing(true);
                 loadData();
-              }} 
+              }}
             />
           }
           ListEmptyComponent={
@@ -222,7 +246,8 @@ export default function ManageRequestsScreen() {
                 No Pending Requests
               </Text>
               <Text className="text-gray-500 text-center text-sm px-6">
-                There are no students awaiting approval for your assigned courses at this time.
+                There are no students awaiting approval for your assigned
+                courses at this time.
               </Text>
             </View>
           }
@@ -239,54 +264,86 @@ export default function ManageRequestsScreen() {
       >
         <SafeAreaView className="flex-1 bg-gray-50 dark:bg-zinc-900">
           <View className="flex-row items-center justify-between px-6 py-4 bg-white border-b border-gray-100">
-            <Text className="text-xl font-bold text-gray-900">Student Details</Text>
-            <TouchableOpacity onPress={() => setSelectedUser(null)} className="p-1 bg-gray-100 rounded-full">
+            <Text className="text-xl font-bold text-gray-900">
+              Student Details
+            </Text>
+            <TouchableOpacity
+              onPress={() => setSelectedUser(null)}
+              className="p-1 bg-gray-100 rounded-full"
+            >
               <Ionicons name="close" size={24} color="#4b5563" />
             </TouchableOpacity>
           </View>
-          <ScrollView className="flex-1 p-6" contentContainerStyle={{ alignItems: 'center' }}>
-            {selectedUser && (() => {
-              const matchedProfile = profiles.find(p => p.userId === selectedUser.id) || selectedUser.studentProfile;
-              return (
-              <>
-                <View className="w-24 h-24 bg-indigo-100 rounded-full items-center justify-center mb-4 shadow-sm">
-                  <Text className="text-indigo-700 font-bold text-4xl">
-                    {selectedUser.name.charAt(0).toUpperCase()}
-                  </Text>
-                </View>
-                <Text className="text-2xl font-bold text-gray-900 text-center">{selectedUser.name}</Text>
-                <Text className="text-base text-gray-500 mb-6">{selectedUser.email}</Text>
-                
-                <View className="w-full bg-white p-5 rounded-3xl border border-gray-100 shadow-sm mt-2">
-                   <Text className="text-xs font-bold text-gray-400 uppercase mb-4 tracking-wider">Profile Information</Text>
-                   
-                   <View className="flex-row items-center mb-3">
-                     <View className="w-10 h-10 rounded-xl bg-gray-50 items-center justify-center mr-3 border border-gray-100">
-                       <Ionicons name="card-outline" size={18} color="#6b7280" />
-                     </View>
-                     <View>
-                        <Text className="text-xs text-gray-500 font-medium">Admission No.</Text>
-                        <Text className="text-sm text-gray-900 font-bold">
-                          {matchedProfile?.admissionNumber || "N/A"}
-                        </Text>
-                     </View>
-                   </View>
+          <ScrollView
+            className="flex-1 p-6"
+            contentContainerStyle={{ alignItems: "center" }}
+          >
+            {selectedUser &&
+              (() => {
+                const matchedProfile =
+                  profiles.find((p) => p.userId === selectedUser.id) ||
+                  selectedUser.studentProfile;
+                return (
+                  <>
+                    <View className="w-24 h-24 bg-indigo-100 rounded-full items-center justify-center mb-4 shadow-sm">
+                      <Text className="text-indigo-700 font-bold text-4xl">
+                        {selectedUser.name.charAt(0).toUpperCase()}
+                      </Text>
+                    </View>
+                    <Text className="text-2xl font-bold text-gray-900 text-center">
+                      {selectedUser.name}
+                    </Text>
+                    <Text className="text-base text-gray-500 mb-6">
+                      {selectedUser.email}
+                    </Text>
 
-                   <View className="flex-row items-center">
-                     <View className="w-10 h-10 rounded-xl bg-gray-50 items-center justify-center mr-3 border border-gray-100">
-                       <Ionicons name="school-outline" size={18} color="#6b7280" />
-                     </View>
-                     <View>
-                        <Text className="text-xs text-gray-500 font-medium">Semester</Text>
-                        <Text className="text-sm text-gray-900 font-bold">
-                          {matchedProfile?.currentSemester ? SEMESTER_MAP[matchedProfile.currentSemester] || matchedProfile.currentSemester : "N/A"}
-                        </Text>
-                     </View>
-                   </View>
-                </View>
-              </>
-              );
-            })()}
+                    <View className="w-full bg-white p-5 rounded-3xl border border-gray-100 shadow-sm mt-2">
+                      <Text className="text-xs font-bold text-gray-400 uppercase mb-4 tracking-wider">
+                        Profile Information
+                      </Text>
+
+                      <View className="flex-row items-center mb-3">
+                        <View className="w-10 h-10 rounded-xl bg-gray-50 items-center justify-center mr-3 border border-gray-100">
+                          <Ionicons
+                            name="card-outline"
+                            size={18}
+                            color="#6b7280"
+                          />
+                        </View>
+                        <View>
+                          <Text className="text-xs text-gray-500 font-medium">
+                            Admission No.
+                          </Text>
+                          <Text className="text-sm text-gray-900 font-bold">
+                            {matchedProfile?.admissionNumber || "N/A"}
+                          </Text>
+                        </View>
+                      </View>
+
+                      <View className="flex-row items-center">
+                        <View className="w-10 h-10 rounded-xl bg-gray-50 items-center justify-center mr-3 border border-gray-100">
+                          <Ionicons
+                            name="school-outline"
+                            size={18}
+                            color="#6b7280"
+                          />
+                        </View>
+                        <View>
+                          <Text className="text-xs text-gray-500 font-medium">
+                            Semester
+                          </Text>
+                          <Text className="text-sm text-gray-900 font-bold">
+                            {matchedProfile?.currentSemester
+                              ? SEMESTER_MAP[matchedProfile.currentSemester] ||
+                                matchedProfile.currentSemester
+                              : "N/A"}
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                  </>
+                );
+              })()}
           </ScrollView>
         </SafeAreaView>
       </Modal>

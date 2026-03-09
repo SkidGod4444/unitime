@@ -15,27 +15,45 @@ attendance.use("/sessions/:id/students", requireRole("PROFESSOR", "ADMIN"));
 
 attendance.post("/qr/session/create", async (c) => {
   const requester = c.get("user") as { $id?: string } | null;
-  const requesterId = (c.get("requesterId") as string | undefined) ?? (requester?.$id as string | undefined) ?? null;
-  if (!requesterId) return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
+  const requesterId =
+    (c.get("requesterId") as string | undefined) ??
+    (requester?.$id as string | undefined) ??
+    null;
+  if (!requesterId)
+    return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
 
   const parsed = createQRSessionSchema.safeParse(await c.req.json());
   if (!parsed.success) {
     return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT);
   }
-  const { courseId, startTime, endTime, manualPresentIds, manualAbsentIds, labGroupId, geofenceRadius } = parsed.data;
+  const {
+    courseId,
+    startTime,
+    endTime,
+    manualPresentIds,
+    manualAbsentIds,
+    labGroupId,
+    geofenceRadius,
+  } = parsed.data;
   const manualIds = Array.isArray(manualPresentIds) ? manualPresentIds : [];
   const absentIds = Array.isArray(manualAbsentIds) ? manualAbsentIds : [];
 
   const courseDetails = await prisma.courses.findUnique({
     where: { id: courseId },
-    select: { name: true, organizationId: true }
+    select: { name: true, organizationId: true },
   });
 
   // Optional lab-group validation
   if (labGroupId) {
-    const group = await prisma.labGroup.findUnique({ where: { id: labGroupId } });
+    const group = await prisma.labGroup.findUnique({
+      where: { id: labGroupId },
+    });
     if (!group) {
-      return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT, "Invalid lab group");
+      return createHonoErrorResponse(
+        c,
+        ERROR_CODES.INVALID_INPUT,
+        "Invalid lab group",
+      );
     }
   }
 
@@ -65,55 +83,60 @@ attendance.post("/qr/session/create", async (c) => {
         })),
         skipDuplicates: true,
       });
-      console.log(`Manually marked ${manualIds.length} students for session ${qrSession.id}`);
+      console.log(
+        `Manually marked ${manualIds.length} students for session ${qrSession.id}`,
+      );
     } catch (err) {
-      console.error("Failed to commit manual attendance logs during session create", err);
+      console.error(
+        "Failed to commit manual attendance logs during session create",
+        err,
+      );
     }
   }
 
-    if (manualIds.length > 0) {
-      await prisma.historyLog.createMany({
-        data: manualIds.map((userId: string) => ({
-          title: "Manual Attendance (Present)",
-          description: `You were manually marked Present for ${courseDetails?.name || 'your class'}.`,
-          type: "ATTENDANCE",
-          userId,
-          organizationId: courseDetails?.organizationId || null,
-        }))
-      });
+  if (manualIds.length > 0) {
+    await prisma.historyLog.createMany({
+      data: manualIds.map((userId: string) => ({
+        title: "Manual Attendance (Present)",
+        description: `You were manually marked Present for ${courseDetails?.name || "your class"}.`,
+        type: "ATTENDANCE",
+        userId,
+        organizationId: courseDetails?.organizationId || null,
+      })),
+    });
 
-      await prisma.notification.createMany({
-        data: manualIds.map((userId: string) => ({
-          title: "Attendance Updated",
-          body: `You were manually marked Present for ${courseDetails?.name || 'your class'}.`,
-          type: "SYSTEM",
-          userId,
-          organizationId: courseDetails?.organizationId || null,
-        }))
-      });
-    }
+    await prisma.notification.createMany({
+      data: manualIds.map((userId: string) => ({
+        title: "Attendance Updated",
+        body: `You were manually marked Present for ${courseDetails?.name || "your class"}.`,
+        type: "SYSTEM",
+        userId,
+        organizationId: courseDetails?.organizationId || null,
+      })),
+    });
+  }
 
-    if (absentIds.length > 0) {
-      await prisma.historyLog.createMany({
-        data: absentIds.map((userId: string) => ({
-          title: "Manual Attendance (Absent)",
-          description: `You were manually marked Absent for ${courseDetails?.name || 'your class'}.`,
-          type: "ATTENDANCE",
-          userId,
-          organizationId: courseDetails?.organizationId || null,
-        }))
-      });
+  if (absentIds.length > 0) {
+    await prisma.historyLog.createMany({
+      data: absentIds.map((userId: string) => ({
+        title: "Manual Attendance (Absent)",
+        description: `You were manually marked Absent for ${courseDetails?.name || "your class"}.`,
+        type: "ATTENDANCE",
+        userId,
+        organizationId: courseDetails?.organizationId || null,
+      })),
+    });
 
-      await prisma.notification.createMany({
-        data: absentIds.map((userId: string) => ({
-          title: "Attendance Updated",
-          body: `You were manually marked Absent for ${courseDetails?.name || 'your class'}.`,
-          type: "SYSTEM",
-          userId,
-          organizationId: courseDetails?.organizationId || null,
-        }))
-      });
-    }
+    await prisma.notification.createMany({
+      data: absentIds.map((userId: string) => ({
+        title: "Attendance Updated",
+        body: `You were manually marked Absent for ${courseDetails?.name || "your class"}.`,
+        type: "SYSTEM",
+        userId,
+        organizationId: courseDetails?.organizationId || null,
+      })),
+    });
+  }
 
   // Trigger parallel Push Notifications to enrolled students
   try {
@@ -121,9 +144,9 @@ attendance.post("/qr/session/create", async (c) => {
       where: { courseId: courseId },
       include: {
         user: {
-          select: { id: true, expoPushToken: true }
-        }
-      }
+          select: { id: true, expoPushToken: true },
+        },
+      },
     });
 
     // If this is a lab-group session, restrict recipients to members of that group
@@ -133,7 +156,9 @@ attendance.post("/qr/session/create", async (c) => {
         select: { userId: true },
       });
       const allowed = new Set(groupMembers.map((m) => m.userId));
-      enrolledStudents = enrolledStudents.filter((enr) => allowed.has(enr.userId));
+      enrolledStudents = enrolledStudents.filter((enr) =>
+        allowed.has(enr.userId),
+      );
     }
 
     const tokens = enrolledStudents
@@ -148,21 +173,23 @@ attendance.post("/qr/session/create", async (c) => {
 
     if (tokens.length > 0) {
       const pushDetails = {
-        sound: 'default',
-        title: 'Attendance Started',
-        body: `Attendance for ${courseDetails?.name || 'your class'} is now open! Please open the app to check in.`,
+        sound: "default",
+        title: "Attendance Started",
+        body: `Attendance for ${courseDetails?.name || "your class"} is now open! Please open the app to check in.`,
         data: { courseId: courseId, sessionId: qrSession.id },
       };
 
       // Expo Push API chunks requests, but for <100 tokens this bulk push is completely fine
-      await fetch('https://exp.host/--/api/v2/push/send', {
-        method: 'POST',
+      await fetch("https://exp.host/--/api/v2/push/send", {
+        method: "POST",
         headers: {
-          Accept: 'application/json',
-          'Accept-encoding': 'gzip, deflate',
-          'Content-Type': 'application/json',
+          Accept: "application/json",
+          "Accept-encoding": "gzip, deflate",
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(tokens.map(token => ({ to: token, ...pushDetails })))
+        body: JSON.stringify(
+          tokens.map((token) => ({ to: token, ...pushDetails })),
+        ),
       }).catch(console.error);
     }
   } catch (pushErr) {
@@ -181,8 +208,12 @@ attendance.post("/qr/session/create", async (c) => {
 
 attendance.post("/qr/session/verify", async (c) => {
   const requester = c.get("user") as { $id?: string } | null;
-  const requesterId = (c.get("requesterId") as string | undefined) ?? (requester?.$id as string | undefined) ?? null;
-  if (!requesterId) return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
+  const requesterId =
+    (c.get("requesterId") as string | undefined) ??
+    (requester?.$id as string | undefined) ??
+    null;
+  if (!requesterId)
+    return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
   const { qrString } = await c.req.json();
   if (!qrString) {
     return createHonoErrorResponse(c, ERROR_CODES.MISSING_REQUIRED_FIELD);
@@ -241,37 +272,48 @@ attendance.post("/qr/session/verify", async (c) => {
  * Calculates the great-circle distance between two points on the Earth.
  * Returns distance in meters.
  */
-function haversineDistance(coords1: { lat: number; lng: number }, coords2: { lat: number; lng: number }) {
+function haversineDistance(
+  coords1: { lat: number; lng: number },
+  coords2: { lat: number; lng: number },
+) {
   const R = 6371e3; // Earth radius in meters
   const toRadian = (angle: number) => (Math.PI / 180) * angle;
 
   const dLat = toRadian(coords2.lat - coords1.lat);
   const dLon = toRadian(coords2.lng - coords1.lng);
-  
-  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos(toRadian(coords1.lat)) * Math.cos(toRadian(coords2.lat)) *
-            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRadian(coords1.lat)) *
+      Math.cos(toRadian(coords2.lat)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  
-  return R * c; 
+
+  return R * c;
 }
 
 attendance.post("/checkin", async (c) => {
   const requester = c.get("user") as { $id?: string } | null;
-  if (!requester?.$id) return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
+  if (!requester?.$id)
+    return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
   const requesterId = requester.$id as string;
   const parsed = checkinSchema.safeParse(await c.req.json());
-  if (!parsed.success) return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT);
+  if (!parsed.success)
+    return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT);
   const { sessionId, coordinates } = parsed.data;
 
   try {
     const session = await prisma.attendanceQRSession.findUnique({
       where: { id: sessionId },
-      include: { user: true, course: true }
+      include: { user: true, course: true },
     });
 
     if (!session || session.status !== "ACTIVE") {
-      return c.json({ success: false, message: "Session is invalid or inactive" }, 400);
+      return c.json(
+        { success: false, message: "Session is invalid or inactive" },
+        400,
+      );
     }
 
     // Enforce check-in window with optional grace period
@@ -288,25 +330,39 @@ attendance.post("/checkin", async (c) => {
           type: "ATTENDANCE",
           userId: requesterId,
           organizationId: session.course.organizationId || null,
-        }
+        },
       });
-      return c.json({ success: false, message: "Outside check-in window" }, 400);
+      return c.json(
+        { success: false, message: "Outside check-in window" },
+        400,
+      );
     }
 
     if (!session.user.coordinates) {
-       return c.json({ success: false, message: "Professor location is not broadcasted. Cannot verify." }, 400);
+      return c.json(
+        {
+          success: false,
+          message: "Professor location is not broadcasted. Cannot verify.",
+        },
+        400,
+      );
     }
-    
+
     // Parse creator coordinates "lat,lng"
     const [profLatStr, profLngStr] = session.user.coordinates.split(",");
-    const profCoords = { lat: parseFloat(profLatStr), lng: parseFloat(profLngStr) };
-    
+    const profCoords = {
+      lat: parseFloat(profLatStr),
+      lng: parseFloat(profLngStr),
+    };
+
     // Verify distance using per-session geofence radius (default 75m)
     const distanceMeters = haversineDistance(coordinates, profCoords);
     const THRESHOLD_METERS = session.geofenceRadius ?? 75;
-    
+
     if (distanceMeters > THRESHOLD_METERS) {
-      console.log(`[Check-in Failed] User ${requesterId} is ${distanceMeters.toFixed(1)}m away from class.`);
+      console.log(
+        `[Check-in Failed] User ${requesterId} is ${distanceMeters.toFixed(1)}m away from class.`,
+      );
       await prisma.historyLog.create({
         data: {
           title: "Attendance Failed",
@@ -314,14 +370,22 @@ attendance.post("/checkin", async (c) => {
           type: "ATTENDANCE",
           userId: requesterId,
           organizationId: session.course.organizationId || null,
-        }
+        },
       });
-      return c.json({ success: false, message: "You are too far from the classroom to check in." }, 400);
+      return c.json(
+        {
+          success: false,
+          message: "You are too far from the classroom to check in.",
+        },
+        400,
+      );
     }
 
     // Check approved enrollment for requester
     const enrollment = await prisma.userCourse.findUnique({
-      where: { userId_courseId: { userId: requesterId, courseId: session.courseId } },
+      where: {
+        userId_courseId: { userId: requesterId, courseId: session.courseId },
+      },
     });
     if (!enrollment || enrollment.status !== "APPROVED") {
       await prisma.historyLog.create({
@@ -331,9 +395,12 @@ attendance.post("/checkin", async (c) => {
           type: "ATTENDANCE",
           userId: requesterId,
           organizationId: session.course.organizationId || null,
-        }
+        },
       });
-      return c.json({ success: false, message: "Not enrolled in this course" }, 403);
+      return c.json(
+        { success: false, message: "Not enrolled in this course" },
+        403,
+      );
     }
 
     // If session targets a lab group, verify student's mapping
@@ -342,17 +409,26 @@ attendance.post("/checkin", async (c) => {
         where: { userId: requesterId },
       });
       if (!mapping || mapping.labGroupId !== session.labGroupId) {
-        return c.json({ success: false, message: "You are not in the targeted lab group for this session" }, 403);
+        return c.json(
+          {
+            success: false,
+            message: "You are not in the targeted lab group for this session",
+          },
+          403,
+        );
       }
     }
 
     // Check if duplicate
     const existing = await prisma.attendanceLogs.findUnique({
-      where: { sessionId_userId: { sessionId, userId: requesterId } }
+      where: { sessionId_userId: { sessionId, userId: requesterId } },
     });
-    
+
     if (existing) {
-       return c.json({ success: true, message: "Attendance already verified" }, 200);
+      return c.json(
+        { success: true, message: "Attendance already verified" },
+        200,
+      );
     }
 
     // Save attendance
@@ -362,17 +438,17 @@ attendance.post("/checkin", async (c) => {
         userId: requesterId,
         sessionType: "TAP_SESSION",
         markedAt: new Date(),
-      }
+      },
     });
-    
+
     // Add user to the markedUsers array for the session to prevent routing loops
     await prisma.attendanceQRSession.update({
       where: { id: sessionId },
       data: {
         markedUsers: {
-          push: requesterId
-        }
-      }
+          push: requesterId,
+        },
+      },
     });
 
     await prisma.historyLog.create({
@@ -382,7 +458,7 @@ attendance.post("/checkin", async (c) => {
         type: "ATTENDANCE",
         userId: requesterId,
         organizationId: session.course.organizationId || null,
-      }
+      },
     });
 
     // Background aggregation: Update attendance_summary asynchronously
@@ -396,10 +472,10 @@ attendance.post("/checkin", async (c) => {
         });
 
         // Total sessions = all lecture (labGroupId = null) + sessions targeting myGroup.labGroupId (if set)
-        const orClauses: import("@unitime/db").Prisma.AttendanceQRSessionWhereInput[] = [
-          { labGroupId: null },
-        ];
-        if (myGroup?.labGroupId) orClauses.push({ labGroupId: myGroup.labGroupId });
+        const orClauses: import("@unitime/db").Prisma.AttendanceQRSessionWhereInput[] =
+          [{ labGroupId: null }];
+        if (myGroup?.labGroupId)
+          orClauses.push({ labGroupId: myGroup.labGroupId });
         const sessionIds = (
           await prisma.attendanceQRSession.findMany({
             where: {
@@ -416,40 +492,53 @@ attendance.post("/checkin", async (c) => {
           where: { userId: requesterId, sessionId: { in: sessionIds } },
         });
 
-        const percentage = totalSessions === 0 ? 100 : Math.round((attendedSessions / totalSessions) * 100);
+        const percentage =
+          totalSessions === 0
+            ? 100
+            : Math.round((attendedSessions / totalSessions) * 100);
 
         await prisma.attendanceSummary.upsert({
           where: {
             userId_courseId: {
               userId: requesterId,
               courseId,
-            }
+            },
           },
           update: {
             attended: attendedSessions,
             total: totalSessions,
-            percentage
+            percentage,
           },
           create: {
             userId: requesterId,
             courseId,
             attended: attendedSessions,
             total: totalSessions,
-            percentage
-          }
+            percentage,
+          },
         });
-        console.log(`[Background Job] Updated attendance summary for user ${requesterId} in course ${courseId}`);
+        console.log(
+          `[Background Job] Updated attendance summary for user ${requesterId} in course ${courseId}`,
+        );
       } catch (aggrError) {
-        console.error("Failed to aggregate attendance in background:", aggrError);
+        console.error(
+          "Failed to aggregate attendance in background:",
+          aggrError,
+        );
       }
     })();
-    
+
     // Important: Invalidate cache for realtime updates
     await invalidateCache(`attendanceLogs:session:${sessionId}`);
-    await invalidateCache(`dashboard:${requesterId}`, `dashboard:bundle:${requesterId}`);
-    
-    return c.json({ success: true, message: "Attendance Marked Successfully" }, 200);
+    await invalidateCache(
+      `dashboard:${requesterId}`,
+      `dashboard:bundle:${requesterId}`,
+    );
 
+    return c.json(
+      { success: true, message: "Attendance Marked Successfully" },
+      200,
+    );
   } catch (error) {
     console.error("Error during manual check-in:", error);
     return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
@@ -498,10 +587,10 @@ attendance.get("/summary/:userId", async (c) => {
           select: { labGroupId: true },
         });
 
-        const orClauses: import("@unitime/db").Prisma.AttendanceQRSessionWhereInput[] = [
-          { labGroupId: null },
-        ];
-        if (myGroup?.labGroupId) orClauses.push({ labGroupId: myGroup.labGroupId });
+        const orClauses: import("@unitime/db").Prisma.AttendanceQRSessionWhereInput[] =
+          [{ labGroupId: null }];
+        if (myGroup?.labGroupId)
+          orClauses.push({ labGroupId: myGroup.labGroupId });
         const sessionIds = (
           await prisma.attendanceQRSession.findMany({
             where: {
@@ -549,15 +638,16 @@ attendance.get("/sessions/all", async (c) => {
   try {
     const attendanceSessions = await getOrSetCache(
       "attendanceQRSessions:all",
-      () => prisma.attendanceQRSession.findMany({
-        include: {
-          user: true,
-          course: true,
-        },
-        orderBy: {
-          createdAt: "desc",
-        },
-      }),
+      () =>
+        prisma.attendanceQRSession.findMany({
+          include: {
+            user: true,
+            course: true,
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        }),
       120,
     );
 
@@ -580,7 +670,9 @@ attendance.get("/sessions/all", async (c) => {
             select: { userId: true },
           });
           const allowed = new Set(members.map((m) => m.userId));
-          enrolledStudents = enrolledStudents.filter((enr) => allowed.has(enr.userId));
+          enrolledStudents = enrolledStudents.filter((enr) =>
+            allowed.has(enr.userId),
+          );
         }
 
         const formattedLogs = enrolledStudents.map((enr) => {
@@ -593,7 +685,7 @@ attendance.get("/sessions/all", async (c) => {
         });
 
         return { ...session, logs: formattedLogs };
-      })
+      }),
     );
 
     return c.json(
@@ -645,15 +737,17 @@ attendance.patch("/sessions/:id/students", async (c) => {
               },
             });
             // Add to markedUsers string array
-            const session = await tx.attendanceQRSession.findUnique({ where: { id: sessionId } });
+            const session = await tx.attendanceQRSession.findUnique({
+              where: { id: sessionId },
+            });
             if (session && !session.markedUsers.includes(student.id)) {
               await tx.attendanceQRSession.update({
                 where: { id: sessionId },
                 data: {
                   markedUsers: {
-                    push: student.id
-                  }
-                }
+                    push: student.id,
+                  },
+                },
               });
             }
           }
@@ -676,17 +770,21 @@ attendance.patch("/sessions/:id/students", async (c) => {
                 },
               },
             });
-            
-            // Remove from markedUsers array 
-            const session = await tx.attendanceQRSession.findUnique({ where: { id: sessionId } });
+
+            // Remove from markedUsers array
+            const session = await tx.attendanceQRSession.findUnique({
+              where: { id: sessionId },
+            });
             if (session && session.markedUsers.includes(student.id)) {
-               const newMarkedUsers = session.markedUsers.filter(id => id !== student.id);
-               await tx.attendanceQRSession.update({
-                  where: { id: sessionId },
-                  data: {
-                    markedUsers: newMarkedUsers
-                  }
-               });
+              const newMarkedUsers = session.markedUsers.filter(
+                (id) => id !== student.id,
+              );
+              await tx.attendanceQRSession.update({
+                where: { id: sessionId },
+                data: {
+                  markedUsers: newMarkedUsers,
+                },
+              });
             }
           }
         }
@@ -714,7 +812,7 @@ attendance.get("/sessions/:id/export", async (c) => {
       where: { id: sessionId },
       include: {
         course: true,
-      }
+      },
     });
 
     if (!session) {
@@ -738,7 +836,9 @@ attendance.get("/sessions/:id/export", async (c) => {
         select: { userId: true },
       });
       const allowed = new Set(members.map((m) => m.userId));
-      enrolledStudents = enrolledStudents.filter((enr) => allowed.has(enr.userId));
+      enrolledStudents = enrolledStudents.filter((enr) =>
+        allowed.has(enr.userId),
+      );
     }
 
     const headers = [
@@ -754,7 +854,7 @@ attendance.get("/sessions/:id/export", async (c) => {
     for (const enr of enrolledStudents) {
       const isPresent = logs.some((log) => log.userId === enr.userId);
       const profile = enr.user.studentProfile;
-      
+
       const row = [
         `"${enr.user.name || ""}"`,
         `"${profile?.admissionNumber || ""}"`,
@@ -762,7 +862,7 @@ attendance.get("/sessions/:id/export", async (c) => {
         `"${profile?.contactNumber || ""}"`,
         isPresent ? "Present" : "Absent",
       ];
-      
+
       csvRows.push(row.join(","));
     }
 
@@ -770,9 +870,11 @@ attendance.get("/sessions/:id/export", async (c) => {
 
     const response = new Response(csvString);
     response.headers.set("Content-Type", "text/csv");
-    response.headers.set("Content-Disposition", `attachment; filename="UNiTIME_ATTENDANCE_${session.course.code}.csv"`);
+    response.headers.set(
+      "Content-Disposition",
+      `attachment; filename="UNiTIME_ATTENDANCE_${session.course.code}.csv"`,
+    );
     return response;
-
   } catch (error) {
     console.error("Error exporting session:", error);
     return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);

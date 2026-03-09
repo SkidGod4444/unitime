@@ -15,7 +15,10 @@ export const cache: Redis = (() => {
   console.warn(
     "@unitime/cache: UPSTASH env not set; constructing placeholder Redis client for build-time imports.",
   );
-  return new Redis({ url: "https://placeholder.invalid", token: "placeholder" });
+  return new Redis({
+    url: "https://placeholder.invalid",
+    token: "placeholder",
+  });
 })();
 
 /**
@@ -49,7 +52,9 @@ export const getOrSetCache = async <T>(
   }
 
   const freshData = await fetcher();
-  console.log(`[CACHE MISS] returned from db directly for key: ${sanitizedKey}`);
+  console.log(
+    `[CACHE MISS] returned from db directly for key: ${sanitizedKey}`,
+  );
   await cache.set(sanitizedKey, freshData, { ex: ttlSeconds });
   return freshData;
 };
@@ -64,5 +69,3 @@ export const invalidateCache = async (...keys: string[]): Promise<void> => {
   const sanitizedKeys = keys.map(sanitizeCacheKey);
   await cache.del(...sanitizedKeys);
 };
-
-

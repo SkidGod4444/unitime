@@ -5,11 +5,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useMemo } from "react";
 import {
-    RefreshControl,
-    SectionList,
-    Text,
-    TouchableOpacity,
-    View,
+  RefreshControl,
+  SectionList,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -29,7 +29,7 @@ export default function Notify() {
     const startOfToday = new Date(
       now.getFullYear(),
       now.getMonth(),
-      now.getDate()
+      now.getDate(),
     );
     const startOfYesterday = new Date(startOfToday.getTime() - 86400000);
 
@@ -72,7 +72,10 @@ export default function Notify() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background dark:bg-zinc-900" edges={["top"]}>
+    <SafeAreaView
+      className="flex-1 bg-background dark:bg-zinc-900"
+      edges={["top"]}
+    >
       <View className="flex-1 px-5">
         {/* Header */}
         <View className="flex-row justify-between items-end mt-4 mb-6">
@@ -147,7 +150,9 @@ export default function Notify() {
                     }
                     size={24}
                     className={
-                      item.type === "ATTENDANCE" ? "text-green-600" : "text-purple-600"
+                      item.type === "ATTENDANCE"
+                        ? "text-green-600"
+                        : "text-purple-600"
                     }
                     style={{
                       color: item.type === "ATTENDANCE" ? "#16A34A" : "#9333EA",
@@ -165,7 +170,10 @@ export default function Notify() {
                       {timeSince(item.createdAt)}
                     </Text>
                   </View>
-                  <Text className="text-gray-500 dark:text-zinc-300 text-sm leading-5" numberOfLines={3}>
+                  <Text
+                    className="text-gray-500 dark:text-zinc-300 text-sm leading-5"
+                    numberOfLines={3}
+                  >
                     {item.body}
                   </Text>
                 </View>

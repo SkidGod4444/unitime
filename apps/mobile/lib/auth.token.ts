@@ -12,4 +12,3 @@ export const getAuthToken = (): string | null => {
     return null;
   }
 };
-

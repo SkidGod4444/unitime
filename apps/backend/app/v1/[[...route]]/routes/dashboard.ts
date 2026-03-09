@@ -7,7 +7,7 @@ const dashboard = new Hono();
 
 dashboard.get("/:userId", async (c) => {
   const userId = c.req.param("userId");
-  
+
   try {
     const dashboardData = await getOrSetCache(
       `dashboard:${userId}`,
@@ -15,36 +15,45 @@ dashboard.get("/:userId", async (c) => {
         const user = await prisma.user.findUnique({
           where: { id: userId },
           include: {
-            studentProfile: true, // often needed 
+            studentProfile: true, // often needed
             courses: {
               where: { status: "APPROVED" },
-              include: { course: true }
-            }
-          }
+              include: { course: true },
+            },
+          },
         });
 
         if (!user) return null;
 
         // Fetch Timetable active for today roughly
-        const todayStr = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase();
+        const todayStr = new Date()
+          .toLocaleDateString("en-US", { weekday: "long" })
+          .toUpperCase();
         const timetable = await prisma.timetable.findMany({
           where: {
-            day: todayStr as "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY",
+            day: todayStr as
+              | "MONDAY"
+              | "TUESDAY"
+              | "WEDNESDAY"
+              | "THURSDAY"
+              | "FRIDAY"
+              | "SATURDAY"
+              | "SUNDAY",
             course: {
-              users: { some: { userId: user.id, status: "APPROVED" } }
-            }
+              users: { some: { userId: user.id, status: "APPROVED" } },
+            },
           },
           include: { course: true },
-          orderBy: { startTime: 'asc' }
+          orderBy: { startTime: "asc" },
         });
 
         // Compute attendance summary fast approximation for dashboard
         const logs = await prisma.attendanceLogs.findMany({
-          where: { userId: user.id }
+          where: { userId: user.id },
         });
         const summary = {
           totalMarked: logs.length,
-          lastMarkedAt: logs.length > 0 ? logs[logs.length - 1].markedAt : null
+          lastMarkedAt: logs.length > 0 ? logs[logs.length - 1].markedAt : null,
         };
 
         // Get currently active sessions for enrolled courses where endTime hasn't passed yet
@@ -55,46 +64,55 @@ dashboard.get("/:userId", async (c) => {
             status: "ACTIVE",
             endTime: { gte: new Date(now.getTime() - 120_000) }, // allow 2 min grace
             course: {
-              users: { some: { userId: user.id, status: "APPROVED" } }
-            }
+              users: { some: { userId: user.id, status: "APPROVED" } },
+            },
           },
-          include: { 
-            course: true
-          }
+          include: {
+            course: true,
+          },
         });
 
         // Only return sessions that the user hasn't checked into yet
-        const activeSessions = rawActiveSessions.filter(session => !session.markedUsers.includes(user.id));
+        const activeSessions = rawActiveSessions.filter(
+          (session) => !session.markedUsers.includes(user.id),
+        );
 
         // Background: auto-expire sessions whose endTime has long passed (> 5 min ago)
         // so future cache misses don't keep seeing stale ACTIVE sessions
         const staleThreshold = new Date(now.getTime() - 5 * 60_000);
-        prisma.attendanceQRSession.updateMany({
-          where: { status: "ACTIVE", endTime: { lt: staleThreshold } },
-          data: { status: "INACTIVE" },
-        }).catch(() => {});
+        prisma.attendanceQRSession
+          .updateMany({
+            where: { status: "ACTIVE", endTime: { lt: staleThreshold } },
+            data: { status: "INACTIVE" },
+          })
+          .catch(() => {});
 
         return {
           user: { id: user.id, name: user.name, role: user.role },
-          courses: (user as unknown as { courses?: { course: unknown }[] }).courses?.map(uc => uc.course) || [],
+          courses:
+            (
+              user as unknown as { courses?: { course: unknown }[] }
+            ).courses?.map((uc) => uc.course) || [],
           timetable,
           summary,
-          activeSessions
+          activeSessions,
         };
       },
-      300 // TTL of 300 seconds (5 minutes) Cache-First pattern
+      300, // TTL of 300 seconds (5 minutes) Cache-First pattern
     );
 
     if (!dashboardData) {
       return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
     }
 
-    return c.json({
-      success: true,
-      status_code: 200,
-      data: dashboardData
-    }, 200);
-
+    return c.json(
+      {
+        success: true,
+        status_code: 200,
+        data: dashboardData,
+      },
+      200,
+    );
   } catch (error) {
     console.error("Dashboard fetch error:", error);
     return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
@@ -182,7 +200,10 @@ dashboard.get("/:userId/bundle", async (c) => {
             });
 
             const sessionIds = (
-              await prisma.attendanceQRSession.findMany({ where: { courseId }, select: { id: true } })
+              await prisma.attendanceQRSession.findMany({
+                where: { courseId },
+                select: { id: true },
+              })
             ).map((s) => s.id);
 
             const attendedSessions = await prisma.attendanceLogs.count({
@@ -202,7 +223,7 @@ dashboard.get("/:userId/bundle", async (c) => {
               total: totalSessions,
               percentage,
             };
-          })
+          }),
         );
 
         // 4) Active sessions the user hasn't checked into yet, and that haven't expired
@@ -211,21 +232,25 @@ dashboard.get("/:userId/bundle", async (c) => {
           where: {
             status: "ACTIVE",
             endTime: { gte: new Date(now2.getTime() - 120_000) }, // 2 min grace
-            course: { users: { some: { userId: user.id, status: "APPROVED" } } },
+            course: {
+              users: { some: { userId: user.id, status: "APPROVED" } },
+            },
           },
           include: { course: true },
           orderBy: { createdAt: "desc" },
         });
         const activeSessions = rawActiveSessions.filter(
-          (s) => !s.markedUsers.includes(user.id)
+          (s) => !s.markedUsers.includes(user.id),
         );
 
         // Background: auto-expire stale ACTIVE sessions (> 5 min past endTime)
         const staleThreshold2 = new Date(now2.getTime() - 5 * 60_000);
-        prisma.attendanceQRSession.updateMany({
-          where: { status: "ACTIVE", endTime: { lt: staleThreshold2 } },
-          data: { status: "INACTIVE" },
-        }).catch(() => {});
+        prisma.attendanceQRSession
+          .updateMany({
+            where: { status: "ACTIVE", endTime: { lt: staleThreshold2 } },
+            data: { status: "INACTIVE" },
+          })
+          .catch(() => {});
 
         // 5) Notifications (personal + org), last 10 + unreadCount
         const studentProfile = await prisma.studentProfile.findUnique({
@@ -243,7 +268,9 @@ dashboard.get("/:userId/bundle", async (c) => {
         });
 
         // compute unread across all in taken window (consistent with current approach)
-        const unreadCount = notifications.filter((n) => !n.readBy.includes(userId)).length;
+        const unreadCount = notifications.filter(
+          (n) => !n.readBy.includes(userId),
+        ).length;
 
         // 6) History: last 10 personal + org
         const history = await prisma.historyLog.findMany({
@@ -264,7 +291,7 @@ dashboard.get("/:userId/bundle", async (c) => {
           history,
         } as const;
       },
-      120
+      120,
     );
 
     if (!payload) {

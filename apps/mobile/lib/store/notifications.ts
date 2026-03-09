@@ -30,7 +30,8 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
   fetchNotifications: async (userId: string) => {
     try {
       set({ loading: true, error: null });
-      const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+      const origin =
+        process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
       const res = await fetch(`${origin}/notifications/${userId}`);
       const data = await res.json();
 
@@ -52,11 +53,12 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
       // Optimistic update
       set((state) => ({
         notifications: state.notifications.map((n) =>
-          n.id === notificationId ? { ...n, readBy: [...n.readBy, userId] } : n
+          n.id === notificationId ? { ...n, readBy: [...n.readBy, userId] } : n,
         ),
       }));
 
-      const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+      const origin =
+        process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
       await fetch(`${origin}/notifications/${notificationId}/read`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -77,9 +79,10 @@ export const useNotificationsStore = create<NotificationsState>((set, get) => ({
         })),
       }));
 
-      const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+      const origin =
+        process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
       await fetch(`${origin}/notifications/user/${userId}/read-all`, {
-          method: "PUT",
+        method: "PUT",
       });
     } catch (err: any) {
       console.error("Failed to mark all notifications as read", err);

@@ -2,7 +2,9 @@ import { withAccelerate } from "@prisma/extension-accelerate";
 import { PrismaClient } from "../prisma/generated/client";
 
 const prismaClientSingleton = () => {
-  return new PrismaClient({ accelerateUrl: process.env.DATABASE_URL as string }).$extends(withAccelerate());
+  return new PrismaClient({
+    accelerateUrl: process.env.DATABASE_URL as string,
+  }).$extends(withAccelerate());
 };
 
 declare const globalThis: {

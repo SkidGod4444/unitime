@@ -5,11 +5,11 @@ import { UserT } from "@unitime/types";
 import { router } from "expo-router";
 import { usePostHog } from "posthog-react-native";
 import React, {
-    createContext,
-    ReactNode,
-    useContext,
-    useEffect,
-    useState,
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
 } from "react";
 import { ID } from "react-native-appwrite";
 
@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         name: loggedInUser.name,
         email: loggedInUser.email,
       };
-      
+
       if (loggedInUser.role) {
         identifyData.role = loggedInUser.role;
       }

@@ -1,23 +1,27 @@
 import { useAuth } from "@/contexts/auth.cntxt";
 import { useLocalStore } from "@/contexts/localstore.cntxt";
 import { useRefresh } from "@/hooks/use-refresh";
-import { useAttendanceStore, useFeedbacksStore, useTimetableStore } from "@/lib/store";
+import {
+  useAttendanceStore,
+  useFeedbacksStore,
+  useTimetableStore,
+} from "@/lib/store";
 import { Ionicons } from "@expo/vector-icons";
 import * as LocalAuthentication from "expo-local-authentication";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-    Alert,
-    Image,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    RefreshControl,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -29,7 +33,9 @@ export default function Index() {
   const [expanded, setExpanded] = useState(true);
   const [feedbackVisible, setFeedbackVisible] = useState(false);
   const [feedbackText, setFeedbackText] = useState("");
-  const [feedbackCategory, setFeedbackCategory] = useState<"BUG"|"UX"|"FEATURE"|"OTHER">("OTHER");
+  const [feedbackCategory, setFeedbackCategory] = useState<
+    "BUG" | "UX" | "FEATURE" | "OTHER"
+  >("OTHER");
   const { loggedInUser } = useAuth();
   const { refresh, refreshing } = useRefresh();
 
@@ -106,16 +112,28 @@ export default function Index() {
   // Fetch today's timetable for home screen dashboard
   useEffect(() => {
     if (loggedInUser?.id) {
-      const dayNames = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+      const dayNames = [
+        "SUNDAY",
+        "MONDAY",
+        "TUESDAY",
+        "WEDNESDAY",
+        "THURSDAY",
+        "FRIDAY",
+        "SATURDAY",
+      ];
       const todayDay = dayNames[new Date().getDay()];
       fetchTimetable(loggedInUser.id, todayDay);
     }
   }, [loggedInUser?.id]);
 
   const validSummary = summary.filter((s) => s.total > 0);
-  const totalAttended = validSummary.reduce((acc, curr) => acc + curr.attended, 0);
+  const totalAttended = validSummary.reduce(
+    (acc, curr) => acc + curr.attended,
+    0,
+  );
   const totalHeld = validSummary.reduce((acc, curr) => acc + curr.total, 0);
-  const overall = totalHeld > 0 ? Math.round((totalAttended / totalHeld) * 100) : 0;
+  const overall =
+    totalHeld > 0 ? Math.round((totalAttended / totalHeld) * 100) : 0;
 
   // Map first 3 timetable items for quick dashboard view
   const todaysSchedule = timetables.slice(0, 3).map((t, index) => {
@@ -141,7 +159,10 @@ export default function Index() {
   });
 
   return (
-    <SafeAreaView className="flex-1 bg-background dark:bg-zinc-900" edges={["top"]}>
+    <SafeAreaView
+      className="flex-1 bg-background dark:bg-zinc-900"
+      edges={["top"]}
+    >
       <ScrollView
         className="flex-1 px-5"
         showsVerticalScrollIndicator={false}
@@ -195,11 +216,11 @@ export default function Index() {
         {/* Status Overview Cards */}
         <View className="gap-4">
           {/* Expandable Attendance Card */}
-            <TouchableOpacity
-              onPress={toggleExpand}
-              activeOpacity={0.9}
-              className="bg-white dark:bg-zinc-900 p-4 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-sm relative overflow-hidden w-full"
-            >
+          <TouchableOpacity
+            onPress={toggleExpand}
+            activeOpacity={0.9}
+            className="bg-white dark:bg-zinc-900 p-4 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-sm relative overflow-hidden w-full"
+          >
             <View className="flex-row justify-between items-start">
               <View>
                 <View className="flex-row items-center mb-2">
@@ -258,7 +279,9 @@ export default function Index() {
                       <View className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                         <View
                           className={`h-full rounded-full ${item.total === 0 ? "bg-gray-300" : item.percentage >= 75 ? "bg-green-500" : "bg-red-500"}`}
-                          style={{ width: `${item.total === 0 ? 0 : item.percentage}%` }}
+                          style={{
+                            width: `${item.total === 0 ? 0 : item.percentage}%`,
+                          }}
                         />
                       </View>
                       <Text className="text-[10px] text-gray-400 dark:text-zinc-500 mt-0.5">
@@ -309,7 +332,9 @@ export default function Index() {
                 <TouchableOpacity
                   key={index}
                   className="w-[48%] bg-white dark:bg-zinc-900 p-4 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-sm flex-row items-center gap-3"
-                  onPress={() => action.route && router.push(action.route as any)}
+                  onPress={() =>
+                    action.route && router.push(action.route as any)
+                  }
                 >
                   <View
                     className={`h-10 w-10 ${action.bg} rounded-full justify-center items-center`}
@@ -401,7 +426,7 @@ export default function Index() {
             </View>
           )}
 
-          {/* CR Actions Grid */}
+        {/* CR Actions Grid */}
         {loggedInUser &&
           (loggedInUser.role === "REPRESENTATIVE" ||
             loggedInUser.role === "ADMIN") && (
@@ -617,26 +642,34 @@ export default function Index() {
 
                   {/* Subtitle */}
                   <Text className="text-gray-500 dark:text-zinc-400 text-center mb-5 leading-6 px-2">
-                    We&apos;d love to hear from you! Share your thoughts to help us
-                    improve.
+                    We&apos;d love to hear from you! Share your thoughts to help
+                    us improve.
                   </Text>
 
                   {/* Category selector */}
                   <View className="w-full mb-3">
-                    <Text className="text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase mb-2">Category</Text>
+                    <Text className="text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase mb-2">
+                      Category
+                    </Text>
                     <View className="flex-row gap-2 flex-wrap">
-                      {(["BUG","UX","FEATURE","OTHER"] as const).map((cat) => {
-                        const active = feedbackCategory === cat;
-                        return (
-                          <TouchableOpacity
-                            key={cat}
-                            className={`px-3 py-1.5 rounded-full border ${active ? "bg-pink-100 border-pink-200" : "bg-gray-100 dark:bg-zinc-800 border-gray-200 dark:border-zinc-700"}`}
-                            onPress={() => setFeedbackCategory(cat)}
-                          >
-                            <Text className={`text-xs font-bold ${active ? "text-pink-700" : "text-gray-600 dark:text-zinc-300"}`}>{cat}</Text>
-                          </TouchableOpacity>
-                        );
-                      })}
+                      {(["BUG", "UX", "FEATURE", "OTHER"] as const).map(
+                        (cat) => {
+                          const active = feedbackCategory === cat;
+                          return (
+                            <TouchableOpacity
+                              key={cat}
+                              className={`px-3 py-1.5 rounded-full border ${active ? "bg-pink-100 border-pink-200" : "bg-gray-100 dark:bg-zinc-800 border-gray-200 dark:border-zinc-700"}`}
+                              onPress={() => setFeedbackCategory(cat)}
+                            >
+                              <Text
+                                className={`text-xs font-bold ${active ? "text-pink-700" : "text-gray-600 dark:text-zinc-300"}`}
+                              >
+                                {cat}
+                              </Text>
+                            </TouchableOpacity>
+                          );
+                        },
+                      )}
                     </View>
                   </View>
 
@@ -660,22 +693,37 @@ export default function Index() {
                       className="bg-blue-600 w-full py-3.5 rounded-2xl flex-row items-center justify-center shadow-lg shadow-blue-200 active:scale-[0.98] gap-2"
                       onPress={async () => {
                         if (!feedbackText.trim()) {
-                          Alert.alert("Feedback required", "Please enter your feedback message.");
+                          Alert.alert(
+                            "Feedback required",
+                            "Please enter your feedback message.",
+                          );
                           return;
                         }
                         try {
-                          const fb = await createFeedback(feedbackText.trim(), feedbackCategory);
+                          const fb = await createFeedback(
+                            feedbackText.trim(),
+                            feedbackCategory,
+                          );
                           if (!fb) {
-                            Alert.alert("Failed", "Could not submit feedback. Please try again.");
+                            Alert.alert(
+                              "Failed",
+                              "Could not submit feedback. Please try again.",
+                            );
                             return;
                           }
-                          Alert.alert("Thank You!", "Your feedback has been submitted.");
+                          Alert.alert(
+                            "Thank You!",
+                            "Your feedback has been submitted.",
+                          );
                           setFeedbackVisible(false);
                           setFeedbackText("");
                           setFeedbackCategory("OTHER");
                         } catch (e) {
                           console.error(e);
-                          Alert.alert("Failed", "Network error while submitting feedback.");
+                          Alert.alert(
+                            "Failed",
+                            "Network error while submitting feedback.",
+                          );
                         }
                       }}
                     >
@@ -712,4 +760,3 @@ export default function Index() {
     </SafeAreaView>
   );
 }
-

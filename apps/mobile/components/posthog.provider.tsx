@@ -1,6 +1,10 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useGlobalSearchParams, usePathname } from "expo-router";
-import { PostHogCustomStorage, PostHogProvider, usePostHog } from "posthog-react-native";
+import {
+  PostHogCustomStorage,
+  PostHogProvider,
+  usePostHog,
+} from "posthog-react-native";
 import { ReactNode, useEffect } from "react";
 
 export const posthogCustomStorage: PostHogCustomStorage = {
@@ -40,13 +44,17 @@ function ScreenTracker() {
   return null;
 }
 
-export function PostHogAnalyticsProvider({ children }: { children: ReactNode }) {
+export function PostHogAnalyticsProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
   return (
-    <PostHogProvider 
-      apiKey={process.env.EXPO_PUBLIC_POSTHOG_API_KEY as string} 
+    <PostHogProvider
+      apiKey={process.env.EXPO_PUBLIC_POSTHOG_API_KEY as string}
       options={{
         host: process.env.EXPO_PUBLIC_POSTHOG_HOST as string,
-        customStorage: posthogCustomStorage
+        customStorage: posthogCustomStorage,
       }}
     >
       <ScreenTracker />

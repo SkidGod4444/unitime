@@ -126,9 +126,9 @@ admin.get("/enrollments/pending", async (c) => {
             studentProfile: {
               select: {
                 admissionNumber: true,
-              }
-            }
-          }
+              },
+            },
+          },
         },
         course: {
           select: {
@@ -139,15 +139,15 @@ admin.get("/enrollments/pending", async (c) => {
               select: {
                 departmentName: true,
                 courseName: true,
-                section: true
-              }
-            }
-          }
-        }
+                section: true,
+              },
+            },
+          },
+        },
       },
       orderBy: {
-        enrolledAt: "desc"
-      }
+        enrolledAt: "desc",
+      },
     });
 
     return c.json({
@@ -180,7 +180,11 @@ admin.patch("/enrollments/:id/status", async (c) => {
       data: { status: body.status },
     });
 
-    await invalidateCache(`course:${enrollment.courseId}`, "courses:all", "enrollments:pending");
+    await invalidateCache(
+      `course:${enrollment.courseId}`,
+      "courses:all",
+      "enrollments:pending",
+    );
 
     return c.json({
       success: true,

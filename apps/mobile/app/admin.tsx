@@ -40,7 +40,6 @@ type User = {
   admissionNumber?: string | null;
 };
 
-
 type Attendance = {
   id: string;
   course: string;
@@ -113,10 +112,11 @@ const emitAdminNotification = async (
   organizationId: string,
   title: string,
   body: string,
-  actionUrl: string
+  actionUrl: string,
 ) => {
   try {
-    const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+    const origin =
+      process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
     const token = getAuthToken();
     await fetch(`${origin}/notifications`, {
       method: "POST",
@@ -137,7 +137,6 @@ const emitAdminNotification = async (
     console.warn("Failed to dispatch admin notification", error);
   }
 };
-
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
 
@@ -221,11 +220,17 @@ function RolesTab({ onAddUserPress }: { onAddUserPress: () => void }) {
         body: JSON.stringify({ role: targetRole }),
       });
       if (res.status === 401) {
-        Alert.alert("Not Authenticated", "Session expired. Please sign in again.");
+        Alert.alert(
+          "Not Authenticated",
+          "Session expired. Please sign in again.",
+        );
         return;
       }
       if (res.status === 403) {
-        Alert.alert("Insufficient permissions", "You do not have access to perform this action.");
+        Alert.alert(
+          "Insufficient permissions",
+          "You do not have access to perform this action.",
+        );
         return;
       }
       if (!res.ok) throw new Error("Failed to change role");
@@ -252,7 +257,7 @@ function RolesTab({ onAddUserPress }: { onAddUserPress: () => void }) {
             try {
               const origin =
                 process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
-            const res = await fetch(
+              const res = await fetch(
                 `${origin}/admin/users/${user.id}/status`,
                 {
                   method: "PATCH",
@@ -267,11 +272,17 @@ function RolesTab({ onAddUserPress }: { onAddUserPress: () => void }) {
                 },
               );
               if (res.status === 401) {
-                Alert.alert("Not Authenticated", "Session expired. Please sign in again.");
+                Alert.alert(
+                  "Not Authenticated",
+                  "Session expired. Please sign in again.",
+                );
                 return;
               }
               if (res.status === 403) {
-                Alert.alert("Insufficient permissions", "You do not have access to perform this action.");
+                Alert.alert(
+                  "Insufficient permissions",
+                  "You do not have access to perform this action.",
+                );
                 return;
               }
               if (!res.ok) throw new Error("Failed to deactivate user");
@@ -404,20 +415,28 @@ type FeedbackRow = {
 };
 
 function FeedbacksTab() {
-  const { adminFeedbacks, fetchAdminFeedbacks, updateFeedbackStatus, loading } = useFeedbacksStore();
+  const { adminFeedbacks, fetchAdminFeedbacks, updateFeedbackStatus, loading } =
+    useFeedbacksStore();
 
   useEffect(() => {
     fetchAdminFeedbacks();
   }, [fetchAdminFeedbacks]);
 
-  const updateStatus = async (id: string, status: "ACKNOWLEDGED" | "RESOLVED") => {
+  const updateStatus = async (
+    id: string,
+    status: "ACKNOWLEDGED" | "RESOLVED",
+  ) => {
     await updateFeedbackStatus(id, status);
   };
 
   if (loading && adminFeedbacks.length === 0) {
     return (
       <View className="items-center py-10">
-        <Ionicons name="chatbubble-ellipses-outline" size={40} color="#d1d5db" />
+        <Ionicons
+          name="chatbubble-ellipses-outline"
+          size={40}
+          color="#d1d5db"
+        />
         <Text className="text-gray-400 mt-2 text-sm">Loading feedbacks…</Text>
       </View>
     );
@@ -426,16 +445,33 @@ function FeedbacksTab() {
   if (adminFeedbacks.length === 0) {
     return (
       <View className="items-center py-10">
-        <Ionicons name="chatbubble-ellipses-outline" size={40} color="#d1d5db" />
+        <Ionicons
+          name="chatbubble-ellipses-outline"
+          size={40}
+          color="#d1d5db"
+        />
         <Text className="text-gray-400 mt-2 text-sm">No feedbacks yet.</Text>
       </View>
     );
   }
 
   const catColor = (c: FeedbackRow["category"]) =>
-    ({ BUG: ["bg-red-100", "text-red-700"], UX: ["bg-amber-100", "text-amber-700"], FEATURE: ["bg-indigo-100", "text-indigo-700"], OTHER: ["bg-gray-200", "text-gray-700"] } as const)[c];
+    (
+      ({
+        BUG: ["bg-red-100", "text-red-700"],
+        UX: ["bg-amber-100", "text-amber-700"],
+        FEATURE: ["bg-indigo-100", "text-indigo-700"],
+        OTHER: ["bg-gray-200", "text-gray-700"],
+      }) as const
+    )[c];
   const stColor = (s: FeedbackRow["status"]) =>
-    ({ NEW: ["bg-blue-100", "text-blue-700"], ACKNOWLEDGED: ["bg-purple-100", "text-purple-700"], RESOLVED: ["bg-green-100", "text-green-700"] } as const)[s];
+    (
+      ({
+        NEW: ["bg-blue-100", "text-blue-700"],
+        ACKNOWLEDGED: ["bg-purple-100", "text-purple-700"],
+        RESOLVED: ["bg-green-100", "text-green-700"],
+      }) as const
+    )[s];
 
   return (
     <FlatList
@@ -449,28 +485,47 @@ function FeedbacksTab() {
           <View className="bg-white rounded-2xl p-4 mb-3 border border-gray-100 shadow-sm">
             <View className="flex-row items-start justify-between gap-x-3">
               <View className="flex-1">
-                <Text className="text-base font-bold text-gray-900" numberOfLines={2}>{r.message}</Text>
+                <Text
+                  className="text-base font-bold text-gray-900"
+                  numberOfLines={2}
+                >
+                  {r.message}
+                </Text>
                 <Text className="text-xs text-gray-500 mt-1">
                   {r.user?.name || "Unknown"} • {r.user?.email || "—"}
                 </Text>
                 <View className="flex-row gap-x-2 mt-2">
                   <View className={`px-2.5 py-0.5 rounded-full ${catBg}`}>
-                    <Text className={`text-xs font-bold ${catText}`}>{r.category}</Text>
+                    <Text className={`text-xs font-bold ${catText}`}>
+                      {r.category}
+                    </Text>
                   </View>
                   <View className={`px-2.5 py-0.5 rounded-full ${stBg}`}>
-                    <Text className={`text-xs font-bold ${stText}`}>{r.status}</Text>
+                    <Text className={`text-xs font-bold ${stText}`}>
+                      {r.status}
+                    </Text>
                   </View>
                 </View>
               </View>
               <View className="items-end gap-y-1">
                 {r.status !== "ACKNOWLEDGED" && r.status !== "RESOLVED" && (
-                  <TouchableOpacity onPress={() => updateStatus(r.id, "ACKNOWLEDGED")} className="px-2 py-1 rounded-lg bg-purple-50">
-                    <Text className="text-purple-700 text-xs font-bold">Acknowledge</Text>
+                  <TouchableOpacity
+                    onPress={() => updateStatus(r.id, "ACKNOWLEDGED")}
+                    className="px-2 py-1 rounded-lg bg-purple-50"
+                  >
+                    <Text className="text-purple-700 text-xs font-bold">
+                      Acknowledge
+                    </Text>
                   </TouchableOpacity>
                 )}
                 {r.status !== "RESOLVED" && (
-                  <TouchableOpacity onPress={() => updateStatus(r.id, "RESOLVED")} className="px-2 py-1 rounded-lg bg-green-50">
-                    <Text className="text-green-700 text-xs font-bold">Resolve</Text>
+                  <TouchableOpacity
+                    onPress={() => updateStatus(r.id, "RESOLVED")}
+                    className="px-2 py-1 rounded-lg bg-green-50"
+                  >
+                    <Text className="text-green-700 text-xs font-bold">
+                      Resolve
+                    </Text>
                   </TouchableOpacity>
                 )}
               </View>
@@ -495,9 +550,13 @@ type TicketRow = {
 };
 
 function TicketsTab() {
-  const { adminTickets, fetchAdminTickets, setTicketStatus, resolveTicket } = useTicketsStore();
+  const { adminTickets, fetchAdminTickets, setTicketStatus, resolveTicket } =
+    useTicketsStore();
   const [loading, setLoading] = useState(false);
-  const [resolveModal, setResolveModal] = useState<{ id: string; note: string } | null>(null);
+  const [resolveModal, setResolveModal] = useState<{
+    id: string;
+    note: string;
+  } | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -515,7 +574,14 @@ function TicketsTab() {
   };
 
   const statusColors = (s: TicketRow["status"]) =>
-    ({ OPEN: ["bg-amber-100", "text-amber-700"], IN_PROGRESS: ["bg-indigo-100", "text-indigo-700"], RESOLVED: ["bg-green-100", "text-green-700"], CLOSED: ["bg-gray-200", "text-gray-700"] } as const)[s];
+    (
+      ({
+        OPEN: ["bg-amber-100", "text-amber-700"],
+        IN_PROGRESS: ["bg-indigo-100", "text-indigo-700"],
+        RESOLVED: ["bg-green-100", "text-green-700"],
+        CLOSED: ["bg-gray-200", "text-gray-700"],
+      }) as const
+    )[s];
 
   if (loading && adminTickets.length === 0) {
     return (
@@ -546,27 +612,66 @@ function TicketsTab() {
             <View className="bg-white rounded-2xl p-4 mb-3 border border-gray-100 shadow-sm">
               <View className="flex-row items-start justify-between gap-x-2">
                 <View className="flex-1">
-                  <Text className="text-base font-bold text-gray-900" numberOfLines={1}>{r.title}</Text>
-                  <Text className="text-xs text-gray-500 mt-0.5">{r.user?.name || "Unknown"} • {r.user?.email || "—"}</Text>
-                  <Text className="text-sm text-gray-700 mt-2" numberOfLines={3}>{r.description}</Text>
-                  <View className={`self-start mt-2 px-2.5 py-0.5 rounded-full ${bg}`}>
-                    <Text className={`text-xs font-bold ${text}`}>{r.status.replace("_", " ")}</Text>
+                  <Text
+                    className="text-base font-bold text-gray-900"
+                    numberOfLines={1}
+                  >
+                    {r.title}
+                  </Text>
+                  <Text className="text-xs text-gray-500 mt-0.5">
+                    {r.user?.name || "Unknown"} • {r.user?.email || "—"}
+                  </Text>
+                  <Text
+                    className="text-sm text-gray-700 mt-2"
+                    numberOfLines={3}
+                  >
+                    {r.description}
+                  </Text>
+                  <View
+                    className={`self-start mt-2 px-2.5 py-0.5 rounded-full ${bg}`}
+                  >
+                    <Text className={`text-xs font-bold ${text}`}>
+                      {r.status.replace("_", " ")}
+                    </Text>
                   </View>
                   {r.resolutionNote ? (
                     <View className="mt-2 bg-green-50 p-2 rounded-xl border border-green-100">
-                      <Text className="text-xs font-semibold text-green-700">Resolution</Text>
-                      <Text className="text-sm text-green-700 mt-0.5">{r.resolutionNote}</Text>
+                      <Text className="text-xs font-semibold text-green-700">
+                        Resolution
+                      </Text>
+                      <Text className="text-sm text-green-700 mt-0.5">
+                        {r.resolutionNote}
+                      </Text>
                     </View>
                   ) : null}
                 </View>
                 <View className="items-end gap-y-1">
                   {r.status !== "RESOLVED" && (
-                    <TouchableOpacity onPress={() => setResolveModal({ id: r.id, note: "" })} className="px-2 py-1 rounded-lg bg-green-50">
-                      <Text className="text-green-700 text-xs font-bold">Resolve</Text>
+                    <TouchableOpacity
+                      onPress={() => setResolveModal({ id: r.id, note: "" })}
+                      className="px-2 py-1 rounded-lg bg-green-50"
+                    >
+                      <Text className="text-green-700 text-xs font-bold">
+                        Resolve
+                      </Text>
                     </TouchableOpacity>
                   )}
-                  <TouchableOpacity onPress={() => setStatus(r.id, r.status === "OPEN" ? "IN_PROGRESS" : r.status === "IN_PROGRESS" ? "CLOSED" : "OPEN")} className="px-2 py-1 rounded-lg bg-gray-100">
-                    <Text className="text-gray-700 text-xs font-bold">Cycle Status</Text>
+                  <TouchableOpacity
+                    onPress={() =>
+                      setStatus(
+                        r.id,
+                        r.status === "OPEN"
+                          ? "IN_PROGRESS"
+                          : r.status === "IN_PROGRESS"
+                            ? "CLOSED"
+                            : "OPEN",
+                      )
+                    }
+                    className="px-2 py-1 rounded-lg bg-gray-100"
+                  >
+                    <Text className="text-gray-700 text-xs font-bold">
+                      Cycle Status
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -576,24 +681,43 @@ function TicketsTab() {
       />
 
       {/* Resolve Modal */}
-      <Modal visible={!!resolveModal} transparent animationType="fade" onRequestClose={() => setResolveModal(null)}>
-        <TouchableOpacity activeOpacity={1} onPress={() => setResolveModal(null)} className="flex-1 bg-black/40 justify-end">
+      <Modal
+        visible={!!resolveModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setResolveModal(null)}
+      >
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={() => setResolveModal(null)}
+          className="flex-1 bg-black/40 justify-end"
+        >
           <TouchableOpacity activeOpacity={1} onPress={() => {}}>
             <View className="bg-white rounded-t-3xl p-6">
-              <Text className="text-base font-bold text-gray-900 mb-2">Resolution Note</Text>
+              <Text className="text-base font-bold text-gray-900 mb-2">
+                Resolution Note
+              </Text>
               <TextInput
                 value={resolveModal?.note || ""}
-                onChangeText={(t) => setResolveModal((s) => (s ? { ...s, note: t } : s))}
+                onChangeText={(t) =>
+                  setResolveModal((s) => (s ? { ...s, note: t } : s))
+                }
                 placeholder="Describe the resolution"
                 multiline
                 textAlignVertical="top"
                 className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 mb-3 min-h-[90px]"
               />
               <View className="flex-row justify-end gap-2">
-                <TouchableOpacity onPress={() => setResolveModal(null)} className="px-4 py-2 rounded-lg bg-gray-200">
+                <TouchableOpacity
+                  onPress={() => setResolveModal(null)}
+                  className="px-4 py-2 rounded-lg bg-gray-200"
+                >
                   <Text className="text-gray-700 font-bold">Cancel</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={resolveWithNote} className="px-4 py-2 rounded-lg bg-green-600">
+                <TouchableOpacity
+                  onPress={resolveWithNote}
+                  className="px-4 py-2 rounded-lg bg-green-600"
+                >
                   <Text className="text-white font-bold">Resolve</Text>
                 </TouchableOpacity>
               </View>
@@ -622,7 +746,7 @@ function ModerateUserModal({
 
   const unbannedUsers = React.useMemo(
     () => users.filter((u) => !u.banned),
-    [users]
+    [users],
   );
 
   const filtered = React.useMemo(
@@ -630,9 +754,9 @@ function ModerateUserModal({
       unbannedUsers.filter(
         (u) =>
           (u.name ?? "").toLowerCase().includes(search.toLowerCase()) ||
-          u.email.toLowerCase().includes(search.toLowerCase())
+          u.email.toLowerCase().includes(search.toLowerCase()),
       ),
-    [search, unbannedUsers]
+    [search, unbannedUsers],
   );
 
   const handleBan = () => {
@@ -656,20 +780,27 @@ function ModerateUserModal({
             <Ionicons name="close" size={22} color="#6b7280" />
           </TouchableOpacity>
           <View style={{ flex: 1, alignItems: "center" }}>
-            <Text className="text-base font-bold text-gray-900">Moderate User</Text>
+            <Text className="text-base font-bold text-gray-900">
+              Moderate User
+            </Text>
           </View>
           <TouchableOpacity
             onPress={handleBan}
             disabled={!selected}
             className={`px-4 py-1.5 rounded-lg ${selected ? "bg-red-600" : "bg-gray-200"}`}
           >
-            <Text className={`font-bold text-sm ${selected ? "text-white" : "text-gray-400"}`}>
+            <Text
+              className={`font-bold text-sm ${selected ? "text-white" : "text-gray-400"}`}
+            >
               Ban
             </Text>
           </TouchableOpacity>
         </View>
 
-        <ScrollView className="flex-1 px-4 pt-4" keyboardShouldPersistTaps="handled">
+        <ScrollView
+          className="flex-1 px-4 pt-4"
+          keyboardShouldPersistTaps="handled"
+        >
           <View className="flex-row items-center bg-white border border-gray-200 rounded-xl px-3 mb-4 gap-x-2">
             <Ionicons name="search-outline" size={18} color="#9ca3af" />
             <TextInput
@@ -698,20 +829,30 @@ function ModerateUserModal({
                 key={user.id}
                 onPress={() => setSelected(isSelected ? null : user)}
                 className={`flex-row items-center justify-between p-4 rounded-2xl mb-2 border ${
-                  isSelected ? "bg-red-50 border-red-300" : "bg-white border-gray-100"
+                  isSelected
+                    ? "bg-red-50 border-red-300"
+                    : "bg-white border-gray-100"
                 }`}
               >
                 <View className="flex-row items-center gap-x-3 flex-1">
-                  <View className={`w-9 h-9 rounded-full items-center justify-center ${isSelected ? "bg-red-200" : "bg-gray-100"}`}>
-                    <Text className={`font-bold text-base ${isSelected ? "text-red-700" : "text-gray-500"}`}>
+                  <View
+                    className={`w-9 h-9 rounded-full items-center justify-center ${isSelected ? "bg-red-200" : "bg-gray-100"}`}
+                  >
+                    <Text
+                      className={`font-bold text-base ${isSelected ? "text-red-700" : "text-gray-500"}`}
+                    >
                       {user.name?.[0] || "?"}
                     </Text>
                   </View>
                   <View className="flex-1">
-                    <Text className={`font-semibold ${isSelected ? "text-red-800" : "text-gray-800"}`}>
+                    <Text
+                      className={`font-semibold ${isSelected ? "text-red-800" : "text-gray-800"}`}
+                    >
                       {user.name}
                     </Text>
-                    <Text className="text-xs text-gray-500 mt-0.5">{user.email}</Text>
+                    <Text className="text-xs text-gray-500 mt-0.5">
+                      {user.email}
+                    </Text>
                   </View>
                 </View>
                 {isSelected ? (
@@ -1127,7 +1268,9 @@ function AddCourseModal({
             </Text>
             {professorId && (
               <TouchableOpacity onPress={() => setProfessorId(null)}>
-                <Text className="text-xs font-semibold text-red-500">Unassign</Text>
+                <Text className="text-xs font-semibold text-red-500">
+                  Unassign
+                </Text>
               </TouchableOpacity>
             )}
           </View>
@@ -1139,7 +1282,9 @@ function AddCourseModal({
             professors.map((prof) => (
               <Pressable
                 key={prof.id}
-                onPress={() => setProfessorId(prof.id === professorId ? null : prof.id)}
+                onPress={() =>
+                  setProfessorId(prof.id === professorId ? null : prof.id)
+                }
                 className={`flex-row items-center justify-between p-4 rounded-xl border mb-2 ${professorId === prof.id ? "bg-indigo-50 border-indigo-300" : "bg-white border-gray-200"}`}
               >
                 <Text
@@ -1171,7 +1316,10 @@ function AddCourseModal({
                 <Text
                   className={`font-semibold ${organizationId === org.id ? "text-indigo-700" : "text-gray-700"}`}
                 >
-                  {org.courseName} – {SEMESTER_MAP[org.semester] || org.semester.replace("_SEMESTER", "")} ({org.departmentName}) Sect: {org.section}
+                  {org.courseName} –{" "}
+                  {SEMESTER_MAP[org.semester] ||
+                    org.semester.replace("_SEMESTER", "")}{" "}
+                  ({org.departmentName}) Sect: {org.section}
                 </Text>
                 {organizationId === org.id && (
                   <Ionicons name="checkmark-circle" size={20} color="#4f46e5" />
@@ -1216,10 +1364,16 @@ function AddClassModal({
   onAdd: (data: any) => void;
   initialData?: any;
 }) {
-  const [departmentName, setDepartmentName] = useState(initialData?.departmentName || "");
+  const [departmentName, setDepartmentName] = useState(
+    initialData?.departmentName || "",
+  );
   const [courseName, setCourseName] = useState(initialData?.courseName || "");
-  const [semester, setSemester] = useState(initialData?.semester || "FIRST_SEMESTER");
-  const [sectionStr, setSectionStr] = useState(initialData?.section?.toString() || "");
+  const [semester, setSemester] = useState(
+    initialData?.semester || "FIRST_SEMESTER",
+  );
+  const [sectionStr, setSectionStr] = useState(
+    initialData?.section?.toString() || "",
+  );
 
   React.useEffect(() => {
     if (initialData) {
@@ -1357,12 +1511,12 @@ function ClassesTab() {
   const handleEditSave = async (classData: any) => {
     try {
       await updateOrg(editingClass.id, classData);
-      
+
       await emitAdminNotification(
         editingClass.id,
         "Class Details Updated",
         `Details for ${classData.courseName} (Sec: ${classData.section}) have been changed.`,
-        "/schedule"
+        "/schedule",
       );
 
       setEditingClass(null);
@@ -1373,68 +1527,75 @@ function ClassesTab() {
   };
 
   const handleDelete = (org: any) => {
-    Alert.alert("Delete Class", `Delete ${org.courseName} (${org.departmentName})?`, [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await deleteOrg(org.id);
-            Alert.alert("Success", "Class deleted successfully!");
-          } catch (e: any) {
-            Alert.alert("Error", e.message || "Failed to delete class");
-          }
+    Alert.alert(
+      "Delete Class",
+      `Delete ${org.courseName} (${org.departmentName})?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteOrg(org.id);
+              Alert.alert("Success", "Class deleted successfully!");
+            } catch (e: any) {
+              Alert.alert("Error", e.message || "Failed to delete class");
+            }
+          },
         },
-      },
-    ]);
+      ],
+    );
   };
 
   return (
     <>
-    <FlatList
-      data={orgs}
-      keyExtractor={(c) => c.id}
-      scrollEnabled={false}
-      renderItem={({ item: org }) => (
-        <View className="bg-white rounded-2xl p-4 mb-3 border border-gray-100 shadow-sm">
-          <View className="flex-row items-center justify-between">
-            <View className="flex-1">
-              <Text className="text-base font-bold text-gray-900">
-                {org.courseName} – {SEMESTER_MAP[org.semester] || org.semester.replace("_SEMESTER", "")} ({org.departmentName})
-              </Text>
-              <View className="flex-row gap-x-3 mt-1.5">
-                <View className="flex-row items-center gap-x-1">
-                  <Ionicons name="people-outline" size={13} color="#6b7280" />
-                  <Text className="text-xs text-gray-500">
-                    Sect: {org.section}
-                  </Text>
-                </View>
-                <View className="flex-row items-center gap-x-1">
-                  <Ionicons
-                    name="pie-chart-outline"
-                    size={13}
-                    color="#6b7280"
-                  />
-                  <Text className="text-xs text-gray-500">Active</Text>
+      <FlatList
+        data={orgs}
+        keyExtractor={(c) => c.id}
+        scrollEnabled={false}
+        renderItem={({ item: org }) => (
+          <View className="bg-white rounded-2xl p-4 mb-3 border border-gray-100 shadow-sm">
+            <View className="flex-row items-center justify-between">
+              <View className="flex-1">
+                <Text className="text-base font-bold text-gray-900">
+                  {org.courseName} –{" "}
+                  {SEMESTER_MAP[org.semester] ||
+                    org.semester.replace("_SEMESTER", "")}{" "}
+                  ({org.departmentName})
+                </Text>
+                <View className="flex-row gap-x-3 mt-1.5">
+                  <View className="flex-row items-center gap-x-1">
+                    <Ionicons name="people-outline" size={13} color="#6b7280" />
+                    <Text className="text-xs text-gray-500">
+                      Sect: {org.section}
+                    </Text>
+                  </View>
+                  <View className="flex-row items-center gap-x-1">
+                    <Ionicons
+                      name="pie-chart-outline"
+                      size={13}
+                      color="#6b7280"
+                    />
+                    <Text className="text-xs text-gray-500">Active</Text>
+                  </View>
                 </View>
               </View>
+              <RowActions
+                onEdit={() => setEditingClass(org)}
+                onDelete={() => handleDelete(org)}
+              />
             </View>
-            <RowActions
-              onEdit={() => setEditingClass(org)}
-              onDelete={() => handleDelete(org)}
-            />
           </View>
-        </View>
-      )}
-    />
-    {/* Edit Class Modal */}
-    <AddClassModal
-      visible={!!editingClass}
-      onClose={() => setEditingClass(null)}
-      onAdd={handleEditSave}
-      initialData={editingClass}
-    />
+        )}
+      />
+      {/* Edit Class Modal */}
+      <AddClassModal
+        visible={!!editingClass}
+        onClose={() => setEditingClass(null)}
+        onAdd={handleEditSave}
+        initialData={editingClass}
+      />
     </>
   );
 }
@@ -1503,12 +1664,12 @@ function CoursesTab() {
   const handleEditSave = async (courseData: any) => {
     try {
       await updateCourse(editingCourse.id, courseData);
-      
+
       await emitAdminNotification(
         courseData.organizationId,
         "Course Updated",
         `${courseData.name} details have been updated.`,
-        "/my-courses"
+        "/my-courses",
       );
 
       setEditingCourse(null);
@@ -1527,12 +1688,12 @@ function CoursesTab() {
         onPress: async () => {
           try {
             await deleteCourse(c.id);
-            
+
             await emitAdminNotification(
               c.organizationId,
               "Course Removed",
               `${c.name} has been removed from the class curriculum.`,
-              "/my-courses"
+              "/my-courses",
             );
 
             Alert.alert("Success", "Course deleted successfully!");
@@ -1582,25 +1743,40 @@ function CoursesTab() {
                       {course.name}
                     </Text>
                   </View>
-                  
+
                   <View className="mt-2 gap-y-1.5">
                     <View className="flex-row items-center gap-x-3">
                       <View className="flex-row items-center gap-x-1 shrink">
-                        <Ionicons name="person-outline" size={13} color="#6b7280" />
-                        <Text className="text-xs text-gray-500" numberOfLines={1}>
+                        <Ionicons
+                          name="person-outline"
+                          size={13}
+                          color="#6b7280"
+                        />
+                        <Text
+                          className="text-xs text-gray-500"
+                          numberOfLines={1}
+                        >
                           {profName}
                         </Text>
                       </View>
                       <View className="flex-row items-center gap-x-1 shrink">
-                        <Ionicons name="star-outline" size={13} color="#6b7280" />
+                        <Ionicons
+                          name="star-outline"
+                          size={13}
+                          color="#6b7280"
+                        />
                         <Text className="text-xs text-gray-500">
                           {course.credit || "N/A"} credits
                         </Text>
                       </View>
                     </View>
-                    
+
                     <View className="flex-row items-center gap-x-1">
-                      <Ionicons name="school-outline" size={13} color="#6b7280" />
+                      <Ionicons
+                        name="school-outline"
+                        size={13}
+                        color="#6b7280"
+                      />
                       <Text className="text-xs text-gray-500" numberOfLines={1}>
                         {orgName}
                       </Text>
@@ -1708,25 +1884,21 @@ function UsersTab() {
   }, [users]);
 
   const handleUnban = (user: any) => {
-    Alert.alert(
-      "Unban User",
-      `Are you sure you want to unban ${user.name}?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Unban",
-          style: "default",
-          onPress: async () => {
-            try {
-              await toggleBan(user.id, false);
-              Alert.alert("Success", "User unbanned successfully.");
-            } catch (e: any) {
-              Alert.alert("Error", e.message || "Failed to unban user");
-            }
-          },
+    Alert.alert("Unban User", `Are you sure you want to unban ${user.name}?`, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Unban",
+        style: "default",
+        onPress: async () => {
+          try {
+            await toggleBan(user.id, false);
+            Alert.alert("Success", "User unbanned successfully.");
+          } catch (e: any) {
+            Alert.alert("Error", e.message || "Failed to unban user");
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   return (
@@ -1749,13 +1921,9 @@ function UsersTab() {
               <Text className="text-base font-bold text-gray-900">
                 {user.name}
               </Text>
-              <Text className="text-sm text-gray-500 mt-0.5">
-                {user.email}
-              </Text>
+              <Text className="text-sm text-gray-500 mt-0.5">{user.email}</Text>
               <View className="self-start mt-2 px-2.5 py-0.5 rounded-full bg-red-100">
-                <Text className="text-xs font-bold text-red-700">
-                  BANNED
-                </Text>
+                <Text className="text-xs font-bold text-red-700">BANNED</Text>
               </View>
               {user.banReason && (
                 <Text className="text-xs text-gray-500 italic mt-2">
@@ -1805,12 +1973,12 @@ export default function AdminPage() {
         ...courseData,
         userId: loggedInUser?.id || "",
       });
-      
+
       await emitAdminNotification(
         courseData.organizationId,
         "New Course Added",
         `You have been enrolled in ${courseData.name} (${courseData.code}).`,
-        "/my-courses"
+        "/my-courses",
       );
 
       setAddCourseVisible(false);
@@ -1895,16 +2063,22 @@ export default function AdminPage() {
         }),
       );
       if (res.status === 401) {
-        Alert.alert("Not Authenticated", "Session expired. Please sign in again.");
+        Alert.alert(
+          "Not Authenticated",
+          "Session expired. Please sign in again.",
+        );
         return;
       }
       if (res.status === 403) {
-        Alert.alert("Insufficient permissions", "You do not have access to perform this action.");
+        Alert.alert(
+          "Insufficient permissions",
+          "You do not have access to perform this action.",
+        );
         return;
       }
 
       if (!res.ok) throw new Error("Failed to assign role");
-      
+
       // Update local store to reflect new role immediately
       updateUser(user.id, { role: user.role });
       Alert.alert("Success", "Role assigned successfully!");
@@ -2075,23 +2249,27 @@ export default function AdminPage() {
           <Text className="text-base font-bold text-gray-800">
             {TABS.find((t) => t.key === activeTab)?.label}
           </Text>
-          {(activeTab === "users" || activeTab === "roles" || activeTab === "classes" || activeTab === "courses" || activeTab === "attendance") && (
-          <TouchableOpacity
-            onPress={handleAdd}
-            activeOpacity={0.8}
-            className="flex-row items-center gap-x-1 bg-indigo-600 px-3.5 py-2 rounded-xl"
-            style={{ minWidth: 0, maxWidth: "100%" }}
-          >
-            <Ionicons name="add" size={16} color="#fff" />
-            <Text
-              className="text-white text-sm font-bold"
-              numberOfLines={1}
-              ellipsizeMode="tail"
-              style={{ flexShrink: 1 }}
+          {(activeTab === "users" ||
+            activeTab === "roles" ||
+            activeTab === "classes" ||
+            activeTab === "courses" ||
+            activeTab === "attendance") && (
+            <TouchableOpacity
+              onPress={handleAdd}
+              activeOpacity={0.8}
+              className="flex-row items-center gap-x-1 bg-indigo-600 px-3.5 py-2 rounded-xl"
+              style={{ minWidth: 0, maxWidth: "100%" }}
             >
-              {TAB_ADD_LABELS[activeTab]}
-            </Text>
-          </TouchableOpacity>
+              <Ionicons name="add" size={16} color="#fff" />
+              <Text
+                className="text-white text-sm font-bold"
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                style={{ flexShrink: 1 }}
+              >
+                {TAB_ADD_LABELS[activeTab]}
+              </Text>
+            </TouchableOpacity>
           )}
         </View>
 

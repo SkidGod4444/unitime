@@ -80,7 +80,8 @@ courses.post("/", async (c) => {
       classType,
       professorId: professorId || null,
       organizationId,
-      enrollmentEnabled: enrollmentEnabled !== undefined ? enrollmentEnabled : true,
+      enrollmentEnabled:
+        enrollmentEnabled !== undefined ? enrollmentEnabled : true,
     },
   });
   if (!course.id) {
@@ -158,7 +159,7 @@ courses.delete("/:id", async (c) => {
 courses.post("/:id/enroll", async (c) => {
   const courseId = c.req.param("id");
   const { userId } = await c.req.json();
-  
+
   if (!userId) {
     return createHonoErrorResponse(c, ERROR_CODES.MISSING_REQUIRED_FIELD);
   }
@@ -174,16 +175,23 @@ courses.post("/:id/enroll", async (c) => {
         userId,
         courseId,
         status: "PENDING",
-      }
+      },
     });
-    
-    await invalidateCache(`course:${courseId}`, "courses:all", "enrollments:pending");
-    
-    return c.json({
-      success: true,
-      status_code: 201,
-      enrollment
-    }, 201);
+
+    await invalidateCache(
+      `course:${courseId}`,
+      "courses:all",
+      "enrollments:pending",
+    );
+
+    return c.json(
+      {
+        success: true,
+        status_code: 201,
+        enrollment,
+      },
+      201,
+    );
   } catch (error) {
     console.error("Enrollment error", error);
     return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
@@ -193,7 +201,7 @@ courses.post("/:id/enroll", async (c) => {
 courses.delete("/:id/enroll", async (c) => {
   const courseId = c.req.param("id");
   const { userId } = await c.req.json();
-  
+
   if (!userId) {
     return createHonoErrorResponse(c, ERROR_CODES.MISSING_REQUIRED_FIELD);
   }
@@ -204,17 +212,24 @@ courses.delete("/:id/enroll", async (c) => {
         userId_courseId: {
           userId,
           courseId,
-        }
-      }
+        },
+      },
     });
-    
-    await invalidateCache(`course:${courseId}`, "courses:all", "enrollments:pending");
-    
-    return c.json({
-      success: true,
-      status_code: 200,
-      message: "Successfully de-enrolled"
-    }, 200);
+
+    await invalidateCache(
+      `course:${courseId}`,
+      "courses:all",
+      "enrollments:pending",
+    );
+
+    return c.json(
+      {
+        success: true,
+        status_code: 200,
+        message: "Successfully de-enrolled",
+      },
+      200,
+    );
   } catch (error) {
     console.error("De-enrollment error", error);
     return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
@@ -227,34 +242,36 @@ courses.get("/:id/students", async (c) => {
   try {
     const enrollments = await getOrSetCache(
       `userCourse:course:${courseId}`,
-      () => prisma.userCourse.findMany({
-        where: { courseId },
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              expoPushToken: true,
-              studentProfile: true
-            }
-          }
-        }
-      }),
-      120
+      () =>
+        prisma.userCourse.findMany({
+          where: { courseId },
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                expoPushToken: true,
+                studentProfile: true,
+              },
+            },
+          },
+        }),
+      120,
     );
 
-    return c.json({
-      success: true,
-      status_code: 200,
-      students: enrollments.map(e => e.user)
-    }, 200);
-
+    return c.json(
+      {
+        success: true,
+        status_code: 200,
+        students: enrollments.map((e) => e.user),
+      },
+      200,
+    );
   } catch (error) {
     console.error("Error fetching course students:", error);
     return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
   }
 });
-
 
 export default courses;

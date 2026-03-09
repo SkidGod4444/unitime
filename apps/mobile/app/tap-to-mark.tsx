@@ -50,7 +50,10 @@ function useCountdown(endTimeISO: string | undefined) {
 function fmtTime(iso?: string) {
   if (!iso) return "";
   try {
-    return new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    return new Date(iso).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   } catch {
     return "";
   }
@@ -75,23 +78,29 @@ export default function TapToMarkScreen() {
     startTime: string;
   } | null>(null);
 
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [status, setStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
   const isSubmittingRef = useRef(false);
 
   // Fetch session details on mount via dashboard (already cached by listener)
   useEffect(() => {
     if (!loggedInUser?.id || !sessionId) return;
-    const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+    const origin =
+      process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
     fetch(`${origin}/dashboard/${loggedInUser.id}`, {
       headers: { "Cache-Control": "no-cache" },
     })
       .then((r) => r.json())
       .then((json) => {
         if (!json?.data?.activeSessions) return;
-        const session = json.data.activeSessions.find((s: any) => s.id === sessionId);
+        const session = json.data.activeSessions.find(
+          (s: any) => s.id === sessionId,
+        );
         if (session) {
           setSessionInfo({
-            courseName: session.course?.name ?? session.courseId ?? "Unknown Course",
+            courseName:
+              session.course?.name ?? session.courseId ?? "Unknown Course",
             courseCode: session.course?.code ?? "",
             endTime: session.endTime ?? "",
             startTime: session.startTime ?? "",
@@ -150,9 +159,14 @@ export default function TapToMarkScreen() {
     // Record attempt immediately so the listener won't re-route
     try {
       const attemptedStr = await getItem("ATTEMPTED_SESSIONS");
-      const attemptedIds: string[] = attemptedStr ? JSON.parse(attemptedStr) : [];
+      const attemptedIds: string[] = attemptedStr
+        ? JSON.parse(attemptedStr)
+        : [];
       if (!attemptedIds.includes(String(sessionId))) {
-        await setItem("ATTEMPTED_SESSIONS", JSON.stringify([...attemptedIds, sessionId]));
+        await setItem(
+          "ATTEMPTED_SESSIONS",
+          JSON.stringify([...attemptedIds, sessionId]),
+        );
       }
     } catch {}
 
@@ -162,16 +176,22 @@ export default function TapToMarkScreen() {
     pulseScale.value = withTiming(0.95, { duration: 200 });
 
     try {
-      const { status: locStatus } = await Location.requestForegroundPermissionsAsync();
+      const { status: locStatus } =
+        await Location.requestForegroundPermissionsAsync();
       if (locStatus !== "granted") {
         setStatus("error");
-        Alert.alert("Permission Error", "Location permission is required to mark attendance.");
+        Alert.alert(
+          "Permission Error",
+          "Location permission is required to mark attendance.",
+        );
         pulseScale.value = withSpring(1);
         isSubmittingRef.current = false;
         return;
       }
 
-      const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
+      const loc = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      });
       const result = await markAttendance(String(sessionId), {
         lat: loc.coords.latitude,
         lng: loc.coords.longitude,
@@ -185,19 +205,32 @@ export default function TapToMarkScreen() {
         const prevStr = await getItem("MARKED_SESSIONS");
         const prevIds = prevStr ? JSON.parse(prevStr) : [];
         if (!prevIds.includes(sessionId)) {
-          await setItem("MARKED_SESSIONS", JSON.stringify([...prevIds, sessionId]));
+          await setItem(
+            "MARKED_SESSIONS",
+            JSON.stringify([...prevIds, sessionId]),
+          );
         }
 
         pulseScale.value = withSpring(1);
-        rippleScale.value = withTiming(1, { duration: 500, easing: Easing.out(Easing.cubic) });
+        rippleScale.value = withTiming(1, {
+          duration: 500,
+          easing: Easing.out(Easing.cubic),
+        });
         successScale.value = withSpring(1, { damping: 12 });
 
         setTimeout(() => {
-          if (router.canGoBack()) { router.back(); } else { router.replace("/"); }
+          if (router.canGoBack()) {
+            router.back();
+          } else {
+            router.replace("/");
+          }
         }, 2500);
       } else {
         setStatus("error");
-        Alert.alert("Attendance Failed", result.message || "Could not verify location or session.");
+        Alert.alert(
+          "Attendance Failed",
+          result.message || "Could not verify location or session.",
+        );
         pulseScale.value = withSpring(1);
         isSubmittingRef.current = false;
       }
@@ -245,7 +278,9 @@ export default function TapToMarkScreen() {
             )}
             <View className="bg-green-100 dark:bg-green-900/40 px-2.5 py-1 rounded-full flex-row items-center gap-x-1">
               <View className="w-1.5 h-1.5 rounded-full bg-green-500" />
-              <Text className="text-green-700 dark:text-green-300 text-xs font-semibold">Live</Text>
+              <Text className="text-green-700 dark:text-green-300 text-xs font-semibold">
+                Live
+              </Text>
             </View>
           </View>
 
@@ -263,14 +298,17 @@ export default function TapToMarkScreen() {
               <View className="flex-row items-center gap-x-1.5 bg-gray-50 dark:bg-zinc-700 px-3 py-2 rounded-lg flex-1">
                 <Feather name="clock" size={12} color="#6b7280" />
                 <Text className="text-gray-600 dark:text-gray-300 text-xs font-medium">
-                  {fmtTime(sessionInfo.startTime)} – {fmtTime(sessionInfo.endTime)}
+                  {fmtTime(sessionInfo.startTime)} –{" "}
+                  {fmtTime(sessionInfo.endTime)}
                 </Text>
               </View>
             )}
             {countdown !== null && (
               <View
                 className={`flex-row items-center gap-x-1.5 px-3 py-2 rounded-lg ${
-                  isExpired ? "bg-red-50 dark:bg-red-900/30" : "bg-amber-50 dark:bg-amber-900/30"
+                  isExpired
+                    ? "bg-red-50 dark:bg-red-900/30"
+                    : "bg-amber-50 dark:bg-amber-900/30"
                 }`}
               >
                 <Ionicons
@@ -310,8 +348,8 @@ export default function TapToMarkScreen() {
               status === "success"
                 ? "bg-green-500"
                 : isExpired
-                ? "bg-gray-400"
-                : "bg-primary"
+                  ? "bg-gray-400"
+                  : "bg-primary"
             }`}
           >
             {status === "success" ? (
@@ -329,11 +367,13 @@ export default function TapToMarkScreen() {
                   {isExpired
                     ? "Session Ended"
                     : status === "loading"
-                    ? "Verifying..."
-                    : "Tap to Mark"}
+                      ? "Verifying..."
+                      : "Tap to Mark"}
                 </Text>
                 {status === "loading" && (
-                  <Text className="text-blue-100 text-sm mt-1">Checking location…</Text>
+                  <Text className="text-blue-100 text-sm mt-1">
+                    Checking location…
+                  </Text>
                 )}
               </View>
             )}
@@ -342,7 +382,10 @@ export default function TapToMarkScreen() {
       </View>
 
       {/* Footer */}
-      <Animated.View entering={FadeInDown.springify().delay(100)} className="pb-10 px-10">
+      <Animated.View
+        entering={FadeInDown.springify().delay(100)}
+        className="pb-10 px-10"
+      >
         {status === "success" ? (
           <Text className="text-green-600 font-bold text-lg text-center">
             Attendance Marked Successfully! 🎉

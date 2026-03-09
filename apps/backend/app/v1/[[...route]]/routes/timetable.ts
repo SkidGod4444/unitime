@@ -34,10 +34,7 @@ timetable.get("/week/:userId", async (c) => {
       prisma.timetable.findMany({
         where: {
           courseId: { in: courseIds },
-          OR: [
-            { labGroupId: null },
-            { labGroupId: { in: labGroupIds } }
-          ]
+          OR: [{ labGroupId: null }, { labGroupId: { in: labGroupIds } }],
         },
         include: {
           course: true,
@@ -46,15 +43,16 @@ timetable.get("/week/:userId", async (c) => {
     120,
   );
 
-  const week: Record<string, { startTime: string; [key: string]: unknown }[]> = {
-    MONDAY: [],
-    TUESDAY: [],
-    WEDNESDAY: [],
-    THURSDAY: [],
-    FRIDAY: [],
-    SATURDAY: [],
-    SUNDAY: [],
-  };
+  const week: Record<string, { startTime: string; [key: string]: unknown }[]> =
+    {
+      MONDAY: [],
+      TUESDAY: [],
+      WEDNESDAY: [],
+      THURSDAY: [],
+      FRIDAY: [],
+      SATURDAY: [],
+      SUNDAY: [],
+    };
 
   timetables.forEach((t) => {
     if (week[t.day]) {
@@ -67,7 +65,7 @@ timetable.get("/week/:userId", async (c) => {
       // We assume startTime is a string like "09:00" and can be sorted alphabetically,
       // which corresponds to chronological sorting for 24-hr time strings.
       (a: { startTime: string }, b: { startTime: string }) =>
-        a.startTime.localeCompare(b.startTime)
+        a.startTime.localeCompare(b.startTime),
     );
   }
 
@@ -118,10 +116,7 @@ timetable.get("/:userId", async (c) => {
       prisma.timetable.findMany({
         where: {
           courseId: { in: courseIds },
-          OR: [
-            { labGroupId: null },
-            { labGroupId: { in: labGroupIds } }
-          ],
+          OR: [{ labGroupId: null }, { labGroupId: { in: labGroupIds } }],
           ...(day && { day }),
         },
         include: {
@@ -181,7 +176,10 @@ timetable.post("/", requireRole("ADMIN", "REPRESENTATIVE"), async (c) => {
 
     await invalidateCache("timetable:all");
 
-    return c.json({ success: true, status_code: 201, timetable: newEntry }, 201);
+    return c.json(
+      { success: true, status_code: 201, timetable: newEntry },
+      201,
+    );
   } catch (error) {
     console.error("Error creating timetable:", error);
     return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
@@ -225,7 +223,14 @@ timetable.delete("/:id", requireRole("ADMIN", "REPRESENTATIVE"), async (c) => {
     await prisma.timetable.delete({ where: { id } });
     await invalidateCache("timetable:all");
 
-    return c.json({ success: true, status_code: 200, message: "Timetable entry deleted successfully" }, 200);
+    return c.json(
+      {
+        success: true,
+        status_code: 200,
+        message: "Timetable entry deleted successfully",
+      },
+      200,
+    );
   } catch (error) {
     console.error("Error deleting timetable:", error);
     return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);

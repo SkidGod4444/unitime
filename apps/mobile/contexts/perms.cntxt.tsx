@@ -5,11 +5,11 @@ import * as MediaLibrary from "expo-media-library";
 import * as Network from "expo-network";
 import * as Notifications from "expo-notifications";
 import React, {
-    createContext,
-    useCallback,
-    useContext,
-    useEffect,
-    useState
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
 } from "react";
 import { AppState } from "react-native";
 import { useAuth } from "./auth.cntxt";

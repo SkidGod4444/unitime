@@ -11,7 +11,7 @@ import {
   RefreshControl,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAttendanceStore, useOrgsStore } from "../lib/store";
@@ -286,7 +286,9 @@ const SessionCard = React.memo(
               {ongoing && (
                 <View className="bg-indigo-100 flex-row items-center px-1.5 py-0.5 rounded-full border border-indigo-200">
                   <View className="w-1.5 h-1.5 rounded-full bg-indigo-500 mr-1 animate-pulse" />
-                  <Text className="text-[10px] font-bold text-indigo-700 uppercase tracking-tighter">Live</Text>
+                  <Text className="text-[10px] font-bold text-indigo-700 uppercase tracking-tighter">
+                    Live
+                  </Text>
                 </View>
               )}
             </View>
@@ -369,8 +371,14 @@ const SessionCard = React.memo(
           </View>
           {!editable && (
             <View className="flex-row items-center gap-x-1">
-              <Ionicons name={ongoing ? "radio-outline" : "lock-closed-outline"} size={11} color={ongoing ? "#818cf8" : "#d1d5db"} />
-              <Text className={`text-xs font-medium ${ongoing ? "text-indigo-400" : "text-gray-300"}`}>
+              <Ionicons
+                name={ongoing ? "radio-outline" : "lock-closed-outline"}
+                size={11}
+                color={ongoing ? "#818cf8" : "#d1d5db"}
+              />
+              <Text
+                className={`text-xs font-medium ${ongoing ? "text-indigo-400" : "text-gray-300"}`}
+              >
                 {ongoing ? "Live Session Running" : "Edit locked"}
               </Text>
             </View>
@@ -387,18 +395,21 @@ SessionCard.displayName = "SessionCard";
 export default function AttendanceSessionHistory() {
   const { loggedInUser: user } = useAuth();
   const isAdmin = user?.role === "ADMIN";
-  
+
   const [selectedClassId, setSelectedClassId] = useState("all");
   const [selectedCourseId, setSelectedCourseId] = useState("all");
-  
+
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const [isCourseDropdownOpen, setCourseDropdownOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  
+
   const { orgs, fetchOrgs } = useOrgsStore();
   const { courses, fetchCourses } = useCoursesStore();
-  const { sessions: apiSessions, updateSessionAttendance, fetchSessions } =
-    useAttendanceStore();
+  const {
+    sessions: apiSessions,
+    updateSessionAttendance,
+    fetchSessions,
+  } = useAttendanceStore();
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -425,8 +436,11 @@ export default function AttendanceSessionHistory() {
       courseCode: s.course?.code || "UNK",
       courseName: s.course?.name || "Unknown Course",
       classId: s.course?.organizationId || "unknown",
-      className: orgs.find(o => o.id === s.course?.organizationId)?.courseName || "Unknown Class",
-      section: orgs.find(o => o.id === s.course?.organizationId)?.section || "N/A",
+      className:
+        orgs.find((o) => o.id === s.course?.organizationId)?.courseName ||
+        "Unknown Class",
+      section:
+        orgs.find((o) => o.id === s.course?.organizationId)?.section || "N/A",
       date: new Date(s.createdAt),
       startTime: new Date(s.startTime),
       endTime: new Date(s.endTime),
@@ -448,11 +462,11 @@ export default function AttendanceSessionHistory() {
     if (!orgs || orgs.length === 0) return [defaultOption];
     return [
       defaultOption,
-      ...orgs.map(org => ({
+      ...orgs.map((org) => ({
         id: org.id,
         name: `${org.courseName} (${org.departmentName})`,
         sec: org.section || "",
-      }))
+      })),
     ];
   }, [orgs]);
 
@@ -461,16 +475,16 @@ export default function AttendanceSessionHistory() {
     if (!courses || courses.length === 0) return [defaultOption];
     return [
       defaultOption,
-      ...courses.map(c => ({
+      ...courses.map((c) => ({
         id: c.id,
         name: `${c.code} - ${c.name}`,
-      }))
+      })),
     ];
   }, [courses]);
 
   const selectedClass =
     CLASSES.find((c) => c.id === selectedClassId) || CLASSES[0];
-    
+
   const selectedCourse =
     COURSES.find((c) => c.id === selectedCourseId) || COURSES[0];
 
@@ -481,8 +495,14 @@ export default function AttendanceSessionHistory() {
   const filtered = useMemo(
     () =>
       mappedSessions.filter((s) => {
-        const classMatch = selectedClassId === "all" || s.classId === selectedClassId;
-        const courseMatch = selectedCourseId === "all" || s.courseCode === COURSES.find(c => c.id === selectedCourseId)?.name.split(" - ")[0]; // Matching off code easily mapped natively securely
+        const classMatch =
+          selectedClassId === "all" || s.classId === selectedClassId;
+        const courseMatch =
+          selectedCourseId === "all" ||
+          s.courseCode ===
+            COURSES.find((c) => c.id === selectedCourseId)?.name.split(
+              " - ",
+            )[0]; // Matching off code easily mapped natively securely
         return classMatch && courseMatch;
       }),
     [selectedClassId, selectedCourseId, mappedSessions, COURSES],
@@ -506,9 +526,10 @@ export default function AttendanceSessionHistory() {
 
   const handleDownloadPress = useCallback(async (session: SessionRecord) => {
     try {
-      const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+      const origin =
+        process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
       const url = `${origin}/attendance/sessions/${session.id}/export`;
-      
+
       const supported = await Linking.canOpenURL(url);
       if (supported) {
         await Linking.openURL(url);
@@ -598,15 +619,19 @@ export default function AttendanceSessionHistory() {
                     } ${selectedClassId === cls.id ? "bg-indigo-50" : "bg-white"}`}
                   >
                     <Text
-                    className={`font-medium w-[90%] ${selectedClassId === cls.id ? "text-indigo-600" : "text-gray-700"}`}
-                    numberOfLines={1}
-                  >
-                    {cls.id === "all"
-                      ? "All Classes"
-                      : `${cls.name} Sec ${cls.sec}`}
-                  </Text>
+                      className={`font-medium w-[90%] ${selectedClassId === cls.id ? "text-indigo-600" : "text-gray-700"}`}
+                      numberOfLines={1}
+                    >
+                      {cls.id === "all"
+                        ? "All Classes"
+                        : `${cls.name} Sec ${cls.sec}`}
+                    </Text>
                     {selectedClassId === cls.id && (
-                      <Ionicons name="checkmark-circle" size={18} color="#4f46e5" />
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={18}
+                        color="#4f46e5"
+                      />
                     )}
                   </Pressable>
                 ))}
@@ -628,7 +653,10 @@ export default function AttendanceSessionHistory() {
           >
             <View className="flex-row items-center gap-x-2">
               <Ionicons name="book-outline" size={18} color="#6b7280" />
-              <Text className="text-gray-800 font-semibold w-[85%]" numberOfLines={1}>
+              <Text
+                className="text-gray-800 font-semibold w-[85%]"
+                numberOfLines={1}
+              >
                 {selectedCourse.name}
               </Text>
             </View>
@@ -661,7 +689,11 @@ export default function AttendanceSessionHistory() {
                     {course.name}
                   </Text>
                   {selectedCourseId === course.id && (
-                    <Ionicons name="checkmark-circle" size={18} color="#4f46e5" />
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={18}
+                      color="#4f46e5"
+                    />
                   )}
                 </Pressable>
               ))}

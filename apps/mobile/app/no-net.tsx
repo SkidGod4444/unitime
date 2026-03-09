@@ -45,9 +45,9 @@ export default function NoNetScreen() {
         </View>
 
         <View className="items-center space-y-2">
-      <Text className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 text-center">
-        No Internet Connection
-      </Text>
+          <Text className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 text-center">
+            No Internet Connection
+          </Text>
           <Text className="text-base text-accent text-center px-4">
             Please check your connection and try again.
           </Text>

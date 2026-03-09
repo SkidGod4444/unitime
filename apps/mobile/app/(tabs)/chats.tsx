@@ -128,7 +128,10 @@ export default function Chats() {
 
   return (
     <GestureHandlerRootView className="flex-1 bg-white dark:bg-zinc-900">
-      <SafeAreaView className="flex-1 bg-white dark:bg-zinc-900" edges={["top"]}>
+      <SafeAreaView
+        className="flex-1 bg-white dark:bg-zinc-900"
+        edges={["top"]}
+      >
         <View className="flex-1">
           {/* Header */}
           <View className="px-5 pt-2 pb-4 flex-row justify-between items-center bg-white dark:bg-zinc-900 z-10">

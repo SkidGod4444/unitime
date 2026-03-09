@@ -1,16 +1,21 @@
 import { useAuth } from "@/contexts/auth.cntxt";
-import { useAttendanceStore, useOrgsStore, useProfilesStore, useThemeStore } from "@/lib/store";
+import {
+  useAttendanceStore,
+  useOrgsStore,
+  useProfilesStore,
+  useThemeStore,
+} from "@/lib/store";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
 import {
-    Image,
-    ScrollView,
-    Switch,
-    Text,
-    TouchableOpacity,
-    View,
+  Image,
+  ScrollView,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -33,13 +38,21 @@ export default function Profile() {
           onPress={() => router.back()}
           className="h-10 w-10 bg-gray-50 dark:bg-zinc-800 rounded-full items-center justify-center"
         >
-          <Ionicons name="arrow-back" size={24} color={theme === "dark" ? "#E5E7EB" : "#374151"} />
+          <Ionicons
+            name="arrow-back"
+            size={24}
+            color={theme === "dark" ? "#E5E7EB" : "#374151"}
+          />
         </TouchableOpacity>
         <Text className="text-lg font-bold font-lora text-zinc-900 dark:text-zinc-100">
           My Profile
         </Text>
         <TouchableOpacity className="h-10 w-10 bg-gray-50 dark:bg-zinc-800 rounded-full items-center justify-center">
-          <Ionicons name="settings-outline" size={22} color={theme === "dark" ? "#E5E7EB" : "#374151"} />
+          <Ionicons
+            name="settings-outline"
+            size={22}
+            color={theme === "dark" ? "#E5E7EB" : "#374151"}
+          />
         </TouchableOpacity>
       </View>
 
@@ -93,7 +106,8 @@ export default function Profile() {
                 {
                   icon: "business-outline",
                   label: "Department",
-                  value: myOrg?.departmentName || myProfile?.department || "N/A",
+                  value:
+                    myOrg?.departmentName || myProfile?.department || "N/A",
                   color: "#2563EB",
                   bg: "#EFF6FF",
                 },
@@ -143,7 +157,33 @@ export default function Profile() {
           {[
             {
               label: "Semester",
-              value: myOrg?.semester ? myOrg.semester.replace("_SEMESTER", "").replace("FIRST", "1st").replace("SECOND", "2nd").replace("THIRD", "3rd").replace("FOURTH", "4th").replace("FIFTH", "5th").replace("SIXTH", "6th").replace("SEVENTH", "7th").replace("EIGHTH", "8th").replace("NINTH", "9th").replace("TENTH", "10th") : myProfile?.semester ? myProfile?.semester.replace("_SEMESTER", "").replace("FIRST", "1st").replace("SECOND", "2nd").replace("THIRD", "3rd").replace("FOURTH", "4th").replace("FIFTH", "5th").replace("SIXTH", "6th").replace("SEVENTH", "7th").replace("EIGHTH", "8th").replace("NINTH", "9th").replace("TENTH", "10th") : "N/A",
+              value: myOrg?.semester
+                ? myOrg.semester
+                    .replace("_SEMESTER", "")
+                    .replace("FIRST", "1st")
+                    .replace("SECOND", "2nd")
+                    .replace("THIRD", "3rd")
+                    .replace("FOURTH", "4th")
+                    .replace("FIFTH", "5th")
+                    .replace("SIXTH", "6th")
+                    .replace("SEVENTH", "7th")
+                    .replace("EIGHTH", "8th")
+                    .replace("NINTH", "9th")
+                    .replace("TENTH", "10th")
+                : myProfile?.semester
+                  ? myProfile?.semester
+                      .replace("_SEMESTER", "")
+                      .replace("FIRST", "1st")
+                      .replace("SECOND", "2nd")
+                      .replace("THIRD", "3rd")
+                      .replace("FOURTH", "4th")
+                      .replace("FIFTH", "5th")
+                      .replace("SIXTH", "6th")
+                      .replace("SEVENTH", "7th")
+                      .replace("EIGHTH", "8th")
+                      .replace("NINTH", "9th")
+                      .replace("TENTH", "10th")
+                  : "N/A",
               icon: "school-outline",
               color: "text-blue-600",
               bg: "bg-blue-50",
@@ -151,12 +191,18 @@ export default function Profile() {
             {
               label: "Attendance",
               value: (() => {
-                 const summaryStore = useAttendanceStore.getState().summary;
-                 if (!summaryStore || summaryStore.length === 0) return "N/A";
-                 const totalAttended = summaryStore.reduce((acc, curr) => acc + curr.attended, 0);
-                 const totalHeld = summaryStore.reduce((acc, curr) => acc + curr.total, 0);
-                 if (totalHeld === 0) return "0%";
-                 return `${Math.round((totalAttended / totalHeld) * 100)}%`;
+                const summaryStore = useAttendanceStore.getState().summary;
+                if (!summaryStore || summaryStore.length === 0) return "N/A";
+                const totalAttended = summaryStore.reduce(
+                  (acc, curr) => acc + curr.attended,
+                  0,
+                );
+                const totalHeld = summaryStore.reduce(
+                  (acc, curr) => acc + curr.total,
+                  0,
+                );
+                if (totalHeld === 0) return "0%";
+                return `${Math.round((totalAttended / totalHeld) * 100)}%`;
               })(),
               icon: "stats-chart-outline",
               color: "text-green-600",
@@ -176,13 +222,13 @@ export default function Profile() {
                   className={stat.color}
                   style={{
                     color:
-                      stat.color === "text-blue-600"
-                        ? "#2563EB"
-                        : "#16A34A",
+                      stat.color === "text-blue-600" ? "#2563EB" : "#16A34A",
                   }}
                 />
               </View>
-              <Text className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{stat.value}</Text>
+              <Text className="text-lg font-bold text-zinc-900 dark:text-zinc-100">
+                {stat.value}
+              </Text>
               <Text className="text-xs text-gray-400 dark:text-zinc-400 font-medium uppercase tracking-wide">
                 {stat.label}
               </Text>
@@ -239,11 +285,19 @@ export default function Profile() {
             >
               <View className="flex-row items-center gap-4">
                 <View className="h-10 w-10 bg-blue-50 dark:bg-blue-900/20 rounded-full items-center justify-center">
-                  <Ionicons name="help-buoy-outline" size={20} color="#2563EB" />
+                  <Ionicons
+                    name="help-buoy-outline"
+                    size={20}
+                    color="#2563EB"
+                  />
                 </View>
                 <View>
-                  <Text className="text-base font-semibold text-gray-700 dark:text-zinc-100">Support</Text>
-                  <Text className="text-xs text-gray-500 dark:text-zinc-400">Open a ticket or view responses</Text>
+                  <Text className="text-base font-semibold text-gray-700 dark:text-zinc-100">
+                    Support
+                  </Text>
+                  <Text className="text-xs text-gray-500 dark:text-zinc-400">
+                    Open a ticket or view responses
+                  </Text>
                 </View>
               </View>
               <Ionicons name="chevron-forward" size={18} color="#9ca3af" />
@@ -272,8 +326,6 @@ export default function Profile() {
               />
             </View>
           </View>
-
-          
 
           {/* Logout Button */}
           <TouchableOpacity

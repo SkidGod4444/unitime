@@ -82,7 +82,7 @@ export const useUsersStore = create<UsersState>()(
           }
           set((state) => ({
             users: state.users.map((u) =>
-              u.id === id ? { ...u, banned, banReason } : u
+              u.id === id ? { ...u, banned, banReason } : u,
             ),
           }));
         } catch (error) {
@@ -152,8 +152,13 @@ type OrgsState = {
   setOrgs: (orgs: OrgT[]) => void;
   loading: boolean;
   fetchOrgs: () => Promise<void>;
-  createOrg: (data: Omit<OrgT, "id" | "createdAt" | "updatedAt" | "students">) => Promise<void>;
-  updateOrg: (id: string, data: Partial<Omit<OrgT, "id" | "createdAt" | "updatedAt" | "students">>) => Promise<void>;
+  createOrg: (
+    data: Omit<OrgT, "id" | "createdAt" | "updatedAt" | "students">,
+  ) => Promise<void>;
+  updateOrg: (
+    id: string,
+    data: Partial<Omit<OrgT, "id" | "createdAt" | "updatedAt" | "students">>,
+  ) => Promise<void>;
   deleteOrg: (id: string) => Promise<void>;
 };
 
@@ -165,7 +170,8 @@ export const useOrgsStore = create<OrgsState>()(
       setOrgs: (orgs) => set({ orgs }),
       createOrg: async (orgData) => {
         try {
-          const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+          const origin =
+            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
           const res = await fetch(`${origin}/orgs/create`, {
             method: "POST",
             headers: {
@@ -186,7 +192,8 @@ export const useOrgsStore = create<OrgsState>()(
       },
       updateOrg: async (id, orgData) => {
         try {
-          const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+          const origin =
+            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
           const res = await fetch(`${origin}/orgs/${id}/update`, {
             method: "PUT",
             headers: {
@@ -207,7 +214,8 @@ export const useOrgsStore = create<OrgsState>()(
       },
       deleteOrg: async (id) => {
         try {
-          const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+          const origin =
+            process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
           const res = await fetch(`${origin}/orgs/${id}`, {
             method: "DELETE",
           });
@@ -261,12 +269,20 @@ export * from "./timetable";
 
 type FeedbacksState = {
   myFeedbacks: FeedbackT[];
-  adminFeedbacks: (FeedbackT & { user?: { id: string; name: string; email: string } | null })[];
+  adminFeedbacks: (FeedbackT & {
+    user?: { id: string; name: string; email: string } | null;
+  })[];
   loading: boolean;
   fetchMyFeedbacks: () => Promise<void>;
-  createFeedback: (message: string, category?: FeedbackT["category"]) => Promise<FeedbackT | null>;
+  createFeedback: (
+    message: string,
+    category?: FeedbackT["category"],
+  ) => Promise<FeedbackT | null>;
   fetchAdminFeedbacks: (organizationId?: string) => Promise<void>;
-  updateFeedbackStatus: (id: string, status: "ACKNOWLEDGED" | "RESOLVED") => Promise<void>;
+  updateFeedbackStatus: (
+    id: string,
+    status: "ACKNOWLEDGED" | "RESOLVED",
+  ) => Promise<void>;
 };
 
 export const useFeedbacksStore = create<FeedbacksState>()(
@@ -305,7 +321,9 @@ export const useFeedbacksStore = create<FeedbacksState>()(
       fetchAdminFeedbacks: async (organizationId?: string) => {
         set({ loading: true });
         try {
-          const url = organizationId ? `/feedbacks/admin?organizationId=${organizationId}` : "/feedbacks/admin";
+          const url = organizationId
+            ? `/feedbacks/admin?organizationId=${organizationId}`
+            : "/feedbacks/admin";
           const res = await apiFetch(url);
           if (!res.ok) return;
           const data = await res.json();
@@ -325,7 +343,9 @@ export const useFeedbacksStore = create<FeedbacksState>()(
           const data = await res.json();
           const updated = data.feedback as FeedbackT;
           set({
-            adminFeedbacks: get().adminFeedbacks.map((f) => (f.id === id ? { ...f, ...updated } : f)),
+            adminFeedbacks: get().adminFeedbacks.map((f) =>
+              f.id === id ? { ...f, ...updated } : f,
+            ),
           });
         } catch {}
       },
@@ -344,12 +364,21 @@ export const useFeedbacksStore = create<FeedbacksState>()(
 
 type TicketsState = {
   myTickets: SupportTicketT[];
-  adminTickets: (SupportTicketT & { user?: { id: string; name: string; email: string } | null })[];
+  adminTickets: (SupportTicketT & {
+    user?: { id: string; name: string; email: string } | null;
+  })[];
   loading: boolean;
   fetchMyTickets: () => Promise<void>;
-  createTicket: (title: string, description: string) => Promise<SupportTicketT | null>;
+  createTicket: (
+    title: string,
+    description: string,
+  ) => Promise<SupportTicketT | null>;
   fetchAdminTickets: (organizationId?: string) => Promise<void>;
-  setTicketStatus: (id: string, status: SupportTicketT["status"], assigneeId?: string) => Promise<void>;
+  setTicketStatus: (
+    id: string,
+    status: SupportTicketT["status"],
+    assigneeId?: string,
+  ) => Promise<void>;
   resolveTicket: (id: string, note: string) => Promise<void>;
 };
 
@@ -389,7 +418,9 @@ export const useTicketsStore = create<TicketsState>()(
       fetchAdminTickets: async (organizationId?: string) => {
         set({ loading: true });
         try {
-          const url = organizationId ? `/tickets/admin?organizationId=${organizationId}` : "/tickets/admin";
+          const url = organizationId
+            ? `/tickets/admin?organizationId=${organizationId}`
+            : "/tickets/admin";
           const res = await apiFetch(url);
           if (!res.ok) return;
           const data = await res.json();
@@ -403,13 +434,18 @@ export const useTicketsStore = create<TicketsState>()(
           const res = await apiFetch(`/tickets/${id}/status`, {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ status, ...(assigneeId ? { assigneeId } : {}) }),
+            body: JSON.stringify({
+              status,
+              ...(assigneeId ? { assigneeId } : {}),
+            }),
           });
           if (!res.ok) return;
           const data = await res.json();
           const updated = data.ticket as SupportTicketT;
           set({
-            adminTickets: get().adminTickets.map((t) => (t.id === id ? { ...t, ...updated } : t)),
+            adminTickets: get().adminTickets.map((t) =>
+              t.id === id ? { ...t, ...updated } : t,
+            ),
           });
         } catch {}
       },
@@ -424,7 +460,9 @@ export const useTicketsStore = create<TicketsState>()(
           const data = await res.json();
           const updated = data.ticket as SupportTicketT;
           set({
-            adminTickets: get().adminTickets.map((t) => (t.id === id ? { ...t, ...updated } : t)),
+            adminTickets: get().adminTickets.map((t) =>
+              t.id === id ? { ...t, ...updated } : t,
+            ),
           });
         } catch {}
       },

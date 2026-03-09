@@ -38,7 +38,9 @@ const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "http://localhost:3000")
 const isAllowedOrigin = (origin: string | null): boolean => {
   if (!origin) return false;
   return ALLOWED_ORIGINS.some((pattern) =>
-    pattern.startsWith("^") ? new RegExp(pattern).test(origin) : pattern === origin,
+    pattern.startsWith("^")
+      ? new RegExp(pattern).test(origin)
+      : pattern === origin,
   );
 };
 

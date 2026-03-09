@@ -24,40 +24,49 @@ export const useHistoryStore = create<HistoryState>((set) => ({
   fetchHistoryLogs: async (userId: string) => {
     try {
       set({ loading: true, error: null });
-      const origin = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-      
+      const origin =
+        process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+
       const [historyRes, attendanceRes] = await Promise.all([
         fetch(`${origin}/history/${userId}`),
-        fetch(`${origin}/attendance/all-history/${userId}`)
+        fetch(`${origin}/attendance/all-history/${userId}`),
       ]);
-      
+
       const historyData = await historyRes.json();
       const attendanceData = await attendanceRes.json();
-      
+
       let combinedLogs: HistoryLog[] = [];
 
       if (historyRes.ok && historyData.success) {
         combinedLogs = [...historyData.data];
       }
-      
+
       if (attendanceRes.ok && attendanceData.success) {
-        const mappedSessions: HistoryLog[] = attendanceData.data.map((session: any) => ({
-          id: session.id,
-          title: "Attendance Session",
-          description: `Session tracking configured for ${session.course?.name || "a course"}`,
-          type: "ATTENDANCE" as const,
-          userId: session.createdBy,
-          organizationId: session.course?.organizationId || null,
-          createdAt: session.createdAt,
-        }));
-        
+        const mappedSessions: HistoryLog[] = attendanceData.data.map(
+          (session: any) => ({
+            id: session.id,
+            title: "Attendance Session",
+            description: `Session tracking configured for ${session.course?.name || "a course"}`,
+            type: "ATTENDANCE" as const,
+            userId: session.createdBy,
+            organizationId: session.course?.organizationId || null,
+            createdAt: session.createdAt,
+          }),
+        );
+
         combinedLogs = [...combinedLogs, ...mappedSessions];
       }
 
       // Sort combined array securely natively descending
-      combinedLogs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      combinedLogs.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
 
-      if ((historyRes.ok && historyData.success) || (attendanceRes.ok && attendanceData.success)) {
+      if (
+        (historyRes.ok && historyData.success) ||
+        (attendanceRes.ok && attendanceData.success)
+      ) {
         set({ logs: combinedLogs, loading: false });
       } else {
         set({ error: "Failed to fetch history logs", loading: false });

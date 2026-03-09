@@ -3,11 +3,11 @@ import { useHistoryStore } from "@/lib/store/history";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
-    RefreshControl,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -39,12 +39,13 @@ export default function History() {
   const filteredData =
     activeFilter === "All"
       ? logs
-      : logs.filter(
-          (item) => item.type === activeFilter.toUpperCase()
-        );
+      : logs.filter((item) => item.type === activeFilter.toUpperCase());
 
   return (
-    <SafeAreaView className="flex-1 bg-background dark:bg-zinc-900" edges={["top"]}>
+    <SafeAreaView
+      className="flex-1 bg-background dark:bg-zinc-900"
+      edges={["top"]}
+    >
       <View className="flex-1 px-5">
         {/* Header */}
         <View className="mt-4 mb-6">
@@ -75,7 +76,9 @@ export default function History() {
               >
                 <Text
                   className={`font-medium text-sm ${
-                    activeFilter === filter ? "text-white dark:text-zinc-900" : "text-gray-600 dark:text-zinc-300"
+                    activeFilter === filter
+                      ? "text-white dark:text-zinc-900"
+                      : "text-gray-600 dark:text-zinc-300"
                   }`}
                 >
                   {filter}
@@ -90,7 +93,10 @@ export default function History() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 100, gap: 16 }}
           refreshControl={
-            <RefreshControl refreshing={refreshing || loading} onRefresh={refresh} />
+            <RefreshControl
+              refreshing={refreshing || loading}
+              onRefresh={refresh}
+            />
           }
         >
           {filteredData.map((item) => (
@@ -104,9 +110,15 @@ export default function History() {
                 } justify-center items-center`}
               >
                 <Ionicons
-                  name={item.type === "ATTENDANCE" ? "checkmark-circle" : "person"}
+                  name={
+                    item.type === "ATTENDANCE" ? "checkmark-circle" : "person"
+                  }
                   size={24}
-                  className={item.type === "ATTENDANCE" ? "text-green-600" : "text-purple-600"}
+                  className={
+                    item.type === "ATTENDANCE"
+                      ? "text-green-600"
+                      : "text-purple-600"
+                  }
                   style={{
                     color: item.type === "ATTENDANCE" ? "#16A34A" : "#9333EA",
                   }}
@@ -121,7 +133,10 @@ export default function History() {
                     {timeSince(item.createdAt)}
                   </Text>
                 </View>
-                <Text className="text-gray-500 dark:text-zinc-300 text-sm" numberOfLines={2}>
+                <Text
+                  className="text-gray-500 dark:text-zinc-300 text-sm"
+                  numberOfLines={2}
+                >
                   {item.description}
                 </Text>
               </View>
