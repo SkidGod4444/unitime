@@ -62,6 +62,17 @@ const isSameDay = (d1: Date, d2: Date) => {
   );
 };
 
+const isFutureDate = (d: Date) => {
+  const allowedLimit = new Date();
+  allowedLimit.setDate(allowedLimit.getDate() + 6);
+  allowedLimit.setHours(0, 0, 0, 0);
+  
+  const compareDate = new Date(d);
+  compareDate.setHours(0, 0, 0, 0);
+  
+  return compareDate > allowedLimit;
+};
+
 const getDaysInMonth = (month: number, year: number) => {
   return new Date(year, month + 1, 0).getDate();
 };
@@ -126,14 +137,17 @@ const DateItem = ({
   isSelected: boolean;
   onSelect: (date: Date) => void;
 }) => {
+  const isFuture = isFutureDate(date);
+
   return (
     <TouchableOpacity
-      onPress={() => onSelect(date)}
+      onPress={() => !isFuture && onSelect(date)}
+      activeOpacity={isFuture ? 1 : 0.2}
       className={`mr-3 items-center justify-center rounded-2xl ${
         isSelected
           ? "bg-black dark:bg-white"
           : "bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800"
-      } shadow-sm`}
+      } shadow-sm ${isFuture ? "opacity-40" : ""}`}
       style={{
         width: 70,
         height: 85,
@@ -171,15 +185,33 @@ const ClassCard = ({ session, index }: { session: any; index: number }) => {
     >
       <View className="flex-row">
         {/* Time Column */}
-        <View className="w-20 items-end pr-5 pt-1">
-          <Text className="text-gray-900 dark:text-white font-bold text-base">
-            {session.startTime}
-          </Text>
-          <Text className="text-gray-400 text-xs">{session.endTime}</Text>
+        <View className="w-24 items-end pr-6 pt-1">
+          {(() => {
+            const parts = session.startTime.split(" ");
+            const timeStr = parts[0] || session.startTime;
+            const periodStr = parts[1] || "";
+            return (
+              <View className="items-end">
+                <View className="flex-row items-baseline gap-1">
+                  <Text className="text-gray-900 dark:text-white font-bold text-lg leading-tight">
+                    {timeStr}
+                  </Text>
+                  {!!periodStr && (
+                    <Text className="text-gray-500 dark:text-gray-400 font-semibold text-[10px] leading-tight mb-[2px]">
+                      {periodStr}
+                    </Text>
+                  )}
+                </View>
+                <Text className="text-gray-400 dark:text-zinc-500 text-xs mt-0.5">
+                  {session.endTime.split(" ").join("")}
+                </Text>
+              </View>
+            );
+          })()}
           {/* Vertical Line */}
-          <View className="absolute right-[-6px] top-8 bottom-[-20px] w-[2px] bg-gray-100 dark:bg-gray-800 rounded-full" />
+          <View className="absolute right-[-6px] top-8 bottom-[-30px] w-[2px] bg-gray-100 dark:bg-zinc-800 rounded-full" />
           <View
-            className="absolute right-[-10px] top-2 w-[10px] h-[10px] rounded-full border-2 border-white dark:border-black"
+            className="absolute right-[-10px] top-3 w-[10px] h-[10px] rounded-full border-2 border-white dark:border-black"
             style={{ backgroundColor: session.color }}
           />
         </View>
@@ -335,12 +367,14 @@ const CustomCalendar = ({
           const isSelected = isSameDay(date, selectedDate);
           // Check if date is today (optional visual cue)
           const isToday = isSameDay(date, new Date());
+          const isFuture = isFutureDate(date);
 
           return (
             <TouchableOpacity
               key={date.toISOString()}
-              className="w-[14%] h-12 items-center justify-center"
-              onPress={() => onSelect(date)}
+              className={`w-[14%] h-12 items-center justify-center ${isFuture ? "opacity-30" : ""}`}
+              onPress={() => !isFuture && onSelect(date)}
+              activeOpacity={isFuture ? 1 : 0.2}
             >
               <View
                 className={`w-10 h-10 items-center justify-center rounded-full ${isSelected ? "bg-black dark:bg-white" : isToday ? "bg-gray-100 dark:bg-gray-800" : ""}`}
@@ -366,15 +400,13 @@ export default function ScheduleScreen() {
   const flatListRef = useRef<FlatList>(null);
 
   const { loggedInUser } = useAuth();
-  const { timetables, loading, fetchTimetable } = useTimetableStore();
-
+  const { weekTimetable, loading, fetchWeekTimetable } = useTimetableStore();
 
   useEffect(() => {
-    if (loggedInUser?.id) {
-      const dayStr = FULL_DAY_NAMES[selectedDate.getDay()];
-      fetchTimetable(loggedInUser.id, dayStr);
+    if (loggedInUser?.id && Object.keys(weekTimetable).length === 0) {
+      fetchWeekTimetable(loggedInUser.id);
     }
-  }, [selectedDate, loggedInUser, fetchTimetable]);
+  }, [loggedInUser?.id, fetchWeekTimetable, weekTimetable]);
 
   // Ensure scrolling works reliably
   const getItemLayout = (data: any, index: number) => ({
@@ -399,33 +431,70 @@ export default function ScheduleScreen() {
     setSelectedDate(date);
   };
 
-  const formattedClasses = timetables.map((t: any, idx: number) => {
-    const start = new Date(t.startTime);
-    const end = new Date(t.endTime);
-    // basic color palette cycling
-    const colors = ["#6366f1", "#ec4899", "#10b981", "#f59e0b", "#8b5cf6"];
+  // Safely parse incoming time representations (ISO strings or "14:25" format) into a chronological minute-of-day integer and a formatted 12h string.
+  const parseAndFormatTime = (timeInput: string | Date | undefined) => {
+    if (!timeInput) return { sortVal: 0, display: "TBD" };
 
-    // pad hours/mins to "HH:MM"
-    const startH = start.getHours() % 12 || 12;
-    const startM = start.getMinutes().toString().padStart(2, "0");
-    const startAmPm = start.getHours() >= 12 ? "PM" : "AM";
+    let hours = 0;
+    let minutes = 0;
 
-    const endH = end.getHours() % 12 || 12;
-    const endM = end.getMinutes().toString().padStart(2, "0");
-    const endAmPm = end.getHours() >= 12 ? "PM" : "AM";
+    // Check if it's an ISO date string
+    const asDate = new Date(timeInput);
+    if (!isNaN(asDate.getTime()) && String(timeInput).includes("T")) {
+      hours = asDate.getHours();
+      minutes = asDate.getMinutes();
+    } else {
+      // Direct string like "14:25", "02:25 PM", etc.
+      const timeStr = String(timeInput).trim();
+      if (timeStr.includes(" ")) {
+        const [timePart, period] = timeStr.split(" ");
+        const [h, m] = timePart.split(":").map(Number);
+        hours = h;
+        if (period?.toUpperCase() === "PM" && hours !== 12) hours += 12;
+        if (period?.toUpperCase() === "AM" && hours === 12) hours = 0;
+        minutes = m || 0;
+      } else if (timeStr.includes(":")) {
+        const [h, m] = timeStr.split(":").map(Number);
+        hours = h;
+        minutes = m || 0;
+      }
+    }
 
-    return {
-      id: t.id,
-      courseCode: t.course?.code || "UNK",
-      courseName: t.course?.name || "Unknown Course",
-      startTime: `${startH}:${startM} ${startAmPm}`,
-      endTime: `${endH}:${endM} ${endAmPm}`,
-      location: t.location || "TBD",
-      professor: "Dr. Faculty", // Add professor to timetable response later if needed
-      type: t.course?.classType || "Lecture",
-      color: colors[idx % colors.length],
-    };
-  });
+    const sortVal = hours * 60 + minutes;
+
+    // Format for display (HH:MM AM/PM)
+    const displayH = hours % 12 || 12;
+    const displayM = String(minutes).padStart(2, "0");
+    const amPm = hours >= 12 ? "PM" : "AM";
+    const display = `${displayH}:${displayM} ${amPm}`;
+
+    return { sortVal, display };
+  };
+
+  const dayStr = FULL_DAY_NAMES[selectedDate.getDay()];
+  const dayClasses = weekTimetable[dayStr] || [];
+
+  const formattedClasses = [...dayClasses]
+    .map((t: any, idx: number) => {
+      // Keep existing color palette
+      const colors = ["#6366f1", "#ec4899", "#10b981", "#f59e0b", "#8b5cf6"];
+      const startObj = parseAndFormatTime(t.startTime);
+      const endObj = parseAndFormatTime(t.endTime);
+      
+      return {
+        id: t.id,
+        courseCode: t.course?.code || "UNK",
+        courseName: t.course?.name || "Unknown Course",
+        startTime: startObj.display,
+        endTime: endObj.display,
+        location: t.location || "TBD",
+        professor: "Dr. Faculty", // Add professor to timetable response later if needed
+        type: t.course?.classType || "Lecture",
+        color: colors[idx % colors.length],
+        sortVal: startObj.sortVal
+      };
+    })
+    .sort((a, b) => a.sortVal - b.sortVal);
 
   const handleCalendarSelect = (date: Date) => {
     setSelectedDate(date);

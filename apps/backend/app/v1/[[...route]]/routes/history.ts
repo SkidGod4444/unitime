@@ -1,6 +1,7 @@
+import { ERROR_CODES, createHonoErrorResponse } from "@/lib/error.codes";
 import { requireAuth } from "@/middleware/check.auth";
 import type { AppEnv } from "@/types/app-env";
-import { getOrSetCache } from "@unitime/cache";
+import { getOrSetCache, invalidateCache } from "@unitime/cache";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
 
@@ -52,6 +53,44 @@ history.get("/:userId", async (c) => {
       { success: false, error: "Failed to fetch history" },
       { status: 500 },
     );
+  }
+});
+
+history.post("/", async (c) => {
+  const { userId, organizationId, title, description, type } = await c.req.json();
+
+  if (!userId || !title || !description || !type) {
+    return createHonoErrorResponse(c, ERROR_CODES.MISSING_REQUIRED_FIELD);
+  }
+
+  try {
+    const log = await prisma.historyLog.create({
+      data: {
+        userId,
+        organizationId: organizationId || null,
+        title,
+        description,
+        type, // "SYSTEM" or "ATTENDANCE"
+      },
+    });
+
+    if (!log.id) {
+      return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
+    }
+
+    await invalidateCache(`history:${userId}`);
+
+    return c.json(
+      {
+        success: true,
+        status_code: 201,
+        log,
+      },
+      201
+    );
+  } catch (error) {
+    console.error("Error creating history log:", error);
+    return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
   }
 });
 

@@ -3,17 +3,18 @@ import { Ionicons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  Modal,
-  RefreshControl,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    FlatList,
+    Modal,
+    RefreshControl,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { apiFetch } from "../lib/api";
 import { useProfilesStore } from "../lib/store";
 import { PendingEnrollment, useEnrollmentStore } from "../lib/store/enrollment";
 
@@ -56,6 +57,27 @@ export default function ManageRequestsScreen() {
     try {
       setActionLoadingId(id);
       await updateEnrollmentStatus(id, status);
+
+      const targetEnrollment = enrollments.find(e => e.id === id);
+
+      if (status === "APPROVED" && targetEnrollment) {
+        // Send a notification to the user that their enrollment was approved
+        const userProfile = profiles.find((p) => p.userId === targetEnrollment.user.id);
+        const orgId = userProfile?.organizationId || null;
+
+        await apiFetch("/notifications", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: targetEnrollment.user.id,
+            organizationId: orgId,
+            title: "Enrollment Approved",
+            body: `Your request to join ${targetEnrollment.course.name} (${targetEnrollment.course.code}) has been approved!`,
+            type: "SYSTEM",
+          }),
+        }).catch(console.error);
+      }
+
       Alert.alert(
         "Success",
         `Enrollment ${status === "APPROVED" ? "approved" : "rejected"}.`,

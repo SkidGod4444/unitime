@@ -36,13 +36,16 @@ const SHORT_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 export default function ManageTimetableScreen() {
   const router = useRouter();
   const { loggedInUser, refreshJwt } = useAuth();
-  const { createTimetableEntry, deleteTimetableEntry } = useTimetableStore();
+  const { createTimetableEntry, deleteTimetableEntry, updateTimetableEntry } = useTimetableStore();
   const { courses, fetchCourses } = useCoursesStore();
   const { byOrg, fetchOrgLabGroups, createLabGroup } = useLabGroupsStore();
 
   const [selectedDay, setSelectedDay] = useState(DAYS[0]);
   const [allEntries, setAllEntries] = useState<TimetableEntry[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Edit State
+  const [editEntryId, setEditEntryId] = useState<string | null>(null);
 
   // Create group state
   const [showCreateGroup, setShowCreateGroup] = useState(false);
@@ -56,7 +59,9 @@ export default function ManageTimetableScreen() {
   const [showGroupPicker, setShowGroupPicker] = useState(false);
   const [formDay, setFormDay] = useState<string>("MONDAY");
   const [formStartTime, setFormStartTime] = useState<string>("");
+  const [formStartPeriod, setFormStartPeriod] = useState<"AM" | "PM">("AM");
   const [formEndTime, setFormEndTime] = useState<string>("");
+  const [formEndPeriod, setFormEndPeriod] = useState<"AM" | "PM">("AM");
   const [formLocation, setFormLocation] = useState<string>("");
 
   const loadAll = async () => {
@@ -123,29 +128,46 @@ export default function ManageTimetableScreen() {
       return;
     }
 
-    const entry = {
+    const payload = {
       courseId: formCourseId,
       day: formDay,
-      startTime: formStartTime,
-      endTime: formEndTime,
+      startTime: `${formStartTime} ${formStartPeriod}`,
+      endTime: `${formEndTime} ${formEndPeriod}`,
       location: formLocation,
-      // auto-attach the currently selected lab group (or undefined for all students)
       labGroupId: activeGroupId ?? undefined,
     };
 
     const token = await refreshJwt();
-    const success = await createTimetableEntry(token || "", entry);
-    if (success) {
-      Alert.alert("Success", "Timetable entry created.");
-      setAddModalOpen(false);
-      setFormCourseId("");
-      setFormStartTime("");
-      setFormEndTime("");
-      setFormLocation("");
-      loadAll();
+    if (!token) return;
+
+    if (editEntryId) {
+      const success = await updateTimetableEntry(token, editEntryId, payload);
+      if (success) {
+        Alert.alert("Success", "Timetable entry updated.");
+        closeModal();
+        loadAll();
+      } else {
+        Alert.alert("Error", "Could not update entry.");
+      }
     } else {
-      Alert.alert("Error", "Could not create entry.");
+      const success = await createTimetableEntry(token, payload);
+      if (success) {
+        Alert.alert("Success", "Timetable entry created.");
+        closeModal();
+        loadAll();
+      } else {
+        Alert.alert("Error", "Could not create entry.");
+      }
     }
+  };
+
+  const closeModal = () => {
+    setAddModalOpen(false);
+    setEditEntryId(null);
+    setFormCourseId("");
+    setFormStartTime("");
+    setFormEndTime("");
+    setFormLocation("");
   };
 
   const handleDelete = (id: string) => {
@@ -198,33 +220,57 @@ export default function ManageTimetableScreen() {
             <Ionicons name="menu-outline" size={24} color="#9CA3AF" />
           </View>
           <View className="flex-1">
-            <View className="flex-row justify-between">
-              <Text className="text-gray-900 dark:text-white font-bold text-base">
+            <View className="flex-row justify-between items-start gap-2">
+              <Text 
+                className="text-gray-900 dark:text-white font-bold text-base flex-1"
+                numberOfLines={2}
+              >
                 {course?.name || "Unknown Course"}
               </Text>
-              <Text className="text-xs font-semibold text-gray-500 bg-gray-100 dark:bg-zinc-800 px-2 py-0.5 rounded-md">
+              <Text className="text-xs font-semibold text-gray-500 bg-gray-100 dark:bg-zinc-800 px-2 py-0.5 rounded-md mt-0.5 shrink-0">
                 {course?.code}
               </Text>
             </View>
-            <View className="flex-row items-center gap-3 mt-2">
+            <View className="flex-row items-center flex-wrap gap-x-3 gap-y-1 mt-2 pr-2">
               <View className="flex-row items-center gap-1">
                 <Ionicons name="time-outline" size={14} color="#6B7280" />
                 <Text className="text-sm text-gray-500">{timeStr}</Text>
               </View>
               {item.location ? (
-                <View className="flex-row items-center gap-1">
+                <View className="flex-row items-center gap-1 flex-shrink">
                   <Ionicons name="location-outline" size={14} color="#6B7280" />
-                  <Text className="text-sm text-gray-500">{item.location}</Text>
+                  <Text className="text-sm text-gray-500 flex-shrink" numberOfLines={1}>{item.location}</Text>
                 </View>
               ) : null}
             </View>
           </View>
-          <TouchableOpacity
-            onPress={() => handleDelete(item.id)}
-            className="ml-3 justify-center"
-          >
-            <Ionicons name="trash-outline" size={20} color="#EF4444" />
-          </TouchableOpacity>
+          <View className="flex-row items-center justify-center gap-4 ml-2">
+            <TouchableOpacity
+              onPress={() => {
+                setEditEntryId(item.id);
+                setFormCourseId(item.courseId);
+                setFormDay(item.day);
+                setFormLocation(item.location || "");
+                const [sTime, sPeriod] = item.startTime.split(" ");
+                const [eTime, ePeriod] = item.endTime.split(" ");
+                setFormStartTime(sTime || item.startTime);
+                setFormStartPeriod((sPeriod as "AM" | "PM") || "AM");
+                setFormEndTime(eTime || item.endTime);
+                setFormEndPeriod((ePeriod as "AM" | "PM") || "AM");
+                setActiveGroupId((item as any).labGroupId || null);
+                setAddModalOpen(true);
+              }}
+              className="justify-center"
+            >
+              <Ionicons name="pencil-outline" size={20} color="#3B82F6" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => handleDelete(item.id)}
+              className="justify-center"
+            >
+              <Ionicons name="trash-outline" size={20} color="#EF4444" />
+            </TouchableOpacity>
+          </View>
         </TouchableOpacity>
       </ScaleDecorator>
     );
@@ -309,6 +355,7 @@ export default function ManageTimetableScreen() {
       <TouchableOpacity
         onPress={() => {
           setFormDay(selectedDay);
+          closeModal(); // Reset form first before popping open to start fresh
           setAddModalOpen(true);
         }}
         className="absolute bottom-6 right-6 bg-blue-600 h-14 w-14 rounded-full justify-center items-center shadow-lg shadow-blue-500/30 active:scale-95"
@@ -472,12 +519,11 @@ export default function ManageTimetableScreen() {
         </Pressable>
       </Modal>
 
-      {/* ── Add Slot Modal ── */}
       <Modal
         visible={isAddModalOpen}
         animationType="slide"
         transparent
-        onRequestClose={() => setAddModalOpen(false)}
+        onRequestClose={closeModal}
       >
         <Pressable
           style={{
@@ -485,14 +531,14 @@ export default function ManageTimetableScreen() {
             backgroundColor: "rgba(0,0,0,0.6)",
             justifyContent: "flex-end",
           }}
-          onPress={() => setAddModalOpen(false)}
+          onPress={closeModal}
         >
           <Pressable onPress={(e) => e.stopPropagation()}>
             <View className="bg-white dark:bg-zinc-900 w-full rounded-t-[32px] p-6 shadow-2xl">
               <View className="items-center mb-6">
                 <View className="w-12 h-1.5 bg-gray-200 dark:bg-zinc-700 rounded-full mb-4" />
                 <Text className="text-xl font-bold font-lora text-zinc-900 dark:text-white">
-                  Add Slot
+                  {editEntryId ? "Edit Slot" : "Add Slot"}
                 </Text>
               </View>
 
@@ -582,25 +628,43 @@ export default function ManageTimetableScreen() {
                   <Text className="text-sm font-semibold text-gray-700 dark:text-zinc-300 mb-2">
                     Start Time
                   </Text>
-                  <TextInput
-                    value={formStartTime}
-                    onChangeText={setFormStartTime}
-                    placeholder="09:00"
-                    placeholderTextColor="#9CA3AF"
-                    className="bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white font-medium"
-                  />
+                  <View className="flex-row items-center bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl overflow-hidden pr-1">
+                    <TextInput
+                      value={formStartTime}
+                      onChangeText={setFormStartTime}
+                      placeholder="09:00"
+                      placeholderTextColor="#9CA3AF"
+                      keyboardType="numbers-and-punctuation"
+                      className="flex-1 px-4 py-3 text-gray-900 dark:text-white font-medium"
+                    />
+                    <TouchableOpacity
+                      onPress={() => setFormStartPeriod(formStartPeriod === "AM" ? "PM" : "AM")}
+                      className="bg-indigo-100 dark:bg-indigo-900/30 px-3 py-1.5 rounded-lg ml-1"
+                    >
+                      <Text className="text-indigo-700 dark:text-indigo-400 font-bold text-xs">{formStartPeriod}</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
                 <View className="flex-1">
                   <Text className="text-sm font-semibold text-gray-700 dark:text-zinc-300 mb-2">
                     End Time
                   </Text>
-                  <TextInput
-                    value={formEndTime}
-                    onChangeText={setFormEndTime}
-                    placeholder="10:00"
-                    placeholderTextColor="#9CA3AF"
-                    className="bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl px-4 py-3 text-gray-900 dark:text-white font-medium"
-                  />
+                  <View className="flex-row items-center bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl overflow-hidden pr-1">
+                    <TextInput
+                      value={formEndTime}
+                      onChangeText={setFormEndTime}
+                      placeholder="10:00"
+                      placeholderTextColor="#9CA3AF"
+                      keyboardType="numbers-and-punctuation"
+                      className="flex-1 px-4 py-3 text-gray-900 dark:text-white font-medium"
+                    />
+                    <TouchableOpacity
+                      onPress={() => setFormEndPeriod(formEndPeriod === "AM" ? "PM" : "AM")}
+                      className="bg-indigo-100 dark:bg-indigo-900/30 px-3 py-1.5 rounded-lg ml-1"
+                    >
+                      <Text className="text-indigo-700 dark:text-indigo-400 font-bold text-xs">{formEndPeriod}</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
 
@@ -617,14 +681,26 @@ export default function ManageTimetableScreen() {
                 />
               </View>
 
-              <TouchableOpacity
-                onPress={handleAddSubmit}
-                className="bg-blue-600 rounded-2xl py-4 items-center mb-5 shadow-lg shadow-blue-500/20"
-              >
-                <Text className="text-white font-bold text-base tracking-wide">
-                  Save Slot
-                </Text>
-              </TouchableOpacity>
+              <View className="flex-row gap-3 mb-5">
+                {editEntryId && (
+                  <TouchableOpacity
+                    onPress={closeModal}
+                    className="flex-1 bg-gray-100 dark:bg-zinc-800 rounded-2xl py-4 items-center shadow-sm"
+                  >
+                    <Text className="text-gray-700 dark:text-zinc-300 font-bold text-base tracking-wide">
+                      Cancel
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                <TouchableOpacity
+                  onPress={handleAddSubmit}
+                  className="flex-1 bg-blue-600 rounded-2xl py-4 items-center shadow-lg shadow-blue-500/20"
+                >
+                  <Text className="text-white font-bold text-base tracking-wide">
+                    {editEntryId ? "Update Slot" : "Save Slot"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </Pressable>
         </Pressable>

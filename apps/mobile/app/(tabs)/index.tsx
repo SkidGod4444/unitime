@@ -2,26 +2,26 @@ import { useAuth } from "@/contexts/auth.cntxt";
 import { useLocalStore } from "@/contexts/localstore.cntxt";
 import { useRefresh } from "@/hooks/use-refresh";
 import {
-    useAttendanceStore,
-    useFeedbacksStore,
-    useTimetableStore,
+  useAttendanceStore,
+  useFeedbacksStore,
+  useTimetableStore,
 } from "@/lib/store";
 import { Ionicons } from "@expo/vector-icons";
 import * as LocalAuthentication from "expo-local-authentication";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-    Alert,
-    Image,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    RefreshControl,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -135,12 +135,32 @@ export default function Index() {
   const overall =
     totalHeld > 0 ? Math.round((totalAttended / totalHeld) * 100) : 0;
 
+  const dayNames = [
+    "SUNDAY",
+    "MONDAY",
+    "TUESDAY",
+    "WEDNESDAY",
+    "THURSDAY",
+    "FRIDAY",
+    "SATURDAY",
+  ];
+  const todayDay = dayNames[new Date().getDay()];
+
+  // Filter local store by today explicitly, in case it holds the full week or future days
+  const todayTimetables = timetables.filter((t) => t.day === todayDay);
+
   // Map first 3 timetable items for quick dashboard view
-  const todaysSchedule = timetables.slice(0, 3).map((t, index) => {
-    const start = new Date(t.startTime);
-    const startH = start.getHours() % 12 || 12;
-    const startM = start.getMinutes().toString().padStart(2, "0");
-    const startAmPm = start.getHours() >= 12 ? "PM" : "AM";
+  const todaysSchedule = todayTimetables.slice(0, 3).map((t, index) => {
+    // Determine start time AM/PM correctly based on whether it is an ISO Date or 'HH:MM AM' string
+    let displayTime = t.startTime; // Use DB formatted string directly if it conforms to formatting.
+    const startObj = new Date(t.startTime);
+    if (!isNaN(startObj.getTime()) && String(t.startTime).includes("T")) {
+      const startH = startObj.getHours() % 12 || 12;
+      const startM = startObj.getMinutes().toString().padStart(2, "0");
+      const startAmPm = startObj.getHours() >= 12 ? "PM" : "AM";
+      displayTime = `${startH}:${startM} ${startAmPm}`;
+    }
+
     const colors = [
       "border-l-blue-500",
       "border-l-green-500",
@@ -150,7 +170,7 @@ export default function Index() {
 
     return {
       id: t.id,
-      time: `${startH}:${startM} ${startAmPm}`,
+      time: displayTime,
       subject: t.course?.name || "Unknown",
       room: t.location || "TBA",
       status: "Upcoming",

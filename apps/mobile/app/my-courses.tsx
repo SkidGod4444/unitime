@@ -6,13 +6,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    FlatList,
-    RefreshControl,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  RefreshControl,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Course } from "../lib/store/timetable";
@@ -66,6 +66,20 @@ export default function MyCoursesScreen() {
         body: JSON.stringify({ userId: loggedInUser?.id }),
       });
       if (!res.ok) throw new Error("Failed to enroll");
+
+      // Log the enrollment action to user's history
+      await apiFetch("/history", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: loggedInUser?.id,
+          organizationId: organizationId,
+          title: "Course Enrollment Request",
+          description: `You requested to enroll in ${course.name} (${course.code}). Waiting for approval.`,
+          type: "SYSTEM",
+        }),
+      }).catch(console.error);
+
       Alert.alert("Success", "Enrollment request sent. Waiting for approval.");
       fetchCourses();
     } catch {

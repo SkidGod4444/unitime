@@ -42,6 +42,11 @@ type TimetablesState = {
     token: string,
     entry: Omit<TimetableEntry, "id" | "course"> & { labGroupId?: string },
   ) => Promise<boolean>;
+  updateTimetableEntry: (
+    token: string,
+    id: string,
+    entry: Partial<Omit<TimetableEntry, "id" | "course">> & { labGroupId?: string },
+  ) => Promise<boolean>;
   deleteTimetableEntry: (token: string, id: string) => Promise<boolean>;
 };
 
@@ -117,6 +122,25 @@ export const useTimetableStore = create<TimetablesState>()(
         } catch (error) {
           console.error("Error creating timetable entry:", error);
           set({ loading: false, error: "Network error creating entry" });
+          return false;
+        }
+      },
+      updateTimetableEntry: async (token, id, entry) => {
+        set({ loading: true, error: null });
+        try {
+          const res = await apiFetch(`/timetable/${id}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(entry),
+          });
+          const data = await res.json();
+          set({ loading: false });
+          return res.ok && data.success;
+        } catch (error) {
+          console.error("Error updating timetable entry:", error);
+          set({ loading: false, error: "Network error updating entry" });
           return false;
         }
       },
