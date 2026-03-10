@@ -401,7 +401,7 @@ export default function ScheduleScreen() {
   const flatListRef = useRef<FlatList>(null);
 
   const { loggedInUser } = useAuth();
-  const { timetables, loading, fetchWeekTimetable } = useTimetableStore();
+  const { weekTimetable, loading, fetchWeekTimetable } = useTimetableStore();
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -414,11 +414,14 @@ export default function ScheduleScreen() {
   }, [loggedInUser?.id, fetchWeekTimetable]);
 
   useEffect(() => {
-    // If the timetable is empty, do an initial fetch
-    if (loggedInUser?.id && timetables.length === 0) {
+    // Always fetch on mount so we get fresh data for all days.
+    // The zustand-persist layer hydrates from AsyncStorage first, so the
+    // cached weekTimetable is shown instantly while the network call runs
+    // in the background (stale-while-revalidate).
+    if (loggedInUser?.id) {
       fetchWeekTimetable(loggedInUser.id);
     }
-  }, [loggedInUser?.id, fetchWeekTimetable, timetables.length]);
+  }, [loggedInUser?.id, fetchWeekTimetable]);
 
   // Ensure scrolling works reliably
   const getItemLayout = (data: any, index: number) => ({
@@ -495,25 +498,24 @@ export default function ScheduleScreen() {
   };
 
   const dayStr = FULL_DAY_NAMES[selectedDate.getDay()];
+
+  // Use the pre-organised weekTimetable map (keyed by uppercase day name)
+  // instead of filtering the flat timetables array.  This is both correct
+  // and efficient: all seven days are fetched once, cached in the store,
+  // and each day's slice is looked up in O(1) when the user switches dates.
   const dayClasses = React.useMemo(() => {
-    return (
-      timetables.filter((t: any) =>
-        String(t.day).toUpperCase().includes(dayStr),
-      ) || []
-    );
-  }, [timetables, dayStr]);
+    return weekTimetable[dayStr] ?? [];
+  }, [weekTimetable, dayStr]);
 
   useEffect(() => {
     console.log("Selected Date:", selectedDate);
     console.log("Selected Day:", dayStr);
-    console.log(
-      "Available timetable days:",
-      timetables.map((t) => t.day),
-    );
+    console.log("weekTimetable keys:", Object.keys(weekTimetable));
+    console.log(`Classes for ${dayStr}:`, (weekTimetable[dayStr] ?? []).length);
     if (dayClasses.length > 0) {
       console.log("Sample Timetable Object:", dayClasses[0]);
     }
-  }, [selectedDate, timetables, dayStr, dayClasses]);
+  }, [selectedDate, weekTimetable, dayStr, dayClasses]);
 
   const formattedClasses = [...dayClasses]
     .map((t: any, idx: number) => {

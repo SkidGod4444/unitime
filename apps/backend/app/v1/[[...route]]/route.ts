@@ -20,6 +20,7 @@ import users from "./routes/users";
 import labGroups from "./routes/lab-groups";
 import feedbacks from "./routes/feedbacks";
 import tickets from "./routes/tickets";
+import email from "./routes/email";
 
 export const runtime = "nodejs";
 
@@ -72,6 +73,7 @@ app.route("/download", download);
 app.route("/lab-groups", labGroups);
 app.route("/feedbacks", feedbacks);
 app.route("/tickets", tickets);
+app.route("/email", email);
 
 export const GET = handle(app);
 export const POST = handle(app);

@@ -252,6 +252,13 @@ export default function StudentProfileForm() {
         });
       }
 
+      // Send welcome email — fire-and-forget, failure must not block onboarding
+      apiFetch("/email/welcome", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ to: email, variables: { User: name } }),
+      }).catch((err) => console.warn("[Email] Welcome email failed:", err));
+
       // Sync local auth state
       if (loggedInUser) {
         setLoggedInUser({ ...loggedInUser, name, isOnboarded: true });
