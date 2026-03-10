@@ -36,13 +36,13 @@ export default function Auth() {
     if (!isInstitutionalEmail(email)) {
       alert("Please use your institutional email address.");
     }
-    const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
-    if (!isLogin && !fullName) {
-      alert("Please enter your name.");
+    if (!isLogin && !firstName.trim()) {
+      alert("Please enter your first name.");
       return;
     }
 
     try {
+      const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
       await register(email, password, fullName);
     } catch (err) {
       console.error("Signup failed:", err);
@@ -100,7 +100,7 @@ export default function Auth() {
                 />
                 <TextInput
                   className="flex-1 bg-slate-50 dark:bg-zinc-900/50 rounded-2xl px-5 py-4 border border-slate-200/60 dark:border-zinc-800/80 text-[15px] font-medium text-slate-900 dark:text-white"
-                  placeholder="Last Name"
+                  placeholder="Last Name (Optional)"
                   placeholderTextColor={isDark ? "#71717A" : "#94A3B8"}
                   autoCapitalize="words"
                   value={lastName}

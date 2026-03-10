@@ -33,7 +33,7 @@ const SEMESTER_MAP: Record<string, string> = {
 
 export default function ManageRequestsScreen() {
   const router = useRouter();
-  const { enrollments, loading, updateEnrollmentStatus } = useEnrollmentStore();
+  const { enrollments, loading, updateEnrollmentStatus, approveAllEnrollments } = useEnrollmentStore();
   const { profiles, fetchProfiles } = useProfilesStore();
   const [refreshing, setRefreshing] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
@@ -88,6 +88,33 @@ export default function ManageRequestsScreen() {
     } finally {
       setActionLoadingId(null);
     }
+  };
+  
+  const handleApproveAll = async () => {
+    if (enrollments.length === 0) return;
+    
+    Alert.alert(
+      "Approve All",
+      `Are you sure you want to approve all ${enrollments.length} pending requests?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        { 
+          text: "Approve All", 
+          style: "default",
+          onPress: async () => {
+            try {
+              setActionLoadingId("bulk");
+              await approveAllEnrollments();
+              Alert.alert("Success", "All enrollments have been approved.");
+            } catch (error: any) {
+              Alert.alert("Error", error.message || "Failed to approve all enrollments.");
+            } finally {
+              setActionLoadingId(null);
+            }
+          }
+        }
+      ]
+    );
   };
 
   const renderItem = ({ item }: { item: PendingEnrollment }) => {
@@ -238,6 +265,24 @@ export default function ManageRequestsScreen() {
             Enrollments
           </Text>
         </View>
+        {enrollments.length > 0 && (
+          <TouchableOpacity
+            onPress={handleApproveAll}
+            disabled={actionLoadingId === "bulk"}
+            className="px-4 py-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex-row items-center gap-1.5 border border-indigo-200 dark:border-indigo-800"
+          >
+            {actionLoadingId === "bulk" ? (
+              <ActivityIndicator size="small" color="#4f46e5" />
+            ) : (
+              <>
+                <Ionicons name="checkmark-done" size={16} color="#4f46e5" />
+                <Text className="text-indigo-700 dark:text-indigo-300 font-bold text-sm">
+                  Approve All
+                </Text>
+              </>
+            )}
+          </TouchableOpacity>
+        )}
       </View>
 
       {loading && !refreshing ? (

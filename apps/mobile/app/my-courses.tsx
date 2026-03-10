@@ -6,13 +6,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  RefreshControl,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    FlatList,
+    RefreshControl,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Course } from "../lib/store/timetable";
@@ -46,47 +46,69 @@ export default function MyCoursesScreen() {
   const { summary } = useAttendanceStore();
   const [refreshing, setRefreshing] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+  const [selectedCourseIds, setSelectedCourseIds] = useState<Set<string>>(new Set());
+
   const userProfile = profiles.find((p) => p.userId === loggedInUser?.id);
   const organizationId = userProfile?.organizationId;
 
+  const userEnrollments = React.useMemo(() => {
+    return courses.flatMap(c => {
+      const enrollment = (c as any).users?.find((u: any) => u.userId === loggedInUser?.id);
+      return enrollment ? [{ ...enrollment, courseId: c.id }] : [];
+    });
+  }, [courses, loggedInUser?.id]);
+
+  const hasAnyEnrollment = userEnrollments.some(e => e.status === "APPROVED" || e.status === "PENDING");
+  const isExploring = !hasAnyEnrollment;
+
   const filteredCourses = React.useMemo(() => {
-    // Show all courses if user's organization isn't resolved yet,
-    // so newly created courses are visible immediately.
     if (!organizationId) return courses;
-    return courses.filter((c) => c.organizationId === organizationId);
-  }, [courses, organizationId]);
+    const orgCourses = courses.filter((c) => c.organizationId === organizationId);
+    
+    if (isExploring) {
+      return orgCourses;
+    } else {
+      // Only show courses the user has interacted with (Enrolled/Pending/Rejected)
+      return orgCourses.filter(c => 
+        (c as any).users?.some((u: any) => u.userId === loggedInUser?.id)
+      );
+    }
+  }, [courses, organizationId, isExploring, loggedInUser?.id]);
 
-  const handleEnroll = async (course: Course) => {
+  const handleBatchEnroll = async () => {
+    if (selectedCourseIds.size === 0) return;
+
     try {
-      // LECTURE/TUTORIAL: direct enroll
-      setActionLoadingId(course.id);
-      const res = await apiFetch(`/courses/${course.id}/enroll`, {
+      setActionLoadingId("batch");
+      const res = await apiFetch("/courses/enroll-batch", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: loggedInUser?.id }),
-      });
-      if (!res.ok) throw new Error("Failed to enroll");
-
-      // Log the enrollment action to user's history
-      await apiFetch("/history", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        body: JSON.stringify({ 
           userId: loggedInUser?.id,
-          organizationId: organizationId,
-          title: "Course Enrollment Request",
-          description: `You requested to enroll in ${course.name} (${course.code}). Waiting for approval.`,
-          type: "SYSTEM",
+          courseIds: Array.from(selectedCourseIds),
+          organizationId: organizationId
         }),
-      }).catch(console.error);
+      });
+      if (!res.ok) throw new Error("Batch enrollment failed");
 
-      Alert.alert("Success", "Enrollment request sent. Waiting for approval.");
-      fetchCourses();
+      Alert.alert("Success", "Enrollment requests sent for all selected courses.");
+      setSelectedCourseIds(new Set());
+      await fetchCourses();
     } catch {
-      Alert.alert("Error", "Could not enroll. Please try again.");
+      Alert.alert("Error", "Could not complete enrollment. Please try again.");
     } finally {
       setActionLoadingId(null);
     }
+  };
+
+  const toggleSelection = (courseId: string) => {
+    const newSelection = new Set(selectedCourseIds);
+    if (newSelection.has(courseId)) {
+      newSelection.delete(courseId);
+    } else {
+      newSelection.add(courseId);
+    }
+    setSelectedCourseIds(newSelection);
   };
 
   const handleDeEnroll = async (courseId: string, status?: string) => {
@@ -148,7 +170,7 @@ export default function MyCoursesScreen() {
       ? orgs.find((o: any) => o.id === item.organizationId)
       : null;
 
-    const isEnrollmentOpen = item.enrollmentEnabled ?? true;
+    const isSelected = selectedCourseIds.has(item.id);
 
     const rawSemester = org?.semester || (item as any).semester;
     const semesterDisplay = rawSemester
@@ -159,11 +181,19 @@ export default function MyCoursesScreen() {
       CLASS_TYPE_COLORS[typeLabel] || "bg-gray-100 text-gray-800";
 
     return (
-      <View className="bg-white dark:bg-zinc-900 p-5 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-sm mb-5">
+      <TouchableOpacity 
+        activeOpacity={isExploring && !userEnrollment ? 0.7 : 1}
+        onPress={() => isExploring && !userEnrollment && toggleSelection(item.id)}
+        className={`p-5 rounded-3xl border shadow-sm mb-5 ${
+          isSelected 
+            ? "bg-indigo-50/50 border-indigo-200 dark:bg-indigo-900/20 dark:border-indigo-800" 
+            : "bg-white dark:bg-zinc-900 border-gray-100 dark:border-zinc-800"
+        }`}
+      >
         {/* Course Header */}
         <View className="flex-row items-start justify-between mb-5">
           <View className="flex-row flex-1 mr-3">
-            <View className="h-12 w-12 bg-indigo-50 rounded-2xl justify-center items-center mr-3 mt-1">
+            <View className={`h-12 w-12 ${isSelected ? "bg-indigo-100" : "bg-indigo-50"} rounded-2xl justify-center items-center mr-3 mt-1`}>
               <Ionicons name="book" size={22} color="#4f46e5" />
             </View>
             <View className="flex-1 pr-1">
@@ -191,7 +221,11 @@ export default function MyCoursesScreen() {
             </View>
           </View>
 
-          {userEnrollment ? (
+          {isExploring && !userEnrollment ? (
+            <View className={`h-6 w-6 rounded-full border-2 items-center justify-center ${isSelected ? "bg-indigo-600 border-indigo-600" : "border-gray-300"}`}>
+              {isSelected && <Ionicons name="checkmark" size={14} color="white" />}
+            </View>
+          ) : userEnrollment ? (
             <View
               className={`px-2.5 py-1 rounded-lg border ${userEnrollment.status === "APPROVED" ? "bg-green-50 border-green-200" : userEnrollment.status === "PENDING" ? "bg-amber-50 border-amber-200" : "bg-red-50 border-red-200"}`}
             >
@@ -201,12 +235,6 @@ export default function MyCoursesScreen() {
                 {userEnrollment.status === "APPROVED"
                   ? "Enrolled"
                   : userEnrollment.status}
-              </Text>
-            </View>
-          ) : isEnrollmentOpen ? (
-            <View className="bg-gray-50 border border-gray-200 px-2.5 py-1 rounded-lg">
-              <Text className="text-[10px] font-bold text-gray-500 uppercase">
-                Available
               </Text>
             </View>
           ) : (
@@ -271,7 +299,7 @@ export default function MyCoursesScreen() {
 
         {/* Actions / Attendance Bar */}
         <View className="flex-col gap-3">
-          {userEnrollment ? (
+          {userEnrollment && (
             userEnrollment.status === "REJECTED" ? (
               <View className="w-full py-3.5 rounded-xl border border-red-200 bg-red-50 flex-row justify-center items-center gap-2">
                 <Ionicons
@@ -344,35 +372,15 @@ export default function MyCoursesScreen() {
                 })()}
               </View>
             )
-          ) : isEnrollmentOpen ? (
-            <TouchableOpacity
-              onPress={() => handleEnroll(item)}
-              disabled={actionLoadingId === item.id}
-              className="flex-1 py-3.5 rounded-xl border border-transparent bg-indigo-600 flex-row justify-center items-center gap-2"
-            >
-              {actionLoadingId === item.id ? (
-                <ActivityIndicator color="#fff" size="small" />
-              ) : (
-                <>
-                  <Ionicons name="add-circle-outline" size={18} color="#fff" />
-                  <Text className="text-white font-bold">Enroll in Course</Text>
-                </>
-              )}
-            </TouchableOpacity>
-          ) : (
-            <View className="flex-1 py-3.5 rounded-xl border border-gray-200 bg-gray-50 flex-row justify-center items-center gap-2">
-              <Ionicons name="lock-closed-outline" size={18} color="#9ca3af" />
-              <Text className="text-gray-500 font-bold">Enrollment Closed</Text>
-            </View>
           )}
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 
   return (
-    <>
-      <SafeAreaView className="flex-1 bg-gray-50 dark:bg-zinc-900">
+    <View className="flex-1 bg-gray-50 dark:bg-zinc-900">
+      <SafeAreaView className="flex-1" edges={["top"]}>
         <Stack.Screen options={{ headerShown: false }} />
 
         <View className="flex-row items-center px-6 pt-2 pb-4">
@@ -384,7 +392,7 @@ export default function MyCoursesScreen() {
           </TouchableOpacity>
           <View className="flex-1">
             <Text className="text-sm font-medium text-gray-500 uppercase tracking-wider">
-              Explore & Enroll
+              {isExploring ? "Explore & Enroll" : "My Schedule"}
             </Text>
             <Text className="text-3xl font-bold text-gray-900 dark:text-white">
               My Courses
@@ -401,7 +409,7 @@ export default function MyCoursesScreen() {
             data={filteredCourses}
             keyExtractor={(item) => item.id}
             className="flex-1 px-4 pt-4"
-            contentContainerStyle={{ paddingBottom: 100 }}
+            contentContainerStyle={{ paddingBottom: 150 }}
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}
@@ -421,14 +429,55 @@ export default function MyCoursesScreen() {
                   No Courses Found
                 </Text>
                 <Text className="text-gray-500 dark:text-zinc-400 text-center text-sm px-6">
-                  There are no courses available for enrollment right now.
+                  {isExploring 
+                    ? "There are no courses available for enrollment right now."
+                    : "You are not enrolled in any courses yet."}
                 </Text>
+                {!isExploring && (
+                    <TouchableOpacity 
+                        onPress={async () => {
+                            // Temporary way to go back to explore if needed
+                            // In real app, we'd have a toggle or better flow
+                        }}
+                        className="mt-6 px-6 py-3 bg-indigo-600 rounded-full"
+                    >
+                        <Text className="text-white font-bold">Discover Courses</Text>
+                    </TouchableOpacity>
+                )}
               </View>
             }
             renderItem={renderItem}
           />
         )}
       </SafeAreaView>
-    </>
+
+      {/* Floating Batch Action Bar */}
+      {selectedCourseIds.size > 0 && (
+        <View className="absolute bottom-10 left-5 right-5 bg-white dark:bg-zinc-800 p-4 rounded-3xl shadow-2xl border border-gray-100 dark:border-zinc-700 flex-row items-center justify-between">
+          <View>
+            <Text className="text-gray-900 dark:text-white font-bold text-base">
+              {selectedCourseIds.size} Courses Selected
+            </Text>
+            <Text className="text-gray-500 dark:text-zinc-400 text-xs">
+              Waiting for admin approval post-enrollment
+            </Text>
+          </View>
+          <TouchableOpacity
+            onPress={handleBatchEnroll}
+            disabled={actionLoadingId === "batch"}
+            className="bg-indigo-600 px-6 py-3 rounded-2xl flex-row items-center gap-2"
+          >
+            {actionLoadingId === "batch" ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <>
+                <Text className="text-white font-bold">Save & Enroll</Text>
+                <Ionicons name="arrow-forward" size={18} color="white" />
+              </>
+            )}
+          </TouchableOpacity>
+        </View>
+      )}
+    </View>
   );
 }

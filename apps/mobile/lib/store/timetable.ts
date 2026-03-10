@@ -91,9 +91,18 @@ export const useTimetableStore = create<TimetablesState>()(
         try {
           const res = await apiFetch(`/timetable/week/${userId}`);
           const data = await res.json();
+          console.log("RAW TIMETABLE RESPONSE", data);
 
           if (res.ok && data.success) {
-            set({ weekTimetable: data.week });
+            const normalizedTimetables = (data.timetables || []).map((t: any) => ({
+              ...t,
+              day: (t.day || "").toUpperCase().trim(),
+            }));
+            set({
+              weekTimetable: data.week,
+              timetables: normalizedTimetables,
+            });
+            console.log("STORE TIMETABLE DATA", normalizedTimetables);
           } else if (res.status === 404 || data?.status_code === 404) {
             set({ weekTimetable: {} });
           } else {

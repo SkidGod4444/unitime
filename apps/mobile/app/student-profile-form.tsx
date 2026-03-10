@@ -1,8 +1,8 @@
 import { useAuth } from "@/contexts/auth.cntxt";
 import { apiFetch } from "@/lib/api";
 import {
-    profileSchema,
-    type ProfileFormErrors,
+  profileSchema,
+  type ProfileFormErrors,
 } from "@/lib/schemas/profile.schema";
 import { useOrgsStore } from "@/lib/store";
 import { useLabGroupsStore } from "@/lib/store/lab-groups";
@@ -11,16 +11,16 @@ import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Image,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -37,7 +37,7 @@ export default function StudentProfileForm() {
   const [yearOfAdmission, setYearOfAdmission] = useState("2025");
   const [department, setDepartment] = useState("");
   const [course, setCourse] = useState("");
-  const [semister, setSemister] = useState("");
+  const [semester, setSemester] = useState("");
   const [section, setSection] = useState("");
   const [labGroupId, setLabGroupId] = useState<string | null>(null);
   const [dob, setDob] = useState("");
@@ -116,7 +116,7 @@ export default function StudentProfileForm() {
       : [];
 
   const sections =
-    department && course && semister
+    department && course && semester
       ? Array.from(
           new Set(
             orgs
@@ -124,7 +124,7 @@ export default function StudentProfileForm() {
                 (o) =>
                   cleanStr(o.departmentName) === department &&
                   cleanStr(o.courseName) === course &&
-                  o.semester === semister,
+                  o.semester === semester,
               )
               .map((o) => o.section.toString()),
           ),
@@ -133,12 +133,12 @@ export default function StudentProfileForm() {
 
   // Dynamically resolved org (once section is picked)
   const matchedOrgPreview =
-    department && course && semister && section
+    department && course && semester && section
       ? orgs.find(
           (o) =>
             cleanStr(o.departmentName) === department &&
             cleanStr(o.courseName) === course &&
-            o.semester === semister &&
+            o.semester === semester &&
             o.section.toString() === section,
         )
       : null;
@@ -173,7 +173,7 @@ export default function StudentProfileForm() {
       email,
       department,
       course,
-      semister,
+      semester,
       section,
       yearOfAdmission,
       dob,
@@ -195,7 +195,7 @@ export default function StudentProfileForm() {
       (o) =>
         cleanStr(o.departmentName) === department &&
         cleanStr(o.courseName) === course &&
-        o.semester === semister &&
+        o.semester === semester &&
         o.section.toString() === section,
     );
     if (!matchedOrg) {
@@ -223,7 +223,7 @@ export default function StudentProfileForm() {
           department,
           course,
           yearOfStudy: parseInt(yearOfAdmission, 10),
-          semester: semister,
+          semester,
           organizationId: matchedOrg.id,
           labGroupId,
           dob,
@@ -553,14 +553,14 @@ export default function StudentProfileForm() {
                         onPress={() => {
                           setDepartment(dept);
                           setCourse("");
-                          setSemister("");
+                          setSemester("");
                           setSection("");
                           setShowDepartmentDropdown(false);
                           setErrors((e) => ({
                             ...e,
                             department: undefined,
                             course: undefined,
-                            semister: undefined,
+                            semester: undefined,
                             section: undefined,
                           }));
                         }}
@@ -613,13 +613,13 @@ export default function StudentProfileForm() {
                         key={c}
                         onPress={() => {
                           setCourse(c);
-                          setSemister("");
+                          setSemester("");
                           setSection("");
                           setShowCourseDropdown(false);
                           setErrors((e) => ({
                             ...e,
                             course: undefined,
-                            semister: undefined,
+                            semester: undefined,
                             section: undefined,
                           }));
                         }}
@@ -635,24 +635,24 @@ export default function StudentProfileForm() {
               {/* Semester Dropdown */}
               <View>
                 <Text className="text-xs font-bold text-gray-500 mb-2 ml-1 uppercase tracking-wide">
-                  Current Semister*
+                  Current Semester*
                 </Text>
                 <TouchableOpacity
                   onPress={() => setShowSemDropdown(!showSemDropdown)}
-                  className={`flex-row items-center border rounded-2xl px-4 py-3.5 bg-white ${fieldBorder("semister")}`}
+                  className={`flex-row items-center border rounded-2xl px-4 py-3.5 bg-white ${fieldBorder("semester")}`}
                 >
                   <Ionicons
                     name="school-outline"
                     size={20}
-                    color={hasError("semister") ? "#F87171" : "#9CA3AF"}
+                    color={hasError("semester") ? "#F87171" : "#9CA3AF"}
                     style={{ marginRight: 12 }}
                   />
                   <Text
-                    className={`flex-1 text-base font-semibold ${semister ? "text-gray-900" : "text-gray-400"}`}
+                    className={`flex-1 text-base font-semibold ${semester ? "text-gray-900" : "text-gray-400"}`}
                   >
-                    {SEMESTER_MAP[semister] ||
-                      semister ||
-                      "Select your Semister"}
+                    {SEMESTER_MAP[semester] ||
+                      semester ||
+                      "Select your Semester"}
                   </Text>
                   <Ionicons
                     name={showSemDropdown ? "chevron-up" : "chevron-down"}
@@ -660,9 +660,9 @@ export default function StudentProfileForm() {
                     color="#9CA3AF"
                   />
                 </TouchableOpacity>
-                {errors.semister && (
+                {errors.semester && (
                   <Text className="text-xs text-red-500 mt-1 ml-1">
-                    {errors.semister}
+                    {errors.semester}
                   </Text>
                 )}
                 {showSemDropdown && (
@@ -671,12 +671,12 @@ export default function StudentProfileForm() {
                       <TouchableOpacity
                         key={s}
                         onPress={() => {
-                          setSemister(s);
+                          setSemester(s);
                           setSection("");
                           setShowSemDropdown(false);
                           setErrors((e) => ({
                             ...e,
-                            semister: undefined,
+                            semester: undefined,
                             section: undefined,
                           }));
                         }}

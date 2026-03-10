@@ -106,25 +106,15 @@ export default function Index() {
   };
 
   const { summary } = useAttendanceStore();
-  const { timetables, loading, fetchTimetable } = useTimetableStore();
+  const { timetables, loading, fetchWeekTimetable } = useTimetableStore();
   const { createFeedback } = useFeedbacksStore();
 
-  // Fetch today's timetable for home screen dashboard
+  // Fetch full weekly timetable for all screens
   useEffect(() => {
     if (loggedInUser?.id) {
-      const dayNames = [
-        "SUNDAY",
-        "MONDAY",
-        "TUESDAY",
-        "WEDNESDAY",
-        "THURSDAY",
-        "FRIDAY",
-        "SATURDAY",
-      ];
-      const todayDay = dayNames[new Date().getDay()];
-      fetchTimetable(loggedInUser.id, todayDay);
+      fetchWeekTimetable(loggedInUser.id);
     }
-  }, [loggedInUser?.id]);
+  }, [loggedInUser?.id, fetchWeekTimetable]);
 
   const validSummary = summary.filter((s) => s.total > 0);
   const totalAttended = validSummary.reduce(
@@ -146,8 +136,10 @@ export default function Index() {
   ];
   const todayDay = dayNames[new Date().getDay()];
 
-  // Filter local store by today explicitly, in case it holds the full week or future days
-  const todayTimetables = timetables.filter((t) => t.day === todayDay);
+  // Filter unified store by today explicitly
+  const todayTimetables = timetables.filter(
+    (t) => t.day.toUpperCase().trim() === todayDay,
+  );
 
   // Map first 3 timetable items for quick dashboard view
   const todaysSchedule = todayTimetables.slice(0, 3).map((t, index) => {

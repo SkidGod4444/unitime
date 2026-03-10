@@ -14,7 +14,7 @@ export const profileSchema = z.object({
   email: z.string().min(1, "Email is required").email("Enter a valid email"),
   department: z.string().min(1, "Department is required"),
   course: z.string().min(1, "Course is required"),
-  semister: z.string().min(1, "Semester is required"),
+  semester: z.string().min(1, "Semester is required"),
   section: z.string().min(1, "Section is required"),
   dob: z
     .string()

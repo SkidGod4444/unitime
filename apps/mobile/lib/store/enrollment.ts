@@ -31,6 +31,7 @@ type EnrollmentState = {
     enrollmentId: string,
     status: "APPROVED" | "REJECTED",
   ) => Promise<void>;
+  approveAllEnrollments: (organizationId?: string | null) => Promise<void>;
 };
 
 export const useEnrollmentStore = create<EnrollmentState>()(
@@ -93,6 +94,28 @@ export const useEnrollmentStore = create<EnrollmentState>()(
         } catch (error) {
           console.error("Error updating enrollment status:", error);
           throw error;
+        }
+      },
+      approveAllEnrollments: async (organizationId) => {
+        set({ loading: true });
+        try {
+          let url = "/admin/enrollments/approve-all";
+          if (organizationId) {
+            url += `?organizationId=${organizationId}`;
+          }
+
+          const res = await apiFetch(url, { method: "PATCH" });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            set({ enrollments: [] });
+          } else {
+            throw new Error(data.message || "Failed to approve all enrollments");
+          }
+        } catch (error) {
+          console.error("Error approving all enrollments:", error);
+          throw error;
+        } finally {
+          set({ loading: false });
         }
       },
     }),

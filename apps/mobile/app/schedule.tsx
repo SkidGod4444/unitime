@@ -1,13 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useRef, useState } from "react";
 import {
-    FlatList,
-    Modal,
-    RefreshControl,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View
+  FlatList,
+  Modal,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
 import Animated, { FadeInDown, Layout } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -401,7 +401,7 @@ export default function ScheduleScreen() {
   const flatListRef = useRef<FlatList>(null);
 
   const { loggedInUser } = useAuth();
-  const { weekTimetable, loading, fetchWeekTimetable } = useTimetableStore();
+  const { timetables, loading, fetchWeekTimetable } = useTimetableStore();
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -415,10 +415,10 @@ export default function ScheduleScreen() {
 
   useEffect(() => {
     // If the timetable is empty, do an initial fetch
-    if (loggedInUser?.id && Object.keys(weekTimetable).length === 0) {
+    if (loggedInUser?.id && timetables.length === 0) {
       fetchWeekTimetable(loggedInUser.id);
     }
-  }, [loggedInUser?.id, fetchWeekTimetable, weekTimetable]);
+  }, [loggedInUser?.id, fetchWeekTimetable, timetables.length]);
 
   // Ensure scrolling works reliably
   const getItemLayout = (data: any, index: number) => ({
@@ -440,6 +440,7 @@ export default function ScheduleScreen() {
   }, [selectedDate, dates]);
 
   const handleDateSelect = (date: Date) => {
+    console.log("New selected date:", date);
     setSelectedDate(date);
   };
 
@@ -494,7 +495,22 @@ export default function ScheduleScreen() {
   };
 
   const dayStr = FULL_DAY_NAMES[selectedDate.getDay()];
-  const dayClasses = weekTimetable[dayStr] || [];
+  const dayClasses = React.useMemo(() => {
+    return (
+      timetables.filter((t: any) =>
+        String(t.day).toUpperCase().includes(dayStr),
+      ) || []
+    );
+  }, [timetables, dayStr]);
+
+  useEffect(() => {
+    console.log("Selected Date:", selectedDate);
+    console.log("Selected Day:", dayStr);
+    console.log("Available timetable days:", timetables.map((t) => t.day));
+    if (dayClasses.length > 0) {
+      console.log("Sample Timetable Object:", dayClasses[0]);
+    }
+  }, [selectedDate, timetables, dayStr, dayClasses]);
 
   const formattedClasses = [...dayClasses]
     .map((t: any, idx: number) => {

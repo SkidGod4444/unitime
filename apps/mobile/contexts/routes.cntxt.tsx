@@ -80,7 +80,7 @@ export const RoutesProvider = ({ children }: { children: ReactNode }) => {
     if (!isOnline) {
       // User code specified "/offline", but existing file is "no-net.tsx".
       // Keeping user's code as requested:
-      // router.replace("/offline");
+      router.replace("/no-net");
       return;
     }
 

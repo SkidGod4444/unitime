@@ -37,6 +37,12 @@ export default ({ config }) => ({
   userInterfaceStyle: 'automatic',
   newArchEnabled: true,
   deepLinking: true,
+  updates: {
+    url: "https://u.expo.dev/7c92f536-ed65-4cbb-856a-f32a8f8eacac"
+  },
+  runtimeVersion: {
+    policy: "appVersion"
+  },
   plugins: [
     'expo-audio',
     'expo-localization',

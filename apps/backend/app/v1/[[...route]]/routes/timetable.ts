@@ -29,7 +29,7 @@ timetable.get("/week/:userId", async (c) => {
   });
   const labGroupIds = profile?.labGroupId ? [profile.labGroupId] : [];
 
-  const cacheKey = `timetable:week:${userId}:${labGroupIds.join(",") || "none"}`;
+  const cacheKey = `timetable:week:${userId}:${labGroupIds.sort().join(",") || "none"}`;
   const timetables = await getOrSetCache(
     cacheKey,
     () =>
@@ -57,8 +57,9 @@ timetable.get("/week/:userId", async (c) => {
     };
 
   timetables.forEach((t) => {
-    if (week[t.day]) {
-      week[t.day].push(t);
+    const dayKey = t.day.toUpperCase().trim();
+    if (week[dayKey]) {
+      week[dayKey].push(t);
     }
   });
 
@@ -112,8 +113,9 @@ timetable.get("/:userId", async (c) => {
   });
   const labGroupIds = profile?.labGroupId ? [profile.labGroupId] : [];
 
+  const cacheKey = `timetable:${userId}:${day ?? "all"}:${labGroupIds.sort().join(",") || "none"}`;
   const timetables = await getOrSetCache(
-    `timetable:${userId}:${day ?? "all"}`,
+    cacheKey,
     () =>
       prisma.timetable.findMany({
         where: {

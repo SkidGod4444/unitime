@@ -180,10 +180,19 @@ admin.patch("/enrollments/:id/status", async (c) => {
       data: { status: body.status },
     });
 
+    const profile = await prisma.studentProfile.findUnique({
+      where: { userId: enrollment.userId },
+      select: { labGroupId: true },
+    });
+    const labGroupIds = profile?.labGroupId ? [profile.labGroupId] : [];
+    const lgKey = labGroupIds.sort().join(",") || "none";
+
     await invalidateCache(
       `course:${enrollment.courseId}`,
       "courses:all",
       "enrollments:pending",
+      `timetable:${enrollment.userId}:all:${lgKey}`,
+      `timetable:week:${enrollment.userId}:${lgKey}`,
     );
 
     return c.json({
@@ -193,6 +202,86 @@ admin.patch("/enrollments/:id/status", async (c) => {
     });
   } catch (error) {
     console.error("Error updating enrollment status:", error);
+    return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
+  }
+});
+
+admin.patch("/enrollments/approve-all", async (c) => {
+  const organizationId = c.req.query("organizationId");
+
+  try {
+    const pendingEnrollments = await prisma.userCourse.findMany({
+      where: {
+        status: "PENDING",
+        ...(organizationId ? { course: { organizationId } } : {}),
+      },
+      include: {
+        course: {
+          select: {
+            id: true,
+            name: true,
+            code: true,
+          },
+        },
+      },
+    }) as any[];
+
+    if (pendingEnrollments.length === 0) {
+      return c.json({
+        success: true,
+        status_code: 200,
+        message: "No pending enrollments to approve",
+      });
+    }
+
+    await prisma.userCourse.updateMany({
+      where: {
+        id: { in: pendingEnrollments.map((e) => e.id) },
+      },
+      data: { status: "APPROVED" },
+    });
+
+    await prisma.notification.createMany({
+      data: pendingEnrollments.map((e) => ({
+        userId: e.userId,
+        title: "Enrollment Approved",
+        body: `Your request to join ${e.course.name} (${e.course.code}) has been approved!`,
+        type: "SYSTEM",
+      })),
+    });
+
+    const usersToInvalidate = [...new Set(pendingEnrollments.map(e => e.userId))];
+    const profiles = await prisma.studentProfile.findMany({
+      where: { userId: { in: usersToInvalidate } },
+      select: { userId: true, labGroupId: true },
+    });
+    
+    const profileMap = new Map(profiles.map(p => [p.userId, p.labGroupId]));
+
+    const timetableKeys: string[] = [];
+    usersToInvalidate.forEach(uId => {
+      const lg = profileMap.get(uId);
+      const lgKey = lg ? [lg].sort().join(",") : "none";
+      timetableKeys.push(`timetable:${uId}:all:${lgKey}`);
+      timetableKeys.push(`timetable:week:${uId}:${lgKey}`);
+    });
+
+    const cacheKeys = [
+      "enrollments:pending",
+      "courses:all",
+      ...pendingEnrollments.map((e) => `course:${e.courseId}`),
+      ...pendingEnrollments.map((e) => `notifications:${e.userId}`),
+      ...timetableKeys,
+    ];
+    await invalidateCache(...cacheKeys);
+
+    return c.json({
+      success: true,
+      status_code: 200,
+      count: pendingEnrollments.length,
+    });
+  } catch (error) {
+    console.error("Error approving all enrollments:", error);
     return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
   }
 });

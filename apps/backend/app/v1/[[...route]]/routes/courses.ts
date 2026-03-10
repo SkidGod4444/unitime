@@ -181,10 +181,18 @@ courses.post("/:id/enroll", async (c) => {
       },
     });
 
+    const profile = await prisma.studentProfile.findUnique({
+      where: { userId },
+      select: { labGroupId: true },
+    });
+    const lgKey = profile?.labGroupId ? [profile.labGroupId].sort().join(",") : "none";
+
     await invalidateCache(
       `course:${courseId}`,
       "courses:all",
       "enrollments:pending",
+      `timetable:${userId}:all:${lgKey}`,
+      `timetable:week:${userId}:${lgKey}`,
     );
 
     return c.json(
@@ -197,6 +205,68 @@ courses.post("/:id/enroll", async (c) => {
     );
   } catch (error) {
     console.error("Enrollment error", error);
+    return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
+  }
+});
+
+courses.post("/enroll-batch", async (c) => {
+  const { userId, courseIds, organizationId } = await c.req.json();
+
+  if (!userId || !courseIds || !Array.isArray(courseIds)) {
+    return createHonoErrorResponse(c, ERROR_CODES.MISSING_REQUIRED_FIELD);
+  }
+
+  try {
+    // Create all enrollments as PENDING
+    const enrollments = await prisma.$transaction(
+      courseIds.map((courseId) =>
+        prisma.userCourse.upsert({
+          where: {
+            userId_courseId: { userId, courseId },
+          },
+          update: { status: "PENDING" },
+          create: {
+            userId,
+            courseId,
+            status: "PENDING",
+          },
+        })
+      )
+    );
+
+    // Add history log for the batch action
+    await prisma.historyLog.create({
+      data: {
+        userId,
+        organizationId: organizationId || null,
+        title: "Bulk Course Enrollment",
+        description: `You requested to enroll in ${courseIds.length} courses. Waiting for approval.`,
+        type: "SYSTEM",
+      },
+    });
+
+    const profile = await prisma.studentProfile.findUnique({
+      where: { userId },
+      select: { labGroupId: true },
+    });
+    const lgKey = profile?.labGroupId ? [profile.labGroupId].sort().join(",") : "none";
+
+    const cacheKeys = [
+      "courses:all",
+      "enrollments:pending",
+      ...courseIds.map((id) => `course:${id}`),
+      `timetable:${userId}:all:${lgKey}`,
+      `timetable:week:${userId}:${lgKey}`,
+    ];
+    await invalidateCache(...cacheKeys);
+
+    return c.json({
+      success: true,
+      status_code: 201,
+      count: enrollments.length,
+    });
+  } catch (error) {
+    console.error("Batch enrollment error", error);
     return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
   }
 });
@@ -219,10 +289,18 @@ courses.delete("/:id/enroll", async (c) => {
       },
     });
 
+    const profile = await prisma.studentProfile.findUnique({
+      where: { userId },
+      select: { labGroupId: true },
+    });
+    const lgKey = profile?.labGroupId ? [profile.labGroupId].sort().join(",") : "none";
+
     await invalidateCache(
       `course:${courseId}`,
       "courses:all",
       "enrollments:pending",
+      `timetable:${userId}:all:${lgKey}`,
+      `timetable:week:${userId}:${lgKey}`,
     );
 
     return c.json(
