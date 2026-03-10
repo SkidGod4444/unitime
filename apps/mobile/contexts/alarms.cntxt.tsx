@@ -163,21 +163,18 @@ export function AlarmsProvider({
     [userId],
   );
 
-  const deleteAlarm = useCallback(
-    async (id: string): Promise<void> => {
-      try {
-        const res = await apiFetch(`/alarms/${id}`, {
-          method: "DELETE",
-        });
-        if (!res.ok) throw new Error("Delete failed");
-        setAlarms((prev) => prev.filter((a) => a.id !== id));
-      } catch (err) {
-        console.error("[AlarmsCtx] deleteAlarm error:", err);
-        Alert.alert("Error", "Failed to delete alarm. Please try again.");
-      }
-    },
-    [],
-  );
+  const deleteAlarm = useCallback(async (id: string): Promise<void> => {
+    try {
+      const res = await apiFetch(`/alarms/${id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Delete failed");
+      setAlarms((prev) => prev.filter((a) => a.id !== id));
+    } catch (err) {
+      console.error("[AlarmsCtx] deleteAlarm error:", err);
+      Alert.alert("Error", "Failed to delete alarm. Please try again.");
+    }
+  }, []);
 
   const toggleAlarm = useCallback(
     async (id: string): Promise<void> => {

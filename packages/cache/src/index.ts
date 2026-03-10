@@ -59,7 +59,7 @@ export const getOrSetCache = async <T>(
   );
   // Non-blocking counter increment for misses
   cache.incr("system:metrics:cache:misses").catch(() => {});
-  
+
   await cache.set(sanitizedKey, freshData, { ex: ttlSeconds });
   return freshData;
 };

@@ -10,7 +10,8 @@ const notifications = new Hono<AppEnv>();
 notifications.use("*", requireAuth);
 
 notifications.post("/", async (c) => {
-  const { userId, organizationId, title, body, type, actionUrl } = await c.req.json();
+  const { userId, organizationId, title, body, type, actionUrl } =
+    await c.req.json();
 
   if (!userId || !title || !body || !type) {
     return createHonoErrorResponse(c, ERROR_CODES.MISSING_REQUIRED_FIELD);
@@ -40,7 +41,7 @@ notifications.post("/", async (c) => {
         status_code: 201,
         notification,
       },
-      201
+      201,
     );
   } catch (error) {
     console.error("Error creating notification:", error);
@@ -60,7 +61,7 @@ notifications.get("/:userId", async (c) => {
           orderBy: { createdAt: "desc" },
           take: 50,
         }),
-      120
+      120,
     );
 
     return c.json(
@@ -69,7 +70,7 @@ notifications.get("/:userId", async (c) => {
         status_code: 200,
         notifications: notificationsList,
       },
-      200
+      200,
     );
   } catch (error) {
     console.error("Error fetching notifications:", error);

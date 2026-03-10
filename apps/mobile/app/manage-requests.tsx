@@ -3,15 +3,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    FlatList,
-    Modal,
-    RefreshControl,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Modal,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { apiFetch } from "../lib/api";
@@ -33,7 +33,12 @@ const SEMESTER_MAP: Record<string, string> = {
 
 export default function ManageRequestsScreen() {
   const router = useRouter();
-  const { enrollments, loading, updateEnrollmentStatus, approveAllEnrollments } = useEnrollmentStore();
+  const {
+    enrollments,
+    loading,
+    updateEnrollmentStatus,
+    approveAllEnrollments,
+  } = useEnrollmentStore();
   const { profiles, fetchProfiles } = useProfilesStore();
   const [refreshing, setRefreshing] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
@@ -58,11 +63,13 @@ export default function ManageRequestsScreen() {
       setActionLoadingId(id);
       await updateEnrollmentStatus(id, status);
 
-      const targetEnrollment = enrollments.find(e => e.id === id);
+      const targetEnrollment = enrollments.find((e) => e.id === id);
 
       if (status === "APPROVED" && targetEnrollment) {
         // Send a notification to the user that their enrollment was approved
-        const userProfile = profiles.find((p) => p.userId === targetEnrollment.user.id);
+        const userProfile = profiles.find(
+          (p) => p.userId === targetEnrollment.user.id,
+        );
         const orgId = userProfile?.organizationId || null;
 
         await apiFetch("/notifications", {
@@ -89,17 +96,17 @@ export default function ManageRequestsScreen() {
       setActionLoadingId(null);
     }
   };
-  
+
   const handleApproveAll = async () => {
     if (enrollments.length === 0) return;
-    
+
     Alert.alert(
       "Approve All",
       `Are you sure you want to approve all ${enrollments.length} pending requests?`,
       [
         { text: "Cancel", style: "cancel" },
-        { 
-          text: "Approve All", 
+        {
+          text: "Approve All",
           style: "default",
           onPress: async () => {
             try {
@@ -107,13 +114,16 @@ export default function ManageRequestsScreen() {
               await approveAllEnrollments();
               Alert.alert("Success", "All enrollments have been approved.");
             } catch (error: any) {
-              Alert.alert("Error", error.message || "Failed to approve all enrollments.");
+              Alert.alert(
+                "Error",
+                error.message || "Failed to approve all enrollments.",
+              );
             } finally {
               setActionLoadingId(null);
             }
-          }
-        }
-      ]
+          },
+        },
+      ],
     );
   };
 

@@ -12,7 +12,7 @@ dashboard.use("*", requireAuth);
 interface UserWithProfile {
   id: string;
   name: string;
-  role: UserRole; 
+  role: UserRole;
   studentProfile: {
     labGroupId: string | null;
     organizationId: string | null;
@@ -82,7 +82,11 @@ dashboard.get("/:userId", async (c) => {
             },
             OR: [
               { labGroupId: null },
-              { labGroupId: (user as unknown as UserWithProfile).studentProfile?.labGroupId || undefined },
+              {
+                labGroupId:
+                  (user as unknown as UserWithProfile).studentProfile
+                    ?.labGroupId || undefined,
+              },
             ],
           },
           include: {
@@ -182,7 +186,8 @@ dashboard.get("/:userId/bundle", async (c) => {
         }));
 
         const myLabGroupId =
-          (user as unknown as UserWithProfile).studentProfile?.labGroupId || undefined;
+          (user as unknown as UserWithProfile).studentProfile?.labGroupId ||
+          undefined;
 
         // 2) Today timetable entries for the user
         const todayStr = new Date()
@@ -257,10 +262,7 @@ dashboard.get("/:userId/bundle", async (c) => {
             course: {
               users: { some: { userId: user.id, status: "APPROVED" } },
             },
-            OR: [
-              { labGroupId: null },
-              { labGroupId: myLabGroupId },
-            ],
+            OR: [{ labGroupId: null }, { labGroupId: myLabGroupId }],
           },
           include: { course: true },
           orderBy: { createdAt: "desc" },

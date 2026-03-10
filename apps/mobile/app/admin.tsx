@@ -247,16 +247,13 @@ function RolesTab({ onAddUserPress }: { onAddUserPress: () => void }) {
           style: "destructive",
           onPress: async () => {
             try {
-              const res = await apiFetch(
-                `/admin/users/${user.id}/status`,
-                {
-                  method: "PATCH",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({ status: "INACTIVE" }),
+              const res = await apiFetch(`/admin/users/${user.id}/status`, {
+                method: "PATCH",
+                headers: {
+                  "Content-Type": "application/json",
                 },
-              );
+                body: JSON.stringify({ status: "INACTIVE" }),
+              });
               if (res.status === 401) {
                 Alert.alert(
                   "Not Authenticated",
@@ -2011,7 +2008,11 @@ export default function AdminPage() {
     feedbacks: number;
     tickets: number;
     cacheMetrics?: { hits: number; misses: number };
-    dbMetrics?: { activeConnections: number, idleConnections: number, size: string };
+    dbMetrics?: {
+      activeConnections: number;
+      idleConnections: number;
+      size: string;
+    };
   } | null>(null);
 
   const fetchStats = async () => {

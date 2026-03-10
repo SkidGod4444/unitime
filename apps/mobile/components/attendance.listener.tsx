@@ -46,16 +46,13 @@ export function AttendanceListener() {
             }
 
             try {
-              const res = await apiFetch(
-                `/dashboard/${loggedInUser.id}`,
-                {
-                  headers: {
-                    "Cache-Control": "no-cache",
-                    Pragma: "no-cache",
-                    Expires: "0",
-                  },
+              const res = await apiFetch(`/dashboard/${loggedInUser.id}`, {
+                headers: {
+                  "Cache-Control": "no-cache",
+                  Pragma: "no-cache",
+                  Expires: "0",
                 },
-              );
+              });
               if (res.ok) {
                 const json = await res.json();
                 if (json.success) {

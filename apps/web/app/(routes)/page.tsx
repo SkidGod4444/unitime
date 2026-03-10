@@ -111,35 +111,66 @@ export default function Home() {
         <section className="mb-16">
           <SectionLabel>What&apos;s Inside?</SectionLabel>
           <p className="text-[#3d3230] leading-relaxed mb-8">
-            UNiTIME is built to empower everyone in the classroom. Here is what you can do based on your role:
+            UNiTIME is built to empower everyone in the classroom. Here is what
+            you can do based on your role:
           </p>
-          
+
           <div className="flex flex-col gap-10">
-            <RoleSection 
-              title="👨‍🎓 Students" 
+            <RoleSection
+              title="👨‍🎓 Students"
               features={[
-                { name: "Profile & onboarding", detail: "Create and fetch own student profile." },
-                { name: "Courses & timetable", detail: "Request course enrollment and see enrolled courses. View personal weekly timetable and per-day timetable (lecture + lab-group–specific slots)." },
-                { name: "Attendance", detail: "Join QR/tap/manual attendance sessions and see own attendance summary per course." },
-                { name: "Feedback & support", detail: "Submit feedback. Create support tickets and track their status." }
+                {
+                  name: "Profile & onboarding",
+                  detail: "Create and fetch own student profile.",
+                },
+                {
+                  name: "Courses & timetable",
+                  detail:
+                    "Request course enrollment and see enrolled courses. View personal weekly timetable and per-day timetable (lecture + lab-group–specific slots).",
+                },
+                {
+                  name: "Attendance",
+                  detail:
+                    "Join QR/tap/manual attendance sessions and see own attendance summary per course.",
+                },
+                {
+                  name: "Feedback & support",
+                  detail:
+                    "Submit feedback. Create support tickets and track their status.",
+                },
               ]}
             />
-            
-            <RoleSection 
-              title="⭐ Class Representatives" 
+
+            <RoleSection
+              title="⭐ Class Representatives"
               description="Everything students can do, plus:"
               features={[
-                { name: "Timetable management", detail: "Create, update, and delete timetable entries (for their class/lab groups)." },
-                { name: "Lab groups", detail: "Create lab groups for a course/org. Delete empty lab groups. View members of a given lab group." }
+                {
+                  name: "Timetable management",
+                  detail:
+                    "Create, update, and delete timetable entries (for their class/lab groups).",
+                },
+                {
+                  name: "Lab groups",
+                  detail:
+                    "Create lab groups for a course/org. Delete empty lab groups. View members of a given lab group.",
+                },
               ]}
             />
-            
-            <RoleSection 
-              title="👨‍🏫 Professors" 
+
+            <RoleSection
+              title="👨‍🏫 Professors"
               description="Everything students can do, plus:"
               features={[
-                { name: "Attendance control", detail: "Create QR attendance sessions for their courses. View the list of students in a given attendance session." },
-                { name: "Lab groups", detail: "View members of a given lab group." }
+                {
+                  name: "Attendance control",
+                  detail:
+                    "Create QR attendance sessions for their courses. View the list of students in a given attendance session.",
+                },
+                {
+                  name: "Lab groups",
+                  detail: "View members of a given lab group.",
+                },
               ]}
             />
           </div>
@@ -409,21 +440,23 @@ function WhatsAppIcon() {
   );
 }
 
-function RoleSection({ 
-  title, 
-  description, 
+function RoleSection({
+  title,
+  description,
   features,
-}: { 
-  title: string; 
-  description?: string; 
-  features: { name: string; detail: string; }[];
+}: {
+  title: string;
+  description?: string;
+  features: { name: string; detail: string }[];
 }) {
   return (
     <div>
       <h3 className="text-[#1a1614] font-bold text-lg mb-1">{title}</h3>
-      {description && <p className="text-[#3d3230] text-sm mb-3 italic">{description}</p>}
+      {description && (
+        <p className="text-[#3d3230] text-sm mb-3 italic">{description}</p>
+      )}
       {!description && <div className="h-2" />}
-      
+
       <ul className="space-y-3">
         {features.map((f, i) => (
           <li key={i} className="flex gap-2.5">

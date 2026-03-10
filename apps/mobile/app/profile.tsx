@@ -1,24 +1,24 @@
 import { useAuth } from "@/contexts/auth.cntxt";
 import {
-    useAttendanceStore,
-    useOrgsStore,
-    useProfilesStore,
-    useThemeStore,
+  useAttendanceStore,
+  useOrgsStore,
+  useProfilesStore,
+  useThemeStore,
 } from "@/lib/store";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import * as Updates from 'expo-updates';
+import * as Updates from "expo-updates";
 import React from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Image,
-    ScrollView,
-    Switch,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Image,
+  ScrollView,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -36,7 +36,7 @@ export default function Profile() {
     if (__DEV__) {
       Alert.alert(
         "Development Mode",
-        "Updates are not available in development mode."
+        "Updates are not available in development mode.",
       );
       return;
     }
@@ -62,19 +62,19 @@ export default function Profile() {
                   Alert.alert(
                     "Update Ready",
                     "The update has been downloaded. The app will now restart to apply the changes.",
-                    [{ text: "OK", onPress: () => Updates.reloadAsync() }]
+                    [{ text: "OK", onPress: () => Updates.reloadAsync() }],
                   );
                 } catch {
                   Alert.alert(
                     "Error",
-                    "Failed to fetch the update. Please try again later."
+                    "Failed to fetch the update. Please try again later.",
                   );
                 } finally {
                   setIsCheckingUpdates(false);
                 }
               },
             },
-          ]
+          ],
         );
       } else {
         Alert.alert("Up to Date", "You are already using the latest version.");
@@ -84,7 +84,7 @@ export default function Profile() {
       console.error("Update check failed:", error);
       Alert.alert(
         "Error",
-        "Failed to check for updates. Please check your internet connection."
+        "Failed to check for updates. Please check your internet connection.",
       );
       setIsCheckingUpdates(false);
     }

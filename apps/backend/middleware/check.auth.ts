@@ -28,7 +28,8 @@ function extractJwt(
   }
   // 2. Fall back to cookie (for browser clients)
   const cookieJwt = parseCookie(cookieHeader, APPWRITE_JWT_COOKIE);
-  if (cookieJwt) console.log(`[Auth] Extracted JWT from cookie (len: ${cookieJwt.length})`);
+  if (cookieJwt)
+    console.log(`[Auth] Extracted JWT from cookie (len: ${cookieJwt.length})`);
   return cookieJwt;
 }
 
@@ -51,7 +52,9 @@ async function getCurrentUserFromRequest(
     console.log(`[Auth] Appwrite user found: ${me.$id} (${me.email})`);
     return me;
   } catch (err) {
-    console.error(`[Auth] Appwrite account.get() failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    console.error(
+      `[Auth] Appwrite account.get() failed: ${err instanceof Error ? err.message : "Unknown error"}`,
+    );
     return null;
   }
 }
@@ -64,10 +67,14 @@ export const authMiddleware: MiddlewareHandler<AppEnv> = async (c, next) => {
 
   if (!token) {
     console.log(`[Auth] Incoming request: ${c.req.method} ${c.req.path}`);
-    if (!authHeader && !cookieHeader) console.log("[Auth] No auth headers present");
+    if (!authHeader && !cookieHeader)
+      console.log("[Auth] No auth headers present");
   }
 
-  const user = await getCurrentUserFromRequest(cookieHeader, authHeader || null);
+  const user = await getCurrentUserFromRequest(
+    cookieHeader,
+    authHeader || null,
+  );
 
   // Attach Appwrite user (or null)
   c.set("user", user);
@@ -131,7 +138,7 @@ export const requireRole = (
       if (!dbUser) {
         return c.json({ error: "Account not linked" }, 403);
       }
-      
+
       // Implicitly allow ADMIN role for all guarded routes
       if (dbUser.role === "ADMIN" || roles.includes(dbUser.role)) {
         c.set("requesterId", dbUser.id);

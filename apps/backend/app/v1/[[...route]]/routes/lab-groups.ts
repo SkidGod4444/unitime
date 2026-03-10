@@ -1,7 +1,7 @@
 import {
-    createHonoErrorResponse,
-    ERROR_CODES,
-    RESOURCE_ERRORS,
+  createHonoErrorResponse,
+  ERROR_CODES,
+  RESOURCE_ERRORS,
 } from "@/lib/error.codes";
 import { requireAuth, requireRole } from "@/middleware/check.auth";
 import type { AppEnv } from "@/types/app-env";

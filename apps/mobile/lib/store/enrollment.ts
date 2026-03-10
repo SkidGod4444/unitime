@@ -109,7 +109,9 @@ export const useEnrollmentStore = create<EnrollmentState>()(
           if (res.ok && data.success) {
             set({ enrollments: [] });
           } else {
-            throw new Error(data.message || "Failed to approve all enrollments");
+            throw new Error(
+              data.message || "Failed to approve all enrollments",
+            );
           }
         } catch (error) {
           console.error("Error approving all enrollments:", error);

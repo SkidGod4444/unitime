@@ -97,16 +97,13 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
       // 1) Try dashboard bundle first
       if (loggedInUser?.id) {
         try {
-          const res = await apiFetch(
-            `/dashboard/${loggedInUser.id}/bundle`,
-            {
-              headers: {
-                "Cache-Control": "no-cache",
-                Pragma: "no-cache",
-                Expires: "0",
-              },
+          const res = await apiFetch(`/dashboard/${loggedInUser.id}/bundle`, {
+            headers: {
+              "Cache-Control": "no-cache",
+              Pragma: "no-cache",
+              Expires: "0",
             },
-          );
+          });
           if (res.ok) {
             const json = await res.json();
             const data = json?.data || {};
@@ -195,16 +192,13 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
       // Active Session Fallback Check for "Pull to Refresh"
       if (loggedInUser?.id) {
         try {
-          const dashRes = await apiFetch(
-            `/dashboard/${loggedInUser.id}`,
-            {
-              headers: {
-                "Cache-Control": "no-cache",
-                Pragma: "no-cache",
-                Expires: "0",
-              },
+          const dashRes = await apiFetch(`/dashboard/${loggedInUser.id}`, {
+            headers: {
+              "Cache-Control": "no-cache",
+              Pragma: "no-cache",
+              Expires: "0",
             },
-          );
+          });
           if (dashRes.ok) {
             const dashData = await dashRes.json();
 

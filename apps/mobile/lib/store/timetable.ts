@@ -45,7 +45,9 @@ type TimetablesState = {
   updateTimetableEntry: (
     token: string,
     id: string,
-    entry: Partial<Omit<TimetableEntry, "id" | "course">> & { labGroupId?: string },
+    entry: Partial<Omit<TimetableEntry, "id" | "course">> & {
+      labGroupId?: string;
+    },
   ) => Promise<boolean>;
   deleteTimetableEntry: (token: string, id: string) => Promise<boolean>;
 };
@@ -94,10 +96,12 @@ export const useTimetableStore = create<TimetablesState>()(
           console.log("RAW TIMETABLE RESPONSE", data);
 
           if (res.ok && data.success) {
-            const normalizedTimetables = (data.timetables || []).map((t: any) => ({
-              ...t,
-              day: (t.day || "").toUpperCase().trim(),
-            }));
+            const normalizedTimetables = (data.timetables || []).map(
+              (t: any) => ({
+                ...t,
+                day: (t.day || "").toUpperCase().trim(),
+              }),
+            );
             set({
               weekTimetable: data.week,
               timetables: normalizedTimetables,

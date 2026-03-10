@@ -1,7 +1,11 @@
 import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
 import { requireRole } from "@/middleware/check.auth";
 import type { AppEnv } from "@/types/app-env";
-import { getCacheMetrics, getOrSetCache, invalidateCache } from "@unitime/cache";
+import {
+  getCacheMetrics,
+  getOrSetCache,
+  invalidateCache,
+} from "@unitime/cache";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
 
@@ -210,7 +214,7 @@ admin.patch("/enrollments/approve-all", async (c) => {
   const organizationId = c.req.query("organizationId");
 
   try {
-    const pendingEnrollments = await prisma.userCourse.findMany({
+    const pendingEnrollments = (await prisma.userCourse.findMany({
       where: {
         status: "PENDING",
         ...(organizationId ? { course: { organizationId } } : {}),
@@ -224,7 +228,7 @@ admin.patch("/enrollments/approve-all", async (c) => {
           },
         },
       },
-    }) as any[];
+    })) as any[];
 
     if (pendingEnrollments.length === 0) {
       return c.json({
@@ -250,16 +254,18 @@ admin.patch("/enrollments/approve-all", async (c) => {
       })),
     });
 
-    const usersToInvalidate = [...new Set(pendingEnrollments.map(e => e.userId))];
+    const usersToInvalidate = [
+      ...new Set(pendingEnrollments.map((e) => e.userId)),
+    ];
     const profiles = await prisma.studentProfile.findMany({
       where: { userId: { in: usersToInvalidate } },
       select: { userId: true, labGroupId: true },
     });
-    
-    const profileMap = new Map(profiles.map(p => [p.userId, p.labGroupId]));
+
+    const profileMap = new Map(profiles.map((p) => [p.userId, p.labGroupId]));
 
     const timetableKeys: string[] = [];
-    usersToInvalidate.forEach(uId => {
+    usersToInvalidate.forEach((uId) => {
       const lg = profileMap.get(uId);
       const lgKey = lg ? [lg].sort().join(",") : "none";
       timetableKeys.push(`timetable:${uId}:all:${lgKey}`);
@@ -314,14 +320,22 @@ admin.get("/stats", async (c) => {
           prisma.supportTicket.count(),
           getCacheMetrics(),
           // Getting raw db metrics
-          prisma.$queryRaw<{pg_size_pretty: string}[]>`SELECT pg_size_pretty(pg_database_size(current_database()));`.catch(() => [{ pg_size_pretty: "0 KB" }]),
-          prisma.$queryRaw<{state: string, count: number}[]>`SELECT state, count(*)::int FROM pg_stat_activity GROUP BY state;`.catch(() => []),
+          prisma.$queryRaw<
+            { pg_size_pretty: string }[]
+          >`SELECT pg_size_pretty(pg_database_size(current_database()));`.catch(
+            () => [{ pg_size_pretty: "0 KB" }],
+          ),
+          prisma.$queryRaw<
+            { state: string; count: number }[]
+          >`SELECT state, count(*)::int FROM pg_stat_activity GROUP BY state;`.catch(
+            () => [],
+          ),
         ]);
 
         // Parse the connection states
         let activeConnections = 0;
         let idleConnections = 0;
-        
+
         connectionStates.forEach((row) => {
           if (row.state === "active") activeConnections += row.count;
           else if (row.state === "idle") idleConnections += row.count;
@@ -337,14 +351,14 @@ admin.get("/stats", async (c) => {
           feedbacks,
           tickets,
           cacheMetrics,
-          dbMetrics: { 
+          dbMetrics: {
             size: dbSizeRes[0]?.pg_size_pretty || "0 KB",
             activeConnections,
             idleConnections,
           },
         };
       },
-      120 // 2 minutes TTL
+      120, // 2 minutes TTL
     );
 
     return c.json({

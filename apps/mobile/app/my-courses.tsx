@@ -1,18 +1,23 @@
 import { useAuth } from "@/contexts/auth.cntxt";
 import { useStore } from "@/contexts/store.cntxt";
 import { apiFetch } from "@/lib/api";
-import { useAttendanceStore, useCoursesStore, useOrgsStore, useProfilesStore } from "@/lib/store";
+import {
+  useAttendanceStore,
+  useCoursesStore,
+  useOrgsStore,
+  useProfilesStore,
+} from "@/lib/store";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    FlatList,
-    RefreshControl,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  RefreshControl,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Course } from "../lib/store/timetable";
@@ -46,31 +51,39 @@ export default function MyCoursesScreen() {
   const { summary } = useAttendanceStore();
   const [refreshing, setRefreshing] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
-  const [selectedCourseIds, setSelectedCourseIds] = useState<Set<string>>(new Set());
+  const [selectedCourseIds, setSelectedCourseIds] = useState<Set<string>>(
+    new Set(),
+  );
 
   const userProfile = profiles.find((p) => p.userId === loggedInUser?.id);
   const organizationId = userProfile?.organizationId;
 
   const userEnrollments = React.useMemo(() => {
-    return courses.flatMap(c => {
-      const enrollment = (c as any).users?.find((u: any) => u.userId === loggedInUser?.id);
+    return courses.flatMap((c) => {
+      const enrollment = (c as any).users?.find(
+        (u: any) => u.userId === loggedInUser?.id,
+      );
       return enrollment ? [{ ...enrollment, courseId: c.id }] : [];
     });
   }, [courses, loggedInUser?.id]);
 
-  const hasAnyEnrollment = userEnrollments.some(e => e.status === "APPROVED" || e.status === "PENDING");
+  const hasAnyEnrollment = userEnrollments.some(
+    (e) => e.status === "APPROVED" || e.status === "PENDING",
+  );
   const isExploring = !hasAnyEnrollment;
 
   const filteredCourses = React.useMemo(() => {
     if (!organizationId) return courses;
-    const orgCourses = courses.filter((c) => c.organizationId === organizationId);
-    
+    const orgCourses = courses.filter(
+      (c) => c.organizationId === organizationId,
+    );
+
     if (isExploring) {
       return orgCourses;
     } else {
       // Only show courses the user has interacted with (Enrolled/Pending/Rejected)
-      return orgCourses.filter(c => 
-        (c as any).users?.some((u: any) => u.userId === loggedInUser?.id)
+      return orgCourses.filter((c) =>
+        (c as any).users?.some((u: any) => u.userId === loggedInUser?.id),
       );
     }
   }, [courses, organizationId, isExploring, loggedInUser?.id]);
@@ -83,15 +96,18 @@ export default function MyCoursesScreen() {
       const res = await apiFetch("/courses/enroll-batch", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           userId: loggedInUser?.id,
           courseIds: Array.from(selectedCourseIds),
-          organizationId: organizationId
+          organizationId: organizationId,
         }),
       });
       if (!res.ok) throw new Error("Batch enrollment failed");
 
-      Alert.alert("Success", "Enrollment requests sent for all selected courses.");
+      Alert.alert(
+        "Success",
+        "Enrollment requests sent for all selected courses.",
+      );
       setSelectedCourseIds(new Set());
       await fetchCourses();
     } catch {
@@ -181,19 +197,23 @@ export default function MyCoursesScreen() {
       CLASS_TYPE_COLORS[typeLabel] || "bg-gray-100 text-gray-800";
 
     return (
-      <TouchableOpacity 
+      <TouchableOpacity
         activeOpacity={isExploring && !userEnrollment ? 0.7 : 1}
-        onPress={() => isExploring && !userEnrollment && toggleSelection(item.id)}
+        onPress={() =>
+          isExploring && !userEnrollment && toggleSelection(item.id)
+        }
         className={`p-5 rounded-3xl border shadow-sm mb-5 ${
-          isSelected 
-            ? "bg-indigo-50/50 border-indigo-200 dark:bg-indigo-900/20 dark:border-indigo-800" 
+          isSelected
+            ? "bg-indigo-50/50 border-indigo-200 dark:bg-indigo-900/20 dark:border-indigo-800"
             : "bg-white dark:bg-zinc-900 border-gray-100 dark:border-zinc-800"
         }`}
       >
         {/* Course Header */}
         <View className="flex-row items-start justify-between mb-5">
           <View className="flex-row flex-1 mr-3">
-            <View className={`h-12 w-12 ${isSelected ? "bg-indigo-100" : "bg-indigo-50"} rounded-2xl justify-center items-center mr-3 mt-1`}>
+            <View
+              className={`h-12 w-12 ${isSelected ? "bg-indigo-100" : "bg-indigo-50"} rounded-2xl justify-center items-center mr-3 mt-1`}
+            >
               <Ionicons name="book" size={22} color="#4f46e5" />
             </View>
             <View className="flex-1 pr-1">
@@ -222,8 +242,12 @@ export default function MyCoursesScreen() {
           </View>
 
           {isExploring && !userEnrollment ? (
-            <View className={`h-6 w-6 rounded-full border-2 items-center justify-center ${isSelected ? "bg-indigo-600 border-indigo-600" : "border-gray-300"}`}>
-              {isSelected && <Ionicons name="checkmark" size={14} color="white" />}
+            <View
+              className={`h-6 w-6 rounded-full border-2 items-center justify-center ${isSelected ? "bg-indigo-600 border-indigo-600" : "border-gray-300"}`}
+            >
+              {isSelected && (
+                <Ionicons name="checkmark" size={14} color="white" />
+              )}
             </View>
           ) : userEnrollment ? (
             <View
@@ -299,8 +323,8 @@ export default function MyCoursesScreen() {
 
         {/* Actions / Attendance Bar */}
         <View className="flex-col gap-3">
-          {userEnrollment && (
-            userEnrollment.status === "REJECTED" ? (
+          {userEnrollment &&
+            (userEnrollment.status === "REJECTED" ? (
               <View className="w-full py-3.5 rounded-xl border border-red-200 bg-red-50 flex-row justify-center items-center gap-2">
                 <Ionicons
                   name="close-circle-outline"
@@ -350,9 +374,7 @@ export default function MyCoursesScreen() {
                         <Text
                           className={`text-xs font-bold ${summaryItem.total === 0 ? "text-gray-400" : summaryItem.percentage >= 75 ? "text-green-600" : "text-red-500"}`}
                         >
-                          {summaryItem.total === 0
-                            ? 0
-                            : summaryItem.percentage}
+                          {summaryItem.total === 0 ? 0 : summaryItem.percentage}
                           %
                         </Text>
                       </View>
@@ -371,8 +393,7 @@ export default function MyCoursesScreen() {
                   );
                 })()}
               </View>
-            )
-          )}
+            ))}
         </View>
       </TouchableOpacity>
     );
@@ -429,20 +450,22 @@ export default function MyCoursesScreen() {
                   No Courses Found
                 </Text>
                 <Text className="text-gray-500 dark:text-zinc-400 text-center text-sm px-6">
-                  {isExploring 
+                  {isExploring
                     ? "There are no courses available for enrollment right now."
                     : "You are not enrolled in any courses yet."}
                 </Text>
                 {!isExploring && (
-                    <TouchableOpacity 
-                        onPress={async () => {
-                            // Temporary way to go back to explore if needed
-                            // In real app, we'd have a toggle or better flow
-                        }}
-                        className="mt-6 px-6 py-3 bg-indigo-600 rounded-full"
-                    >
-                        <Text className="text-white font-bold">Discover Courses</Text>
-                    </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={async () => {
+                      // Temporary way to go back to explore if needed
+                      // In real app, we'd have a toggle or better flow
+                    }}
+                    className="mt-6 px-6 py-3 bg-indigo-600 rounded-full"
+                  >
+                    <Text className="text-white font-bold">
+                      Discover Courses
+                    </Text>
+                  </TouchableOpacity>
                 )}
               </View>
             }

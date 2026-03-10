@@ -7,18 +7,18 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Modal,
-    Pressable,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Modal,
+  Pressable,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import DraggableFlatList, {
-    RenderItemParams,
-    ScaleDecorator,
+  RenderItemParams,
+  ScaleDecorator,
 } from "react-native-draggable-flatlist";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -36,7 +36,8 @@ const SHORT_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 export default function ManageTimetableScreen() {
   const router = useRouter();
   const { loggedInUser, refreshJwt } = useAuth();
-  const { createTimetableEntry, deleteTimetableEntry, updateTimetableEntry } = useTimetableStore();
+  const { createTimetableEntry, deleteTimetableEntry, updateTimetableEntry } =
+    useTimetableStore();
   const { courses, fetchCourses } = useCoursesStore();
   const { byOrg, fetchOrgLabGroups, createLabGroup } = useLabGroupsStore();
 
@@ -221,7 +222,7 @@ export default function ManageTimetableScreen() {
           </View>
           <View className="flex-1">
             <View className="flex-row justify-between items-start gap-2">
-              <Text 
+              <Text
                 className="text-gray-900 dark:text-white font-bold text-base flex-1"
                 numberOfLines={2}
               >
@@ -239,7 +240,12 @@ export default function ManageTimetableScreen() {
               {item.location ? (
                 <View className="flex-row items-center gap-1 flex-shrink">
                   <Ionicons name="location-outline" size={14} color="#6B7280" />
-                  <Text className="text-sm text-gray-500 flex-shrink" numberOfLines={1}>{item.location}</Text>
+                  <Text
+                    className="text-sm text-gray-500 flex-shrink"
+                    numberOfLines={1}
+                  >
+                    {item.location}
+                  </Text>
                 </View>
               ) : null}
             </View>
@@ -638,10 +644,16 @@ export default function ManageTimetableScreen() {
                       className="flex-1 px-4 py-3 text-gray-900 dark:text-white font-medium"
                     />
                     <TouchableOpacity
-                      onPress={() => setFormStartPeriod(formStartPeriod === "AM" ? "PM" : "AM")}
+                      onPress={() =>
+                        setFormStartPeriod(
+                          formStartPeriod === "AM" ? "PM" : "AM",
+                        )
+                      }
                       className="bg-indigo-100 dark:bg-indigo-900/30 px-3 py-1.5 rounded-lg ml-1"
                     >
-                      <Text className="text-indigo-700 dark:text-indigo-400 font-bold text-xs">{formStartPeriod}</Text>
+                      <Text className="text-indigo-700 dark:text-indigo-400 font-bold text-xs">
+                        {formStartPeriod}
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -659,10 +671,14 @@ export default function ManageTimetableScreen() {
                       className="flex-1 px-4 py-3 text-gray-900 dark:text-white font-medium"
                     />
                     <TouchableOpacity
-                      onPress={() => setFormEndPeriod(formEndPeriod === "AM" ? "PM" : "AM")}
+                      onPress={() =>
+                        setFormEndPeriod(formEndPeriod === "AM" ? "PM" : "AM")
+                      }
                       className="bg-indigo-100 dark:bg-indigo-900/30 px-3 py-1.5 rounded-lg ml-1"
                     >
-                      <Text className="text-indigo-700 dark:text-indigo-400 font-bold text-xs">{formEndPeriod}</Text>
+                      <Text className="text-indigo-700 dark:text-indigo-400 font-bold text-xs">
+                        {formEndPeriod}
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 </View>

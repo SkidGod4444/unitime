@@ -9,13 +9,13 @@ import * as Location from "expo-location";
 import { Stack, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
-    Alert,
-    FlatList,
-    Pressable,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  FlatList,
+  Pressable,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -214,9 +214,7 @@ export default function AttendanceSessionForm() {
         return;
       }
       try {
-        const res = await apiFetch(
-          `/courses/${selectedCourse.id}/students`,
-        );
+        const res = await apiFetch(`/courses/${selectedCourse.id}/students`);
         if (res.ok) {
           const data = await res.json();
           if (data.success && Array.isArray(data.students)) {
@@ -343,24 +341,21 @@ export default function AttendanceSessionForm() {
 
       // Helper: makes the session create POST and returns {res, data}
       const doCreateSession = async () => {
-        const r = await apiFetch(
-          "/attendance/qr/session/create",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              courseId: selectedCourse!.id,
-              startTime: startTime.toISOString(),
-              endTime: endTime.toISOString(),
-              manualPresentIds,
-              labGroupId:
-                (selectedCourse as any).classType === "LAB"
-                  ? selectedLabGroupId
-                  : undefined,
-              geofenceRadius,
-            }),
-          },
-        );
+        const r = await apiFetch("/attendance/qr/session/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            courseId: selectedCourse!.id,
+            startTime: startTime.toISOString(),
+            endTime: endTime.toISOString(),
+            manualPresentIds,
+            labGroupId:
+              (selectedCourse as any).classType === "LAB"
+                ? selectedLabGroupId
+                : undefined,
+            geofenceRadius,
+          }),
+        });
         const d = await r.json();
         return { res: r, data: d };
       };
@@ -429,7 +424,8 @@ export default function AttendanceSessionForm() {
               // 2. Filter by Lab Group (if applicable)
               if (selectedLabGroupId) {
                 targetStudents = targetStudents.filter(
-                  (s: any) => s.studentProfile?.labGroupId === selectedLabGroupId,
+                  (s: any) =>
+                    s.studentProfile?.labGroupId === selectedLabGroupId,
                 );
               }
 
@@ -487,9 +483,12 @@ export default function AttendanceSessionForm() {
                   actionUrl: "/tap-to-mark",
                 };
 
-                // If a lab group is targetted, or no organization-wide class is selected, 
-                // we must notify students individually. 
-                if ((selectedLabGroupId || !selectedClass) && targetStudents.length > 0) {
+                // If a lab group is targetted, or no organization-wide class is selected,
+                // we must notify students individually.
+                if (
+                  (selectedLabGroupId || !selectedClass) &&
+                  targetStudents.length > 0
+                ) {
                   await Promise.all(
                     targetStudents.map((s: any) =>
                       apiFetch("/notifications", {

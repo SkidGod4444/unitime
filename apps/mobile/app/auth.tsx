@@ -4,19 +4,26 @@ import { isInstitutionalEmail } from "@/utils/email.validator";
 import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
-import { Image, Linking, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  Image,
+  Linking,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 export default function Auth() {
   const { theme } = useThemeStore();
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
-  
+
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [password, setPassword] = useState("");
-  
+
   const { register, login } = useAuth();
   const isDark = theme === "dark";
 
@@ -53,7 +60,7 @@ export default function Auth() {
   return (
     <View className="flex-1 bg-indigo-600 dark:bg-zinc-950">
       <StatusBar style="light" />
-      
+
       <KeyboardAwareScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         enableOnAndroid={true}
@@ -63,11 +70,14 @@ export default function Auth() {
         bounces={false}
       >
         {/* Top Header Background Area */}
-        <View className="pt-24 pb-20 overflow-hidden relative" style={{ minHeight: 280 }}>
+        <View
+          className="pt-24 pb-20 overflow-hidden relative"
+          style={{ minHeight: 280 }}
+        >
           {/* Decorative Blobs */}
           <View className="absolute top-10 -left-16 w-56 h-56 bg-indigo-500/40 dark:bg-indigo-900/40 rounded-full opacity-90" />
           <View className="absolute -bottom-12 -right-12 w-64 h-64 bg-purple-500/30 dark:bg-purple-900/30 rounded-full opacity-90" />
-          
+
           <View className="flex-1 justify-center items-center px-6 relative z-10">
             <Text className="text-white text-[38px] font-bold text-center tracking-tight leading-tight">
               {isLogin ? "Welcome\nback" : "Create an\naccount"}
@@ -77,10 +87,9 @@ export default function Auth() {
 
         {/* Bottom Form Card */}
         <View className="flex-1 bg-white dark:bg-[#09090B] -mt-10 rounded-t-[40px] px-6 pt-10 pb-10 shadow-2xl shadow-indigo-500/10">
-          
           <View className="items-center mb-10">
-            <Image 
-              source={require("@/assets/icons/logo.png")} 
+            <Image
+              source={require("@/assets/icons/logo.png")}
               className="w-16 h-16"
               resizeMode="contain"
             />
@@ -140,7 +149,7 @@ export default function Auth() {
                 />
               </TouchableOpacity>
             </View>
-            
+
             {isLogin && (
               <TouchableOpacity className="self-end mt-1 px-1">
                 <Text className="text-indigo-600 dark:text-indigo-400 font-bold text-[13px]">
@@ -166,20 +175,23 @@ export default function Auth() {
           {/* Terms text */}
           <View className="items-center px-4 mb-8">
             <Text className="text-slate-400 dark:text-zinc-500 text-[13px] text-center font-medium leading-[20px]">
-              {isLogin ? "By logging in you agree to our" : "Signing up for an account means you\nagree to the"} {" "}
+              {isLogin
+                ? "By logging in you agree to our"
+                : "Signing up for an account means you\nagree to the"}{" "}
               <Text
                 className="text-slate-600 dark:text-zinc-400 font-bold underline"
                 onPress={() => Linking.openURL("https://unitime.devwtf.in/")}
               >
                 Privacy Policy
-              </Text>
-              {" "}and{" "}
+              </Text>{" "}
+              and{" "}
               <Text
                 className="text-slate-600 dark:text-zinc-400 font-bold underline"
                 onPress={() => Linking.openURL("https://unitime.devwtf.in/")}
               >
                 Terms of Service
-              </Text>.
+              </Text>
+              .
             </Text>
           </View>
 
@@ -188,13 +200,15 @@ export default function Auth() {
             <Text className="text-slate-500 dark:text-zinc-400 text-[15px] font-medium">
               {isLogin ? "Don't have an account? " : "Have an account? "}
             </Text>
-            <TouchableOpacity onPress={() => setIsLogin(!isLogin)} className="px-1">
+            <TouchableOpacity
+              onPress={() => setIsLogin(!isLogin)}
+              className="px-1"
+            >
               <Text className="text-indigo-600 dark:text-indigo-400 font-bold text-[15px] underline">
                 {isLogin ? "Sign up here" : "Log in here"}
               </Text>
             </TouchableOpacity>
           </View>
-          
         </View>
       </KeyboardAwareScrollView>
     </View>

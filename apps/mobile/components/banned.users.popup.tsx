@@ -12,8 +12,7 @@ import {
   View,
 } from "react-native";
 
-const SUPPORT_SERVER_URL =
-  "https://chat.whatsapp.com/G601WXeqmrw5xgEYPgLiZZ"; // 🔗 Replace with your actual support link
+const SUPPORT_SERVER_URL = "https://chat.whatsapp.com/G601WXeqmrw5xgEYPgLiZZ"; // 🔗 Replace with your actual support link
 
 export default function BannedUserPopup() {
   const { loggedInUser } = useAuth();

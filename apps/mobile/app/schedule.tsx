@@ -7,7 +7,7 @@ import {
   ScrollView,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import Animated, { FadeInDown, Layout } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -67,10 +67,10 @@ const isFutureDate = (d: Date) => {
   const allowedLimit = new Date();
   allowedLimit.setDate(allowedLimit.getDate() + 6);
   allowedLimit.setHours(0, 0, 0, 0);
-  
+
   const compareDate = new Date(d);
   compareDate.setHours(0, 0, 0, 0);
-  
+
   return compareDate > allowedLimit;
 };
 
@@ -89,16 +89,16 @@ const generateDates = (startDate: Date, days: number = 15) => {
   }
   return dates;
 };
- 
- const FULL_DAY_NAMES = [
-   "SUNDAY",
-   "MONDAY",
-   "TUESDAY",
-   "WEDNESDAY",
-   "THURSDAY",
-   "FRIDAY",
-   "SATURDAY",
- ];
+
+const FULL_DAY_NAMES = [
+  "SUNDAY",
+  "MONDAY",
+  "TUESDAY",
+  "WEDNESDAY",
+  "THURSDAY",
+  "FRIDAY",
+  "SATURDAY",
+];
 
 // --- Components ---
 
@@ -232,7 +232,7 @@ const ClassCard = ({ session, index }: { session: any; index: number }) => {
                   {session.courseCode} • {session.type}
                 </Text>
               </View>
-{/* <TouchableOpacity
+              {/* <TouchableOpacity
                 onPress={() => {
                   Alert.alert(
                     "Set Alarm",
@@ -460,7 +460,7 @@ export default function ScheduleScreen() {
       const timeStr = String(timeInput).trim();
       // Match formats like "14:25", "02:25 PM", "2:25pm", "9:00 AM"
       const match = timeStr.match(/^(\d{1,2}):(\d{1,2})\s*(am|pm)?$/i);
-      
+
       if (match) {
         hours = parseInt(match[1], 10);
         minutes = parseInt(match[2], 10);
@@ -506,7 +506,10 @@ export default function ScheduleScreen() {
   useEffect(() => {
     console.log("Selected Date:", selectedDate);
     console.log("Selected Day:", dayStr);
-    console.log("Available timetable days:", timetables.map((t) => t.day));
+    console.log(
+      "Available timetable days:",
+      timetables.map((t) => t.day),
+    );
     if (dayClasses.length > 0) {
       console.log("Sample Timetable Object:", dayClasses[0]);
     }
@@ -518,7 +521,7 @@ export default function ScheduleScreen() {
       const colors = ["#6366f1", "#ec4899", "#10b981", "#f59e0b", "#8b5cf6"];
       const startObj = parseAndFormatTime(t.startTime);
       const endObj = parseAndFormatTime(t.endTime);
-      
+
       return {
         id: t.id,
         courseCode: t.course?.code || "UNK",
@@ -529,7 +532,7 @@ export default function ScheduleScreen() {
         professor: "Dr. Faculty", // Add professor to timetable response later if needed
         type: t.course?.classType || "Lecture",
         color: colors[idx % colors.length],
-        sortVal: startObj.sortVal
+        sortVal: startObj.sortVal,
       };
     })
     .sort((a, b) => a.sortVal - b.sortVal);

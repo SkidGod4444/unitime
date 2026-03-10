@@ -185,7 +185,9 @@ courses.post("/:id/enroll", async (c) => {
       where: { userId },
       select: { labGroupId: true },
     });
-    const lgKey = profile?.labGroupId ? [profile.labGroupId].sort().join(",") : "none";
+    const lgKey = profile?.labGroupId
+      ? [profile.labGroupId].sort().join(",")
+      : "none";
 
     await invalidateCache(
       `course:${courseId}`,
@@ -230,8 +232,8 @@ courses.post("/enroll-batch", async (c) => {
             courseId,
             status: "PENDING",
           },
-        })
-      )
+        }),
+      ),
     );
 
     // Add history log for the batch action
@@ -249,7 +251,9 @@ courses.post("/enroll-batch", async (c) => {
       where: { userId },
       select: { labGroupId: true },
     });
-    const lgKey = profile?.labGroupId ? [profile.labGroupId].sort().join(",") : "none";
+    const lgKey = profile?.labGroupId
+      ? [profile.labGroupId].sort().join(",")
+      : "none";
 
     const cacheKeys = [
       "courses:all",
@@ -293,7 +297,9 @@ courses.delete("/:id/enroll", async (c) => {
       where: { userId },
       select: { labGroupId: true },
     });
-    const lgKey = profile?.labGroupId ? [profile.labGroupId].sort().join(",") : "none";
+    const lgKey = profile?.labGroupId
+      ? [profile.labGroupId].sort().join(",")
+      : "none";
 
     await invalidateCache(
       `course:${courseId}`,

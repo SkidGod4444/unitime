@@ -154,7 +154,8 @@ export default function Index() {
     .map((t) => {
       // Robust time parsing helper
       const parseTime = (timeInput: string | Date) => {
-        if (!timeInput) return { sortVal: 0, display: "TBD", date: new Date(0) };
+        if (!timeInput)
+          return { sortVal: 0, display: "TBD", date: new Date(0) };
         const d = new Date(timeInput);
         if (!isNaN(d.getTime()) && String(timeInput).includes("T")) {
           return {
@@ -206,7 +207,8 @@ export default function Index() {
       };
 
       const badgeColors = {
-        Ongoing: "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400",
+        Ongoing:
+          "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400",
         Upcoming:
           "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400",
         Past: "bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-zinc-500",
@@ -683,7 +685,9 @@ export default function Index() {
                           size={12}
                           color="#6B7280"
                         />
-                        <Text className="text-xs text-gray-500">{item.room}</Text>
+                        <Text className="text-xs text-gray-500">
+                          {item.room}
+                        </Text>
                       </View>
                       <View className="bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">
                         <Text className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400">
@@ -692,7 +696,9 @@ export default function Index() {
                       </View>
                     </View>
                   </View>
-                  <View className={`${item.badgeStyle} px-3 py-1.2 rounded-full`}>
+                  <View
+                    className={`${item.badgeStyle} px-3 py-1.2 rounded-full`}
+                  >
                     <Text className="text-[10px] font-bold uppercase tracking-wider">
                       {item.status}
                     </Text>

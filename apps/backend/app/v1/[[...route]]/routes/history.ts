@@ -57,7 +57,8 @@ history.get("/:userId", async (c) => {
 });
 
 history.post("/", async (c) => {
-  const { userId, organizationId, title, description, type } = await c.req.json();
+  const { userId, organizationId, title, description, type } =
+    await c.req.json();
 
   if (!userId || !title || !description || !type) {
     return createHonoErrorResponse(c, ERROR_CODES.MISSING_REQUIRED_FIELD);
@@ -86,7 +87,7 @@ history.post("/", async (c) => {
         status_code: 201,
         log,
       },
-      201
+      201,
     );
   } catch (error) {
     console.error("Error creating history log:", error);
