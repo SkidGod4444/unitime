@@ -1,32 +1,94 @@
 import { useAuth } from "@/contexts/auth.cntxt";
 import {
-  useAttendanceStore,
-  useOrgsStore,
-  useProfilesStore,
-  useThemeStore,
+    useAttendanceStore,
+    useOrgsStore,
+    useProfilesStore,
+    useThemeStore,
 } from "@/lib/store";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import * as Updates from 'expo-updates';
 import React from "react";
 import {
-  Image,
-  ScrollView,
-  Switch,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Image,
+    ScrollView,
+    Switch,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Profile() {
   const router = useRouter();
+  const [isCheckingUpdates, setIsCheckingUpdates] = React.useState(false);
   const { theme, toggleTheme } = useThemeStore();
   const { logout, loggedInUser } = useAuth();
   const { profiles } = useProfilesStore();
   const { orgs } = useOrgsStore();
   const myProfile = profiles.find((p) => p.userId === loggedInUser?.id);
   const myOrg = orgs.find((o) => o.id === myProfile?.organizationId);
+
+  const handleCheckForUpdates = async () => {
+    if (__DEV__) {
+      Alert.alert(
+        "Development Mode",
+        "Updates are not available in development mode."
+      );
+      return;
+    }
+
+    setIsCheckingUpdates(true);
+    try {
+      const update = await Updates.checkForUpdateAsync();
+      if (update.isAvailable) {
+        Alert.alert(
+          "Update Available",
+          "A new version of the app is available. Would you like to download and install it?",
+          [
+            {
+              text: "Cancel",
+              style: "cancel",
+              onPress: () => setIsCheckingUpdates(false),
+            },
+            {
+              text: "Update",
+              onPress: async () => {
+                try {
+                  await Updates.fetchUpdateAsync();
+                  Alert.alert(
+                    "Update Ready",
+                    "The update has been downloaded. The app will now restart to apply the changes.",
+                    [{ text: "OK", onPress: () => Updates.reloadAsync() }]
+                  );
+                } catch {
+                  Alert.alert(
+                    "Error",
+                    "Failed to fetch the update. Please try again later."
+                  );
+                } finally {
+                  setIsCheckingUpdates(false);
+                }
+              },
+            },
+          ]
+        );
+      } else {
+        Alert.alert("Up to Date", "You are already using the latest version.");
+        setIsCheckingUpdates(false);
+      }
+    } catch (error) {
+      console.error("Update check failed:", error);
+      Alert.alert(
+        "Error",
+        "Failed to check for updates. Please check your internet connection."
+      );
+      setIsCheckingUpdates(false);
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-white dark:bg-zinc-900" edges={["top"]}>
@@ -325,6 +387,30 @@ export default function Profile() {
                 thumbColor={"#FFFFFF"}
               />
             </View>
+
+            <TouchableOpacity
+              onPress={handleCheckForUpdates}
+              disabled={isCheckingUpdates}
+              className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm overflow-hidden p-4 flex-row items-center justify-between mt-3"
+            >
+              <View className="flex-row items-center gap-4">
+                <View className="h-10 w-10 bg-indigo-50 dark:bg-indigo-900/20 rounded-full items-center justify-center">
+                  <Ionicons
+                    name="cloud-download-outline"
+                    size={20}
+                    color="#4F46E5"
+                  />
+                </View>
+                <Text className="text-base font-semibold text-gray-700 dark:text-zinc-100">
+                  Check for Updates
+                </Text>
+              </View>
+              {isCheckingUpdates ? (
+                <ActivityIndicator size="small" color="#4F46E5" />
+              ) : (
+                <Ionicons name="chevron-forward" size={18} color="#9ca3af" />
+              )}
+            </TouchableOpacity>
           </View>
 
           {/* Logout Button */}

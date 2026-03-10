@@ -141,34 +141,92 @@ export default function Index() {
     (t) => t.day.toUpperCase().trim() === todayDay,
   );
 
-  // Map first 3 timetable items for quick dashboard view
-  const todaysSchedule = todayTimetables.slice(0, 3).map((t, index) => {
-    // Determine start time AM/PM correctly based on whether it is an ISO Date or 'HH:MM AM' string
-    let displayTime = t.startTime; // Use DB formatted string directly if it conforms to formatting.
-    const startObj = new Date(t.startTime);
-    if (!isNaN(startObj.getTime()) && String(t.startTime).includes("T")) {
-      const startH = startObj.getHours() % 12 || 12;
-      const startM = startObj.getMinutes().toString().padStart(2, "0");
-      const startAmPm = startObj.getHours() >= 12 ? "PM" : "AM";
-      displayTime = `${startH}:${startM} ${startAmPm}`;
-    }
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 17) return "Good Afternoon";
+    if (hour < 21) return "Good Evening";
+    return "Good Night";
+  };
 
-    const colors = [
-      "border-l-blue-500",
-      "border-l-green-500",
-      "border-l-purple-500",
-      "border-l-yellow-500",
-    ];
+  // Map timetable items for quick dashboard view with dynamic status
+  const todaysSchedule = [...todayTimetables]
+    .map((t) => {
+      // Robust time parsing helper
+      const parseTime = (timeInput: string | Date) => {
+        if (!timeInput) return { sortVal: 0, display: "TBD", date: new Date(0) };
+        const d = new Date(timeInput);
+        if (!isNaN(d.getTime()) && String(timeInput).includes("T")) {
+          return {
+            sortVal: d.getHours() * 60 + d.getMinutes(),
+            display: d.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true,
+            }),
+            date: d,
+          };
+        }
+        // Fallback for "HH:MM AM/PM" strings
+        const match = String(timeInput).match(/(\d+):(\d+)\s*(AM|PM)/i);
+        if (match) {
+          let h = parseInt(match[1]);
+          const m = parseInt(match[2]);
+          const ampm = match[3].toUpperCase();
+          if (ampm === "PM" && h !== 12) h += 12;
+          if (ampm === "AM" && h === 12) h = 0;
+          const today = new Date();
+          const date = new Date(
+            today.getFullYear(),
+            today.getMonth(),
+            today.getDate(),
+            h,
+            m,
+          );
+          return { sortVal: h * 60 + m, display: timeInput, date };
+        }
+        return { sortVal: 0, display: String(timeInput), date: new Date(0) };
+      };
 
-    return {
-      id: t.id,
-      time: displayTime,
-      subject: t.course?.name || "Unknown",
-      room: t.location || "TBA",
-      status: "Upcoming",
-      color: colors[index % colors.length],
-    };
-  });
+      const start = parseTime(t.startTime);
+      const end = parseTime(t.endTime);
+      const now = new Date();
+
+      let status: "Ongoing" | "Past" | "Upcoming" = "Upcoming";
+      if (now >= start.date && now <= end.date) {
+        status = "Ongoing";
+      } else if (now > end.date) {
+        status = "Past";
+      }
+
+      const colors = {
+        Ongoing: "border-l-blue-500",
+        Upcoming: "border-l-indigo-500",
+        Past: "border-l-gray-300",
+      };
+
+      const badgeColors = {
+        Ongoing: "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400",
+        Upcoming:
+          "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400",
+        Past: "bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-zinc-500",
+      };
+
+      return {
+        id: t.id,
+        time: `${start.display} - ${end.display}`,
+        subject: t.course?.name || "Unknown",
+        courseCode: t.course?.code || "",
+        classType: t.course?.classType || "Lecture",
+        room: t.location || "TBA",
+        status,
+        color: colors[status],
+        badgeStyle: badgeColors[status],
+        sortVal: start.sortVal,
+      };
+    })
+    .sort((a, b) => a.sortVal - b.sortVal)
+    .slice(0, 3);
 
   return (
     <SafeAreaView
@@ -201,7 +259,7 @@ export default function Index() {
             </View>
             <View>
               <Text className="text-gray-500 dark:text-zinc-400 font-medium text-sm">
-                Welcome back,
+                {getGreeting()},
               </Text>
               <Text className="text-zinc-900 dark:text-zinc-100 font-lora font-bold text-xl">
                 {loggedInUser?.name || "John Doe"}
@@ -599,23 +657,43 @@ export default function Index() {
                   className={`bg-white dark:bg-zinc-900 p-4 rounded-3xl border-l-4 ${item.color} shadow-sm flex-row justify-between items-center border border-gray-100 dark:border-zinc-800`}
                 >
                   <View className="flex-1">
-                    <Text className="text-xs text-gray-500 font-medium mb-1">
-                      {item.time}
-                    </Text>
-                    <Text className="text-base font-bold text-zinc-900 dark:text-zinc-100">
+                    <View className="flex-row items-center gap-2 mb-1">
+                      <Text className="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">
+                        {item.time}
+                      </Text>
+                      {item.courseCode && (
+                        <>
+                          <View className="w-1 h-1 rounded-full bg-gray-300" />
+                          <Text className="text-[10px] text-primary font-bold">
+                            {item.courseCode}
+                          </Text>
+                        </>
+                      )}
+                    </View>
+                    <Text
+                      numberOfLines={1}
+                      className="text-base font-bold text-zinc-900 dark:text-zinc-100"
+                    >
                       {item.subject}
                     </Text>
-                    <View className="flex-row items-center mt-1 gap-1">
-                      <Ionicons
-                        name="location-outline"
-                        size={12}
-                        color="#6B7280"
-                      />
-                      <Text className="text-xs text-gray-500">{item.room}</Text>
+                    <View className="flex-row items-center mt-1.5 gap-3">
+                      <View className="flex-row items-center gap-1">
+                        <Ionicons
+                          name="location-outline"
+                          size={12}
+                          color="#6B7280"
+                        />
+                        <Text className="text-xs text-gray-500">{item.room}</Text>
+                      </View>
+                      <View className="bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">
+                        <Text className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400">
+                          {item.classType}
+                        </Text>
+                      </View>
                     </View>
                   </View>
-                  <View className="bg-gray-50 dark:bg-zinc-800 px-3 py-1 rounded-full">
-                    <Text className="text-xs font-medium text-gray-600">
+                  <View className={`${item.badgeStyle} px-3 py-1.2 rounded-full`}>
+                    <Text className="text-[10px] font-bold uppercase tracking-wider">
                       {item.status}
                     </Text>
                   </View>
