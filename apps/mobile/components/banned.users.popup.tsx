@@ -13,7 +13,7 @@ import {
 } from "react-native";
 
 const SUPPORT_SERVER_URL =
-  "https://unitime-backend.vercel.app/v1/users?email=saidev.25scse1680001@galgotiasuniversity.ac.in"; // 🔗 Replace with your actual support link
+  "https://chat.whatsapp.com/G601WXeqmrw5xgEYPgLiZZ"; // 🔗 Replace with your actual support link
 
 export default function BannedUserPopup() {
   const { loggedInUser } = useAuth();

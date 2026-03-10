@@ -17,7 +17,7 @@ const getUserAgent = (c: Context) =>
   c.req.raw.headers.get("user-agent") ||
   undefined;
 
-const globalLimit = process.env.NODE_ENV === "production" ? 60 : 100;
+const globalLimit = process.env.NODE_ENV === "production" ? 100 : 200;
 const pollingLimit = process.env.NODE_ENV === "production" ? 300 : 500;
 const checkinLimit = 5; // Very strict limit for attendance check-ins
 
