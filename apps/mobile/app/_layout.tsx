@@ -1,3 +1,4 @@
+import { initDeviceId } from "@/lib/device.id";
 import { AttendanceListener } from "@/components/attendance.listener";
 import BannedUserPopup from "@/components/banned.users.popup";
 import { PostHogAnalyticsProvider } from "@/components/posthog.provider";
@@ -117,6 +118,18 @@ function AppContent() {
 }
 
 export default function RootLayout() {
+  // Initialise the stable device ID as early as possible — before AuthProvider
+  // mounts and fires any API requests — so that every request (including
+  // unauthenticated login/signup calls) carries an X-Device-ID header and gets
+  // its own rate-limit bucket instead of sharing one with every other user on
+  // the same IP/network.
+  React.useEffect(() => {
+    initDeviceId().catch(() => {
+      // Non-fatal: the app still works; requests just won't carry the header
+      // until the next cold-start successfully resolves the ID.
+    });
+  }, []);
+
   return (
     <PostHogAnalyticsProvider>
       <QueryClientProvider client={queryClient}>

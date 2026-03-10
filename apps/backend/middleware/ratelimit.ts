@@ -4,22 +4,71 @@ import { cache } from "@unitime/cache";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Context, Next } from "hono";
 
-const getClientIp = (c: Context) =>
-  c.req.header("x-forwarded-for") ||
+// ---------------------------------------------------------------------------
+// Header helpers
+// ---------------------------------------------------------------------------
+
+const getClientIp = (c: Context): string | undefined =>
+  c.req.header("cf-connecting-ip") ||
+  c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ||
   c.req.header("x-real-ip") ||
-  c.req.raw.headers.get("x-forwarded-for") ||
-  c.req.raw.headers.get("x-real-ip") ||
   c.req.raw.headers.get("cf-connecting-ip") ||
+  c.req.raw.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+  c.req.raw.headers.get("x-real-ip") ||
   undefined;
 
-const getUserAgent = (c: Context) =>
+const getUserAgent = (c: Context): string | undefined =>
   c.req.header("user-agent") ||
   c.req.raw.headers.get("user-agent") ||
   undefined;
 
-const globalLimit = process.env.NODE_ENV === "production" ? 100 : 200;
-const pollingLimit = process.env.NODE_ENV === "production" ? 300 : 500;
-const checkinLimit = 5; // Very strict limit for attendance check-ins
+/**
+ * Stable per-device identifier sent by the mobile client.
+ * See apps/mobile/lib/device.id.ts for how it is generated.
+ * Falls back to undefined when absent (e.g. non-mobile callers).
+ */
+const getDeviceId = (c: Context): string | undefined =>
+  c.req.header("x-device-id") ||
+  c.req.raw.headers.get("x-device-id") ||
+  undefined;
+
+// ---------------------------------------------------------------------------
+// Rate limit windows / thresholds
+// ---------------------------------------------------------------------------
+
+const IS_PROD = process.env.NODE_ENV === "production";
+
+/**
+ * Global catch-all limiter — applied to every route that isn't a polling
+ * or check-in route.
+ */
+const globalLimit = IS_PROD ? 100 : 200;
+
+/**
+ * Polling limiter — applied to read-heavy data routes that the app polls
+ * on every foreground-restore (timetable, attendance, users, …).
+ */
+const pollingLimit = IS_PROD ? 300 : 500;
+
+/**
+ * Check-in limiter — very tight; prevents attendance check-in abuse.
+ */
+const checkinLimit = 5;
+
+/**
+ * Auth-flow limiter — generous dedicated bucket for the login / signup /
+ * user-lookup calls that happen BEFORE the client has a JWT.  These requests
+ * are keyed by device ID (or IP as last resort), so they must not share a
+ * bucket with the regular per-user global limiter.
+ *
+ * 30 attempts per device per 5 min is more than enough for any legitimate
+ * login flow while still blocking credential-stuffing.
+ */
+const authFlowLimit = IS_PROD ? 30 : 100;
+
+// ---------------------------------------------------------------------------
+// Limiter instances
+// ---------------------------------------------------------------------------
 
 const ratelimit = {
   global: new Ratelimit({
@@ -43,61 +92,178 @@ const ratelimit = {
     prefix: "@unitime/ratelimit:checkin",
     limiter: Ratelimit.slidingWindow(checkinLimit, "1m"),
   }),
+  authFlow: new Ratelimit({
+    redis: cache,
+    analytics: true,
+    enableProtection: true,
+    prefix: "@unitime/ratelimit:auth-flow",
+    limiter: Ratelimit.slidingWindow(authFlowLimit, "5m"),
+  }),
 };
 
+// ---------------------------------------------------------------------------
+// Route classification helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Routes that are part of the login / signup flow.
+ *
+ * These fire BEFORE the client has a JWT, so they will never have a userId
+ * and must be handled with the dedicated authFlow limiter (keyed by device ID
+ * or IP) rather than the global limiter.
+ *
+ * Exact paths only — we don't want to accidentally exempt entire subtrees.
+ */
+const AUTH_FLOW_ROUTES: string[] = ["/v1/users/create"];
+
+const isAuthFlowRoute = (path: string): boolean => {
+  // Exact match
+  if (AUTH_FLOW_ROUTES.includes(path)) return true;
+  // GET /v1/users?email=... — user lookup during login / session restore
+  if (path === "/v1/users" || path.startsWith("/v1/users?")) return true;
+  return false;
+};
+
+const POLLING_ROUTE_PREFIXES: string[] = [
+  "/v1/timetable",
+  "/v1/attendance",
+  "/v1/users",
+  "/v1/courses",
+  "/v1/orgs",
+  "/v1/profiles",
+];
+
+const isPollingRoute = (path: string): boolean =>
+  POLLING_ROUTE_PREFIXES.some((prefix) => path.startsWith(prefix));
+
+const isCheckinRoute = (path: string): boolean =>
+  path.endsWith("/attendance/checkin");
+
+// ---------------------------------------------------------------------------
+// Key resolution
+// ---------------------------------------------------------------------------
+
+/**
+ * Build the best available rate-limit key for a request.
+ *
+ * Priority (most → least stable / unique):
+ *  1. Authenticated user ID  — 1:1 with an account, ideal key.
+ *  2. Device ID header       — stable per installation even before login.
+ *  3. IP address             — last resort; shared on campus NAT but still
+ *                              better than a global "anonymous" bucket.
+ *
+ * We intentionally never fall back to a bare "anonymous" string because that
+ * would put EVERY user without an IP into the same bucket and instantly
+ * exhaust the limit for all of them simultaneously.
+ *
+ * Returns `null` when we genuinely cannot produce any identifier. The caller
+ * should let those requests through rather than block everyone.
+ */
+const resolveKey = (
+  userId: string | undefined,
+  deviceId: string | undefined,
+  ip: string | undefined,
+  forceDeviceKey: boolean = false,
+): string | null => {
+  // Auth-flow routes bypass userId so they use their own bucket even when
+  // the user happens to already be authenticated (e.g. re-login after expiry).
+  if (!forceDeviceKey && userId) {
+    return `user:${userId}`;
+  }
+
+  // Device ID is the most reliable anonymous identifier — it is a UUID
+  // generated once per device install and sent on every request.
+  if (deviceId) {
+    return `device:${deviceId}`;
+  }
+
+  // IP is the last resort.  On campus NAT this is shared, but it is still
+  // significantly better than a single global bucket.
+  if (ip) {
+    return `ip:${ip}`;
+  }
+
+  // We have nothing useful.  Return null so the caller can decide.
+  return null;
+};
+
+// ---------------------------------------------------------------------------
+// Middleware
+// ---------------------------------------------------------------------------
+
 export const rateLimitHandler = async (c: Context<AppEnv>, next: Next) => {
-  // Try to get user from context (set by auth middleware)
   const user = c.get("user");
   const requesterId = c.get("requesterId");
   const userId = requesterId || user?.$id;
 
-  console.log(`Ratelimiting user: ${userId || "anonymous"}`);
   const ip = getClientIp(c);
   const userAgent = getUserAgent(c);
-
-  // Determine rate limit context
+  const deviceId = getDeviceId(c);
   const path = c.req.path;
-  const isPollingRoute = [
-    "/v1/timetable",
-    "/v1/attendance",
-    "/v1/users",
-    "/v1/courses",
-    "/v1/orgs",
-    "/v1/profiles",
-  ].some((r) => path.startsWith(r));
 
-  const isCheckinRoute = path.endsWith("/attendance/checkin");
+  // ------------------------------------------------------------------
+  // 1. Determine which limiter and key to use.
+  // ------------------------------------------------------------------
 
-  let key: string | undefined;
   let limiter: Ratelimit;
+  let key: string | null;
 
-  if (userId) {
-    key = userId;
-  } else {
-    // fallback for anonymous users
-    key = ip || userAgent || "anonymous";
-  }
-
-  if (isCheckinRoute) {
+  if (isCheckinRoute(path)) {
+    // Check-in: always per-user, fall back to device, then IP.
     limiter = ratelimit.checkin;
-  } else if (isPollingRoute) {
+    key = resolveKey(userId, deviceId, ip);
+  } else if (isAuthFlowRoute(path)) {
+    // Auth-flow routes get their own generous bucket keyed by device / IP.
+    // We intentionally do NOT use userId here even when present so that
+    // auth-related traffic never depletes the user's global quota.
+    limiter = ratelimit.authFlow;
+    key = resolveKey(undefined, deviceId, ip, true);
+  } else if (isPollingRoute(path)) {
     limiter = ratelimit.polling;
+    key = resolveKey(userId, deviceId, ip);
   } else {
     limiter = ratelimit.global;
+    key = resolveKey(userId, deviceId, ip);
   }
 
-  // Apply rate limit
-  const { success, pending, reason, deniedValue } = await limiter.limit(key!, {
+  // ------------------------------------------------------------------
+  // 2. If we could not build any key, let the request through.
+  //    It is better to allow an unidentifiable request than to silently
+  //    block all users who happen to share a degenerate identifier.
+  // ------------------------------------------------------------------
+  if (!key) {
+    console.warn(
+      `[RateLimit] No identifier available for ${c.req.method} ${path} — allowing through.`,
+    );
+    return await next();
+  }
+
+  console.log(
+    `[RateLimit] key="${key}" limiter=${isCheckinRoute(path) ? "checkin" : isAuthFlowRoute(path) ? "authFlow" : isPollingRoute(path) ? "polling" : "global"} path=${path}`,
+  );
+
+  // ------------------------------------------------------------------
+  // 3. Apply the limit.
+  // ------------------------------------------------------------------
+  const { success, pending, reason, deniedValue } = await limiter.limit(key, {
     ip,
     userAgent,
   });
-  await pending; // Await analytics if enabled
+  await pending;
 
-  // Optionally log for debugging
-  console.log("RATELIMIT HANDLER: ", success, reason, deniedValue);
+  console.log(
+    `[RateLimit] success=${success} reason=${reason ?? "-"} deniedValue=${deniedValue ?? "-"}`,
+  );
 
   if (!success) {
-    return c.json({ message: "You hit the rate limit", status_code: 429 }, 429);
+    return c.json(
+      {
+        message: "Too many requests. Please slow down and try again shortly.",
+        status_code: 429,
+      },
+      429,
+    );
   }
+
   return await next();
 };
