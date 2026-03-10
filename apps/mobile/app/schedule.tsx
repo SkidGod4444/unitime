@@ -1,12 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  FlatList,
-  Modal,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View
+    FlatList,
+    Modal,
+    RefreshControl,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View
 } from "react-native";
 import Animated, { FadeInDown, Layout } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -402,7 +403,18 @@ export default function ScheduleScreen() {
   const { loggedInUser } = useAuth();
   const { weekTimetable, loading, fetchWeekTimetable } = useTimetableStore();
 
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = React.useCallback(async () => {
+    if (loggedInUser?.id) {
+      setRefreshing(true);
+      await fetchWeekTimetable(loggedInUser.id);
+      setRefreshing(false);
+    }
+  }, [loggedInUser?.id, fetchWeekTimetable]);
+
   useEffect(() => {
+    // If the timetable is empty, do an initial fetch
     if (loggedInUser?.id && Object.keys(weekTimetable).length === 0) {
       fetchWeekTimetable(loggedInUser.id);
     }
@@ -444,19 +456,29 @@ export default function ScheduleScreen() {
       hours = asDate.getHours();
       minutes = asDate.getMinutes();
     } else {
-      // Direct string like "14:25", "02:25 PM", etc.
       const timeStr = String(timeInput).trim();
-      if (timeStr.includes(" ")) {
-        const [timePart, period] = timeStr.split(" ");
-        const [h, m] = timePart.split(":").map(Number);
-        hours = h;
-        if (period?.toUpperCase() === "PM" && hours !== 12) hours += 12;
-        if (period?.toUpperCase() === "AM" && hours === 12) hours = 0;
-        minutes = m || 0;
-      } else if (timeStr.includes(":")) {
-        const [h, m] = timeStr.split(":").map(Number);
-        hours = h;
-        minutes = m || 0;
+      // Match formats like "14:25", "02:25 PM", "2:25pm", "9:00 AM"
+      const match = timeStr.match(/^(\d{1,2}):(\d{1,2})\s*(am|pm)?$/i);
+      
+      if (match) {
+        hours = parseInt(match[1], 10);
+        minutes = parseInt(match[2], 10);
+        const period = match[3]?.toUpperCase();
+
+        if (period === "PM" && hours !== 12) {
+          hours += 12;
+        } else if (period === "AM" && hours === 12) {
+          hours = 0;
+        }
+      } else {
+        // Fallback for unexpected formats that have at least one number
+        const numMatch = timeStr.match(/\d+/g);
+        if (numMatch && numMatch.length > 0) {
+          hours = parseInt(numMatch[0], 10);
+          if (numMatch.length > 1) {
+            minutes = parseInt(numMatch[1], 10);
+          }
+        }
       }
     }
 
@@ -552,6 +574,9 @@ export default function ScheduleScreen() {
         className="flex-1 px-6"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       >
         <Text className="text-lg font-bold text-gray-900 dark:text-white mb-4">
           {isSameDay(selectedDate, new Date())
