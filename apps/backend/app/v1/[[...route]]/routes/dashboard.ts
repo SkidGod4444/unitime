@@ -2,146 +2,114 @@ import { createHonoErrorResponse, ERROR_CODES } from "@/lib/error.codes";
 import { requireAuth } from "@/middleware/check.auth";
 import type { AppEnv } from "@/types/app-env";
 import { getOrSetCache } from "@unitime/cache";
-import type { UserRole } from "@unitime/db";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
 
 const dashboard = new Hono<AppEnv>();
 dashboard.use("*", requireAuth);
 
-interface UserWithProfile {
-  id: string;
-  name: string;
-  role: UserRole;
-  studentProfile: {
-    labGroupId: string | null;
-    organizationId: string | null;
-  } | null;
-}
-
 dashboard.get("/:userId", async (c) => {
   const userId = c.req.param("userId");
 
   try {
+    const userProfile = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { studentProfile: { select: { organizationId: true, labGroupId: true } } },
+    });
+    
+    if (!userProfile) return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
+    const orgId = userProfile.studentProfile?.organizationId || "global";
+    const myLabGroupId = userProfile.studentProfile?.labGroupId;
+
     const dashboardData = await getOrSetCache(
-      `dashboard:${userId}`,
+      `dashboard:${userId}:${orgId}`,
       async () => {
-        const user = await prisma.user.findUnique({
+        const user = (await prisma.user.findUnique({
           where: { id: userId },
           include: {
-            studentProfile: true, // often needed
             courses: {
               where: { status: "APPROVED" },
               include: { course: true },
             },
           },
-        });
+        })) as unknown as { 
+          id: string; 
+          name: string; 
+          role: "STUDENT" | "PROFESSOR" | "ADMIN"; 
+          courses: Array<{ course: unknown }>;
+        };
 
         if (!user) return null;
 
-        // Fetch Timetable active for today roughly
-        const todayStr = new Date()
-          .toLocaleDateString("en-US", { weekday: "long" })
-          .toUpperCase();
+        const now = new Date();
+        const todayStr = now.toLocaleDateString("en-US", { weekday: "long" }).toUpperCase();
+        
         const timetable = await prisma.timetable.findMany({
           where: {
-            day: todayStr as
-              | "MONDAY"
-              | "TUESDAY"
-              | "WEDNESDAY"
-              | "THURSDAY"
-              | "FRIDAY"
-              | "SATURDAY"
-              | "SUNDAY",
+            day: todayStr as "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY",
             course: {
-              users: { some: { userId: user.id, status: "APPROVED" } },
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              users: { some: { userId: user.id, status: "APPROVED" as any } },
             },
+            OR: [
+              { labGroupId: null },
+              { labGroupId: myLabGroupId || undefined },
+            ],
           },
           include: { course: true },
           orderBy: { startTime: "asc" },
         });
 
-        // Compute attendance summary fast approximation for dashboard
-        const logs = await prisma.attendanceLogs.findMany({
+        const logsCount = await prisma.attendanceLogs.count({ where: { userId: user.id } });
+        const lastLog = await prisma.attendanceLogs.findFirst({
           where: { userId: user.id },
+          orderBy: { markedAt: "desc" },
         });
-        const summary = {
-          totalMarked: logs.length,
-          lastMarkedAt: logs.length > 0 ? logs[logs.length - 1].markedAt : null,
-        };
 
-        // Get currently active sessions for enrolled courses where endTime hasn't passed yet
-        // Exclude ones where the user has ALREADY marked attendance
-        const now = new Date();
-        const rawActiveSessions = await prisma.attendanceQRSession.findMany({
+        const activeSessions = await prisma.attendanceQRSession.findMany({
           where: {
             status: "ACTIVE",
-            endTime: { gte: new Date(now.getTime() - 120_000) }, // allow 2 min grace
+            endTime: { gte: now },
             course: {
-              users: { some: { userId: user.id, status: "APPROVED" } },
+              users: { some: { userId: user.id, status: "APPROVED" as any } },
             },
             OR: [
               { labGroupId: null },
-              {
-                labGroupId:
-                  (user as unknown as UserWithProfile).studentProfile
-                    ?.labGroupId || undefined,
-              },
+              { labGroupId: myLabGroupId || undefined },
             ],
           },
-          include: {
-            course: true,
-          },
+          include: { course: true },
         });
 
-        // Only return sessions that the user hasn't checked into yet
-        const activeSessions = rawActiveSessions.filter(
-          (session) => !session.markedUsers.includes(user.id),
-        );
-
-        // Background: auto-expire sessions whose endTime has long passed (> 5 min ago)
-        // so future cache misses don't keep seeing stale ACTIVE sessions
+        // Background: expire stale sessions
         const staleThreshold = new Date(now.getTime() - 5 * 60_000);
-        prisma.attendanceQRSession
-          .updateMany({
-            where: { status: "ACTIVE", endTime: { lt: staleThreshold } },
-            data: { status: "INACTIVE" },
-          })
-          .catch(() => {});
+        prisma.attendanceQRSession.updateMany({
+          where: { status: "ACTIVE", endTime: { lt: staleThreshold } },
+          data: { status: "INACTIVE" },
+        }).catch(() => {});
 
         return {
           user: { id: user.id, name: user.name, role: user.role },
-          courses:
-            (
-              user as unknown as { courses?: { course: unknown }[] }
-            ).courses?.map((uc) => uc.course) || [],
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          courses: (user.courses || []).map((uc: { course: any }) => uc.course),
           timetable,
-          summary,
-          activeSessions,
+          summary: {
+            totalMarked: logsCount,
+            lastMarkedAt: lastLog?.markedAt || null,
+          },
+          activeSessions: activeSessions.filter((s) => !s.markedUsers.includes(user.id)),
         };
       },
-      300, // TTL of 300 seconds (5 minutes) Cache-First pattern
+      300
     );
 
-    if (!dashboardData) {
-      return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
-    }
-
-    return c.json(
-      {
-        success: true,
-        status_code: 200,
-        data: dashboardData,
-      },
-      200,
-    );
+    return c.json({ success: true, data: dashboardData });
   } catch (error) {
-    console.error("Dashboard fetch error:", error);
+    console.error(error);
     return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
   }
 });
 
-// Bundle endpoint to reduce round trips for the mobile home/landing flows
 dashboard.get("/:userId/bundle", async (c) => {
   const userId = c.req.param("userId");
 
@@ -149,8 +117,7 @@ dashboard.get("/:userId/bundle", async (c) => {
     const payload = await getOrSetCache(
       `dashboard:bundle:${userId}`,
       async () => {
-        // 1) User + enrolled courses (approved only)
-        const user = await prisma.user.findUnique({
+        const userRaw = await prisma.user.findUnique({
           where: { id: userId },
           include: {
             studentProfile: true,
@@ -160,150 +127,50 @@ dashboard.get("/:userId/bundle", async (c) => {
             },
           },
         });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const user = userRaw as any;
 
         if (!user) return null;
+        const myLabGroupId = user.studentProfile?.labGroupId;
+        const orgId = user.studentProfile?.organizationId;
 
-        const userWithCourses = user as unknown as {
-          courses: {
-            course: {
-              id: string;
-              code: string;
-              name: string;
-              credit: number;
-              classType: unknown;
-              organizationId: string | null;
-            };
-          }[];
-        };
+        const now = new Date();
+        const todayStr = now.toLocaleDateString("en-US", { weekday: "long" }).toUpperCase();
 
-        const minimalCourses = (userWithCourses.courses || []).map((uc) => ({
-          id: uc.course.id,
-          code: uc.course.code,
-          name: uc.course.name,
-          credit: uc.course.credit,
-          classType: uc.course.classType,
-          organizationId: uc.course.organizationId,
-        }));
-
-        const myLabGroupId =
-          (user as unknown as UserWithProfile).studentProfile?.labGroupId ||
-          undefined;
-
-        // 2) Today timetable entries for the user
-        const todayStr = new Date()
-          .toLocaleDateString("en-US", { weekday: "long" })
-          .toUpperCase();
         const timetable = await prisma.timetable.findMany({
           where: {
-            day: todayStr as
-              | "MONDAY"
-              | "TUESDAY"
-              | "WEDNESDAY"
-              | "THURSDAY"
-              | "FRIDAY"
-              | "SATURDAY"
-              | "SUNDAY",
-            course: {
-              users: { some: { userId: user.id, status: "APPROVED" } },
-            },
+            day: todayStr as "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY",
+            course: { users: { some: { userId: user.id, status: "APPROVED" as any } } },
+            OR: [{ labGroupId: null }, { labGroupId: myLabGroupId || undefined }],
           },
           include: { course: true },
           orderBy: { startTime: "asc" },
         });
 
-        // 3) Attendance summary (reuse logic from attendance summary route)
-        const enrollments = await prisma.userCourse.findMany({
-          where: { userId },
-          include: { course: true },
-        });
-
-        const attendanceSummary = await Promise.all(
-          enrollments.map(async (enrollment) => {
-            const courseId = enrollment.courseId;
-
-            const totalSessions = await prisma.attendanceQRSession.count({
-              where: { courseId },
-            });
-
-            const sessionIds = (
-              await prisma.attendanceQRSession.findMany({
-                where: { courseId },
-                select: { id: true },
-              })
-            ).map((s) => s.id);
-
-            const attendedSessions = await prisma.attendanceLogs.count({
-              where: { userId, sessionId: { in: sessionIds } },
-            });
-
-            const percentage =
-              totalSessions === 0
-                ? 100
-                : Math.round((attendedSessions / totalSessions) * 100);
-
-            return {
-              courseId,
-              courseName: enrollment.course.name,
-              courseCode: enrollment.course.code,
-              classType: enrollment.course.classType,
-              attended: attendedSessions,
-              total: totalSessions,
-              percentage,
-            };
-          }),
-        );
-
-        // 4) Active sessions the user hasn't checked into yet, and that haven't expired
-        const now2 = new Date();
-        const rawActiveSessions = await prisma.attendanceQRSession.findMany({
+        const activeSessionsRaw = await prisma.attendanceQRSession.findMany({
           where: {
             status: "ACTIVE",
-            endTime: { gte: new Date(now2.getTime() - 120_000) }, // 2 min grace
-            course: {
-              users: { some: { userId: user.id, status: "APPROVED" } },
-            },
-            OR: [{ labGroupId: null }, { labGroupId: myLabGroupId }],
+            endTime: { gte: new Date(now.getTime() - 120_000) },
+            course: { users: { some: { userId: user.id, status: "APPROVED" as any } } },
+            OR: [{ labGroupId: null }, { labGroupId: myLabGroupId || undefined }],
           },
           include: { course: true },
           orderBy: { createdAt: "desc" },
         });
-        const activeSessions = rawActiveSessions.filter(
-          (s) => !s.markedUsers.includes(user.id),
-        );
 
-        // Background: auto-expire stale ACTIVE sessions (> 5 min past endTime)
-        const staleThreshold2 = new Date(now2.getTime() - 5 * 60_000);
-        prisma.attendanceQRSession
-          .updateMany({
-            where: { status: "ACTIVE", endTime: { lt: staleThreshold2 } },
-            data: { status: "INACTIVE" },
-          })
-          .catch(() => {});
-
-        // 5) Notifications (personal + org), last 10 + unreadCount
-        const studentProfile = await prisma.studentProfile.findUnique({
-          where: { userId },
-          select: { organizationId: true },
-        });
-        const organizationId = studentProfile?.organizationId || undefined;
+        const activeSessions = activeSessionsRaw.filter((s) => !s.markedUsers.includes(user.id));
 
         const notifications = await prisma.notification.findMany({
           where: {
-            OR: [{ userId }, ...(organizationId ? [{ organizationId }] : [])],
+            OR: [{ userId }, ...(orgId ? [{ organizationId: orgId }] : [])],
           },
           orderBy: { createdAt: "desc" },
           take: 10,
         });
 
-        // compute unread across all in taken window (consistent with current approach)
-        const unreadCount = notifications.filter(
-          (n) => !n.readBy.includes(userId),
-        ).length;
-
-        // 6) History: last 10 personal + org
         const history = await prisma.historyLog.findMany({
           where: {
-            OR: [{ userId }, ...(organizationId ? [{ organizationId }] : [])],
+            OR: [{ userId }, ...(orgId ? [{ organizationId: orgId }] : [])],
           },
           orderBy: { createdAt: "desc" },
           take: 10,
@@ -311,24 +178,20 @@ dashboard.get("/:userId/bundle", async (c) => {
 
         return {
           user: { id: user.id, name: user.name, role: user.role },
-          courses: minimalCourses,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          courses: (user.courses || []).map((uc: { course: any }) => uc.course),
           timetable,
-          attendanceSummary,
           activeSessions,
-          notifications: { items: notifications, unreadCount },
+          notifications: { items: notifications, unreadCount: notifications.filter((n) => !n.readBy.includes(userId)).length },
           history,
-        } as const;
+        };
       },
-      120,
+      120
     );
 
-    if (!payload) {
-      return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
-    }
-
-    return c.json({ success: true, status_code: 200, data: payload }, 200);
+    return c.json({ success: true, data: payload });
   } catch (error) {
-    console.error("Dashboard bundle error:", error);
+    console.error(error);
     return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
   }
 });

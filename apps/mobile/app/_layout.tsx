@@ -1,5 +1,5 @@
 import { initDeviceId } from "@/lib/device.id";
-import { AttendanceListener } from "@/components/attendance.listener";
+import AttendanceListener from "@/components/attendance.listener";
 import BannedUserPopup from "@/components/banned.users.popup";
 import { PostHogAnalyticsProvider } from "@/components/posthog.provider";
 import ProfileCompletionPopup from "@/components/profile.completion.popup";
@@ -24,6 +24,9 @@ import { useColorScheme as useNWColorScheme } from "nativewind";
 import { useThemeStore } from "@/lib/store";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import UpdateModal from "@/components/update.modal";
+import { useAppUpdates } from "@/hooks/use-app-updates";
+import { registerBackgroundUpdateTask } from "@/utils/background.updates";
 import "./globals.css";
 import Loader from "./loader";
 
@@ -64,6 +67,7 @@ function AppContent() {
   const segments = useSegments() as string[];
   const { setColorScheme } = useNWColorScheme();
   const appTheme = useThemeStore((s) => s.theme);
+  const updater = useAppUpdates();
 
   React.useEffect(() => {
     setColorScheme(appTheme);
@@ -99,6 +103,7 @@ function AppContent() {
                   />
                   <BannedUserPopup />
                   <ProfileCompletionPopup />
+                  <UpdateModal updater={updater} />
 
                   <ThemeProvider
                     value={appTheme === "dark" ? DarkTheme : DefaultTheme}
@@ -128,6 +133,11 @@ export default function RootLayout() {
       // Non-fatal: the app still works; requests just won't carry the header
       // until the next cold-start successfully resolves the ID.
     });
+
+    // Register the optional background update task. This is a best-effort
+    // optimisation — the app works fine if expo-background-task is not yet
+    // installed or if the OS declines the registration.
+    registerBackgroundUpdateTask();
   }, []);
 
   return (

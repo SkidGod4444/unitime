@@ -45,6 +45,7 @@ export default ({ config }) => ({
   },
   plugins: [
     'expo-audio',
+    'expo-background-task',
     'expo-localization',
     'expo-quick-actions',
     [

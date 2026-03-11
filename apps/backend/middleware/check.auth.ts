@@ -105,6 +105,13 @@ export const requireAuth: MiddlewareHandler<AppEnv> = async (c, next) => {
   if (!user) {
     return c.json({ error: "You are not authorized!" }, 401);
   }
+
+  // Optimization: Check if authMiddleware already resolved the DB user
+  const existingId = c.get("requesterId");
+  if (existingId) {
+    return await next();
+  }
+
   try {
     let dbUser = await prisma.user.findUnique({ where: { id: user.$id } });
     if (!dbUser && user.email) {
@@ -130,6 +137,19 @@ export const requireRole = (
     if (!user) {
       return c.json({ error: "You are not authorized!" }, 401);
     }
+
+    // Optimization: Check if context already has role/id
+    const existingId = c.get("requesterId");
+    const existingRole = c.get("requesterRole");
+
+    if (existingId && existingRole) {
+      if (existingRole === "ADMIN" || roles.includes(existingRole)) {
+        return await next();
+      } else {
+        return c.json({ error: "Forbidden" }, 403);
+      }
+    }
+
     try {
       let dbUser = await prisma.user.findUnique({ where: { id: user.$id } });
       if (!dbUser && user.email) {
