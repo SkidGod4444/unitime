@@ -75,7 +75,11 @@ const ConfettiParticle = ({
         width: 8,
         height: 16,
         backgroundColor: color,
-        transform: [{ translateX: animX }, { translateY: animY }, { rotate: spin }],
+        transform: [
+          { translateX: animX },
+          { translateY: animY },
+          { rotate: spin },
+        ],
         borderRadius: 4,
       }}
     />
@@ -115,7 +119,13 @@ export const BirthdayModal: React.FC<BirthdayModalProps> = ({
 
   if (!visible) return null;
 
-  const confettiColors = ["#EF4444", "#3B82F6", "#10B981", "#F59E0B", "#8B5CF6"];
+  const confettiColors = [
+    "#EF4444",
+    "#3B82F6",
+    "#10B981",
+    "#F59E0B",
+    "#8B5CF6",
+  ];
   const particles = Array.from({ length: 50 }).map((_, i) => ({
     id: i,
     x: Math.random() * width,
@@ -156,13 +166,14 @@ export const BirthdayModal: React.FC<BirthdayModalProps> = ({
             <Text className="text-3xl font-bold font-lora text-zinc-900 dark:text-zinc-100 text-center mb-2">
               Happy Birthday!
             </Text>
-            
+
             <Text className="text-xl font-semibold text-pink-500 mb-4 text-center">
               {name.split(" ")[0]} 🎂
             </Text>
 
             <Text className="text-gray-500 dark:text-zinc-400 text-center leading-6 mb-8 px-2 font-medium">
-              Wishing you a fantastic day filled with joy, laughter, and amazing moments. Have a great one!
+              Wishing you a fantastic day filled with joy, laughter, and amazing
+              moments. Have a great one!
             </Text>
 
             <TouchableOpacity
