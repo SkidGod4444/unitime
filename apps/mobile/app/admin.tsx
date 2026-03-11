@@ -1961,7 +1961,7 @@ function LabGroupsTab() {
   };
 
   const items = orgs.flatMap((org) =>
-    (byOrg[org.id] || []).map((g) => ({ ...g, org }))
+    (byOrg[org.id] || []).map((g) => ({ ...g, org })),
   );
 
   if (items.length === 0) {
@@ -1982,12 +1982,20 @@ function LabGroupsTab() {
         <View className="bg-white rounded-2xl p-4 mb-3 border border-gray-100 shadow-sm">
           <View className="flex-row items-center justify-between">
             <View className="flex-1">
-              <Text className="text-base font-bold text-gray-900">{g.name}</Text>
+              <Text className="text-base font-bold text-gray-900">
+                {g.name}
+              </Text>
               <Text className="text-xs text-gray-500 mt-0.5">
-                {g.org.courseName} – {SEMESTER_MAP[g.org.semester] || g.org.semester.replace("_SEMESTER", "")} ({g.org.departmentName})
+                {g.org.courseName} –{" "}
+                {SEMESTER_MAP[g.org.semester] ||
+                  g.org.semester.replace("_SEMESTER", "")}{" "}
+                ({g.org.departmentName})
               </Text>
             </View>
-            <TouchableOpacity onPress={() => handleDelete(g, g.org.id)} className="p-2 bg-red-50 rounded-lg">
+            <TouchableOpacity
+              onPress={() => handleDelete(g, g.org.id)}
+              className="p-2 bg-red-50 rounded-lg"
+            >
               <Ionicons name="trash-outline" size={16} color="#dc2626" />
             </TouchableOpacity>
           </View>
@@ -2032,7 +2040,9 @@ function AddLabGroupModal({
           <TouchableOpacity onPress={onClose} className="p-1">
             <Ionicons name="close" size={22} color="#6b7280" />
           </TouchableOpacity>
-          <Text className="text-base font-bold text-gray-900">Add Lab Group</Text>
+          <Text className="text-base font-bold text-gray-900">
+            Add Lab Group
+          </Text>
           <TouchableOpacity
             onPress={handleSave}
             className="px-4 py-1.5 rounded-lg bg-indigo-600"
@@ -2041,22 +2051,33 @@ function AddLabGroupModal({
           </TouchableOpacity>
         </View>
 
-        <ScrollView className="flex-1 px-4 pt-4" keyboardShouldPersistTaps="handled">
-          <Text className="text-xs font-semibold text-gray-500 uppercase mb-2">Class (Organization)</Text>
+        <ScrollView
+          className="flex-1 px-4 pt-4"
+          keyboardShouldPersistTaps="handled"
+        >
+          <Text className="text-xs font-semibold text-gray-500 uppercase mb-2">
+            Class (Organization)
+          </Text>
           {orgs.map((org) => (
             <Pressable
               key={org.id}
               onPress={() => setSelectedOrgId(org.id)}
               className={`flex-row items-center justify-between p-4 rounded-xl border mb-2 ${selectedOrgId === org.id ? "bg-indigo-50 border-indigo-300" : "bg-white border-gray-200"}`}
             >
-              <Text className={`font-semibold ${selectedOrgId === org.id ? "text-indigo-700" : "text-gray-700"}`}>
+              <Text
+                className={`font-semibold ${selectedOrgId === org.id ? "text-indigo-700" : "text-gray-700"}`}
+              >
                 {org.courseName} – {org.departmentName} (Sec: {org.section})
               </Text>
-              {selectedOrgId === org.id && <Ionicons name="checkmark-circle" size={20} color="#4f46e5" />}
+              {selectedOrgId === org.id && (
+                <Ionicons name="checkmark-circle" size={20} color="#4f46e5" />
+              )}
             </Pressable>
           ))}
 
-          <Text className="text-xs font-semibold text-gray-500 uppercase mb-2 mt-4">Lab Group Name</Text>
+          <Text className="text-xs font-semibold text-gray-500 uppercase mb-2 mt-4">
+            Lab Group Name
+          </Text>
           <TextInput
             value={name}
             onChangeText={setName}

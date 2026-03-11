@@ -60,14 +60,22 @@ export default function ManageTimetableScreen() {
   const getOrgDisplayName = (orgId: string | null) => {
     const org = orgs.find((o) => o.id === orgId);
     if (!org) return "Select Organization";
-    
+
     let sem = org.semester ? org.semester.replace("_SEMESTER", "") : "";
     const semMap: Record<string, string> = {
-      FIRST: "1st", SECOND: "2nd", THIRD: "3rd", FOURTH: "4th", FIFTH: "5th",
-      SIXTH: "6th", SEVENTH: "7th", EIGHTH: "8th", NINTH: "9th", TENTH: "10th"
+      FIRST: "1st",
+      SECOND: "2nd",
+      THIRD: "3rd",
+      FOURTH: "4th",
+      FIFTH: "5th",
+      SIXTH: "6th",
+      SEVENTH: "7th",
+      EIGHTH: "8th",
+      NINTH: "9th",
+      TENTH: "10th",
     };
     sem = semMap[sem] || sem;
-    
+
     return `${org.courseName} - Sem ${sem} - Sec ${org.section}`;
   };
 
@@ -684,32 +692,32 @@ export default function ManageTimetableScreen() {
                 </Text>
                 <View className="flex-row flex-wrap gap-2">
                   {courses
-                    .filter((c) => 
-                      loggedInUser?.role === "ADMIN" && selectedOrgId 
-                        ? c.organizationId === selectedOrgId 
-                        : true
+                    .filter((c) =>
+                      loggedInUser?.role === "ADMIN" && selectedOrgId
+                        ? c.organizationId === selectedOrgId
+                        : true,
                     )
                     .map((course) => (
-                    <TouchableOpacity
-                      key={course.id}
-                      onPress={() => setFormCourseId(course.id)}
-                      className={`px-3 py-2 rounded-xl border ${
-                        formCourseId === course.id
-                          ? "bg-blue-50 border-blue-500"
-                          : "bg-gray-50 dark:bg-zinc-800 border-gray-200 dark:border-zinc-700"
-                      }`}
-                    >
-                      <Text
-                        className={`text-sm font-semibold ${
+                      <TouchableOpacity
+                        key={course.id}
+                        onPress={() => setFormCourseId(course.id)}
+                        className={`px-3 py-2 rounded-xl border ${
                           formCourseId === course.id
-                            ? "text-blue-700"
-                            : "text-gray-700 dark:text-zinc-300"
+                            ? "bg-blue-50 border-blue-500"
+                            : "bg-gray-50 dark:bg-zinc-800 border-gray-200 dark:border-zinc-700"
                         }`}
                       >
-                        {course.code}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
+                        <Text
+                          className={`text-sm font-semibold ${
+                            formCourseId === course.id
+                              ? "text-blue-700"
+                              : "text-gray-700 dark:text-zinc-300"
+                          }`}
+                        >
+                          {course.code}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
                 </View>
               </View>
 
