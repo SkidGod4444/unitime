@@ -20,7 +20,9 @@
         "APPWRITE_PROJECT_NAME",
         "APPWRITE_ENDPOINT",
         "APPWRITE_DEV_KEY",
-        "BETA_APK_URL"
+        "BETA_APK_URL",
+        "RESEND_API_KEY",
+        "RESEND_FROM_ADDRESS"
       ]
     },
     "lint": {
