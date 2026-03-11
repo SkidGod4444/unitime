@@ -20,14 +20,21 @@ attendance.use("/sessions/:id/students", requireRole("PROFESSOR", "ADMIN"));
  * Helper to calculate haversine distance between two points.
  * Returns distance in meters.
  */
-function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
+function haversineDistance(
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number,
+) {
   const R = 6371e3; // metres
   const φ1 = (lat1 * Math.PI) / 180;
   const φ2 = (lat2 * Math.PI) / 180;
   const Δφ = ((lat2 - lat1) * Math.PI) / 180;
   const Δλ = ((lon2 - lon1) * Math.PI) / 180;
 
-  const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+  const a =
+    Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+    Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
   return R * c;
@@ -35,7 +42,8 @@ function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
 
 attendance.post("/qr/session/create", async (c) => {
   const requesterId = c.get("requesterId") as string;
-  if (!requesterId) return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
+  if (!requesterId)
+    return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
 
   const json = await c.req.json();
   const parsed = createQRSessionSchema.safeParse(json);
@@ -61,8 +69,15 @@ attendance.post("/qr/session/create", async (c) => {
   });
 
   if (labGroupId) {
-    const group = await prisma.labGroup.findUnique({ where: { id: labGroupId } });
-    if (!group) return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT, "Invalid lab group");
+    const group = await prisma.labGroup.findUnique({
+      where: { id: labGroupId },
+    });
+    if (!group)
+      return createHonoErrorResponse(
+        c,
+        ERROR_CODES.INVALID_INPUT,
+        "Invalid lab group",
+      );
   }
 
   const qrSession = await prisma.attendanceQRSession.create({
@@ -94,7 +109,9 @@ attendance.post("/qr/session/create", async (c) => {
 
       await prisma.historyLog.createMany({
         data: allManualIds.map((userId: string) => ({
-          title: manualIds.includes(userId) ? "Manual Attendance (Present)" : "Manual Attendance (Absent)",
+          title: manualIds.includes(userId)
+            ? "Manual Attendance (Present)"
+            : "Manual Attendance (Absent)",
           description: manualIds.includes(userId)
             ? `You were manually marked Present for ${courseDetails?.name || "your class"}.`
             : `You were manually marked Absent for ${courseDetails?.name || "your class"}.`,
@@ -125,7 +142,10 @@ attendance.post("/qr/session/create", async (c) => {
     const enrolledStudentsRaw = (await prisma.userCourse.findMany({
       where: { courseId: courseId, status: "APPROVED" },
       include: { user: { select: { expoPushToken: true } } },
-    })) as unknown as Array<{ userId: string; user: { expoPushToken: string | null } }>;
+    })) as unknown as Array<{
+      userId: string;
+      user: { expoPushToken: string | null };
+    }>;
 
     let enrolledStudents = enrolledStudentsRaw.map((e) => ({
       userId: e.userId,
@@ -138,7 +158,9 @@ attendance.post("/qr/session/create", async (c) => {
         select: { userId: true },
       });
       const allowedIds = new Set(groupMembers.map((m) => m.userId));
-      enrolledStudents = enrolledStudents.filter((e) => allowedIds.has(e.userId));
+      enrolledStudents = enrolledStudents.filter((e) =>
+        allowedIds.has(e.userId),
+      );
     }
 
     await Promise.all(
@@ -146,15 +168,17 @@ attendance.post("/qr/session/create", async (c) => {
         Promise.all([
           invalidateCache(`dashboard:${e.userId}`),
           invalidateCache(`dashboard:bundle:${e.userId}`),
-        ])
-      )
+        ]),
+      ),
     );
 
     const targetStudents = enrolledStudents.filter(
-      (e) => !allManualIds.includes(e.userId) && e.userId !== requesterId
+      (e) => !allManualIds.includes(e.userId) && e.userId !== requesterId,
     );
 
-    const tokens = targetStudents.map((e) => e.user.expoPushToken).filter(Boolean) as string[];
+    const tokens = targetStudents
+      .map((e) => e.user.expoPushToken)
+      .filter(Boolean) as string[];
 
     if (tokens.length > 0) {
       const pushDetails = {
@@ -170,7 +194,9 @@ attendance.post("/qr/session/create", async (c) => {
           "Accept-encoding": "gzip, deflate",
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(tokens.map((token) => ({ to: token, ...pushDetails }))),
+        body: JSON.stringify(
+          tokens.map((token) => ({ to: token, ...pushDetails })),
+        ),
       }).catch(console.error);
     }
   } catch (err) {
@@ -182,10 +208,12 @@ attendance.post("/qr/session/create", async (c) => {
 
 attendance.post("/qr/session/verify", async (c) => {
   const requesterId = c.get("requesterId") as string;
-  if (!requesterId) return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
+  if (!requesterId)
+    return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
 
   const { qrString } = await c.req.json();
-  if (!qrString) return createHonoErrorResponse(c, ERROR_CODES.MISSING_REQUIRED_FIELD);
+  if (!qrString)
+    return createHonoErrorResponse(c, ERROR_CODES.MISSING_REQUIRED_FIELD);
 
   const isValid = verifyQRToken(qrString);
   if (!isValid) return c.json({ error: "Invalid or expired QR" }, 400);
@@ -210,7 +238,10 @@ attendance.post("/qr/session/verify", async (c) => {
     });
 
     if (existing) {
-      return c.json({ success: true, message: "Attendance already verified" }, 200);
+      return c.json(
+        { success: true, message: "Attendance already verified" },
+        200,
+      );
     }
 
     await prisma.attendanceLogs.create({
@@ -241,7 +272,10 @@ attendance.post("/qr/session/verify", async (c) => {
     await invalidateCache(`dashboard:bundle:${requesterId}`);
     await invalidateCache(`attendance:summary:${requesterId}`);
 
-    return c.json({ success: true, message: "Attendance verified successfully" });
+    return c.json({
+      success: true,
+      message: "Attendance verified successfully",
+    });
   } catch (err) {
     console.error("Verification error:", err);
     return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
@@ -250,10 +284,12 @@ attendance.post("/qr/session/verify", async (c) => {
 
 attendance.post("/checkin", async (c) => {
   const requesterId = c.get("requesterId") as string;
-  if (!requesterId) return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
+  if (!requesterId)
+    return createHonoErrorResponse(c, ERROR_CODES.TOKEN_MISSING);
 
   const parsed = checkinSchema.safeParse(await c.req.json());
-  if (!parsed.success) return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT);
+  if (!parsed.success)
+    return createHonoErrorResponse(c, ERROR_CODES.INVALID_INPUT);
   const { sessionId, coordinates } = parsed.data;
 
   try {
@@ -263,7 +299,10 @@ attendance.post("/checkin", async (c) => {
     });
 
     if (!session || session.status !== "ACTIVE") {
-      return c.json({ success: false, message: "Session is invalid or inactive" }, 400);
+      return c.json(
+        { success: false, message: "Session is invalid or inactive" },
+        400,
+      );
     }
 
     const now = new Date();
@@ -278,7 +317,12 @@ attendance.post("/checkin", async (c) => {
     const targetCoords = session.coordinates || session.user.coordinates;
     if (targetCoords) {
       const [pLat, pLng] = targetCoords.split(",").map(Number);
-      const distance = haversineDistance(pLat, pLng, coordinates.lat, coordinates.lng);
+      const distance = haversineDistance(
+        pLat,
+        pLng,
+        coordinates.lat,
+        coordinates.lng,
+      );
 
       if (distance > (session.geofenceRadius ?? 75)) {
         await prisma.historyLog.create({
@@ -290,28 +334,42 @@ attendance.post("/checkin", async (c) => {
             organizationId: session.course.organizationId || null,
           },
         });
-        return c.json({ success: false, message: "Too far from classroom", distance }, 403);
+        return c.json(
+          { success: false, message: "Too far from classroom", distance },
+          403,
+        );
       }
     }
 
     const enrollment = await prisma.userCourse.findUnique({
-      where: { userId_courseId: { userId: requesterId, courseId: session.courseId } },
+      where: {
+        userId_courseId: { userId: requesterId, courseId: session.courseId },
+      },
     });
     if (!enrollment || enrollment.status !== "APPROVED") {
       return c.json({ error: "Not enrolled in this course" }, 403);
     }
 
     if (session.labGroupId) {
-      const mapping = await prisma.studentProfile.findUnique({ where: { userId: requesterId } });
+      const mapping = await prisma.studentProfile.findUnique({
+        where: { userId: requesterId },
+      });
       if (!mapping || mapping.labGroupId !== session.labGroupId) {
-        return c.json({ success: false, message: "Not in targeted lab group" }, 403);
+        return c.json(
+          { success: false, message: "Not in targeted lab group" },
+          403,
+        );
       }
     }
 
     const existing = await prisma.attendanceLogs.findUnique({
       where: { sessionId_userId: { sessionId, userId: requesterId } },
     });
-    if (existing) return c.json({ success: true, message: "Attendance already marked" }, 200);
+    if (existing)
+      return c.json(
+        { success: true, message: "Attendance already marked" },
+        200,
+      );
 
     await prisma.attendanceLogs.create({
       data: {
@@ -341,7 +399,9 @@ attendance.post("/checkin", async (c) => {
 
 attendance.get("/qr/session/:id", async (c) => {
   const sessionId = c.req.param("id");
-  const session = await prisma.attendanceQRSession.findUnique({ where: { id: sessionId } });
+  const session = await prisma.attendanceQRSession.findUnique({
+    where: { id: sessionId },
+  });
   if (!session) return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
 
   const qr = generateQRToken(sessionId);
@@ -353,7 +413,11 @@ attendance.get("/summary/:userId", async (c) => {
   const requesterRole = c.get("requesterRole") as string;
   const targetUserId = c.req.param("userId");
 
-  if (requesterId !== targetUserId && requesterRole !== "ADMIN" && requesterRole !== "PROFESSOR") {
+  if (
+    requesterId !== targetUserId &&
+    requesterRole !== "ADMIN" &&
+    requesterRole !== "PROFESSOR"
+  ) {
     return c.json({ error: "Forbidden" }, 403);
   }
 
@@ -370,8 +434,11 @@ attendance.get("/summary/:userId", async (c) => {
           select: { labGroupId: true },
         });
 
-        const orClauses: Array<{ labGroupId: string | null }> = [{ labGroupId: null }];
-        if (studentProfile?.labGroupId) orClauses.push({ labGroupId: studentProfile.labGroupId });
+        const orClauses: Array<{ labGroupId: string | null }> = [
+          { labGroupId: null },
+        ];
+        if (studentProfile?.labGroupId)
+          orClauses.push({ labGroupId: studentProfile.labGroupId });
 
         const sessionIds = (
           await prisma.attendanceQRSession.findMany({
@@ -385,7 +452,8 @@ attendance.get("/summary/:userId", async (c) => {
         });
 
         const total = sessionIds.length;
-        const percentage = total === 0 ? 100 : Math.round((attended / total) * 100);
+        const percentage =
+          total === 0 ? 100 : Math.round((attended / total) * 100);
 
         return {
           courseId: enr.courseId,
@@ -396,7 +464,7 @@ attendance.get("/summary/:userId", async (c) => {
           total,
           percentage,
         };
-      })
+      }),
     );
     return c.json({ success: true, summary });
   });
@@ -430,7 +498,9 @@ attendance.get("/sessions/all", async (c) => {
 
     const enhanced = await Promise.all(
       sessionsRaw.map(async (session) => {
-        const logs = await prisma.attendanceLogs.findMany({ where: { sessionId: session.id } });
+        const logs = await prisma.attendanceLogs.findMany({
+          where: { sessionId: session.id },
+        });
         const enrolled = await prisma.userCourse.findMany({
           where: { courseId: session.courseId, status: "APPROVED" },
           include: { user: true },
@@ -456,7 +526,7 @@ attendance.get("/sessions/all", async (c) => {
           creator: session.user?.name || "Unknown",
           stats,
         };
-      })
+      }),
     );
 
     return c.json({ success: true, sessions: enhanced });
@@ -477,9 +547,15 @@ attendance.patch("/sessions/:id/students", async (c) => {
           await tx.attendanceLogs.upsert({
             where: { sessionId_userId: { sessionId, userId: student.id } },
             update: {},
-            create: { sessionId, userId: student.id, sessionType: "MANUAL_SESSION" },
+            create: {
+              sessionId,
+              userId: student.id,
+              sessionType: "MANUAL_SESSION",
+            },
           });
-          const session = await tx.attendanceQRSession.findUnique({ where: { id: sessionId } });
+          const session = await tx.attendanceQRSession.findUnique({
+            where: { id: sessionId },
+          });
           if (session && !session.markedUsers.includes(student.id)) {
             await tx.attendanceQRSession.update({
               where: { id: sessionId },
@@ -490,11 +566,17 @@ attendance.patch("/sessions/:id/students", async (c) => {
           await tx.attendanceLogs.deleteMany({
             where: { sessionId, userId: student.id },
           });
-          const session = await tx.attendanceQRSession.findUnique({ where: { id: sessionId } });
+          const session = await tx.attendanceQRSession.findUnique({
+            where: { id: sessionId },
+          });
           if (session && session.markedUsers.includes(student.id)) {
             await tx.attendanceQRSession.update({
               where: { id: sessionId },
-              data: { markedUsers: session.markedUsers.filter((id) => id !== student.id) },
+              data: {
+                markedUsers: session.markedUsers.filter(
+                  (id) => id !== student.id,
+                ),
+              },
             });
           }
         }

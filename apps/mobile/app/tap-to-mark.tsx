@@ -5,14 +5,25 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useRef, useState } from "react";
-import { Alert, Text, TouchableOpacity, View, ActivityIndicator } from "react-native";
+import {
+  Alert,
+  Text,
+  TouchableOpacity,
+  View,
+  ActivityIndicator,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const TapToMark = () => {
-  const { sessionId, courseName } = useLocalSearchParams<{ sessionId: string; courseName: string }>();
+  const { sessionId, courseName } = useLocalSearchParams<{
+    sessionId: string;
+    courseName: string;
+  }>();
   const { loggedInUser } = useAuth();
 
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error" | "expired">("idle");
+  const [status, setStatus] = useState<
+    "idle" | "loading" | "success" | "error" | "expired"
+  >("idle");
   const [errorMessage, setErrorMessage] = useState("");
   const isSubmittingRef = useRef(false);
 
@@ -23,21 +34,30 @@ const TapToMark = () => {
 
     try {
       // 1. Get Location (B15: High Accuracy)
-      const { status: locStatus } = await Location.requestForegroundPermissionsAsync();
+      const { status: locStatus } =
+        await Location.requestForegroundPermissionsAsync();
       if (locStatus !== "granted") {
-        Alert.alert("Permission Denied", "Location is required for geofencing.");
+        Alert.alert(
+          "Permission Denied",
+          "Location is required for geofencing.",
+        );
         setStatus("idle");
         isSubmittingRef.current = false;
         return;
       }
-      const location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      });
 
       // 2. Submit Checkin
       const res = await apiFetch("/attendance/checkin", {
         method: "POST",
         body: JSON.stringify({
           sessionId,
-          coordinates: { lat: location.coords.latitude, lng: location.coords.longitude },
+          coordinates: {
+            lat: location.coords.latitude,
+            lng: location.coords.longitude,
+          },
         }),
       });
 
@@ -47,17 +67,23 @@ const TapToMark = () => {
         // B9: Store only the last 50 IDs to prevent storage bloat
         const markedStr = await AsyncStorage.getItem("MARKED_SESSIONS");
         let markedIds = markedStr ? JSON.parse(markedStr) : [];
-        markedIds = [sessionId, ...markedIds.filter((id: string) => id !== sessionId)].slice(0, 50);
-        await AsyncStorage.setItem("MARKED_SESSIONS", JSON.stringify(markedIds));
+        markedIds = [
+          sessionId,
+          ...markedIds.filter((id: string) => id !== sessionId),
+        ].slice(0, 50);
+        await AsyncStorage.setItem(
+          "MARKED_SESSIONS",
+          JSON.stringify(markedIds),
+        );
 
         setTimeout(() => router.replace("/(tabs)/attendance" as any), 2000);
       } else {
         // B17: Improved error feedback
         setErrorMessage(data.message || "Failed to mark attendance.");
         if (data.message?.toLowerCase().includes("expired")) {
-            setStatus("expired");
+          setStatus("expired");
         } else {
-            setStatus("error");
+          setStatus("error");
         }
       }
     } catch (err) {
@@ -92,12 +118,16 @@ const TapToMark = () => {
         </TouchableOpacity>
       )}
 
-      {status === "loading" && <ActivityIndicator size="large" color="#6366f1" />}
+      {status === "loading" && (
+        <ActivityIndicator size="large" color="#6366f1" />
+      )}
 
       {status === "success" && (
         <View className="items-center">
           <Ionicons name="checkmark-circle" size={80} color="#22c55e" />
-          <Text className="text-green-600 font-bold text-xl mt-4">Verified!</Text>
+          <Text className="text-green-600 font-bold text-xl mt-4">
+            Verified!
+          </Text>
         </View>
       )}
 
@@ -105,7 +135,9 @@ const TapToMark = () => {
         <View className="items-center w-full">
           <Ionicons name="alert-circle" size={80} color="#ef4444" />
           <Text className="text-red-500 font-bold text-xl mt-4">Failed</Text>
-          <Text className="text-gray-500 text-center mt-2 px-4">{errorMessage}</Text>
+          <Text className="text-gray-500 text-center mt-2 px-4">
+            {errorMessage}
+          </Text>
           <TouchableOpacity
             onPress={() => setStatus("idle")}
             className="mt-6 bg-gray-100 dark:bg-zinc-800 p-4 rounded-xl w-full items-center"
@@ -118,8 +150,12 @@ const TapToMark = () => {
       {status === "expired" && (
         <View className="items-center w-full">
           <Ionicons name="time" size={80} color="#f59e0b" />
-          <Text className="text-amber-500 font-bold text-xl mt-4">Session Expired</Text>
-          <Text className="text-gray-500 text-center mt-2">This attendance session is no longer active.</Text>
+          <Text className="text-amber-500 font-bold text-xl mt-4">
+            Session Expired
+          </Text>
+          <Text className="text-gray-500 text-center mt-2">
+            This attendance session is no longer active.
+          </Text>
           <TouchableOpacity
             onPress={() => router.back()}
             className="mt-6 bg-gray-100 dark:bg-zinc-800 p-4 rounded-xl w-full items-center"

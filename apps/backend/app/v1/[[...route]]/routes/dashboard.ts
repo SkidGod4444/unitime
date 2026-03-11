@@ -14,10 +14,13 @@ dashboard.get("/:userId", async (c) => {
   try {
     const userProfile = await prisma.user.findUnique({
       where: { id: userId },
-      select: { studentProfile: { select: { organizationId: true, labGroupId: true } } },
+      select: {
+        studentProfile: { select: { organizationId: true, labGroupId: true } },
+      },
     });
-    
-    if (!userProfile) return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
+
+    if (!userProfile)
+      return createHonoErrorResponse(c, ERROR_CODES.RECORD_NOT_FOUND);
     const orgId = userProfile.studentProfile?.organizationId || "global";
     const myLabGroupId = userProfile.studentProfile?.labGroupId;
 
@@ -32,21 +35,30 @@ dashboard.get("/:userId", async (c) => {
               include: { course: true },
             },
           },
-        })) as unknown as { 
-          id: string; 
-          name: string; 
-          role: "STUDENT" | "PROFESSOR" | "ADMIN"; 
+        })) as unknown as {
+          id: string;
+          name: string;
+          role: "STUDENT" | "PROFESSOR" | "ADMIN";
           courses: Array<{ course: unknown }>;
         };
 
         if (!user) return null;
 
         const now = new Date();
-        const todayStr = now.toLocaleDateString("en-US", { weekday: "long" }).toUpperCase();
-        
+        const todayStr = now
+          .toLocaleDateString("en-US", { weekday: "long" })
+          .toUpperCase();
+
         const timetable = await prisma.timetable.findMany({
           where: {
-            day: todayStr as "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY",
+            day: todayStr as
+              | "MONDAY"
+              | "TUESDAY"
+              | "WEDNESDAY"
+              | "THURSDAY"
+              | "FRIDAY"
+              | "SATURDAY"
+              | "SUNDAY",
             course: {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               users: { some: { userId: user.id, status: "APPROVED" as any } },
@@ -60,7 +72,9 @@ dashboard.get("/:userId", async (c) => {
           orderBy: { startTime: "asc" },
         });
 
-        const logsCount = await prisma.attendanceLogs.count({ where: { userId: user.id } });
+        const logsCount = await prisma.attendanceLogs.count({
+          where: { userId: user.id },
+        });
         const lastLog = await prisma.attendanceLogs.findFirst({
           where: { userId: user.id },
           orderBy: { markedAt: "desc" },
@@ -83,10 +97,12 @@ dashboard.get("/:userId", async (c) => {
 
         // Background: expire stale sessions
         const staleThreshold = new Date(now.getTime() - 5 * 60_000);
-        prisma.attendanceQRSession.updateMany({
-          where: { status: "ACTIVE", endTime: { lt: staleThreshold } },
-          data: { status: "INACTIVE" },
-        }).catch(() => {});
+        prisma.attendanceQRSession
+          .updateMany({
+            where: { status: "ACTIVE", endTime: { lt: staleThreshold } },
+            data: { status: "INACTIVE" },
+          })
+          .catch(() => {});
 
         return {
           user: { id: user.id, name: user.name, role: user.role },
@@ -97,10 +113,12 @@ dashboard.get("/:userId", async (c) => {
             totalMarked: logsCount,
             lastMarkedAt: lastLog?.markedAt || null,
           },
-          activeSessions: activeSessions.filter((s) => !s.markedUsers.includes(user.id)),
+          activeSessions: activeSessions.filter(
+            (s) => !s.markedUsers.includes(user.id),
+          ),
         };
       },
-      300
+      300,
     );
 
     return c.json({ success: true, data: dashboardData });
@@ -135,13 +153,27 @@ dashboard.get("/:userId/bundle", async (c) => {
         const orgId = user.studentProfile?.organizationId;
 
         const now = new Date();
-        const todayStr = now.toLocaleDateString("en-US", { weekday: "long" }).toUpperCase();
+        const todayStr = now
+          .toLocaleDateString("en-US", { weekday: "long" })
+          .toUpperCase();
 
         const timetable = await prisma.timetable.findMany({
           where: {
-            day: todayStr as "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY",
-            course: { users: { some: { userId: user.id, status: "APPROVED" as any } } },
-            OR: [{ labGroupId: null }, { labGroupId: myLabGroupId || undefined }],
+            day: todayStr as
+              | "MONDAY"
+              | "TUESDAY"
+              | "WEDNESDAY"
+              | "THURSDAY"
+              | "FRIDAY"
+              | "SATURDAY"
+              | "SUNDAY",
+            course: {
+              users: { some: { userId: user.id, status: "APPROVED" as any } },
+            },
+            OR: [
+              { labGroupId: null },
+              { labGroupId: myLabGroupId || undefined },
+            ],
           },
           include: { course: true },
           orderBy: { startTime: "asc" },
@@ -151,14 +183,21 @@ dashboard.get("/:userId/bundle", async (c) => {
           where: {
             status: "ACTIVE",
             endTime: { gte: new Date(now.getTime() - 120_000) },
-            course: { users: { some: { userId: user.id, status: "APPROVED" as any } } },
-            OR: [{ labGroupId: null }, { labGroupId: myLabGroupId || undefined }],
+            course: {
+              users: { some: { userId: user.id, status: "APPROVED" as any } },
+            },
+            OR: [
+              { labGroupId: null },
+              { labGroupId: myLabGroupId || undefined },
+            ],
           },
           include: { course: true },
           orderBy: { createdAt: "desc" },
         });
 
-        const activeSessions = activeSessionsRaw.filter((s) => !s.markedUsers.includes(user.id));
+        const activeSessions = activeSessionsRaw.filter(
+          (s) => !s.markedUsers.includes(user.id),
+        );
 
         const notifications = await prisma.notification.findMany({
           where: {
@@ -182,11 +221,15 @@ dashboard.get("/:userId/bundle", async (c) => {
           courses: (user.courses || []).map((uc: { course: any }) => uc.course),
           timetable,
           activeSessions,
-          notifications: { items: notifications, unreadCount: notifications.filter((n) => !n.readBy.includes(userId)).length },
+          notifications: {
+            items: notifications,
+            unreadCount: notifications.filter((n) => !n.readBy.includes(userId))
+              .length,
+          },
           history,
         };
       },
-      120
+      120,
     );
 
     return c.json({ success: true, data: payload });

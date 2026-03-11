@@ -1,20 +1,20 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Updates from 'expo-updates';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { AppState, AppStateStatus } from 'react-native';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Updates from "expo-updates";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { AppState, AppStateStatus } from "react-native";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 export type UpdateStatus =
-  | 'idle'
-  | 'checking'
-  | 'available'
-  | 'downloading'
-  | 'ready'
-  | 'error';
+  | "idle"
+  | "checking"
+  | "available"
+  | "downloading"
+  | "ready"
+  | "error";
 
 // Shared key: background.updates.ts writes this, we read & clear it here.
-export const BG_UPDATE_READY_KEY = '@unitime/bg_update_ready';
+export const BG_UPDATE_READY_KEY = "@unitime/bg_update_ready";
 
 // Only check at most once every 30 minutes when foregrounding.
 const CHECK_INTERVAL_MS = 30 * 60 * 1000;
@@ -36,11 +36,11 @@ const CHECK_INTERVAL_MS = 30 * 60 * 1000;
  * a UI component (UpdateModal) uses to ask the user first.
  */
 export function useAppUpdates() {
-  const [status, setStatus] = useState<UpdateStatus>('idle');
+  const [status, setStatus] = useState<UpdateStatus>("idle");
 
   // Keep a ref so the AppState callback always sees the latest status without
   // needing to be re-created (avoids stale-closure issues).
-  const statusRef = useRef<UpdateStatus>('idle');
+  const statusRef = useRef<UpdateStatus>("idle");
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
   const lastCheckedRef = useRef<number>(0);
 
@@ -55,10 +55,7 @@ export function useAppUpdates() {
     if (__DEV__) return;
 
     // Don't interrupt an ongoing download or a pending restart.
-    if (
-      statusRef.current === 'downloading' ||
-      statusRef.current === 'ready'
-    ) {
+    if (statusRef.current === "downloading" || statusRef.current === "ready") {
       return;
     }
 
@@ -70,9 +67,9 @@ export function useAppUpdates() {
     // ── 1. Fast path: background task already pre-downloaded an update ──────
     try {
       const bgReady = await AsyncStorage.getItem(BG_UPDATE_READY_KEY);
-      if (bgReady === 'true') {
+      if (bgReady === "true") {
         await AsyncStorage.removeItem(BG_UPDATE_READY_KEY);
-        setStatus('ready');
+        setStatus("ready");
         return;
       }
     } catch {
@@ -80,13 +77,13 @@ export function useAppUpdates() {
     }
 
     // ── 2. Network check ────────────────────────────────────────────────────
-    setStatus('checking');
+    setStatus("checking");
     try {
       const result = await Updates.checkForUpdateAsync();
-      setStatus(result.isAvailable ? 'available' : 'idle');
+      setStatus(result.isAvailable ? "available" : "idle");
     } catch {
       // Swallow the error silently; the next foreground event will retry.
-      setStatus('idle');
+      setStatus("idle");
     }
   }, []); // no deps — all mutable state is accessed through refs
 
@@ -97,12 +94,12 @@ export function useAppUpdates() {
     checkForUpdates();
 
     const subscription = AppState.addEventListener(
-      'change',
+      "change",
       (nextState: AppStateStatus) => {
         // Only fire when transitioning *into* the active foreground state.
         if (
           appStateRef.current.match(/inactive|background/) &&
-          nextState === 'active'
+          nextState === "active"
         ) {
           checkForUpdates();
         }
@@ -120,12 +117,12 @@ export function useAppUpdates() {
    * `downloading` → `ready` (or `error` on failure).
    */
   const downloadUpdate = useCallback(async () => {
-    setStatus('downloading');
+    setStatus("downloading");
     try {
       await Updates.fetchUpdateAsync();
-      setStatus('ready');
+      setStatus("ready");
     } catch {
-      setStatus('error');
+      setStatus("error");
     }
   }, []);
 
@@ -142,7 +139,7 @@ export function useAppUpdates() {
    * The update will be surfaced again on the next foreground check.
    */
   const dismiss = useCallback(() => {
-    setStatus('idle');
+    setStatus("idle");
     // Reset the throttle timer so the next foreground check isn't blocked.
     lastCheckedRef.current = 0;
   }, []);
@@ -153,13 +150,13 @@ export function useAppUpdates() {
     /** Raw status of the update lifecycle. */
     status,
     /** True when an update has been detected but not yet downloaded. */
-    isUpdateAvailable: status === 'available',
+    isUpdateAvailable: status === "available",
     /** True when an update has been downloaded and is waiting to be applied. */
-    isUpdateReady: status === 'ready',
+    isUpdateReady: status === "ready",
     /** True while the update is being fetched from the server. */
-    isDownloading: status === 'downloading',
+    isDownloading: status === "downloading",
     /** True while we are pinging the update server. */
-    isChecking: status === 'checking',
+    isChecking: status === "checking",
     downloadUpdate,
     applyUpdate,
     dismiss,
