@@ -44,6 +44,8 @@ type ProfileT = {
   updatedAt: Date;
   organizationId: string;
   labGroupId: string | null;
+  dob?: string | Date | null;
+  gender?: "MALE" | "FEMALE" | "OTHER" | null;
 };
 
 type OrgT = {

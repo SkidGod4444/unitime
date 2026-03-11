@@ -19,6 +19,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Linking,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -363,6 +364,30 @@ export default function Profile() {
                 </View>
               </View>
               <Ionicons name="chevron-forward" size={18} color="#9ca3af" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => Linking.openURL("https://git.new/unitime")}
+              className="mt-3 bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm overflow-hidden p-4 flex-row items-center justify-between"
+            >
+              <View className="flex-row items-center gap-4">
+                <View className="h-10 w-10 bg-slate-50 dark:bg-zinc-800 rounded-full items-center justify-center">
+                  <Ionicons
+                    name="logo-github"
+                    size={20}
+                    color={theme === "dark" ? "#E5E7EB" : "#374151"}
+                  />
+                </View>
+                <View>
+                  <Text className="text-base font-semibold text-gray-700 dark:text-zinc-100">
+                    Star us on GitHub
+                  </Text>
+                  <Text className="text-xs text-gray-500 dark:text-zinc-400">
+                    Star & contribute to the source code
+                  </Text>
+                </View>
+              </View>
+              <Ionicons name="open-outline" size={18} color="#9ca3af" />
             </TouchableOpacity>
           </View>
 
