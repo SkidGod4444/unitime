@@ -25,6 +25,7 @@ import {
   useProfilesStore,
   useTicketsStore,
   useUsersStore,
+  useLabGroupsStore,
 } from "../lib/store";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -143,7 +144,8 @@ type TabKey =
   | "courses"
   | "attendance"
   | "feedbacks"
-  | "tickets";
+  | "tickets"
+  | "labGroups";
 
 const TABS: { key: TabKey; label: string; icon: string }[] = [
   { key: "users", label: "Users", icon: "people" },
@@ -154,6 +156,7 @@ const TABS: { key: TabKey; label: string; icon: string }[] = [
   { key: "attendance", label: "Attendance", icon: "checkmark-done-outline" },
   { key: "feedbacks", label: "Feedbacks", icon: "chatbubble-ellipses-outline" },
   { key: "tickets", label: "Tickets", icon: "help-buoy-outline" },
+  { key: "labGroups", label: "Lab Groups", icon: "flask-outline" },
 ];
 
 // ─── Action button ────────────────────────────────────────────────────────────
@@ -1927,6 +1930,146 @@ function UsersTab() {
   );
 }
 
+// ─── Lab Groups Tab ──────────────────────────────────────────────────────────
+
+function LabGroupsTab() {
+  const { orgs } = useOrgsStore();
+  const { byOrg, fetchOrgLabGroups, deleteLabGroup } = useLabGroupsStore();
+
+  useEffect(() => {
+    orgs.forEach((org) => {
+      fetchOrgLabGroups(org.id);
+    });
+  }, [orgs, fetchOrgLabGroups]);
+
+  const handleDelete = (group: any, orgId: string) => {
+    Alert.alert("Delete Lab Group", `Delete ${group.name}?`, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await deleteLabGroup(group.id, orgId);
+            Alert.alert("Success", "Lab Group deleted successfully!");
+          } catch (e: any) {
+            Alert.alert("Error", e.message || "Failed to delete lab group");
+          }
+        },
+      },
+    ]);
+  };
+
+  const items = orgs.flatMap((org) =>
+    (byOrg[org.id] || []).map((g) => ({ ...g, org }))
+  );
+
+  if (items.length === 0) {
+    return (
+      <View className="items-center py-10">
+        <Ionicons name="flask-outline" size={40} color="#d1d5db" />
+        <Text className="text-gray-400 mt-2 text-sm">No lab groups yet.</Text>
+      </View>
+    );
+  }
+
+  return (
+    <FlatList
+      data={items}
+      keyExtractor={(g) => g.id}
+      scrollEnabled={false}
+      renderItem={({ item: g }) => (
+        <View className="bg-white rounded-2xl p-4 mb-3 border border-gray-100 shadow-sm">
+          <View className="flex-row items-center justify-between">
+            <View className="flex-1">
+              <Text className="text-base font-bold text-gray-900">{g.name}</Text>
+              <Text className="text-xs text-gray-500 mt-0.5">
+                {g.org.courseName} – {SEMESTER_MAP[g.org.semester] || g.org.semester.replace("_SEMESTER", "")} ({g.org.departmentName})
+              </Text>
+            </View>
+            <TouchableOpacity onPress={() => handleDelete(g, g.org.id)} className="p-2 bg-red-50 rounded-lg">
+              <Ionicons name="trash-outline" size={16} color="#dc2626" />
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+    />
+  );
+}
+
+function AddLabGroupModal({
+  visible,
+  onClose,
+  onAdd,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  onAdd: (data: any) => void;
+}) {
+  const { orgs } = useOrgsStore();
+  const [selectedOrgId, setSelectedOrgId] = useState("");
+  const [name, setName] = useState("");
+
+  const handleSave = () => {
+    if (!selectedOrgId || !name) {
+      Alert.alert("Error", "Please fill all required fields.");
+      return;
+    }
+    onAdd({ organizationId: selectedOrgId, name });
+    setName("");
+    setSelectedOrgId("");
+  };
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
+    >
+      <SafeAreaView className="flex-1 bg-gray-50 dark:bg-zinc-900">
+        <View className="flex-row items-center justify-between px-4 py-3 bg-white border-b border-gray-100">
+          <TouchableOpacity onPress={onClose} className="p-1">
+            <Ionicons name="close" size={22} color="#6b7280" />
+          </TouchableOpacity>
+          <Text className="text-base font-bold text-gray-900">Add Lab Group</Text>
+          <TouchableOpacity
+            onPress={handleSave}
+            className="px-4 py-1.5 rounded-lg bg-indigo-600"
+          >
+            <Text className="font-bold text-sm text-white">Save</Text>
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView className="flex-1 px-4 pt-4" keyboardShouldPersistTaps="handled">
+          <Text className="text-xs font-semibold text-gray-500 uppercase mb-2">Class (Organization)</Text>
+          {orgs.map((org) => (
+            <Pressable
+              key={org.id}
+              onPress={() => setSelectedOrgId(org.id)}
+              className={`flex-row items-center justify-between p-4 rounded-xl border mb-2 ${selectedOrgId === org.id ? "bg-indigo-50 border-indigo-300" : "bg-white border-gray-200"}`}
+            >
+              <Text className={`font-semibold ${selectedOrgId === org.id ? "text-indigo-700" : "text-gray-700"}`}>
+                {org.courseName} – {org.departmentName} (Sec: {org.section})
+              </Text>
+              {selectedOrgId === org.id && <Ionicons name="checkmark-circle" size={20} color="#4f46e5" />}
+            </Pressable>
+          ))}
+
+          <Text className="text-xs font-semibold text-gray-500 uppercase mb-2 mt-4">Lab Group Name</Text>
+          <TextInput
+            value={name}
+            onChangeText={setName}
+            placeholder="e.g. Group A"
+            className="bg-white border border-gray-200 rounded-xl px-4 py-3 mb-4 text-gray-800"
+          />
+          <View className="h-10" />
+        </ScrollView>
+      </SafeAreaView>
+    </Modal>
+  );
+}
+
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
 const TAB_ADD_LABELS: Record<TabKey, string> = {
@@ -1938,6 +2081,7 @@ const TAB_ADD_LABELS: Record<TabKey, string> = {
   attendance: "New Session",
   feedbacks: "",
   tickets: "",
+  labGroups: "Add Lab Group",
 };
 
 export default function AdminPage() {
@@ -1946,7 +2090,9 @@ export default function AdminPage() {
   const [addClassVisible, setAddClassVisible] = useState(false);
   const [addCourseVisible, setAddCourseVisible] = useState(false);
   const [moderateUserVisible, setModerateUserVisible] = useState(false);
+  const [addLabGroupVisible, setAddLabGroupVisible] = useState(false);
   const { loggedInUser } = useAuth();
+  const { createLabGroup } = useLabGroupsStore();
   const { createCourse, courses } = useCoursesStore();
   const { createOrg, orgs } = useOrgsStore();
 
@@ -1981,6 +2127,20 @@ export default function AdminPage() {
     }
   };
 
+  const handleAddLabGroup = async (data: any) => {
+    try {
+      const res = await createLabGroup(data.organizationId, data.name);
+      if (res) {
+        setAddLabGroupVisible(false);
+        Alert.alert("Success", "Lab Group added successfully!");
+      } else {
+        throw new Error("Failed to add Lab Group");
+      }
+    } catch (e: any) {
+      Alert.alert("Error", e.message || "Failed to add Lab Group");
+    }
+  };
+
   const handleAdd = () => {
     if (activeTab === "roles") {
       setAddUserVisible(true);
@@ -1990,6 +2150,8 @@ export default function AdminPage() {
       setAddClassVisible(true);
     } else if (activeTab === "users") {
       setModerateUserVisible(true);
+    } else if (activeTab === "labGroups") {
+      setAddLabGroupVisible(true);
     } else {
       Alert.alert("Add", TAB_ADD_LABELS[activeTab]);
     }
@@ -2261,7 +2423,8 @@ export default function AdminPage() {
             activeTab === "roles" ||
             activeTab === "classes" ||
             activeTab === "courses" ||
-            activeTab === "attendance") && (
+            activeTab === "attendance" ||
+            activeTab === "labGroups") && (
             <TouchableOpacity
               onPress={handleAdd}
               activeOpacity={0.8}
@@ -2293,6 +2456,7 @@ export default function AdminPage() {
           {activeTab === "attendance" && <AttendanceTab />}
           {activeTab === "feedbacks" && <FeedbacksTab />}
           {activeTab === "tickets" && <TicketsTab />}
+          {activeTab === "labGroups" && <LabGroupsTab />}
         </View>
       </ScrollView>
 
@@ -2321,6 +2485,12 @@ export default function AdminPage() {
         visible={addClassVisible}
         onClose={() => setAddClassVisible(false)}
         onAdd={handleAddClass}
+      />
+      {/* Add Lab Group Modal */}
+      <AddLabGroupModal
+        visible={addLabGroupVisible}
+        onClose={() => setAddLabGroupVisible(false)}
+        onAdd={handleAddLabGroup}
       />
     </SafeAreaView>
   );

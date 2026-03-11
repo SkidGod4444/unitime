@@ -1,0 +1,12 @@
+name: EAS Updates
+
+on:
+  push:
+    branches: ['main']
+
+jobs:
+  send_updates:
+    name: EAS Send updates
+    type: update
+    params:
+      channel: production

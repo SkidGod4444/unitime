@@ -2,6 +2,7 @@ import { useAuth } from "@/contexts/auth.cntxt";
 import { apiFetch } from "@/lib/api";
 import { useCoursesStore } from "@/lib/store/courses";
 import { useLabGroupsStore } from "@/lib/store/lab-groups";
+import { useOrgsStore, useProfilesStore } from "@/lib/store";
 import { TimetableEntry, useTimetableStore } from "@/lib/store/timetable";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -11,6 +12,7 @@ import {
   Alert,
   Modal,
   Pressable,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
@@ -40,6 +42,34 @@ export default function ManageTimetableScreen() {
     useTimetableStore();
   const { courses, fetchCourses } = useCoursesStore();
   const { byOrg, fetchOrgLabGroups, createLabGroup } = useLabGroupsStore();
+  const { orgs } = useOrgsStore();
+  const { profiles } = useProfilesStore();
+
+  const myProfile = profiles.find((p) => p.userId === loggedInUser?.id);
+
+  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
+  const [showOrgPicker, setShowOrgPicker] = useState(false);
+
+  // Set initial selected organization when myProfile loads
+  useEffect(() => {
+    if (myProfile?.organizationId && !selectedOrgId) {
+      setSelectedOrgId(myProfile.organizationId);
+    }
+  }, [myProfile?.organizationId, selectedOrgId]);
+
+  const getOrgDisplayName = (orgId: string | null) => {
+    const org = orgs.find((o) => o.id === orgId);
+    if (!org) return "Select Organization";
+    
+    let sem = org.semester ? org.semester.replace("_SEMESTER", "") : "";
+    const semMap: Record<string, string> = {
+      FIRST: "1st", SECOND: "2nd", THIRD: "3rd", FOURTH: "4th", FIFTH: "5th",
+      SIXTH: "6th", SEVENTH: "7th", EIGHTH: "8th", NINTH: "9th", TENTH: "10th"
+    };
+    sem = semMap[sem] || sem;
+    
+    return `${org.courseName} - Sem ${sem} - Sec ${org.section}`;
+  };
 
   const [selectedDay, setSelectedDay] = useState(DAYS[0]);
   const [allEntries, setAllEntries] = useState<TimetableEntry[]>([]);
@@ -192,6 +222,14 @@ export default function ManageTimetableScreen() {
 
   const currentDayEntries = allEntries
     .filter((e) => e.day === selectedDay)
+    .filter((e) => {
+      // Filter by selected organization for Admin
+      if (loggedInUser?.role === "ADMIN" && selectedOrgId) {
+        const course = e.course || courses.find((c) => c.id === e.courseId);
+        return course?.organizationId === selectedOrgId;
+      }
+      return true;
+    })
     .sort(
       (a, b) =>
         new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
@@ -300,6 +338,34 @@ export default function ManageTimetableScreen() {
         <View className="w-8" />
       </View>
 
+      {/* Admin Organization Dropdown */}
+      {loggedInUser?.role === "ADMIN" && (
+        <View className="px-6 mb-4">
+          <TouchableOpacity
+            onPress={() => setShowOrgPicker(true)}
+            className="flex-row items-center justify-between bg-white dark:bg-zinc-900 px-4 py-3 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm"
+          >
+            <View className="flex-row items-center gap-3 flex-1">
+              <View className="h-10 w-10 bg-blue-50 dark:bg-blue-900/20 rounded-full items-center justify-center">
+                <Ionicons name="business-outline" size={20} color="#2563EB" />
+              </View>
+              <View className="flex-1">
+                <Text className="text-xs text-gray-500 dark:text-zinc-400 font-medium mb-0.5">
+                  Mapping timetable for
+                </Text>
+                <Text
+                  className="text-sm font-bold text-zinc-900 dark:text-zinc-100"
+                  numberOfLines={1}
+                >
+                  {getOrgDisplayName(selectedOrgId)}
+                </Text>
+              </View>
+            </View>
+            <Ionicons name="chevron-down" size={20} color="#9CA3AF" />
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* Days Tabs */}
       <View className="px-6 mb-4">
         <View className="flex-row justify-between bg-white dark:bg-zinc-900 p-1.5 rounded-full border border-gray-100 dark:border-zinc-800">
@@ -368,6 +434,70 @@ export default function ManageTimetableScreen() {
       >
         <Ionicons name="add" size={28} color="white" />
       </TouchableOpacity>
+
+      {/* ── Org Picker Modal ── */}
+      <Modal
+        visible={showOrgPicker}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setShowOrgPicker(false)}
+      >
+        <Pressable
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            justifyContent: "flex-end",
+          }}
+          onPress={() => setShowOrgPicker(false)}
+        >
+          <Pressable onPress={(e) => e.stopPropagation()}>
+            <View className="bg-white dark:bg-zinc-900 w-full rounded-t-[32px] p-6 pb-10 h-[90%] shadow-2xl">
+              <View className="w-12 h-1.5 bg-gray-200 dark:bg-zinc-700 rounded-full mb-5 self-center" />
+              <Text className="text-xl font-bold font-lora text-zinc-900 dark:text-white mb-4 text-center">
+                Select Organization
+              </Text>
+
+              <ScrollView>
+                {orgs.map((org) => {
+                  const isSelected = selectedOrgId === org.id;
+                  const orgName = getOrgDisplayName(org.id);
+                  return (
+                    <TouchableOpacity
+                      key={org.id}
+                      onPress={() => {
+                        setSelectedOrgId(org.id);
+                        setShowOrgPicker(false);
+                        // Also clear formCourseId if we switch orgs, to avoid inconsistencies!
+                        setFormCourseId("");
+                      }}
+                      className={`flex-row items-center gap-3 px-4 py-3.5 rounded-2xl border mb-2 ${isSelected ? "bg-blue-50 border-blue-500" : "bg-gray-50 dark:bg-zinc-800 border-gray-100 dark:border-zinc-700"}`}
+                    >
+                      <Ionicons
+                        name="business-outline"
+                        size={18}
+                        color={isSelected ? "#2563EB" : "#6B7280"}
+                      />
+                      <Text
+                        className={`font-semibold text-base flex-1 ${isSelected ? "text-blue-700" : "text-gray-700 dark:text-zinc-200"}`}
+                        numberOfLines={2}
+                      >
+                        {orgName}
+                      </Text>
+                      {isSelected && (
+                        <Ionicons
+                          name="checkmark-circle"
+                          size={18}
+                          color="#2563EB"
+                        />
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       {/* ── Group Picker Modal ── */}
       <Modal
@@ -553,7 +683,13 @@ export default function ManageTimetableScreen() {
                   Select Course
                 </Text>
                 <View className="flex-row flex-wrap gap-2">
-                  {courses.map((course) => (
+                  {courses
+                    .filter((c) => 
+                      loggedInUser?.role === "ADMIN" && selectedOrgId 
+                        ? c.organizationId === selectedOrgId 
+                        : true
+                    )
+                    .map((course) => (
                     <TouchableOpacity
                       key={course.id}
                       onPress={() => setFormCourseId(course.id)}

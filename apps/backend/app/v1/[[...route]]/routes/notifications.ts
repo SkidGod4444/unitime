@@ -13,7 +13,7 @@ notifications.post("/", async (c) => {
   const { userId, organizationId, title, body, type, actionUrl } =
     await c.req.json();
 
-  if (!userId || !title || !body || !type) {
+  if ((!userId && !organizationId) || !title || !body || !type) {
     return createHonoErrorResponse(c, ERROR_CODES.MISSING_REQUIRED_FIELD);
   }
 
@@ -33,7 +33,9 @@ notifications.post("/", async (c) => {
       return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
     }
 
-    await invalidateCache(`notifications:${userId}`);
+    if (userId) {
+      await invalidateCache(`notifications:${userId}`);
+    }
 
     return c.json(
       {
