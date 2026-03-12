@@ -221,7 +221,7 @@ attendance.post("/qr/session/create", async (c) => {
       await prisma.notification.createMany({
         data: targetStudents.map((e) => ({
           title: "Attendance Started",
-          body: `Attendance for ${courseDetails?.name || "your class"} is now open! Tap to check in.",
+          body: `Attendance for ${courseDetails?.name || "your class"} is now open! Tap to check in.`,
           type: "ATTENDANCE",
           userId: e.userId,
           organizationId: courseDetails?.organizationId || null,
