@@ -297,7 +297,8 @@ export const rateLimitHandler = async (c: Context<AppEnv>, next: Next) => {
       if (Number.isFinite(delta) && delta > 0) retryAfterSec = delta;
     }
 
-    if (typeof limitVal === "number") c.header("RateLimit-Limit", String(limitVal));
+    if (typeof limitVal === "number")
+      c.header("RateLimit-Limit", String(limitVal));
     if (typeof remainingVal === "number")
       c.header("RateLimit-Remaining", String(Math.max(0, remainingVal)));
     if (typeof retryAfterSec === "number") {

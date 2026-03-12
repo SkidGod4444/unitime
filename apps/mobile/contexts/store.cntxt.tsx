@@ -54,9 +54,10 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   const lastRefreshedAt = useRef<number>(0);
   const redirectingToTapRef = useRef(false);
 
-  const handleActiveSessions = async (
-    bundleData?: { activeSessions?: any[]; courses?: any[] },
-  ) => {
+  const handleActiveSessions = async (bundleData?: {
+    activeSessions?: any[];
+    courses?: any[];
+  }) => {
     try {
       const sessions = Array.isArray(bundleData?.activeSessions)
         ? bundleData!.activeSessions
@@ -98,8 +99,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
       const isOnTapToMark =
         Array.isArray(segments) && segments.includes("tap-to-mark");
       if (!isOnTapToMark && !redirectingToTapRef.current) {
-        const courseName =
-          validSession.course?.name || validSession.courseId;
+        const courseName = validSession.course?.name || validSession.courseId;
         redirectingToTapRef.current = true;
         console.log("Bundle contains Active Session:", validSession.id);
         router.push(
@@ -117,7 +117,6 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
       console.warn("handleActiveSessions failed:", err);
     }
   };
-
 
   const { fetchUsers } = useUsersStore();
   const { fetchProfiles } = useProfilesStore();
@@ -191,7 +190,6 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
               });
             }
             // also refresh personal tickets/feedbacks
-            
           } else {
             // Fallback to legacy per-endpoint calls
             await Promise.allSettled([
@@ -199,7 +197,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
               fetchSummary(loggedInUser.id),
               fetchNotifications(loggedInUser.id),
               fetchHistoryLogs(loggedInUser.id),
-                          ]);
+            ]);
           }
         } catch {
           // Network error → fallback
@@ -208,7 +206,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
             fetchSummary(loggedInUser.id),
             fetchNotifications(loggedInUser.id),
             fetchHistoryLogs(loggedInUser.id),
-                      ]);
+          ]);
         }
       }
 
