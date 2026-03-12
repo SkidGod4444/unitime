@@ -92,23 +92,22 @@ export default function QRScannerScreen() {
       const result = await res.json();
 
       if (res.ok) {
-        // Save to marked sessions to prevent auto-redirect
+        // Persist locally to prevent auto-redirect loops from the listener
         try {
-          const [sessionId] = data.split("|");
-          const markedStr = await AsyncStorage.getItem("MARKED_SESSIONS");
-          let markedIds = markedStr ? JSON.parse(markedStr) : [];
-          markedIds = [
-            sessionId,
-            ...markedIds.filter((id: string) => id !== sessionId),
-          ].slice(0, 50);
-          await AsyncStorage.setItem(
-            "MARKED_SESSIONS",
-            JSON.stringify(markedIds),
-          );
+          const [sessionId] = (data || "").split("|");
+          if (sessionId) {
+            const markedStr = await AsyncStorage.getItem("MARKED_SESSIONS");
+            let markedIds = markedStr ? JSON.parse(markedStr) : [];
+            markedIds = [
+              sessionId,
+              ...markedIds.filter((id: string) => id !== sessionId),
+            ].slice(0, 50);
+            await AsyncStorage.setItem("MARKED_SESSIONS", JSON.stringify(markedIds));
+          }
         } catch (e) {
-          console.error("Failed to save marked session:", e);
+          // Non-fatal: proceed even if storage write fails
+          console.warn("Failed to persist MARKED_SESSIONS after scan:", e);
         }
-
         Alert.alert(
           "Success",
           result.message || "Attendance verified successfully",

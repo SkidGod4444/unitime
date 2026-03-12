@@ -27,7 +27,16 @@ attendance.get("/qr/session/:id", async (c) => {
 });
 
 // Basic protection for all attendance routes
-attendance.use("*", requireAuth);
+attendance.use("*", async (c, next) => {
+  // Public read endpoint used by the web QR display page.
+  if (
+    c.req.method === "GET" &&
+    /\/attendance\/qr\/session\/[^/]+$/.test(c.req.path)
+  ) {
+    return next();
+  }
+  return requireAuth(c, next);
+});
 
 // More strict protection for specific routes
 attendance.use("/qr/session/create", requireRole("PROFESSOR", "ADMIN"));
@@ -207,36 +216,50 @@ attendance.post("/qr/session/create", async (c) => {
       (e) => !allManualIds.includes(e.userId) && e.userId !== requesterId,
     );
 
-    const tokens = targetStudents
+    // Also create in-app notifications for students who need to act
+    if (targetStudents.length > 0) {
+      await prisma.notification.createMany({
+        data: targetStudents.map((e) => ({
+          title: "Attendance Started",
+          body: `Attendance for ${courseDetails?.name || "your class"} is now open! Tap to check in.",
+          type: "ATTENDANCE",
+          userId: e.userId,
+          organizationId: courseDetails?.organizationId || null,
+        })),
+        skipDuplicates: true,
+      });
+    }
+
+    const tokens = (targetStudents
       .map((e) => e.user.expoPushToken)
-      .filter(Boolean) as string[];
+      .filter(Boolean) as string[])
+      // Filter to Expo token shapes to avoid 400s rejecting the whole batch
+      .filter((t) => /ExponentPushToken\[|ExpoPushToken\[/.test(t));
 
     if (tokens.length > 0) {
       const pushDetails = {
         title: "Attendance Started",
         body: `Attendance for ${courseDetails?.name || "your class"} is now open! Tap here to check in.`,
-        data: { courseId, sessionId: qrSession.id },
-      };
+        data: { courseId, sessionId: qrSession.id, courseName: courseDetails?.name },
+      } as const;
 
-      const pushResponse = await fetch("https://exp.host/--/api/v2/push/send", {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Accept-encoding": "gzip, deflate",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(
-          tokens.map((token) => ({ to: token, ...pushDetails })),
-        ),
-      });
-
-      if (!pushResponse.ok) {
-        console.error(
-          "Expo push notification failed:",
-          await pushResponse.text(),
-        );
-      } else {
-        console.log(`Successfully sent ${tokens.length} push notifications.`);
+      // Chunk to <= 99 tokens per Expo request
+      const chunkSize = 99;
+      for (let i = 0; i < tokens.length; i += chunkSize) {
+        const chunk = tokens.slice(i, i + chunkSize);
+        try {
+          await fetch("https://exp.host/--/api/v2/push/send", {
+            method: "POST",
+            headers: {
+              Accept: "application/json",
+              "Accept-encoding": "gzip, deflate",
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(chunk.map((to) => ({ to, ...pushDetails }))),
+          });
+        } catch (e) {
+          console.error("Expo push send failed:", e);
+        }
       }
     }
   } catch (err) {
