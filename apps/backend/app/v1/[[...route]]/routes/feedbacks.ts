@@ -4,6 +4,7 @@ import type { AppEnv } from "@/types/app-env";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
 import { z } from "zod";
+import { sendPushNotification } from "@/lib/expo.notifications";
 
 const feedbacks = new Hono<AppEnv>();
 feedbacks.use("*", requireAuth);
@@ -107,7 +108,17 @@ feedbacks.patch("/:id/status", requireRole("ADMIN"), async (c) => {
         status: body.status,
         resolvedAt: body.status === "RESOLVED" ? new Date() : undefined,
       },
+      include: { user: { select: { expoPushToken: true } } },
     });
+
+    if (update.user.expoPushToken) {
+      await sendPushNotification(
+        [update.user.expoPushToken],
+        `Feedback Status Updated`,
+        `Your feedback has been marked as ${body.status}.`
+      );
+    }
+
     return c.json({ success: true, feedback: update }, 200);
   } catch (e) {
     console.error("Feedback status update failed", e);

@@ -8,6 +8,7 @@ import {
 } from "@unitime/cache";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
+import { sendPushNotification } from "@/lib/expo.notifications";
 
 const admin = new Hono<AppEnv>();
 // Only ADMINs can access anything under /admin
@@ -99,6 +100,16 @@ admin.patch("/users/:id/ban", async (c) => {
       },
     });
 
+    if (user.expoPushToken) {
+      await sendPushNotification(
+        [user.expoPushToken],
+        body.banned ? "Account Suspended" : "Account Restored",
+        body.banned 
+          ? `Your account has been suspended. Reason: ${body.banReason || "Not provided"}`
+          : "Your account suspension has been lifted."
+      );
+    }
+
     await invalidateCache("users:all", `user:${id}`, `user:${user.email}`);
 
     return c.json({
@@ -182,7 +193,19 @@ admin.patch("/enrollments/:id/status", async (c) => {
     const enrollment = await prisma.userCourse.update({
       where: { id: enrollmentId },
       data: { status: body.status },
+      include: {
+        user: { select: { expoPushToken: true } },
+        course: { select: { name: true, code: true } }
+      }
     });
+
+    if (enrollment.user.expoPushToken) {
+      await sendPushNotification(
+        [enrollment.user.expoPushToken],
+        `Enrollment ${body.status === "APPROVED" ? "Approved" : "Rejected"}`,
+        `Your request to join ${enrollment.course.name} (${enrollment.course.code}) has been ${body.status.toLowerCase()}.`
+      );
+    }
 
     const profile = await prisma.studentProfile.findUnique({
       where: { userId: enrollment.userId },
@@ -220,6 +243,7 @@ admin.patch("/enrollments/approve-all", async (c) => {
         ...(organizationId ? { course: { organizationId } } : {}),
       },
       include: {
+        user: { select: { expoPushToken: true } },
         course: {
           select: {
             id: true,
@@ -253,6 +277,19 @@ admin.patch("/enrollments/approve-all", async (c) => {
         type: "SYSTEM",
       })),
     });
+
+    // Send push notifications
+    const tokensAndMessages = pendingEnrollments
+      .filter((e) => e.user.expoPushToken)
+      .map((e) => ({
+        token: e.user.expoPushToken,
+        title: "Enrollment Approved",
+        body: `Your request to join ${e.course.name} (${e.course.code}) has been approved!`,
+      }));
+      
+    for (const msg of tokensAndMessages) {
+      await sendPushNotification([msg.token], msg.title, msg.body);
+    }
 
     const usersToInvalidate = [
       ...new Set(pendingEnrollments.map((e) => e.userId)),

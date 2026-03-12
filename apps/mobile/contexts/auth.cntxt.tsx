@@ -2,6 +2,7 @@ import { apiFetch } from "@/lib/api";
 import { account, getUser } from "@/lib/auth";
 import { setAuthTokenProvider } from "@/lib/auth.token";
 import { isInstitutionalEmail } from "@/utils/email.validator";
+import { registerForPushNotificationsAsync } from "@/utils/notifications";
 import { UserT } from "@unitime/types";
 import { router } from "expo-router";
 import { usePostHog } from "posthog-react-native";
@@ -206,11 +207,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (jwt) {
         headers["Authorization"] = `Bearer ${jwt}`;
       }
-      await apiFetch(`/user/update/${loggedInUser?.id}`, {
+      // Remove push token on logout
+      await apiFetch(`/users/${loggedInUser?.id}/update`, {
         method: "PUT",
         headers,
         body: JSON.stringify({
-          pushToken: [],
+          expoPushToken: null,
         }),
       });
       await account.deleteSession("current");
@@ -293,6 +295,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Sync Expo Push Token with Backend
+  useEffect(() => {
+    async function setupPush() {
+      if (loggedInUser?.id && jwt) {
+        const pushToken = await registerForPushNotificationsAsync();
+        if (pushToken && pushToken !== loggedInUser.expoPushToken) {
+          try {
+            const headers: Record<string, string> = { "Content-Type": "application/json" };
+            headers["Authorization"] = `Bearer ${jwt}`;
+            
+            await apiFetch(`/users/${loggedInUser.id}/update`, {
+              method: "PUT",
+              headers,
+              body: JSON.stringify({ expoPushToken: pushToken }),
+            });
+            console.log("Push token synced with backend:", pushToken);
+          } catch (e) {
+            console.error("Failed to sync push token", e);
+          }
+        }
+      }
+    }
+    setupPush();
+  }, [loggedInUser?.id, loggedInUser?.expoPushToken, jwt]);
 
   return (
     <AuthContext.Provider

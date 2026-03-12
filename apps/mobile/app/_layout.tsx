@@ -29,6 +29,7 @@ import { useAppUpdates } from "@/hooks/use-app-updates";
 import { registerBackgroundUpdateTask } from "@/utils/background.updates";
 import "./globals.css";
 import Loader from "./loader";
+import QuickActionsListener from "@/components/quick.actions.listener";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -101,6 +102,7 @@ function AppContent() {
                     style={appTheme === "dark" ? "light" : "dark"}
                     animated
                   />
+                  <QuickActionsListener />
                   <BannedUserPopup />
                   <ProfileCompletionPopup />
                   <UpdateModal updater={updater} />

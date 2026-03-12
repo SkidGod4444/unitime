@@ -4,6 +4,7 @@ import type { AppEnv } from "@/types/app-env";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
 import { z } from "zod";
+import { sendPushNotification } from "@/lib/expo.notifications";
 
 const tickets = new Hono<AppEnv>();
 tickets.use("*", requireAuth);
@@ -105,7 +106,17 @@ tickets.patch("/:id/status", requireRole("ADMIN"), async (c) => {
         assigneeId: body.assigneeId ?? undefined,
         resolvedAt: body.status === "RESOLVED" ? new Date() : undefined,
       },
+      include: { user: { select: { expoPushToken: true } } },
     });
+
+    if (update.user.expoPushToken) {
+      await sendPushNotification(
+        [update.user.expoPushToken],
+        `Support Ticket Updated`,
+        `Your support ticket "${update.title}" status is now ${body.status}.`
+      );
+    }
+
     return c.json({ success: true, ticket: update }, 200);
   } catch (e) {
     console.error("Ticket status update failed", e);
@@ -131,7 +142,17 @@ tickets.patch("/:id/resolve", requireRole("ADMIN"), async (c) => {
         resolutionNote: body.resolutionNote,
         resolvedAt: new Date(),
       },
+      include: { user: { select: { expoPushToken: true } } },
     });
+
+    if (update.user.expoPushToken) {
+      await sendPushNotification(
+        [update.user.expoPushToken],
+        `Support Ticket Resolved`,
+        `Your ticket "${update.title}" has been resolved. Note: ${body.resolutionNote}`
+      );
+    }
+
     return c.json({ success: true, ticket: update }, 200);
   } catch (e) {
     console.error("Ticket resolve failed", e);
