@@ -230,9 +230,11 @@ attendance.post("/qr/session/create", async (c) => {
       });
     }
 
-    const tokens = (targetStudents
-      .map((e) => e.user.expoPushToken)
-      .filter(Boolean) as string[])
+    const tokens = (
+      targetStudents
+        .map((e) => e.user.expoPushToken)
+        .filter(Boolean) as string[]
+    )
       // Filter to Expo token shapes to avoid 400s rejecting the whole batch
       .filter((t) => /ExponentPushToken\[|ExpoPushToken\[/.test(t));
 
@@ -240,7 +242,11 @@ attendance.post("/qr/session/create", async (c) => {
       const pushDetails = {
         title: "Attendance Started",
         body: `Attendance for ${courseDetails?.name || "your class"} is now open! Tap here to check in.`,
-        data: { courseId, sessionId: qrSession.id, courseName: courseDetails?.name },
+        data: {
+          courseId,
+          sessionId: qrSession.id,
+          courseName: courseDetails?.name,
+        },
       } as const;
 
       // Chunk to <= 99 tokens per Expo request

@@ -102,7 +102,10 @@ export default function QRScannerScreen() {
               sessionId,
               ...markedIds.filter((id: string) => id !== sessionId),
             ].slice(0, 50);
-            await AsyncStorage.setItem("MARKED_SESSIONS", JSON.stringify(markedIds));
+            await AsyncStorage.setItem(
+              "MARKED_SESSIONS",
+              JSON.stringify(markedIds),
+            );
           }
         } catch (e) {
           // Non-fatal: proceed even if storage write fails
