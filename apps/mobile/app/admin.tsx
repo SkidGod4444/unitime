@@ -1,7 +1,7 @@
 import { apiFetch } from "@/lib/api";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack } from "expo-router";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
   FlatList,
@@ -14,6 +14,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Linking,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../contexts/auth.cntxt";
@@ -26,6 +27,7 @@ import {
   useTicketsStore,
   useUsersStore,
   useLabGroupsStore,
+  useAttendanceStore,
 } from "../lib/store";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -40,13 +42,21 @@ type User = {
   admissionNumber?: string | null;
 };
 
-type Attendance = {
+type Status = "present" | "absent" | null;
+
+type Student = { id: string; name: string; rollNo: string; status: Status };
+
+type SessionRecord = {
   id: string;
-  course: string;
+  courseCode: string;
+  courseName: string;
   className: string;
-  date: string;
-  present: number;
-  total: number;
+  section: string | number;
+  date: Date;
+  startTime: Date;
+  endTime: Date;
+  durationMin: number;
+  students: Student[];
 };
 
 const SEMESTER_MAP: Record<string, string> = {
@@ -62,44 +72,31 @@ const SEMESTER_MAP: Record<string, string> = {
   TENTH_SEMESTER: "Sem X",
 };
 
-// ─── Dummy Data ───────────────────────────────────────────────────────────────
-
-const ATTENDANCES: Attendance[] = [
-  {
-    id: "a1",
-    course: "CS201 – Data Structures",
-    className: "CSE-A",
-    date: "Feb 21, 2026",
-    present: 55,
-    total: 62,
-  },
-  {
-    id: "a2",
-    course: "CS301 – Operating Systems",
-    className: "CSE-B",
-    date: "Feb 21, 2026",
-    present: 48,
-    total: 58,
-  },
-  {
-    id: "a3",
-    course: "CS401 – Computer Networks",
-    className: "IT-A",
-    date: "Feb 20, 2026",
-    present: 53,
-    total: 55,
-  },
-  {
-    id: "a4",
-    course: "CS501 – DBMS",
-    className: "ECE-A",
-    date: "Feb 19, 2026",
-    present: 42,
-    total: 60,
-  },
-];
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function isOngoing(session: SessionRecord): boolean {
+  const now = new Date();
+  return now >= session.startTime && now <= session.endTime;
+}
+
+// Admin automatically has root edit access for any session
+
+function formatDate(d: Date): string {
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+  const sameDay = (a: Date, b: Date) =>
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate();
+  const timeStr = d.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  if (sameDay(d, today)) return `Today, ${timeStr}`;
+  if (sameDay(d, yesterday)) return `Yesterday, ${timeStr}`;
+  return `${d.toLocaleDateString([], { day: "2-digit", month: "short", year: "numeric" })}, ${timeStr}`;
+}
 
 const ROLE_COLORS: Record<Role, { bg: string; text: string }> = {
   ADMIN: { bg: "bg-red-100", text: "text-red-700" },
@@ -107,6 +104,188 @@ const ROLE_COLORS: Record<Role, { bg: string; text: string }> = {
   REPRESENTATIVE: { bg: "bg-amber-100", text: "text-amber-700" },
   STUDENT: { bg: "bg-green-100", text: "text-green-700" },
 };
+
+// ─── Student Row (same styling as session form) ───────────────────────────────
+
+const EditStudentRow = React.memo(
+  ({
+    student,
+    onStatusChange,
+  }: {
+    student: Student;
+    onStatusChange: (id: string, status: Status) => void;
+  }) => (
+    <View className="flex-row items-center justify-between py-3.5 border-b border-gray-100">
+      <View className="flex-1">
+        <Text className="text-base font-semibold text-gray-800">
+          {student.name}
+        </Text>
+        <Text className="text-xs text-gray-500 font-medium mt-0.5">
+          {student.rollNo}
+        </Text>
+      </View>
+
+      <View className="flex-row gap-x-2">
+        <Pressable
+          onPress={() =>
+            onStatusChange(
+              student.id,
+              student.status === "present" ? null : "present",
+            )
+          }
+          className={`px-3 py-1.5 rounded-md border flex-row items-center gap-x-1 ${
+            student.status === "present"
+              ? "bg-green-100 border-green-200"
+              : "bg-gray-50 border-gray-200"
+          }`}
+        >
+          {student.status === "present" && (
+            <Ionicons name="checkmark" size={12} color="#15803d" />
+          )}
+          <Text
+            className={`text-xs font-semibold ${student.status === "present" ? "text-green-700" : "text-gray-500"}`}
+          >
+            Present
+          </Text>
+        </Pressable>
+
+        <Pressable
+          onPress={() =>
+            onStatusChange(
+              student.id,
+              student.status === "absent" ? null : "absent",
+            )
+          }
+          className={`px-3 py-1.5 rounded-md border flex-row items-center gap-x-1 ${
+            student.status === "absent"
+              ? "bg-red-100 border-red-200"
+              : "bg-gray-50 border-gray-200"
+          }`}
+        >
+          {student.status === "absent" && (
+            <Ionicons name="close" size={12} color="#b91c1c" />
+          )}
+          <Text
+            className={`text-xs font-semibold ${student.status === "absent" ? "text-red-700" : "text-gray-500"}`}
+          >
+            Absent
+          </Text>
+        </Pressable>
+      </View>
+    </View>
+  ),
+);
+EditStudentRow.displayName = "EditStudentRow";
+
+// ─── Edit Session Modal ───────────────────────────────────────────────────────
+
+type EditModalProps = {
+  session: SessionRecord | null;
+  onClose: () => void;
+  onSave: (sessionId: string, updatedStudents: Student[]) => void;
+};
+
+function EditSessionModal({ session, onClose, onSave }: EditModalProps) {
+  const [students, setStudents] = useState<Student[]>([]);
+
+  // Reset students list whenever a new session is opened
+  React.useEffect(() => {
+    if (session) setStudents(session.students.map((s) => ({ ...s })));
+  }, [session]);
+
+  const handleStatusChange = useCallback((id: string, status: Status) => {
+    setStudents((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, status } : s)),
+    );
+  }, []);
+
+  const presentCount = students.filter((s) => s.status === "present").length;
+  const absentCount = students.filter((s) => s.status === "absent").length;
+
+  const handleSave = () => {
+    if (!session) return;
+    onSave(session.id, students);
+    onClose();
+    Alert.alert("Saved", "Attendance records have been updated successfully.");
+  };
+
+  if (!session) return null;
+
+  return (
+    <Modal
+      visible={!!session}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
+    >
+      <SafeAreaView className="flex-1 bg-gray-50 dark:bg-zinc-900">
+        {/* Modal Header */}
+        <View className="flex-row items-center justify-between px-4 py-3 bg-white border-b border-gray-100">
+          <TouchableOpacity
+            onPress={onClose}
+            className="flex-row items-center gap-x-1 p-1"
+          >
+            <Ionicons name="close" size={22} color="#6b7280" />
+          </TouchableOpacity>
+          <View className="items-center">
+            <Text className="text-base font-bold text-gray-900">
+              Edit Attendance
+            </Text>
+            <Text className="text-xs text-gray-500">
+              {session.courseCode} · {session.className} Sec {session.section}
+            </Text>
+          </View>
+          <TouchableOpacity
+            onPress={handleSave}
+            className="bg-indigo-600 px-4 py-1.5 rounded-lg"
+          >
+            <Text className="text-white font-bold text-sm">Save</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Stats bar */}
+        <View className="flex-row justify-between items-center px-4 py-3 bg-white border-b border-gray-100">
+          <View className="flex-row items-center gap-x-1.5">
+            <View className="w-2 h-2 rounded-full bg-green-500" />
+            <Text className="text-sm text-gray-600">
+              <Text className="font-bold text-gray-800">{presentCount}</Text>{" "}
+              Present
+            </Text>
+          </View>
+          <View className="flex-row items-center gap-x-1.5">
+            <View className="w-2 h-2 rounded-full bg-red-400" />
+            <Text className="text-sm text-gray-600">
+              <Text className="font-bold text-gray-800">{absentCount}</Text>{" "}
+              Absent
+            </Text>
+          </View>
+          <Text className="text-sm text-indigo-600 font-medium">
+            {students.length} Total
+          </Text>
+        </View>
+
+        {/* Student list */}
+        <FlatList
+          data={students}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32 }}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <EditStudentRow
+              student={item}
+              onStatusChange={handleStatusChange}
+            />
+          )}
+          ListHeaderComponent={
+            <Text className="text-xs font-semibold text-gray-400 uppercase tracking-widest pt-4 pb-1">
+              Students — {session.className} Sec {session.section}
+            </Text>
+          }
+        />
+      </SafeAreaView>
+    </Modal>
+  );
+}
 
 const emitAdminNotification = async (
   organizationId: string,
@@ -1789,74 +1968,257 @@ function CoursesTab() {
   );
 }
 
+// ─── Session Card ─────────────────────────────────────────────────────────────
+
+type SessionCardProps = {
+  session: SessionRecord;
+  onEditPress: (session: SessionRecord) => void;
+  onDownloadPress: (session: SessionRecord) => void;
+};
+
+const SessionCard = React.memo(
+  ({ session, onEditPress, onDownloadPress }: SessionCardProps) => {
+    // Admins can always edit, but we still calculate ongoing for UI status
+    const ongoing = isOngoing(session);
+    const presentCount = session.students.filter(
+      (s) => s.status === "present",
+    ).length;
+    const absentCount = session.students.filter(
+      (s) => s.status === "absent",
+    ).length;
+    const total = session.students.length;
+    const attendancePct =
+      total > 0 ? Math.round((presentCount / total) * 100) : 0;
+
+    return (
+      <View className="bg-white rounded-2xl p-4 mb-3 border border-gray-100 shadow-sm">
+        {/* Top row */}
+        <View className="flex-row justify-between items-start">
+          <View className="flex-1 pr-3">
+            <View className="flex-row items-center gap-x-2">
+              <Text className="text-base font-bold text-gray-900 leading-tight">
+                {session.courseCode} · {session.courseName}
+              </Text>
+              {ongoing && (
+                <View className="bg-indigo-100 flex-row items-center px-1.5 py-0.5 rounded-full border border-indigo-200">
+                  <View className="w-1.5 h-1.5 rounded-full bg-indigo-500 mr-1 animate-pulse" />
+                  <Text className="text-[10px] font-bold text-indigo-700 uppercase tracking-tighter">
+                    Live
+                  </Text>
+                </View>
+              )}
+            </View>
+            <Text className="text-xs text-gray-500 font-medium mt-1">
+              {session.className} — Sec {session.section}
+            </Text>
+          </View>
+
+          <View className="flex-row items-center gap-x-1">
+            {/* Edit */}
+            <TouchableOpacity
+              onPress={() => onEditPress(session)}
+              activeOpacity={0.6}
+              className="p-2 rounded-lg bg-indigo-50"
+            >
+              <Ionicons
+                name="create-outline"
+                size={18}
+                color="#4f46e5"
+              />
+            </TouchableOpacity>
+
+            {/* Download */}
+            <TouchableOpacity
+              onPress={() => onDownloadPress(session)}
+              activeOpacity={0.6}
+              className="p-2 rounded-lg bg-emerald-50"
+            >
+              <Ionicons name="download-outline" size={18} color="#059669" />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View className="h-px bg-gray-100 my-3" />
+
+        {/* Stats */}
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center gap-x-1.5">
+            <View className="w-2 h-2 rounded-full bg-green-500" />
+            <Text className="text-sm text-gray-600 font-medium">
+              <Text className="font-bold text-gray-800">{presentCount}</Text>{" "}
+              Present
+            </Text>
+          </View>
+          <View className="flex-row items-center gap-x-1.5">
+            <View className="w-2 h-2 rounded-full bg-red-400" />
+            <Text className="text-sm text-gray-600 font-medium">
+              <Text className="font-bold text-gray-800">{absentCount}</Text>{" "}
+              Absent
+            </Text>
+          </View>
+          <View className="flex-row items-center gap-x-1">
+            <Ionicons name="time-outline" size={13} color="#9ca3af" />
+            <Text className="text-xs text-gray-400 font-medium">
+              {session.durationMin} min
+            </Text>
+          </View>
+        </View>
+
+        {/* Progress bar */}
+        <View className="mt-3">
+          <View className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+            <View
+              className="h-1.5 rounded-full bg-green-500"
+              style={{ width: `${attendancePct}%` }}
+            />
+          </View>
+          <Text className="text-xs text-right text-gray-400 mt-1">
+            {attendancePct}% attendance
+          </Text>
+        </View>
+
+        {/* Footer */}
+        <View className="flex-row justify-between items-center mt-1">
+          <View className="flex-row items-center gap-x-1">
+            <Ionicons name="calendar-outline" size={12} color="#9ca3af" />
+            <Text className="text-xs text-gray-400">
+              {formatDate(session.date)}
+            </Text>
+          </View>
+        </View>
+      </View>
+    );
+  },
+);
+SessionCard.displayName = "SessionCard";
+
 // ─── Attendance Tab ───────────────────────────────────────────────────────────
 
 function AttendanceTab() {
+  const {
+    sessions: apiSessions,
+    updateSessionAttendance,
+    fetchSessions,
+  } = useAttendanceStore();
+  const { orgs, fetchOrgs } = useOrgsStore();
+  const [editingSession, setEditingSession] = useState<SessionRecord | null>(
+    null,
+  );
+  const [loading, setLoading] = useState(false);
+
+  React.useEffect(() => {
+    setLoading(true);
+    fetchSessions().finally(() => setLoading(false));
+    fetchOrgs();
+  }, [fetchSessions, fetchOrgs]);
+
+  const mappedSessions = React.useMemo(() => {
+    return apiSessions.map((s: any) => ({
+      id: s.id,
+      courseCode: s.course?.code || "UNK",
+      courseName: s.course?.name || "Unknown Course",
+      classId: s.course?.organizationId || "unknown",
+      className:
+        orgs.find((o) => o.id === s.course?.organizationId)?.courseName ||
+        "Unknown Class",
+      section:
+        orgs.find((o) => o.id === s.course?.organizationId)?.section || "N/A",
+      date: new Date(s.createdAt),
+      startTime: new Date(s.startTime),
+      endTime: new Date(s.endTime),
+      durationMin: Math.round(
+        (new Date(s.endTime).getTime() - new Date(s.startTime).getTime()) /
+          60000,
+      ),
+      students: (s.students || []).map((stu: any) => ({
+        id: stu.id,
+        name: stu.name,
+        rollNo: stu.rollNo,
+        status: (stu.status || "absent").toLowerCase() as Status,
+      })),
+    }));
+  }, [apiSessions, orgs]);
+
+  const handleEditPress = React.useCallback((session: SessionRecord) => {
+    Alert.alert(
+      "Edit Attendance",
+      `Are you sure you want to edit the attendance for ${session.courseCode} – ${session.className} Sec ${session.section}?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Proceed",
+          style: "default",
+          onPress: () => setEditingSession(session),
+        },
+      ],
+    );
+  }, []);
+
+  const handleDownloadPress = React.useCallback(async (session: SessionRecord) => {
+    try {
+      const origin =
+        process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+      const url = `${origin}/attendance/sessions/${session.id}/export`;
+
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert("Error", "Your device cannot open this URL.");
+      }
+    } catch (e) {
+      console.error("Open URL failed:", e);
+      Alert.alert("Error", "Failed to open download link.");
+    }
+  }, []);
+
+  const handleSaveEdits = React.useCallback(
+    async (sessionId: string, updatedStudents: Student[]) => {
+      const updates = updatedStudents.map((s) => ({
+        id: s.id,
+        status: s.status ? s.status : null,
+      }));
+      await updateSessionAttendance(sessionId, updates);
+    },
+    [updateSessionAttendance],
+  );
+
+  if (loading && mappedSessions.length === 0) {
+    return (
+      <View className="items-center py-10">
+        <Ionicons name="checkmark-done-outline" size={40} color="#d1d5db" />
+        <Text className="text-gray-400 mt-2 text-sm">Loading sessions…</Text>
+      </View>
+    );
+  }
+
   return (
-    <FlatList
-      data={ATTENDANCES}
-      keyExtractor={(a) => a.id}
-      scrollEnabled={false}
-      renderItem={({ item: att }) => {
-        const pct = Math.round((att.present / att.total) * 100);
-        const isLow = pct < 75;
-        return (
-          <View className="bg-white rounded-2xl p-4 mb-3 border border-gray-100 shadow-sm">
-            <View className="flex-row items-start justify-between">
-              <View className="flex-1">
-                <Text
-                  className="text-base font-bold text-gray-900"
-                  numberOfLines={1}
-                >
-                  {att.course}
-                </Text>
-                <View className="flex-row gap-x-3 mt-1">
-                  <View className="flex-row items-center gap-x-1">
-                    <Ionicons name="school-outline" size={13} color="#6b7280" />
-                    <Text className="text-xs text-gray-500">
-                      {att.className}
-                    </Text>
-                  </View>
-                  <View className="flex-row items-center gap-x-1">
-                    <Ionicons
-                      name="calendar-outline"
-                      size={13}
-                      color="#6b7280"
-                    />
-                    <Text className="text-xs text-gray-500">{att.date}</Text>
-                  </View>
-                </View>
-              </View>
-              <View
-                className={`px-2.5 py-1 rounded-full ml-2 ${isLow ? "bg-red-100" : "bg-green-100"}`}
-              >
-                <Text
-                  className={`text-xs font-bold ${isLow ? "text-red-700" : "text-green-700"}`}
-                >
-                  {pct}%
-                </Text>
-              </View>
-            </View>
-            <View className="mt-3">
-              <View className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                <View
-                  className={`h-1.5 rounded-full ${isLow ? "bg-red-400" : "bg-green-500"}`}
-                  style={{ width: `${pct}%` }}
-                />
-              </View>
-              <View className="flex-row justify-between mt-1">
-                <Text className="text-xs text-gray-400">
-                  {att.present} present
-                </Text>
-                <Text className="text-xs text-gray-400">
-                  {att.total - att.present} absent
-                </Text>
-              </View>
-            </View>
+    <>
+      <FlatList
+        data={mappedSessions}
+        keyExtractor={(s) => s.id}
+        scrollEnabled={false}
+        ListEmptyComponent={
+          <View className="items-center py-10">
+            <Ionicons name="document-text-outline" size={40} color="#d1d5db" />
+            <Text className="text-gray-400 mt-2 text-sm">No sessions found.</Text>
           </View>
-        );
-      }}
-    />
+        }
+        renderItem={({ item }) => (
+          <SessionCard
+            session={item}
+            onEditPress={handleEditPress}
+            onDownloadPress={handleDownloadPress}
+          />
+        )}
+      />
+      
+      <EditSessionModal
+        session={editingSession}
+        onClose={() => setEditingSession(null)}
+        onSave={handleSaveEdits}
+      />
+    </>
   );
 }
 

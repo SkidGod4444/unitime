@@ -28,10 +28,11 @@ attendance.get("/qr/session/:id", async (c) => {
 
 // Basic protection for all attendance routes
 attendance.use("*", async (c, next) => {
-  // Public read endpoint used by the web QR display page.
+  // Public read endpoints
   if (
     c.req.method === "GET" &&
-    /\/attendance\/qr\/session\/[^/]+$/.test(c.req.path)
+    (/\/(attendance\/)?qr\/session\/[^/]+$/.test(c.req.path) ||
+      /\/(attendance\/)?sessions\/[^/]+\/export$/.test(c.req.path))
   ) {
     return next();
   }
@@ -302,6 +303,28 @@ attendance.post("/qr/session/verify", async (c) => {
       return c.json({ error: "Session has expired" }, 400);
     }
 
+    // Security Checks (Unified with checkin)
+    const enrollment = await prisma.userCourse.findUnique({
+      where: {
+        userId_courseId: { userId: requesterId, courseId: session.courseId },
+      },
+    });
+    if (!enrollment || enrollment.status !== "APPROVED") {
+      return c.json({ error: "Not enrolled in this course" }, 403);
+    }
+
+    if (session.labGroupId) {
+      const mapping = await prisma.studentProfile.findUnique({
+        where: { userId: requesterId },
+      });
+      if (!mapping || mapping.labGroupId !== session.labGroupId) {
+        return c.json(
+          { success: false, message: "Not in targeted lab group" },
+          403,
+        );
+      }
+    }
+
     const existing = await prisma.attendanceLogs.findUnique({
       where: { sessionId_userId: { sessionId, userId: requesterId } },
     });
@@ -374,12 +397,8 @@ attendance.post("/checkin", async (c) => {
       );
     }
 
-    const now = new Date();
-    const end = new Date(session.endTime);
-    const allowanceSec = Number(process.env.CHECKIN_GRACE_SECONDS || "120");
-    const endWithGrace = new Date(end.getTime() + allowanceSec * 1000);
-
-    if (now > endWithGrace) {
+    // No grace period (Unified with verify)
+    if (new Date() > session.endTime) {
       return c.json({ success: false, message: "Session has expired" }, 400);
     }
 
@@ -410,6 +429,7 @@ attendance.post("/checkin", async (c) => {
       }
     }
 
+    // Security Checks (Unified with verify)
     const enrollment = await prisma.userCourse.findUnique({
       where: {
         userId_courseId: { userId: requesterId, courseId: session.courseId },
@@ -454,7 +474,17 @@ attendance.post("/checkin", async (c) => {
       data: { markedUsers: { push: requesterId } },
     });
 
-    // Background aggregation logic could be added here if needed, but keeping it consistent with verify
+    // Success History Log (Added to checkin for consistency)
+    await prisma.historyLog.create({
+      data: {
+        title: "Attendance (Checked-in)",
+        description: `Your check-in for ${session.course.name} was successful.`,
+        type: "ATTENDANCE",
+        userId: requesterId,
+        organizationId: session.course.organizationId,
+      },
+    });
+
     await invalidateCache(`dashboard:${requesterId}`);
     await invalidateCache(`dashboard:bundle:${requesterId}`);
     await invalidateCache(`attendance:summary:${requesterId}`);
@@ -559,10 +589,13 @@ attendance.get("/sessions/all", async (c) => {
         const logs = await prisma.attendanceLogs.findMany({
           where: { sessionId: session.id },
         });
-        const enrolled = await prisma.userCourse.findMany({
+        const enrolledRaw = await prisma.userCourse.findMany({
           where: { courseId: session.courseId, status: "APPROVED" },
-          include: { user: true },
+          include: { user: { include: { studentProfile: true } } },
         });
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const enrolled = enrolledRaw as any[];
 
         let finalEnrolled = enrolled;
         if (session.labGroupId) {
@@ -574,6 +607,17 @@ attendance.get("/sessions/all", async (c) => {
           finalEnrolled = enrolled.filter((e) => memberIds.includes(e.userId));
         }
 
+        const studentList = finalEnrolled.map((e) => {
+          const log = logs.find((l) => l.userId === e.userId);
+          const user = e.user;
+          return {
+            id: user.id,
+            name: user.name,
+            rollNo: user.studentProfile?.admissionNumber || "N/A",
+            status: log ? "present" : "absent",
+          };
+        });
+
         const stats = {
           present: logs.length,
           absent: Math.max(0, finalEnrolled.length - logs.length),
@@ -583,6 +627,7 @@ attendance.get("/sessions/all", async (c) => {
           ...session,
           creator: session.user?.name || "Unknown",
           stats,
+          students: studentList,
         };
       }),
     );
