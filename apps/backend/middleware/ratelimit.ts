@@ -39,21 +39,31 @@ const getDeviceId = (c: Context): string | undefined =>
 const IS_PROD = process.env.NODE_ENV === "production";
 
 /**
+ * Helper to read positive integers from env with sane defaults.
+ */
+const envInt = (name: string, fallback: number): number => {
+  const raw = process.env[name];
+  if (!raw) return fallback;
+  const n = parseInt(raw, 10);
+  return Number.isFinite(n) && n > 0 ? n : fallback;
+};
+
+/**
  * Global catch-all limiter — applied to every route that isn't a polling
  * or check-in route.
  */
-const globalLimit = IS_PROD ? 100 : 200;
+const globalLimit = envInt("RATE_LIMIT_GLOBAL", IS_PROD ? 100 : 200);
 
 /**
  * Polling limiter — applied to read-heavy data routes that the app polls
  * on every foreground-restore (timetable, attendance, users, …).
  */
-const pollingLimit = IS_PROD ? 300 : 500;
+const pollingLimit = envInt("RATE_LIMIT_POLLING", IS_PROD ? 300 : 500);
 
 /**
  * Check-in limiter — very tight; prevents attendance check-in abuse.
  */
-const checkinLimit = 5;
+const checkinLimit = envInt("RATE_LIMIT_CHECKIN", 5);
 
 /**
  * Auth-flow limiter — generous dedicated bucket for the login / signup /
@@ -64,7 +74,7 @@ const checkinLimit = 5;
  * 30 attempts per device per 5 min is more than enough for any legitimate
  * login flow while still blocking credential-stuffing.
  */
-const authFlowLimit = IS_PROD ? 30 : 100;
+const authFlowLimit = envInt("RATE_LIMIT_AUTH_FLOW", IS_PROD ? 30 : 100);
 
 // ---------------------------------------------------------------------------
 // Limiter instances
@@ -131,6 +141,9 @@ const POLLING_ROUTE_PREFIXES: string[] = [
   "/v1/courses",
   "/v1/orgs",
   "/v1/profiles",
+  "/v1/dashboard",
+  "/v1/notifications",
+  "/v1/history",
 ];
 
 const isPollingRoute = (path: string): boolean =>
@@ -245,17 +258,53 @@ export const rateLimitHandler = async (c: Context<AppEnv>, next: Next) => {
   // ------------------------------------------------------------------
   // 3. Apply the limit.
   // ------------------------------------------------------------------
-  const { success, pending, reason, deniedValue } = await limiter.limit(key, {
+  const result = await limiter.limit(key, {
     ip,
     userAgent,
   });
-  await pending;
+  await result.pending;
+
+  // Upstash Ratelimit commonly returns limit/remaining/reset; use them when present.
+  type LimitResultLike = {
+    success: boolean;
+    pending: Promise<void>;
+    limit?: number;
+    remaining?: number;
+    reset?: number; // epoch seconds or ms, depending on provider
+    reason?: string;
+    deniedValue?: unknown;
+  };
+  const lr = result as unknown as LimitResultLike;
+  const success = lr.success;
+  const reason = lr.reason;
+  const deniedValue = lr.deniedValue;
+  const limitVal = lr.limit;
+  const remainingVal = lr.remaining;
+  const resetVal = lr.reset; // epoch (s/ms) or delta
 
   console.log(
     `[RateLimit] success=${success} reason=${reason ?? "-"} deniedValue=${deniedValue ?? "-"}`,
   );
 
   if (!success) {
+    // Best‑effort standard headers for clients to back off gracefully.
+    // RateLimit-Reset expects delta-seconds. Compute when we have a numeric reset.
+    let retryAfterSec: number | undefined;
+    if (typeof resetVal === "number") {
+      // Heuristic: treat values < 1e12 as epoch seconds; else milliseconds.
+      const resetMs = resetVal < 1e12 ? resetVal * 1000 : resetVal;
+      const delta = Math.ceil((resetMs - Date.now()) / 1000);
+      if (Number.isFinite(delta) && delta > 0) retryAfterSec = delta;
+    }
+
+    if (typeof limitVal === "number") c.header("RateLimit-Limit", String(limitVal));
+    if (typeof remainingVal === "number")
+      c.header("RateLimit-Remaining", String(Math.max(0, remainingVal)));
+    if (typeof retryAfterSec === "number") {
+      c.header("RateLimit-Reset", String(retryAfterSec));
+      c.header("Retry-After", String(retryAfterSec));
+    }
+
     return c.json(
       {
         message: "Too many requests. Please slow down and try again shortly.",

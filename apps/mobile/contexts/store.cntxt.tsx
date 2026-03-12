@@ -2,11 +2,9 @@ import { apiFetch } from "@/lib/api";
 import {
   useAttendanceStore,
   useCoursesStore,
-  useFeedbacksStore,
   useLabGroupsStore,
   useOrgsStore,
   useProfilesStore,
-  useTicketsStore,
   useTimetableStore,
   useUsersStore,
 } from "@/lib/store";
@@ -56,6 +54,71 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   const lastRefreshedAt = useRef<number>(0);
   const redirectingToTapRef = useRef(false);
 
+  const handleActiveSessions = async (
+    bundleData?: { activeSessions?: any[]; courses?: any[] },
+  ) => {
+    try {
+      const sessions = Array.isArray(bundleData?.activeSessions)
+        ? bundleData!.activeSessions
+        : [];
+      if (sessions.length === 0) return;
+
+      const dashboardCourses = Array.isArray(bundleData?.courses)
+        ? bundleData!.courses
+        : [];
+      const currentEnrolledIds = dashboardCourses.map((c: any) => c.id);
+
+      const validSession = sessions.find((session: any) =>
+        currentEnrolledIds.includes(session.courseId),
+      );
+      if (!validSession) return;
+
+      const now = new Date();
+      const endTime = new Date(validSession.endTime);
+      const graceEndTime = new Date(endTime.getTime() + 120 * 1000);
+      if (now > graceEndTime) {
+        console.log("Bundle active session ignored: session expired.");
+        return;
+      }
+
+      const markedStr = await getItem("MARKED_SESSIONS");
+      const markedIds = markedStr ? JSON.parse(markedStr) : [];
+      if (markedIds.includes(validSession.id)) {
+        console.log("Bundle active session ignored: already marked locally");
+        return;
+      }
+
+      const attemptedStr = await getItem("ATTEMPTED_SESSIONS");
+      const attemptedIds = attemptedStr ? JSON.parse(attemptedStr) : [];
+      if (attemptedIds.includes(validSession.id)) {
+        console.log("Bundle active session ignored: user already attempted.");
+        return;
+      }
+
+      const isOnTapToMark =
+        Array.isArray(segments) && segments.includes("tap-to-mark");
+      if (!isOnTapToMark && !redirectingToTapRef.current) {
+        const courseName =
+          validSession.course?.name || validSession.courseId;
+        redirectingToTapRef.current = true;
+        console.log("Bundle contains Active Session:", validSession.id);
+        router.push(
+          `/tap-to-mark?sessionId=${validSession.id}&courseName=${courseName}`,
+        );
+        setTimeout(() => {
+          redirectingToTapRef.current = false;
+        }, 800);
+      } else {
+        console.log(
+          "Bundle active session ignored: already on tap-to-mark or redirecting.",
+        );
+      }
+    } catch (err) {
+      console.warn("handleActiveSessions failed:", err);
+    }
+  };
+
+
   const { fetchUsers } = useUsersStore();
   const { fetchProfiles } = useProfilesStore();
   const { fetchOrgs } = useOrgsStore();
@@ -66,8 +129,6 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   const { fetchEnrollments } = useEnrollmentStore();
   const { fetchNotifications } = useNotificationsStore();
   const { fetchHistoryLogs } = useHistoryStore();
-  const { fetchMyFeedbacks } = useFeedbacksStore();
-  const { fetchMyTickets } = useTicketsStore();
 
   const refresh = React.useCallback(
     async (isManual: boolean = true) => {
@@ -94,8 +155,10 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
 
       setLoading(true);
 
+      let bundleSucceeded = false;
+
       // 1) Try dashboard bundle first
-      if (loggedInUser?.id) {
+      if (!bundleSucceeded && loggedInUser?.id) {
         try {
           const res = await apiFetch(`/dashboard/${loggedInUser.id}/bundle`, {
             headers: {
@@ -107,6 +170,8 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
           if (res.ok) {
             const json = await res.json();
             const data = json?.data || {};
+            bundleSucceeded = true;
+            await handleActiveSessions(json?.data);
             if (Array.isArray(data.timetable)) setTimetables(data.timetable);
             if (Array.isArray(data.attendanceSummary))
               setSummary(data.attendanceSummary);
@@ -126,7 +191,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
               });
             }
             // also refresh personal tickets/feedbacks
-            await Promise.allSettled([fetchMyFeedbacks(), fetchMyTickets()]);
+            
           } else {
             // Fallback to legacy per-endpoint calls
             await Promise.allSettled([
@@ -134,9 +199,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
               fetchSummary(loggedInUser.id),
               fetchNotifications(loggedInUser.id),
               fetchHistoryLogs(loggedInUser.id),
-              fetchMyFeedbacks(),
-              fetchMyTickets(),
-            ]);
+                          ]);
           }
         } catch {
           // Network error → fallback
@@ -145,16 +208,14 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
             fetchSummary(loggedInUser.id),
             fetchNotifications(loggedInUser.id),
             fetchHistoryLogs(loggedInUser.id),
-            fetchMyFeedbacks(),
-            fetchMyTickets(),
-          ]);
+                      ]);
         }
       }
 
       // 2) Gate heavy admin/prof fetches by role
       const role = loggedInUser?.role;
       const adminOrProf = role === "ADMIN" || role === "PROFESSOR";
-      const adminOrRep = role === "ADMIN" || role === "REPRESENTATIVE";
+      // const adminOrRep = role === "ADMIN" || role === "REPRESENTATIVE";
 
       await Promise.allSettled([
         ...(adminOrProf ? [fetchUsers()] : []),
@@ -190,7 +251,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       // Active Session Fallback Check for "Pull to Refresh"
-      if (loggedInUser?.id) {
+      if (!bundleSucceeded && loggedInUser?.id) {
         try {
           const dashRes = await apiFetch(`/dashboard/${loggedInUser.id}`, {
             headers: {
