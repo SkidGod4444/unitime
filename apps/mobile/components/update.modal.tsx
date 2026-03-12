@@ -1,3 +1,4 @@
+import { useAuth } from "@/contexts/auth.cntxt";
 import { useAppUpdates, UpdateStatus } from "@/hooks/use-app-updates";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
@@ -80,6 +81,7 @@ const STATUS_CONFIG: Partial<Record<UpdateStatus, StatusConfig>> = {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function UpdateModal({ updater }: UpdateModalProps) {
+  const { loggedInUser } = useAuth();
   const { status, downloadUpdate, applyUpdate, dismiss } = updater;
 
   const isVisible =
@@ -90,7 +92,7 @@ export default function UpdateModal({ updater }: UpdateModalProps) {
 
   const config = STATUS_CONFIG[status];
 
-  if (!isVisible || !config) return null;
+  if (!isVisible || !config || !loggedInUser) return null;
 
   const handlePrimary = () => {
     if (status === "available") downloadUpdate();
