@@ -7,10 +7,10 @@ import {
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
+import { apiFetch } from "@/lib/api";
 import {
   Alert,
   Dimensions,
-  Linking,
   StatusBar,
   Text,
   TouchableOpacity,
@@ -51,7 +51,7 @@ export default function QRScannerScreen() {
       -1,
       true,
     );
-  }, []);
+  }, [translateY]);
 
   // Request permission on mount if not granted
   useEffect(() => {
@@ -70,7 +70,7 @@ export default function QRScannerScreen() {
     };
   });
 
-  const handleBarCodeScanned = ({
+  const handleBarCodeScanned = async ({
     type,
     data,
   }: {
@@ -81,31 +81,39 @@ export default function QRScannerScreen() {
 
     setScanned(true);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    console.log("QR Code scanned:", { type, data });
+    console.log("QR Code scanned, verifying:", data);
 
-    Alert.alert(
-      "QR Code Found",
-      `${data}`,
-      [
-        {
-          text: "Scan Again",
-          onPress: () => setScanned(false),
-          style: "default",
-        },
-        {
-          text: "Open",
-          onPress: () => {
-            if (data.startsWith("http")) {
-              Linking.openURL(data).catch((err) =>
-                console.error("An error occurred", err),
-              );
-            }
-            setScanned(false);
-          },
-        },
-      ],
-      { cancelable: true, onDismiss: () => setScanned(false) },
-    );
+    try {
+      const res = await apiFetch("/attendance/qr/session/verify", {
+        method: "POST",
+        body: JSON.stringify({ qrString: data }),
+      });
+      const result = await res.json();
+
+      if (res.ok) {
+        Alert.alert(
+          "Success",
+          result.message || "Attendance verified successfully",
+          [{ text: "OK", onPress: () => router.back() }]
+        );
+      } else {
+        Alert.alert(
+          "Verification Failed",
+          result.error || "Invalid or expired QR code",
+          [
+            { text: "Scan Again", onPress: () => setScanned(false) },
+            { text: "Cancel", onPress: () => router.back(), style: "cancel" }
+          ]
+        );
+      }
+    } catch (err) {
+      console.error(err);
+      Alert.alert(
+        "Error",
+        "Failed to verify attendance. Please check your connection.",
+        [{ text: "Scan Again", onPress: () => setScanned(false) }]
+      );
+    }
   };
 
   const toggleTorch = () => {

@@ -9,6 +9,7 @@ export const createQRSessionSchema = z.object({
   labGroupId: z.string().uuid().optional(),
   geofenceRadius: z.number().int().min(10).max(500).optional(),
   coordinates: z.string().optional(),
+  generateWebLink: z.boolean().optional(),
 });
 
 export const checkinSchema = z

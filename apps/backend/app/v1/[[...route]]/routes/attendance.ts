@@ -59,6 +59,7 @@ attendance.post("/qr/session/create", async (c) => {
     labGroupId,
     geofenceRadius,
     coordinates,
+    generateWebLink,
   } = parsed.data;
   const manualIds = Array.isArray(manualPresentIds) ? manualPresentIds : [];
   const absentIds = Array.isArray(manualAbsentIds) ? manualAbsentIds : [];
@@ -92,6 +93,16 @@ attendance.post("/qr/session/create", async (c) => {
       coordinates: coordinates || null,
     },
   });
+
+  if (generateWebLink) {
+    const baseUrl = process.env.WEB_URL || process.env.FRONTEND_URL || "http://localhost:3000";
+    const webLink = `${baseUrl}/attendance-qr/${qrSession.id}`;
+    await prisma.attendanceQRSession.update({
+      where: { id: qrSession.id },
+      data: { webLink }
+    });
+    qrSession.webLink = webLink;
+  }
 
   const allManualIds = [...manualIds, ...absentIds];
 
@@ -401,11 +412,15 @@ attendance.get("/qr/session/:id", async (c) => {
   const sessionId = c.req.param("id");
   const session = await prisma.attendanceQRSession.findUnique({
     where: { id: sessionId },
+    include: { course: true },
   });
   if (!session) return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
 
   const qr = generateQRToken(sessionId);
-  return c.json({ qrString: qr.qrString });
+  return c.json({ 
+    qrString: qr.qrString,
+    course: session.course 
+  });
 });
 
 attendance.get("/summary/:userId", async (c) => {

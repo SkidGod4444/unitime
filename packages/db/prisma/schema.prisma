@@ -307,6 +307,7 @@ model AttendanceQRSession {
   labGroupId     String?            @map("lab_group_id")
   labGroup       LabGroup?          @relation(fields: [labGroupId], references: [id])
   coordinates    String?            @map("coordinates") // For geofencing, format: "latitude,longitude"
+  webLink        String?            @map("web_link") // Optional static link to the attendance scanner page
   createdAt      DateTime           @default(now()) @map("created_at")
   updatedAt      DateTime           @updatedAt @map("updated_at")
 
