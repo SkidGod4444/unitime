@@ -104,9 +104,9 @@ admin.patch("/users/:id/ban", async (c) => {
       await sendPushNotification(
         [user.expoPushToken],
         body.banned ? "Account Suspended" : "Account Restored",
-        body.banned 
+        body.banned
           ? `Your account has been suspended. Reason: ${body.banReason || "Not provided"}`
-          : "Your account suspension has been lifted."
+          : "Your account suspension has been lifted.",
       );
     }
 
@@ -195,15 +195,15 @@ admin.patch("/enrollments/:id/status", async (c) => {
       data: { status: body.status },
       include: {
         user: { select: { expoPushToken: true } },
-        course: { select: { name: true, code: true } }
-      }
+        course: { select: { name: true, code: true } },
+      },
     });
 
     if (enrollment.user.expoPushToken) {
       await sendPushNotification(
         [enrollment.user.expoPushToken],
         `Enrollment ${body.status === "APPROVED" ? "Approved" : "Rejected"}`,
-        `Your request to join ${enrollment.course.name} (${enrollment.course.code}) has been ${body.status.toLowerCase()}.`
+        `Your request to join ${enrollment.course.name} (${enrollment.course.code}) has been ${body.status.toLowerCase()}.`,
       );
     }
 
@@ -286,7 +286,7 @@ admin.patch("/enrollments/approve-all", async (c) => {
         title: "Enrollment Approved",
         body: `Your request to join ${e.course.name} (${e.course.code}) has been approved!`,
       }));
-      
+
     for (const msg of tokensAndMessages) {
       await sendPushNotification([msg.token], msg.title, msg.body);
     }

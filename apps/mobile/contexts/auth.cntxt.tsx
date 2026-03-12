@@ -303,9 +303,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const pushToken = await registerForPushNotificationsAsync();
         if (pushToken && pushToken !== loggedInUser.expoPushToken) {
           try {
-            const headers: Record<string, string> = { "Content-Type": "application/json" };
+            const headers: Record<string, string> = {
+              "Content-Type": "application/json",
+            };
             headers["Authorization"] = `Bearer ${jwt}`;
-            
+
             await apiFetch(`/users/${loggedInUser.id}/update`, {
               method: "PUT",
               headers,

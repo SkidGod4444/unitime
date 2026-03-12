@@ -113,7 +113,7 @@ tickets.patch("/:id/status", requireRole("ADMIN"), async (c) => {
       await sendPushNotification(
         [update.user.expoPushToken],
         `Support Ticket Updated`,
-        `Your support ticket "${update.title}" status is now ${body.status}.`
+        `Your support ticket "${update.title}" status is now ${body.status}.`,
       );
     }
 
@@ -149,7 +149,7 @@ tickets.patch("/:id/resolve", requireRole("ADMIN"), async (c) => {
       await sendPushNotification(
         [update.user.expoPushToken],
         `Support Ticket Resolved`,
-        `Your ticket "${update.title}" has been resolved. Note: ${body.resolutionNote}`
+        `Your ticket "${update.title}" has been resolved. Note: ${body.resolutionNote}`,
       );
     }
 

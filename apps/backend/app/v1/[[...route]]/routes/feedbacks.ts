@@ -115,7 +115,7 @@ feedbacks.patch("/:id/status", requireRole("ADMIN"), async (c) => {
       await sendPushNotification(
         [update.user.expoPushToken],
         `Feedback Status Updated`,
-        `Your feedback has been marked as ${body.status}.`
+        `Your feedback has been marked as ${body.status}.`,
       );
     }
 

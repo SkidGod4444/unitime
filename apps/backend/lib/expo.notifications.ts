@@ -13,7 +13,7 @@ export async function sendPushNotification(
   tokens: string[],
   title: string,
   body: string,
-  data?: Record<string, unknown>
+  data?: Record<string, unknown>,
 ) {
   // Filter out invalid Expo push tokens
   const validTokens = tokens.filter((token) => Expo.isExpoPushToken(token));
