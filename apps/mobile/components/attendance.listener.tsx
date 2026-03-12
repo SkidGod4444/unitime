@@ -18,7 +18,8 @@ export default function AttendanceListener() {
     const currentPath = segments.join("/");
     if (
       currentPath.includes("tap-to-mark") ||
-      currentPath.includes("attendance-session-form")
+      currentPath.includes("attendance-session-form") ||
+      currentPath.includes("qr-scanner")
     ) {
       return;
     }
