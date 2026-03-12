@@ -8,6 +8,8 @@ import { Loader2 } from "lucide-react";
 type AttendanceQRData = {
   qrString: string;
   course?: { name?: string; code?: string };
+  endTime?: string;
+  status?: string;
 };
 
 export default function AttendanceQRPage() {
@@ -17,6 +19,7 @@ export default function AttendanceQRPage() {
   const [qrData, setQrData] = useState<AttendanceQRData | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
 
   useEffect(() => {
     if (!sessionId) return;
@@ -56,6 +59,36 @@ export default function AttendanceQRPage() {
     return () => clearInterval(interval);
   }, [sessionId]);
 
+  useEffect(() => {
+    if (!qrData?.endTime || qrData.status !== "ACTIVE") {
+      setTimeLeft(null);
+      return;
+    }
+
+    const calculateTimeLeft = () => {
+      const now = new Date().getTime();
+      const end = new Date(qrData.endTime!).getTime();
+      const diff = end - now;
+
+      if (diff <= 0) {
+        setTimeLeft(0);
+        return;
+      }
+      setTimeLeft(Math.floor(diff / 1000));
+    };
+
+    calculateTimeLeft();
+    const timer = setInterval(calculateTimeLeft, 1000);
+
+    return () => clearInterval(timer);
+  }, [qrData]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#fafaf8] flex items-center justify-center font-sans">
@@ -64,7 +97,7 @@ export default function AttendanceQRPage() {
     );
   }
 
-  if (error || !qrData) {
+  if (error || !qrData || timeLeft === 0 || qrData.status !== "ACTIVE") {
     return (
       <div className="min-h-screen bg-[#fafaf8] flex flex-col items-center justify-center font-sans p-6 text-center text-[#1a1614]">
         {/* Subtle grain */}
@@ -82,11 +115,13 @@ export default function AttendanceQRPage() {
             <span className="text-red-500 font-bold text-xl">!</span>
           </div>
           <p className="font-bold font-lora text-2xl mb-2 text-gray-900">
-            Session Unavailable
+            {timeLeft === 0 ? "Session Expired" : "Session Unavailable"}
           </p>
           <p className="text-sm text-gray-500 leading-relaxed">
-            {error ||
-              "This attendance session might have ended or does not exist."}
+            {timeLeft === 0
+              ? "This attendance session has ended. Please contact your instructor."
+              : error ||
+                "This attendance session might have ended or does not exist."}
           </p>
         </div>
       </div>
@@ -113,7 +148,8 @@ export default function AttendanceQRPage() {
       <div className="relative z-10 w-full max-w-xl bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-black/[0.03] border border-black/[0.04] overflow-hidden p-8 md:p-12 flex flex-col items-center">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 text-red-600 text-[10px] md:text-xs font-semibold tracking-[0.1em] uppercase mb-8 border border-red-100/50">
           <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-          Live Attendance
+          Live Attendance{" "}
+          {timeLeft !== null && `• ${formatTime(timeLeft)} left`}
         </div>
 
         <h1 className="text-3xl md:text-4xl font-bold font-lora text-center mb-1.5 tracking-tight text-gray-900">

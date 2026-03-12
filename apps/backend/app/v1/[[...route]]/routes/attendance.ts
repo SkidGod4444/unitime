@@ -9,6 +9,23 @@ import { Hono } from "hono";
 
 const attendance = new Hono<AppEnv>();
 
+attendance.get("/qr/session/:id", async (c) => {
+  const sessionId = c.req.param("id");
+  const session = await prisma.attendanceQRSession.findUnique({
+    where: { id: sessionId },
+    include: { course: true },
+  });
+  if (!session) return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
+
+  const qr = generateQRToken(sessionId);
+  return c.json({
+    qrString: qr.qrString,
+    course: session.course,
+    endTime: session.endTime,
+    status: session.status,
+  });
+});
+
 // Basic protection for all attendance routes
 attendance.use("*", async (c, next) => {
   // Public read endpoint used by the web QR display page.
@@ -107,7 +124,7 @@ attendance.post("/qr/session/create", async (c) => {
     const baseUrl =
       process.env.WEB_URL ||
       process.env.FRONTEND_URL ||
-      "http://localhost:3000";
+      "https://unitime.devwtf.in";
     const webLink = `${baseUrl}/attendance-qr/${qrSession.id}`;
     await prisma.attendanceQRSession.update({
       where: { id: qrSession.id },
@@ -441,21 +458,6 @@ attendance.post("/checkin", async (c) => {
     console.error("Checkin error:", err);
     return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
   }
-});
-
-attendance.get("/qr/session/:id", async (c) => {
-  const sessionId = c.req.param("id");
-  const session = await prisma.attendanceQRSession.findUnique({
-    where: { id: sessionId },
-    include: { course: true },
-  });
-  if (!session) return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
-
-  const qr = generateQRToken(sessionId);
-  return c.json({
-    qrString: qr.qrString,
-    course: session.course,
-  });
 });
 
 attendance.get("/summary/:userId", async (c) => {

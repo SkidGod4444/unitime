@@ -111,7 +111,7 @@ export default function QRScannerScreen() {
         Alert.alert(
           "Success",
           result.message || "Attendance verified successfully",
-          [{ text: "OK", onPress: () => router.back() }],
+          [{ text: "OK", onPress: () => router.replace("/(tabs)/" as any) }],
         );
       } else {
         Alert.alert(

@@ -58,7 +58,7 @@ export default function AttendanceListener() {
   useEffect(() => {
     // 1. Notification Received (Foreground)
     const notificationListener = Notifications.addNotificationReceivedListener(
-      (_notif) => {
+      () => {
         checkActiveSessions(); // Bug 11: Foreground polling/check on notification
       },
     );
