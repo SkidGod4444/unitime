@@ -105,7 +105,10 @@ const AttendanceSessionForm = () => {
 
       // Auto-select first course if current selected course is not in the new list
       if (filtered.length > 0) {
-        if (!selectedCourse || !filtered.find((c) => c.id === selectedCourse.id)) {
+        if (
+          !selectedCourse ||
+          !filtered.find((c) => c.id === selectedCourse.id)
+        ) {
           setSelectedCourse(filtered[0] as any);
         }
       } else {

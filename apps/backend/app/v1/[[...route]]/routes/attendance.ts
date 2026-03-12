@@ -231,7 +231,10 @@ attendance.post("/qr/session/create", async (c) => {
       });
 
       if (!pushResponse.ok) {
-        console.error("Expo push notification failed:", await pushResponse.text());
+        console.error(
+          "Expo push notification failed:",
+          await pushResponse.text(),
+        );
       } else {
         console.log(`Successfully sent ${tokens.length} push notifications.`);
       }
@@ -433,7 +436,6 @@ attendance.post("/checkin", async (c) => {
     return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
   }
 });
-
 
 attendance.get("/summary/:userId", async (c) => {
   const requesterId = c.get("requesterId") as string;

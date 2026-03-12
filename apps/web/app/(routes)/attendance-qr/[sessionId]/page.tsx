@@ -120,7 +120,8 @@ export default function AttendanceQRPage() {
           <p className="text-sm text-gray-500 leading-relaxed">
             {timeLeft === 0
               ? "This attendance session has ended. Please contact your instructor."
-              : error || "This attendance session might have ended or does not exist."}
+              : error ||
+                "This attendance session might have ended or does not exist."}
           </p>
         </div>
       </div>
@@ -147,7 +148,8 @@ export default function AttendanceQRPage() {
       <div className="relative z-10 w-full max-w-xl bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-black/[0.03] border border-black/[0.04] overflow-hidden p-8 md:p-12 flex flex-col items-center">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 text-red-600 text-[10px] md:text-xs font-semibold tracking-[0.1em] uppercase mb-8 border border-red-100/50">
           <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-          Live Attendance {timeLeft !== null && `• ${formatTime(timeLeft)} left`}
+          Live Attendance{" "}
+          {timeLeft !== null && `• ${formatTime(timeLeft)} left`}
         </div>
 
         <h1 className="text-3xl md:text-4xl font-bold font-lora text-center mb-1.5 tracking-tight text-gray-900">
