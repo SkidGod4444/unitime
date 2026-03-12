@@ -13,7 +13,7 @@ type AttendanceQRData = {
 export default function AttendanceQRPage() {
   const params = useParams();
   const sessionId = params.sessionId as string;
-  
+
   const [qrData, setQrData] = useState<AttendanceQRData | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -23,19 +23,20 @@ export default function AttendanceQRPage() {
 
     const fetchQR = async () => {
       try {
-        const origin = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/v1";
-        
+        const origin =
+          process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/v1";
+
         const res = await fetch(`${origin}/attendance/qr/session/${sessionId}`);
-        
+
         let data: unknown;
         try {
           data = await res.json();
         } catch {
           data = {};
         }
-        
+
         const responseData = data as { error?: string } & AttendanceQRData;
-        
+
         if (res.ok) {
           setQrData(responseData);
           setError("");
@@ -66,7 +67,7 @@ export default function AttendanceQRPage() {
   if (error || !qrData) {
     return (
       <div className="min-h-screen bg-[#fafaf8] flex flex-col items-center justify-center font-sans p-6 text-center text-[#1a1614]">
-         {/* Subtle grain */}
+        {/* Subtle grain */}
         <div
           className="pointer-events-none fixed inset-0 z-0 opacity-[0.025]"
           style={{
@@ -75,14 +76,17 @@ export default function AttendanceQRPage() {
             backgroundSize: "128px 128px",
           }}
         />
-        
+
         <div className="relative z-10 bg-white/80 backdrop-blur-md p-8 rounded-3xl max-w-md w-full border border-black/[0.04] shadow-xl shadow-black/[0.02]">
           <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-red-500 font-bold text-xl">!</span>
           </div>
-          <p className="font-bold font-lora text-2xl mb-2 text-gray-900">Session Unavailable</p>
+          <p className="font-bold font-lora text-2xl mb-2 text-gray-900">
+            Session Unavailable
+          </p>
           <p className="text-sm text-gray-500 leading-relaxed">
-            {error || "This attendance session might have ended or does not exist."}
+            {error ||
+              "This attendance session might have ended or does not exist."}
           </p>
         </div>
       </div>
@@ -132,7 +136,8 @@ export default function AttendanceQRPage() {
         </div>
 
         <p className="mt-8 text-xs text-[#9d8f8a] text-center px-4 leading-relaxed font-medium">
-          QR code refreshes automatically for security.<br className="hidden sm:block" /> Do not screenshot.
+          QR code refreshes automatically for security.
+          <br className="hidden sm:block" /> Do not screenshot.
         </p>
       </div>
     </div>

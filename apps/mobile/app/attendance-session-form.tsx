@@ -202,7 +202,7 @@ const AttendanceSessionForm = () => {
       if (res.ok) {
         const data = await res.json();
         const qrSession = data.qrSession;
-        
+
         if (generateWebLink && qrSession?.webLink) {
           Alert.alert(
             "Session Created",
@@ -214,19 +214,22 @@ const AttendanceSessionForm = () => {
                   try {
                     await Clipboard.setStringAsync(qrSession.webLink);
                     Alert.alert("Copied!", "Link copied to clipboard.", [
-                      { text: "OK", onPress: () => router.push("/(tabs)/attendance" as any) }
+                      {
+                        text: "OK",
+                        onPress: () => router.push("/(tabs)/attendance" as any),
+                      },
                     ]);
                   } catch {
                     router.push("/(tabs)/attendance" as any);
                   }
-                }
+                },
               },
               {
                 text: "Done",
                 style: "cancel",
-                onPress: () => router.push("/(tabs)/attendance" as any)
-              }
-            ]
+                onPress: () => router.push("/(tabs)/attendance" as any),
+              },
+            ],
           );
         } else {
           Alert.alert("Success", "Attendance session created successfully.");
@@ -386,8 +389,12 @@ const AttendanceSessionForm = () => {
 
           <View className="flex-row items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-zinc-700">
             <View className="flex-1 pr-4">
-              <Text className="text-base font-medium text-gray-800 dark:text-zinc-200">Scanner Web Link</Text>
-              <Text className="text-xs text-gray-500 mt-1">Generate a link to display the QR code on a larger screen</Text>
+              <Text className="text-base font-medium text-gray-800 dark:text-zinc-200">
+                Scanner Web Link
+              </Text>
+              <Text className="text-xs text-gray-500 mt-1">
+                Generate a link to display the QR code on a larger screen
+              </Text>
             </View>
             <Switch
               value={generateWebLink}

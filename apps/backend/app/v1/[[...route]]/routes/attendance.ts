@@ -95,11 +95,14 @@ attendance.post("/qr/session/create", async (c) => {
   });
 
   if (generateWebLink) {
-    const baseUrl = process.env.WEB_URL || process.env.FRONTEND_URL || "http://localhost:3000";
+    const baseUrl =
+      process.env.WEB_URL ||
+      process.env.FRONTEND_URL ||
+      "http://localhost:3000";
     const webLink = `${baseUrl}/attendance-qr/${qrSession.id}`;
     await prisma.attendanceQRSession.update({
       where: { id: qrSession.id },
-      data: { webLink }
+      data: { webLink },
     });
     qrSession.webLink = webLink;
   }
@@ -417,9 +420,9 @@ attendance.get("/qr/session/:id", async (c) => {
   if (!session) return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
 
   const qr = generateQRToken(sessionId);
-  return c.json({ 
+  return c.json({
     qrString: qr.qrString,
-    course: session.course 
+    course: session.course,
   });
 });
 

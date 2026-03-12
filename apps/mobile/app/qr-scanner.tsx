@@ -94,7 +94,7 @@ export default function QRScannerScreen() {
         Alert.alert(
           "Success",
           result.message || "Attendance verified successfully",
-          [{ text: "OK", onPress: () => router.back() }]
+          [{ text: "OK", onPress: () => router.back() }],
         );
       } else {
         Alert.alert(
@@ -102,8 +102,8 @@ export default function QRScannerScreen() {
           result.error || "Invalid or expired QR code",
           [
             { text: "Scan Again", onPress: () => setScanned(false) },
-            { text: "Cancel", onPress: () => router.back(), style: "cancel" }
-          ]
+            { text: "Cancel", onPress: () => router.back(), style: "cancel" },
+          ],
         );
       }
     } catch (err) {
@@ -111,7 +111,7 @@ export default function QRScannerScreen() {
       Alert.alert(
         "Error",
         "Failed to verify attendance. Please check your connection.",
-        [{ text: "Scan Again", onPress: () => setScanned(false) }]
+        [{ text: "Scan Again", onPress: () => setScanned(false) }],
       );
     }
   };
