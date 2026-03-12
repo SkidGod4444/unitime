@@ -38,8 +38,10 @@ const GEOFENCE_LIMITS = [10, 50, 100, 200, 500];
 
 const AttendanceSessionForm = () => {
   const { loggedInUser } = useAuth();
-  const { courses: allCourses, fetchCourses } = useCoursesStore();
+  const { fetchCourses } = useCoursesStore();
+  const allCourses = useCoursesStore((s) => s.courses);
   const { fetchOrgs } = useOrgsStore();
+  const orgs = useOrgsStore((s) => s.orgs);
   const { fetchOrgLabGroups } = useLabGroupsStore();
 
   const [courses, setCourses] = useState<Course[]>([]);
@@ -65,6 +67,7 @@ const AttendanceSessionForm = () => {
     null,
   );
   const [loadingLocation, setLoadingLocation] = useState(false);
+  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
   const [generateWebLink, setGenerateWebLink] = useState(false);
 
   useEffect(() => {
@@ -95,8 +98,19 @@ const AttendanceSessionForm = () => {
 
   useEffect(() => {
     if (loggedInUser?.role === "ADMIN") {
-      setCourses(allCourses as any);
-      if (allCourses.length > 0) setSelectedCourse(allCourses[0] as any);
+      const filtered = selectedOrgId
+        ? allCourses.filter((c: any) => c.organizationId === selectedOrgId)
+        : allCourses;
+      setCourses(filtered as any);
+
+      // Auto-select first course if current selected course is not in the new list
+      if (filtered.length > 0) {
+        if (!selectedCourse || !filtered.find((c) => c.id === selectedCourse.id)) {
+          setSelectedCourse(filtered[0] as any);
+        }
+      } else {
+        setSelectedCourse(null);
+      }
     } else {
       const userAny = loggedInUser as any;
 
@@ -109,7 +123,7 @@ const AttendanceSessionForm = () => {
       setCourses(userCourses);
       if (userCourses.length > 0) setSelectedCourse(userCourses[0]);
     }
-  }, [allCourses, loggedInUser]);
+  }, [allCourses, loggedInUser, selectedOrgId, selectedCourse]);
 
   const fetchStudents = React.useCallback(async (courseId: string) => {
     setLoadingStudents(true);
@@ -192,9 +206,9 @@ const AttendanceSessionForm = () => {
           endTime,
           manualPresentIds: selectedIndices.map((i) => filteredStudents[i].id),
           manualAbsentIds: absentIndices.map((i) => filteredStudents[i].id),
-          labGroupId: selectedLabGroupId,
+          labGroupId: selectedLabGroupId || undefined,
           geofenceRadius: geofenceRadius,
-          coordinates: coords,
+          coordinates: coords || undefined,
           generateWebLink,
         }),
       });
@@ -216,24 +230,24 @@ const AttendanceSessionForm = () => {
                     Alert.alert("Copied!", "Link copied to clipboard.", [
                       {
                         text: "OK",
-                        onPress: () => router.push("/(tabs)/attendance" as any),
+                        onPress: () => router.push("/(tabs)/" as any),
                       },
                     ]);
                   } catch {
-                    router.push("/(tabs)/attendance" as any);
+                    router.push("/(tabs)/" as any);
                   }
                 },
               },
               {
                 text: "Done",
                 style: "cancel",
-                onPress: () => router.push("/(tabs)/attendance" as any),
+                onPress: () => router.push("/(tabs)/" as any),
               },
             ],
           );
         } else {
           Alert.alert("Success", "Attendance session created successfully.");
-          router.push("/(tabs)/attendance" as any);
+          router.push("/(tabs)/" as any);
         }
       } else {
         const err = await res.json();
@@ -266,6 +280,47 @@ const AttendanceSessionForm = () => {
           <Text className="text-lg font-semibold text-gray-800 dark:text-zinc-200 mb-4">
             Course & Timer
           </Text>
+
+          {loggedInUser?.role === "ADMIN" && (
+            <View className="mb-4">
+              <Text className="text-sm text-gray-500 mb-2">Organization</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <TouchableOpacity
+                  onPress={() => setSelectedOrgId(null)}
+                  className={`mr-2 px-4 py-2 rounded-full border ${
+                    selectedOrgId === null
+                      ? "bg-indigo-600 border-indigo-600"
+                      : "bg-gray-100 border-gray-200 dark:bg-zinc-700 dark:border-zinc-600"
+                  }`}
+                >
+                  <Text
+                    className={`${selectedOrgId === null ? "text-white" : "text-gray-600 dark:text-zinc-300"}`}
+                  >
+                    All Orgs
+                  </Text>
+                </TouchableOpacity>
+                {orgs.map((org) => (
+                  <TouchableOpacity
+                    key={org.id}
+                    onPress={() => setSelectedOrgId(org.id)}
+                    className={`mr-2 px-4 py-2 rounded-full border ${
+                      selectedOrgId === org.id
+                        ? "bg-indigo-600 border-indigo-600"
+                        : "bg-gray-100 border-gray-200 dark:bg-zinc-700 dark:border-zinc-600"
+                    }`}
+                  >
+                    <Text
+                      className={`${selectedOrgId === org.id ? "text-white" : "text-gray-600 dark:text-zinc-300"}`}
+                    >
+                      {`${org.departmentName} - ${org.courseName} (${org.section})`}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          )}
+
+          <Text className="text-sm text-gray-500 mb-2">Course</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}

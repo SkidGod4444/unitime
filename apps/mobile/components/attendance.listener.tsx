@@ -18,7 +18,8 @@ export default function AttendanceListener() {
     const currentPath = segments.join("/");
     if (
       currentPath.includes("tap-to-mark") ||
-      currentPath.includes("attendance-session-form")
+      currentPath.includes("attendance-session-form") ||
+      currentPath.includes("qr-scanner")
     ) {
       return;
     }
@@ -57,7 +58,7 @@ export default function AttendanceListener() {
   useEffect(() => {
     // 1. Notification Received (Foreground)
     const notificationListener = Notifications.addNotificationReceivedListener(
-      (_notif) => {
+      () => {
         checkActiveSessions(); // Bug 11: Foreground polling/check on notification
       },
     );

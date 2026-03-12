@@ -9,6 +9,23 @@ import { Hono } from "hono";
 
 const attendance = new Hono<AppEnv>();
 
+attendance.get("/qr/session/:id", async (c) => {
+  const sessionId = c.req.param("id");
+  const session = await prisma.attendanceQRSession.findUnique({
+    where: { id: sessionId },
+    include: { course: true },
+  });
+  if (!session) return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
+
+  const qr = generateQRToken(sessionId);
+  return c.json({
+    qrString: qr.qrString,
+    course: session.course,
+    endTime: session.endTime,
+    status: session.status,
+  });
+});
+
 // Basic protection for all attendance routes
 attendance.use("*", requireAuth);
 
@@ -98,7 +115,7 @@ attendance.post("/qr/session/create", async (c) => {
     const baseUrl =
       process.env.WEB_URL ||
       process.env.FRONTEND_URL ||
-      "http://localhost:3000";
+      "https://unitime.devwtf.in";
     const webLink = `${baseUrl}/attendance-qr/${qrSession.id}`;
     await prisma.attendanceQRSession.update({
       where: { id: qrSession.id },
@@ -201,7 +218,7 @@ attendance.post("/qr/session/create", async (c) => {
         data: { courseId, sessionId: qrSession.id },
       };
 
-      await fetch("https://exp.host/--/api/v2/push/send", {
+      const pushResponse = await fetch("https://exp.host/--/api/v2/push/send", {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -211,7 +228,13 @@ attendance.post("/qr/session/create", async (c) => {
         body: JSON.stringify(
           tokens.map((token) => ({ to: token, ...pushDetails })),
         ),
-      }).catch(console.error);
+      });
+
+      if (!pushResponse.ok) {
+        console.error("Expo push notification failed:", await pushResponse.text());
+      } else {
+        console.log(`Successfully sent ${tokens.length} push notifications.`);
+      }
     }
   } catch (err) {
     console.error("Push/Cache error:", err);
@@ -411,20 +434,6 @@ attendance.post("/checkin", async (c) => {
   }
 });
 
-attendance.get("/qr/session/:id", async (c) => {
-  const sessionId = c.req.param("id");
-  const session = await prisma.attendanceQRSession.findUnique({
-    where: { id: sessionId },
-    include: { course: true },
-  });
-  if (!session) return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
-
-  const qr = generateQRToken(sessionId);
-  return c.json({
-    qrString: qr.qrString,
-    course: session.course,
-  });
-});
 
 attendance.get("/summary/:userId", async (c) => {
   const requesterId = c.get("requesterId") as string;

@@ -8,6 +8,7 @@ import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { apiFetch } from "@/lib/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   Alert,
   Dimensions,
@@ -91,10 +92,27 @@ export default function QRScannerScreen() {
       const result = await res.json();
 
       if (res.ok) {
+        // Save to marked sessions to prevent auto-redirect
+        try {
+          const [sessionId] = data.split("|");
+          const markedStr = await AsyncStorage.getItem("MARKED_SESSIONS");
+          let markedIds = markedStr ? JSON.parse(markedStr) : [];
+          markedIds = [
+            sessionId,
+            ...markedIds.filter((id: string) => id !== sessionId),
+          ].slice(0, 50);
+          await AsyncStorage.setItem(
+            "MARKED_SESSIONS",
+            JSON.stringify(markedIds),
+          );
+        } catch (e) {
+          console.error("Failed to save marked session:", e);
+        }
+
         Alert.alert(
           "Success",
           result.message || "Attendance verified successfully",
-          [{ text: "OK", onPress: () => router.back() }],
+          [{ text: "OK", onPress: () => router.replace("/(tabs)/" as any) }],
         );
       } else {
         Alert.alert(
