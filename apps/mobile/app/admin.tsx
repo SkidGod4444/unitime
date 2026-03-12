@@ -2020,11 +2020,7 @@ const SessionCard = React.memo(
               activeOpacity={0.6}
               className="p-2 rounded-lg bg-indigo-50"
             >
-              <Ionicons
-                name="create-outline"
-                size={18}
-                color="#4f46e5"
-              />
+              <Ionicons name="create-outline" size={18} color="#4f46e5" />
             </TouchableOpacity>
 
             {/* Download */}
@@ -2154,23 +2150,26 @@ function AttendanceTab() {
     );
   }, []);
 
-  const handleDownloadPress = React.useCallback(async (session: SessionRecord) => {
-    try {
-      const origin =
-        process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
-      const url = `${origin}/attendance/sessions/${session.id}/export`;
+  const handleDownloadPress = React.useCallback(
+    async (session: SessionRecord) => {
+      try {
+        const origin =
+          process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+        const url = `${origin}/attendance/sessions/${session.id}/export`;
 
-      const supported = await Linking.canOpenURL(url);
-      if (supported) {
-        await Linking.openURL(url);
-      } else {
-        Alert.alert("Error", "Your device cannot open this URL.");
+        const supported = await Linking.canOpenURL(url);
+        if (supported) {
+          await Linking.openURL(url);
+        } else {
+          Alert.alert("Error", "Your device cannot open this URL.");
+        }
+      } catch (e) {
+        console.error("Open URL failed:", e);
+        Alert.alert("Error", "Failed to open download link.");
       }
-    } catch (e) {
-      console.error("Open URL failed:", e);
-      Alert.alert("Error", "Failed to open download link.");
-    }
-  }, []);
+    },
+    [],
+  );
 
   const handleSaveEdits = React.useCallback(
     async (sessionId: string, updatedStudents: Student[]) => {
@@ -2201,7 +2200,9 @@ function AttendanceTab() {
         ListEmptyComponent={
           <View className="items-center py-10">
             <Ionicons name="document-text-outline" size={40} color="#d1d5db" />
-            <Text className="text-gray-400 mt-2 text-sm">No sessions found.</Text>
+            <Text className="text-gray-400 mt-2 text-sm">
+              No sessions found.
+            </Text>
           </View>
         }
         renderItem={({ item }) => (
@@ -2212,7 +2213,7 @@ function AttendanceTab() {
           />
         )}
       />
-      
+
       <EditSessionModal
         session={editingSession}
         onClose={() => setEditingSession(null)}
