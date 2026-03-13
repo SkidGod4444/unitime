@@ -229,14 +229,12 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
   ]);
 
   const computeAllGranted = useCallback(
-    (
-      s?: {
-        location: Location.PermissionStatus | null;
-        media: MediaLibrary.PermissionStatus | null;
-        notifications: Notifications.PermissionStatus | null;
-        camera: PermissionStatus | null;
-      },
-    ) => {
+    (s?: {
+      location: Location.PermissionStatus | null;
+      media: MediaLibrary.PermissionStatus | null;
+      notifications: Notifications.PermissionStatus | null;
+      camera: PermissionStatus | null;
+    }) => {
       const loc = s ? s.location : locationPermission;
       const med = s ? s.media : mediaLibraryPermission;
       const noti = s ? s.notifications : notificationPermission;
