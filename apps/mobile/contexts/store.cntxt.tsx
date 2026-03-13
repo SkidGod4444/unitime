@@ -52,11 +52,10 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(false);
   const [rateLimitedFeatures, setRateLimitedFeatures] = useState<string[]>([]);
   const [vpnDetected, setVpnDetected] = useState<boolean>(false);
-  const VPN_BLOCK_ENABLED = String(
-    process.env.EXPO_PUBLIC_ENABLE_VPN_BLOCK ?? "false",
-  )
-    .toLowerCase()
-    .trim() === "true";
+  const VPN_BLOCK_ENABLED =
+    String(process.env.EXPO_PUBLIC_ENABLE_VPN_BLOCK ?? "false")
+      .toLowerCase()
+      .trim() === "true";
   const { loggedInUser } = useAuth();
   const { getItem } = useLocalStore();
   const router = useRouter();
@@ -526,7 +525,9 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
               style={[styles.button, { backgroundColor: "#e5e7eb" }]}
               activeOpacity={0.8}
             >
-              <Text style={[styles.buttonText, { color: "#374151" }]}>Continue</Text>
+              <Text style={[styles.buttonText, { color: "#374151" }]}>
+                Continue
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

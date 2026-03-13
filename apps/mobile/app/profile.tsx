@@ -67,7 +67,7 @@ export default function Profile() {
                     [
                       {
                         text: "OK",
-                      onPress: async () => {
+                        onPress: async () => {
                           // Apply the update without wiping local data.
                           Updates.reloadAsync();
                         },

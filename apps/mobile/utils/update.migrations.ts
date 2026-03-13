@@ -46,4 +46,3 @@ export async function runUpdateMigrationsOnce(): Promise<void> {
 
   await markMigrated(id);
 }
-
