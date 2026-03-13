@@ -242,18 +242,16 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
   const requestAllPermissionsSequentially = useCallback(async () => {
     try {
       setRequestingPerms(true);
-
+    
       await requestNotificationPermission();
       await requestLocationPermission();
       await requestCameraPermission();
       await requestMediaLibraryPermission();
       // Refresh statuses after requests
       await refreshPermissions();
-      if (computeAllGranted()) {
-        setShowPermsExplainer(false);
-      } else {
-        setShowPermsExplainer(true);
-      }
+      // Keep the modal visible after requesting. If all are granted, the UI
+      // switches to a Close button so the user can dismiss it explicitly.
+      setShowPermsExplainer(true);
     } finally {
       setRequestingPerms(false);
     }

@@ -14,6 +14,8 @@
     "build:dev:i": "APP_VARIANT=development eas build --platform ios --profile development",
     "build:dev:a": "APP_VARIANT=development eas build --platform android --profile development",
     "build:dev": "APP_VARIANT=development eas build --profile development",
+    "update:prod": "EXPO_NO_CACHE=1 eas update --channel production",
+    "update:preview": "EXPO_NO_CACHE=1 eas update --channel preview",
     "android": "APP_VARIANT=development expo start --android",
     "ios": "APP_VARIANT=development expo start --ios",
     "web": "APP_VARIANT=development expo start --web",

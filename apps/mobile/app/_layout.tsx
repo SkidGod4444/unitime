@@ -143,6 +143,8 @@ export default function RootLayout() {
             if (prevId !== currentId) {
               await AsyncStorage.clear();
               await AsyncStorage.setItem(KEY, String(currentId));
+              // Also reset React Query cache once on new update boot
+              queryClient.clear();
             }
           }
         }
