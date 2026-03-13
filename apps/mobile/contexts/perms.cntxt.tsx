@@ -4,6 +4,7 @@ import * as Location from "expo-location";
 import * as MediaLibrary from "expo-media-library";
 import * as Network from "expo-network";
 import * as Notifications from "expo-notifications";
+import { Ionicons } from "@expo/vector-icons";
 import React, {
   createContext,
   useCallback,
@@ -11,7 +12,7 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { AppState } from "react-native";
+import { AppState, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useAuth } from "./auth.cntxt";
 import { useLocalStore } from "./localstore.cntxt";
 
@@ -53,6 +54,8 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
     useState<Notifications.PermissionStatus | null>(null);
   const [cameraPermission, setCameraPermission] =
     useState<PermissionStatus | null>(null);
+  const [showPermsExplainer, setShowPermsExplainer] = useState<boolean>(true);
+  const [requestingPerms, setRequestingPerms] = useState<boolean>(false);
 
   const checkConnection = useCallback(async () => {
     try {
@@ -201,39 +204,7 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, []);
 
-  const checkAllPermissions = useCallback(async () => {
-    await checkConnection();
-
-    const locStatus = await checkLocationPermission();
-    if (locStatus !== Location.PermissionStatus.GRANTED) {
-      await requestLocationPermission();
-    }
-
-    const mediaStatus = await checkMediaLibraryPermission();
-    if (mediaStatus !== MediaLibrary.PermissionStatus.GRANTED) {
-      await requestMediaLibraryPermission();
-    }
-
-    const notifStatus = await checkNotificationPermission();
-    if (notifStatus !== Notifications.PermissionStatus.GRANTED) {
-      await requestNotificationPermission();
-    }
-
-    const cameraStatus = await checkCameraPermission();
-    if (cameraStatus !== PermissionStatus.GRANTED) {
-      await requestCameraPermission();
-    }
-  }, [
-    checkConnection,
-    checkLocationPermission,
-    requestLocationPermission,
-    checkMediaLibraryPermission,
-    requestMediaLibraryPermission,
-    checkNotificationPermission,
-    requestNotificationPermission,
-    checkCameraPermission,
-    requestCameraPermission,
-  ]);
+  
 
   const refreshPermissions = useCallback(async () => {
     await checkConnection();
@@ -249,29 +220,72 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
     checkCameraPermission,
   ]);
 
+  const computeAllGranted = useCallback(() => {
+    return (
+      locationPermission === Location.PermissionStatus.GRANTED &&
+      mediaLibraryPermission === MediaLibrary.PermissionStatus.GRANTED &&
+      notificationPermission === Notifications.PermissionStatus.GRANTED &&
+      cameraPermission === PermissionStatus.GRANTED
+    );
+  }, [
+    locationPermission,
+    mediaLibraryPermission,
+    notificationPermission,
+    cameraPermission,
+  ]);
+
+  const requestAllPermissionsSequentially = useCallback(async () => {
+    try {
+      setRequestingPerms(true);
+    
+      await requestNotificationPermission();
+      await requestLocationPermission();
+      await requestCameraPermission();
+      await requestMediaLibraryPermission();
+      // Refresh statuses after requests
+      await refreshPermissions();
+      if (computeAllGranted()) {
+        setShowPermsExplainer(false);
+      } else {
+        setShowPermsExplainer(true);
+      }
+    } finally {
+      setRequestingPerms(false);
+    }
+  }, [
+    requestNotificationPermission,
+    requestLocationPermission,
+    requestCameraPermission,
+    requestMediaLibraryPermission,
+    refreshPermissions,
+    computeAllGranted,
+  ]);
+
   useEffect(() => {
     const initializeState = async () => {
       const storedOnline = await getItem("isOnline");
       if (storedOnline !== null) {
         setIsOnline(storedOnline === "true");
       }
-      await checkAllPermissions();
+      await refreshPermissions();
+      // Show explainer if any required permission is missing
+      setShowPermsExplainer(!computeAllGranted());
     };
 
-    initializeState();
+    void initializeState();
 
-    const subscription = AppState.addEventListener("change", (nextAppState) => {
+    const subscription = AppState.addEventListener("change", async (nextAppState) => {
       if (nextAppState === "active") {
-        // Immediate check when app becomes active
-        checkAllPermissions();
-        console.log("App became active - running immediate permission check");
+        await refreshPermissions();
+        setShowPermsExplainer(!computeAllGranted());
+        console.log("App became active - refreshed permission status");
       }
     });
 
     return () => {
       subscription.remove();
     };
-  }, [getItem, checkAllPermissions, refreshPermissions]);
+  }, [getItem, refreshPermissions, computeAllGranted]);
 
   return (
     <PermsContext.Provider
@@ -288,8 +302,110 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
       }}
     >
       {children}
+
+      {/* Permissions Explainer Modal (blocks app until all granted) */}
+      <Modal visible={showPermsExplainer} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <View style={styles.iconContainer}><Ionicons name="key-outline" size={32} color="#2563eb" /></View>
+            <Text style={styles.titleText}>Permissions Required</Text>
+            <Text style={styles.messageText}>
+              We request these permissions to deliver core features:
+            </Text>
+            <View style={{ width: "100%", marginTop: 8 }}>
+              <Text style={styles.bulletText}>• Notifications: attendance alerts and updates</Text>
+              <Text style={styles.bulletText}>• Location: geofenced attendance validation</Text>
+              <Text style={styles.bulletText}>• Camera: QR scan for check-ins</Text>
+              <Text style={styles.bulletText}>• Media Library: export and file attachments</Text>
+            </View>
+
+            {!computeAllGranted() ? (
+              <TouchableOpacity
+                onPress={requestAllPermissionsSequentially}
+                disabled={requestingPerms}
+                style={[styles.button, requestingPerms && { opacity: 0.7 }]}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.buttonText}>
+                  {requestingPerms ? "Requesting…" : "Continue"}
+                </Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                onPress={() => setShowPermsExplainer(false)}
+                style={styles.button}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.buttonText}>Close</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+      </Modal>
     </PermsContext.Provider>
   );
 };
 
 export const usePerms = () => useContext(PermsContext);
+
+const styles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 24,
+    zIndex: 9999,
+    elevation: 9999,
+  },
+  modalContainer: {
+    backgroundColor: "#ffffff",
+    borderRadius: 24,
+    padding: 24,
+    width: "100%",
+    maxWidth: 360,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.2,
+    shadowRadius: 15,
+  },
+  iconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#dbeafe",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 6,
+  },
+  titleText: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: 6,
+    textAlign: "center",
+  },
+  messageText: {
+    fontSize: 14,
+    color: "#4b5563",
+    textAlign: "center",
+  },
+  bulletText: {
+    fontSize: 13,
+    color: "#374151",
+    marginTop: 4,
+  },
+  button: {
+    marginTop: 16,
+    backgroundColor: "#2563eb",
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+  },
+  buttonText: {
+    color: "#ffffff",
+    fontWeight: "600",
+    fontSize: 15,
+  },
+});

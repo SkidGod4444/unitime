@@ -14,6 +14,7 @@ import { useEnrollmentStore } from "@/lib/store/enrollment";
 import { useHistoryStore } from "@/lib/store/history";
 import { useNotificationsStore } from "@/lib/store/notifications";
 import { Ionicons } from "@expo/vector-icons";
+import * as Network from "expo-network";
 import { useRouter, useSegments } from "expo-router";
 import React, {
   createContext,
@@ -25,6 +26,7 @@ import React, {
 import {
   Alert,
   AppState,
+  BackHandler,
   Modal,
   Platform,
   StyleSheet,
@@ -49,12 +51,14 @@ const StoreContext = createContext<StoreContextType>({
 export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(false);
   const [rateLimitedFeatures, setRateLimitedFeatures] = useState<string[]>([]);
+  const [vpnDetected, setVpnDetected] = useState<boolean>(false);
   const { loggedInUser } = useAuth();
   const { getItem } = useLocalStore();
   const router = useRouter();
   const segments = useSegments() as string[];
   const lastRefreshedAt = useRef<number>(0);
   const redirectingToTapRef = useRef(false);
+  const vpnCheckTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const handleActiveSessions = async (bundleData?: {
     activeSessions?: any[];
@@ -362,6 +366,41 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
     ],
   );
 
+  // VPN detection helpers
+  const checkVpn = React.useCallback(async () => {
+    try {
+      const state = await Network.getNetworkStateAsync();
+      const typeStr = String((state as any)?.type || "").toLowerCase();
+      const details = (state as any)?.details || {};
+      const inferredVpn =
+        typeStr === "vpn" ||
+        Boolean((state as any)?.isVpn) ||
+        Boolean(details?.isVpn) ||
+        Boolean(details?.vpnActive);
+      setVpnDetected(Boolean(inferredVpn));
+    } catch (e) {
+      console.warn("VPN check failed:", e);
+    }
+  }, []);
+
+  useEffect(() => {
+    void checkVpn();
+    const sub = AppState.addEventListener("change", (next) => {
+      if (next === "active") void checkVpn();
+    });
+    vpnCheckTimerRef.current && clearInterval(vpnCheckTimerRef.current);
+    vpnCheckTimerRef.current = setInterval(() => void checkVpn(), 30000);
+    return () => {
+      sub.remove();
+      vpnCheckTimerRef.current && clearInterval(vpnCheckTimerRef.current);
+      vpnCheckTimerRef.current = null;
+    };
+  }, [checkVpn]);
+
+  const handleQuitApp = React.useCallback(() => {
+    BackHandler.exitApp();
+  }, []);
+
   const appState = useRef(AppState.currentState);
 
   useEffect(() => {
@@ -452,6 +491,33 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <StoreContext.Provider value={{ refresh, loading }}>
       {children}
+
+      {/* VPN Detected Modal */}
+      <Modal
+        visible={vpnDetected}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {}}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <View className="items-center mb-3">
+              <Ionicons name="shield-outline" size={32} color="#ef4444" />
+            </View>
+            <Text style={styles.titleText}>VPN Detected</Text>
+            <Text style={styles.messageText}>
+              Please disable your VPN to continue using the app.
+            </Text>
+            <TouchableOpacity
+              onPress={handleQuitApp}
+              style={styles.button}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.buttonText}>Quit App</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       <Modal
         visible={rateLimitedFeatures.length > 0}
