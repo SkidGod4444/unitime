@@ -121,7 +121,9 @@ export function useAppUpdates() {
     try {
       await Updates.fetchUpdateAsync();
       // Apply immediately to the latest downloaded bundle; clear caches first.
-      try { await AsyncStorage.clear(); } catch {}
+      try {
+        await AsyncStorage.clear();
+      } catch {}
       await Updates.reloadAsync();
     } catch {
       setStatus("error");

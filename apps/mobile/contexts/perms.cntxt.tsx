@@ -242,7 +242,7 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
   const requestAllPermissionsSequentially = useCallback(async () => {
     try {
       setRequestingPerms(true);
-    
+
       await requestNotificationPermission();
       await requestLocationPermission();
       await requestCameraPermission();
