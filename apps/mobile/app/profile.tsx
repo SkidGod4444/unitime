@@ -9,6 +9,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as Updates from "expo-updates";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import React from "react";
 import {
   ActivityIndicator,
@@ -63,7 +64,13 @@ export default function Profile() {
                   Alert.alert(
                     "Update Ready",
                     "The update has been downloaded. The app will now restart to apply the changes.",
-                    [{ text: "OK", onPress: () => Updates.reloadAsync() }],
+                    [{
+                      text: "OK",
+                      onPress: async () => {
+                        try { await AsyncStorage.clear(); } catch {}
+                        Updates.reloadAsync();
+                      }
+                    }],
                   );
                 } catch {
                   Alert.alert(

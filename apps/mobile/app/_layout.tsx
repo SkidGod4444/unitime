@@ -23,6 +23,9 @@ import React, { ReactNode } from "react";
 import { useColorScheme as useNWColorScheme } from "nativewind";
 import { useThemeStore } from "@/lib/store";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Updates from "expo-updates";
+import { ActivityIndicator, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import UpdateModal from "@/components/update.modal";
 import { useAppUpdates } from "@/hooks/use-app-updates";
@@ -125,22 +128,40 @@ function AppContent() {
 }
 
 export default function RootLayout() {
-  // Initialise the stable device ID as early as possible — before AuthProvider
-  // mounts and fires any API requests — so that every request (including
-  // unauthenticated login/signup calls) carries an X-Device-ID header and gets
-  // its own rate-limit bucket instead of sharing one with every other user on
-  // the same IP/network.
-  React.useEffect(() => {
-    initDeviceId().catch(() => {
-      // Non-fatal: the app still works; requests just won't carry the header
-      // until the next cold-start successfully resolves the ID.
-    });
+  const [bootReady, setBootReady] = React.useState(false);
 
-    // Register the optional background update task. This is a best-effort
-    // optimisation — the app works fine if expo-background-task is not yet
-    // installed or if the OS declines the registration.
-    registerBackgroundUpdateTask();
+  React.useEffect(() => {
+    (async () => {
+      // On first boot after an OTA update, clear persisted caches to avoid
+      // incompatible state causing stale UI or broken requests.
+      try {
+        if (!__DEV__) {
+          const currentId = Updates.updateId ?? null;
+          if (currentId) {
+            const KEY = "@unitime/last_update_id";
+            const prevId = await AsyncStorage.getItem(KEY);
+            if (prevId !== currentId) {
+              await AsyncStorage.clear();
+              await AsyncStorage.setItem(KEY, String(currentId));
+            }
+          }
+        }
+      } catch {}
+
+      // Initialise the stable device ID as early as possible
+      initDeviceId().catch(() => {});
+      registerBackgroundUpdateTask();
+      setBootReady(true);
+    })();
   }, []);
+
+  if (!bootReady) {
+    return (
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
   return (
     <PostHogAnalyticsProvider>

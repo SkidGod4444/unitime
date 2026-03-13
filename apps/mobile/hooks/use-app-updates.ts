@@ -131,6 +131,12 @@ export function useAppUpdates() {
    * Only call this after the user has explicitly confirmed.
    */
   const applyUpdate = useCallback(async () => {
+    try {
+      // Clear persisted caches so the new bundle doesn't read incompatible state
+      await AsyncStorage.clear();
+    } catch {
+      // Non-fatal — proceed with reload even if clearing fails
+    }
     await Updates.reloadAsync();
   }, []);
 
