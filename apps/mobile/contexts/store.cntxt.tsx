@@ -2,9 +2,11 @@ import { apiFetch } from "@/lib/api";
 import {
   useAttendanceStore,
   useCoursesStore,
+  useFeedbacksStore,
   useLabGroupsStore,
   useOrgsStore,
   useProfilesStore,
+  useTicketsStore,
   useTimetableStore,
   useUsersStore,
 } from "@/lib/store";
@@ -128,6 +130,8 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   const { fetchEnrollments } = useEnrollmentStore();
   const { fetchNotifications } = useNotificationsStore();
   const { fetchHistoryLogs } = useHistoryStore();
+  const { fetchMyFeedbacks } = useFeedbacksStore();
+  const { fetchMyTickets } = useTicketsStore();
 
   const refresh = React.useCallback(
     async (isManual: boolean = true) => {
@@ -190,6 +194,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
               });
             }
             // also refresh personal tickets/feedbacks
+            await Promise.allSettled([fetchMyFeedbacks(), fetchMyTickets()]);
           } else {
             // Fallback to legacy per-endpoint calls
             await Promise.allSettled([
@@ -197,6 +202,8 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
               fetchSummary(loggedInUser.id),
               fetchNotifications(loggedInUser.id),
               fetchHistoryLogs(loggedInUser.id),
+              fetchMyFeedbacks(),
+              fetchMyTickets(),
             ]);
           }
         } catch {
@@ -206,6 +213,8 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
             fetchSummary(loggedInUser.id),
             fetchNotifications(loggedInUser.id),
             fetchHistoryLogs(loggedInUser.id),
+            fetchMyFeedbacks(),
+            fetchMyTickets(),
           ]);
         }
       }
@@ -344,6 +353,8 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
       fetchEnrollments,
       fetchHistoryLogs,
       fetchNotifications,
+      fetchMyFeedbacks,
+      fetchMyTickets,
       getItem,
       loggedInUser,
       router,
