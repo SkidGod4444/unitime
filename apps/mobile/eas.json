@@ -28,15 +28,7 @@
           "buildType": "apk"
         },
         "env": {
-          "APP_VARIANT": "preview",
-          "EXPO_PUBLIC_SUPABASE_URL": "https://vbgpyuvquogntchicdvx.supabase.co",
-          "EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_hBe064AsoFxWIWzmsoyNUQ_4oxYy2f6",
-          "EXPO_PUBLIC_API_URL": "https://unitime-backend.vercel.app/v1",
-          "EXPO_PUBLIC_APPWRITE_PROJECT_ID": "6990273c0034ef9b8594",
-          "EXPO_PUBLIC_APPWRITE_PROJECT_NAME": "UNiTIME",
-          "EXPO_PUBLIC_APPWRITE_ENDPOINT": "https://sgp.cloud.appwrite.io/v1",
-          "EXPO_PUBLIC_POSTHOG_API_KEY": "phc_13qRDyQq0AB0aLr2lS0xfSmFKG4F3aQMtayoywwbElV",
-          "EXPO_PUBLIC_POSTHOG_HOST": "https://us.i.posthog.com"
+          "APP_VARIANT": "preview"
         },
         "autoIncrement": true
       },
@@ -47,15 +39,7 @@
         },
         "autoIncrement": true,
         "env": {
-          "APP_VARIANT": "production",
-          "EXPO_PUBLIC_SUPABASE_URL": "https://vbgpyuvquogntchicdvx.supabase.co",
-          "EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_hBe064AsoFxWIWzmsoyNUQ_4oxYy2f6",
-          "EXPO_PUBLIC_API_URL": "https://unitime-backend.vercel.app/v1",
-          "EXPO_PUBLIC_APPWRITE_PROJECT_ID": "6990273c0034ef9b8594",
-          "EXPO_PUBLIC_APPWRITE_PROJECT_NAME": "UNiTIME",
-          "EXPO_PUBLIC_APPWRITE_ENDPOINT": "https://sgp.cloud.appwrite.io/v1",
-          "EXPO_PUBLIC_POSTHOG_API_KEY": "phc_13qRDyQq0AB0aLr2lS0xfSmFKG4F3aQMtayoywwbElV",
-          "EXPO_PUBLIC_POSTHOG_HOST": "https://us.i.posthog.com"
+          "APP_VARIANT": "production"
         }
       }
     },
