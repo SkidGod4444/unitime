@@ -1,7 +1,7 @@
 {
   "name": "@unitime/mobile",
   "main": "expo-router/entry",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "scripts": {
     "dev": "APP_VARIANT=development expo start",
     "run:build:dev": "bunx eas-cli@latest workflow:run create-dev-builds.yml",
@@ -21,7 +21,9 @@
     "web": "APP_VARIANT=development expo start --web",
     "test": "jest --watchAll",
     "lint": "expo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "version:bump": "node scripts/bump-version.mjs",
+    "version:set": "node scripts/bump-version.mjs"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",

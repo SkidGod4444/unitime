@@ -30,7 +30,7 @@ export default ({ config }) => ({
   ...config,
   name: getAppName(),
   slug: 'unitime',
-  version: '1.0.1',
+  version: '1.0.2',
   orientation: 'portrait',
   icon: getAppIcon(),
   scheme: 'unitime',
