@@ -42,7 +42,7 @@
     },
     "apps/mobile": {
       "name": "@unitime/mobile",
-      "version": "1.0.0",
+      "version": "1.0.2",
       "dependencies": {
         "@expo/vector-icons": "^15.0.3",
         "@posthog/core": "^1.23.2",
