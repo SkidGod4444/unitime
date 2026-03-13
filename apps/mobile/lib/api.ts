@@ -2,7 +2,7 @@ import { getDeviceId } from "@/lib/device.id";
 import { getAuthToken } from "@/lib/auth.token";
 
 export const apiOrigin =
-  process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000/v1";
+  process.env.EXPO_PUBLIC_API_URL || "https://unitime-backend.vercel.app/v1";
 
 export const withAuth = (init?: RequestInit): RequestInit => {
   const token = getAuthToken();
