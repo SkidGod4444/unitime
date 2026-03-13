@@ -67,10 +67,8 @@ export default function Profile() {
                     [
                       {
                         text: "OK",
-                        onPress: async () => {
-                          try {
-                            await AsyncStorage.clear();
-                          } catch {}
+                      onPress: async () => {
+                          // Apply the update without wiping local data.
                           Updates.reloadAsync();
                         },
                       },

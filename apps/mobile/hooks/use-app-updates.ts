@@ -120,11 +120,8 @@ export function useAppUpdates() {
     setStatus("downloading");
     try {
       await Updates.fetchUpdateAsync();
-      // Apply immediately to the latest downloaded bundle; clear caches first.
-      try {
-        await AsyncStorage.clear();
-      } catch {}
-      await Updates.reloadAsync();
+      // Do not auto-restart; surface "ready" so UI can ask user to apply.
+      setStatus("ready");
     } catch {
       setStatus("error");
     }
@@ -135,12 +132,7 @@ export function useAppUpdates() {
    * Only call this after the user has explicitly confirmed.
    */
   const applyUpdate = useCallback(async () => {
-    try {
-      // Clear persisted caches so the new bundle doesn't read incompatible state
-      await AsyncStorage.clear();
-    } catch {
-      // Non-fatal — proceed with reload even if clearing fails
-    }
+    // Just reload to apply the downloaded bundle. Do not wipe storage.
     await Updates.reloadAsync();
   }, []);
 

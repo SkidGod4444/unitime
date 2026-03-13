@@ -39,8 +39,8 @@ export default ({ config }) => ({
   deepLinking: true,
   updates: {
     url: "https://u.expo.dev/7c92f536-ed65-4cbb-856a-f32a8f8eacac",
-    fallbackToCacheTimeout: 0,
-    checkAutomatically: "ON_LOAD"
+    fallbackToCacheTimeout: 2000,
+    checkAutomatically: "ON_ERROR_RECOVERY"
   },
   runtimeVersion: {
     policy: "appVersion"

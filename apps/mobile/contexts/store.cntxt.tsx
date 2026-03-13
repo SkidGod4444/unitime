@@ -52,6 +52,11 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(false);
   const [rateLimitedFeatures, setRateLimitedFeatures] = useState<string[]>([]);
   const [vpnDetected, setVpnDetected] = useState<boolean>(false);
+  const VPN_BLOCK_ENABLED = String(
+    process.env.EXPO_PUBLIC_ENABLE_VPN_BLOCK ?? "false",
+  )
+    .toLowerCase()
+    .trim() === "true";
   const { loggedInUser } = useAuth();
   const { getItem } = useLocalStore();
   const router = useRouter();
@@ -384,6 +389,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   useEffect(() => {
+    if (!VPN_BLOCK_ENABLED) return;
     void checkVpn();
     const sub = AppState.addEventListener("change", (next) => {
       if (next === "active") void checkVpn();
@@ -395,7 +401,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
       vpnCheckTimerRef.current && clearInterval(vpnCheckTimerRef.current);
       vpnCheckTimerRef.current = null;
     };
-  }, [checkVpn]);
+  }, [checkVpn, VPN_BLOCK_ENABLED]);
 
   const handleQuitApp = React.useCallback(() => {
     BackHandler.exitApp();
@@ -494,7 +500,7 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
 
       {/* VPN Detected Modal */}
       <Modal
-        visible={vpnDetected}
+        visible={VPN_BLOCK_ENABLED && vpnDetected}
         transparent
         animationType="fade"
         onRequestClose={() => {}}
@@ -514,6 +520,13 @@ export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
               activeOpacity={0.8}
             >
               <Text style={styles.buttonText}>Quit App</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setVpnDetected(false)}
+              style={[styles.button, { backgroundColor: "#e5e7eb" }]}
+              activeOpacity={0.8}
+            >
+              <Text style={[styles.buttonText, { color: "#374151" }]}>Continue</Text>
             </TouchableOpacity>
           </View>
         </View>

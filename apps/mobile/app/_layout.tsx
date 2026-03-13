@@ -26,6 +26,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Updates from "expo-updates";
 import { ActivityIndicator, View } from "react-native";
+import { runUpdateMigrationsOnce } from "@/utils/update.migrations";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import UpdateModal from "@/components/update.modal";
 import { useAppUpdates } from "@/hooks/use-app-updates";
@@ -132,21 +133,10 @@ export default function RootLayout() {
 
   React.useEffect(() => {
     (async () => {
-      // On first boot after an OTA update, clear persisted caches to avoid
-      // incompatible state causing stale UI or broken requests.
       try {
         if (!__DEV__) {
-          const currentId = Updates.updateId ?? null;
-          if (currentId) {
-            const KEY = "@unitime/last_update_id";
-            const prevId = await AsyncStorage.getItem(KEY);
-            if (prevId !== currentId) {
-              await AsyncStorage.clear();
-              await AsyncStorage.setItem(KEY, String(currentId));
-              // Also reset React Query cache once on new update boot
-              queryClient.clear();
-            }
-          }
+          // Run targeted, one-time migrations for this update id.
+          await runUpdateMigrationsOnce();
         }
       } catch {}
 
