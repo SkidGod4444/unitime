@@ -241,7 +241,8 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
       const LIMITED =
         (MediaLibrary.PermissionStatus as any)?.LIMITED ?? ("limited" as any);
       const mediaGranted =
-        med === MediaLibrary.PermissionStatus.GRANTED || (med as any) === LIMITED;
+        med === MediaLibrary.PermissionStatus.GRANTED ||
+        (med as any) === LIMITED;
       return (
         loc === Location.PermissionStatus.GRANTED &&
         mediaGranted &&
