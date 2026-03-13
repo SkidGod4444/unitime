@@ -7,13 +7,16 @@ import { UserT } from "@unitime/types";
 import { router } from "expo-router";
 import { usePostHog } from "posthog-react-native";
 import React, {
+  useCallback,
   createContext,
   ReactNode,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { ID } from "react-native-appwrite";
+import { AppState, type AppStateStatus } from "react-native";
 
 type AuthContextType = {
   isAuthenticated: boolean;
@@ -47,6 +50,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loggedInUser, setLoggedInUser] = useState<UserT | null>(null);
   const [error, setError] = useState("");
   const [jwt, setJwt] = useState<string | null>(null);
+  const refreshInFlightRef = useRef<Promise<string | null> | null>(null);
+  const lastJwtRefreshAtRef = useRef<number>(0);
+  const appStateRef = useRef<AppStateStatus>(AppState.currentState);
   const posthog = usePostHog();
 
   useEffect(() => {
@@ -138,6 +144,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }
 
+  const setJwtEverywhere = useCallback((nextJwt: string | null) => {
+    setJwt(nextJwt);
+    setAuthTokenProvider(() => nextJwt);
+    if (nextJwt) {
+      lastJwtRefreshAtRef.current = Date.now();
+    }
+  }, []);
+
   async function login(email: string, password: string) {
     try {
       setLoading(true);
@@ -148,7 +162,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (user) {
         // Generate JWT for authenticating with our backend server
         const jwtResponse = await account.createJWT();
-        setJwt(jwtResponse.jwt);
+        setJwtEverywhere(jwtResponse.jwt);
 
         const dbUser = await fetchDbUser(user.email, jwtResponse.jwt, user);
         if (dbUser) {
@@ -216,7 +230,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }),
       });
       await account.deleteSession("current");
-      setJwt(null);
+      setJwtEverywhere(null);
       setLoggedInUser(null);
       if (posthog) {
         posthog.reset();
@@ -230,18 +244,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }
 
-  // Refresh the Appwrite JWT (expires after 15 min) — call before sensitive authenticated requests
-  const refreshJwt = async (): Promise<string | null> => {
-    try {
-      const jwtResponse = await account.createJWT();
-      setJwt(jwtResponse.jwt);
-      setAuthTokenProvider(() => jwtResponse.jwt);
-      return jwtResponse.jwt;
-    } catch (err) {
-      console.warn("Failed to refresh JWT:", err);
-      return null;
+  // Refresh the Appwrite JWT (expires after 15 min) — deduped for concurrent callers.
+  const refreshJwt = useCallback(async (): Promise<string | null> => {
+    if (refreshInFlightRef.current) {
+      return refreshInFlightRef.current;
     }
-  };
+
+    const run = (async () => {
+      try {
+        const jwtResponse = await account.createJWT();
+        setJwtEverywhere(jwtResponse.jwt);
+        return jwtResponse.jwt;
+      } catch (err) {
+        console.warn("Failed to refresh JWT:", err);
+        return null;
+      } finally {
+        refreshInFlightRef.current = null;
+      }
+    })();
+
+    refreshInFlightRef.current = run;
+    return run;
+  }, [setJwtEverywhere]);
 
   useEffect(() => {
     let isMounted = true;
@@ -257,7 +281,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           // Generate a fresh JWT for the existing session
           const jwtResponse = await account.createJWT();
           if (isMounted) {
-            setJwt(jwtResponse.jwt);
+            setJwtEverywhere(jwtResponse.jwt);
           }
 
           const dbUser = await fetchDbUser(user.email, jwtResponse.jwt, user);
@@ -296,17 +320,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Keep Appwrite JWT fresh while app is alive.
+  useEffect(() => {
+    if (!isAuthenticated || !loggedInUser?.id) return;
+
+    const refreshWindowMs = 10 * 60 * 1000; // 10 minutes (< Appwrite JWT 15m expiry)
+    const timer = setInterval(() => {
+      void refreshJwt();
+    }, refreshWindowMs);
+
+    const sub = AppState.addEventListener("change", (nextState) => {
+      const prevState = appStateRef.current;
+      appStateRef.current = nextState;
+
+      if (
+        prevState.match(/inactive|background/) &&
+        nextState === "active" &&
+        Date.now() - lastJwtRefreshAtRef.current > 60 * 1000
+      ) {
+        void refreshJwt();
+      }
+    });
+
+    return () => {
+      clearInterval(timer);
+      sub.remove();
+    };
+  }, [isAuthenticated, loggedInUser?.id, refreshJwt]);
+
   // Sync Expo Push Token with Backend
   useEffect(() => {
     async function setupPush() {
-      if (loggedInUser?.id && jwt) {
+      if (loggedInUser?.id) {
+        const tokenForUpdate = jwt ?? (await refreshJwt());
+        if (!tokenForUpdate) return;
+
         const pushToken = await registerForPushNotificationsAsync();
         if (pushToken && pushToken !== loggedInUser.expoPushToken) {
           try {
             const headers: Record<string, string> = {
               "Content-Type": "application/json",
             };
-            headers["Authorization"] = `Bearer ${jwt}`;
+            headers["Authorization"] = `Bearer ${tokenForUpdate}`;
 
             await apiFetch(`/users/${loggedInUser.id}/update`, {
               method: "PUT",
@@ -321,7 +376,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     }
     setupPush();
-  }, [loggedInUser?.id, loggedInUser?.expoPushToken, jwt]);
+  }, [loggedInUser?.id, loggedInUser?.expoPushToken, refreshJwt]);
 
   return (
     <AuthContext.Provider
