@@ -61,7 +61,9 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
     useState<Notifications.PermissionStatus | null>(null);
   const [cameraPermission, setCameraPermission] =
     useState<PermissionStatus | null>(null);
-  const [showPermsExplainer, setShowPermsExplainer] = useState<boolean>(true);
+  // Start hidden; we'll decide after hydration to avoid flicker
+  const [showPermsExplainer, setShowPermsExplainer] = useState<boolean>(false);
+  const [permsHydrated, setPermsHydrated] = useState<boolean>(false);
   const [requestingPerms, setRequestingPerms] = useState<boolean>(false);
 
   const checkConnection = useCallback(async () => {
@@ -213,10 +215,11 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const refreshPermissions = useCallback(async () => {
     await checkConnection();
-    await checkLocationPermission();
-    await checkMediaLibraryPermission();
-    await checkNotificationPermission();
-    await checkCameraPermission();
+    const location = await checkLocationPermission();
+    const media = await checkMediaLibraryPermission();
+    const notifications = await checkNotificationPermission();
+    const camera = await checkCameraPermission();
+    return { location, media, notifications, camera } as const;
   }, [
     checkConnection,
     checkLocationPermission,
@@ -225,19 +228,33 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
     checkCameraPermission,
   ]);
 
-  const computeAllGranted = useCallback(() => {
-    return (
-      locationPermission === Location.PermissionStatus.GRANTED &&
-      mediaLibraryPermission === MediaLibrary.PermissionStatus.GRANTED &&
-      notificationPermission === Notifications.PermissionStatus.GRANTED &&
-      cameraPermission === PermissionStatus.GRANTED
-    );
-  }, [
-    locationPermission,
-    mediaLibraryPermission,
-    notificationPermission,
-    cameraPermission,
-  ]);
+  const computeAllGranted = useCallback(
+    (
+      s?: {
+        location: Location.PermissionStatus | null;
+        media: MediaLibrary.PermissionStatus | null;
+        notifications: Notifications.PermissionStatus | null;
+        camera: PermissionStatus | null;
+      },
+    ) => {
+      const loc = s ? s.location : locationPermission;
+      const med = s ? s.media : mediaLibraryPermission;
+      const noti = s ? s.notifications : notificationPermission;
+      const cam = s ? s.camera : cameraPermission;
+      return (
+        loc === Location.PermissionStatus.GRANTED &&
+        med === MediaLibrary.PermissionStatus.GRANTED &&
+        noti === Notifications.PermissionStatus.GRANTED &&
+        cam === PermissionStatus.GRANTED
+      );
+    },
+    [
+      locationPermission,
+      mediaLibraryPermission,
+      notificationPermission,
+      cameraPermission,
+    ],
+  );
 
   const requestAllPermissionsSequentially = useCallback(async () => {
     try {
@@ -247,11 +264,9 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
       await requestLocationPermission();
       await requestCameraPermission();
       await requestMediaLibraryPermission();
-      // Refresh statuses after requests
-      await refreshPermissions();
-      // Keep the modal visible after requesting. If all are granted, the UI
-      // switches to a Close button so the user can dismiss it explicitly.
-      setShowPermsExplainer(true);
+      // Refresh statuses after requests and decide visibility deterministically
+      const statuses = await refreshPermissions();
+      setShowPermsExplainer(!computeAllGranted(statuses));
     } finally {
       setRequestingPerms(false);
     }
@@ -270,9 +285,10 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
       if (storedOnline !== null) {
         setIsOnline(storedOnline === "true");
       }
-      await refreshPermissions();
-      // Show explainer if any required permission is missing
-      setShowPermsExplainer(!computeAllGranted());
+      const statuses = await refreshPermissions();
+      // Hydration done; decide once to avoid flash
+      setPermsHydrated(true);
+      setShowPermsExplainer(!computeAllGranted(statuses));
     };
 
     void initializeState();
@@ -281,8 +297,8 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
       "change",
       async (nextAppState) => {
         if (nextAppState === "active") {
-          await refreshPermissions();
-          setShowPermsExplainer(!computeAllGranted());
+          const statuses = await refreshPermissions();
+          setShowPermsExplainer(!computeAllGranted(statuses));
           console.log("App became active - refreshed permission status");
         }
       },
@@ -310,7 +326,11 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
       {children}
 
       {/* Permissions Explainer Modal (blocks app until all granted) */}
-      <Modal visible={showPermsExplainer} transparent animationType="fade">
+      <Modal
+        visible={permsHydrated && showPermsExplainer}
+        transparent
+        animationType="fade"
+      >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <View style={styles.iconContainer}>
@@ -346,15 +366,7 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
                   {requestingPerms ? "Requesting…" : "Continue"}
                 </Text>
               </TouchableOpacity>
-            ) : (
-              <TouchableOpacity
-                onPress={() => setShowPermsExplainer(false)}
-                style={styles.button}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.buttonText}>Close</Text>
-              </TouchableOpacity>
-            )}
+            ) : null}
           </View>
         </View>
       </Modal>
