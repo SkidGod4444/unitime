@@ -12,7 +12,14 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { AppState, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  AppState,
+  Modal,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useAuth } from "./auth.cntxt";
 import { useLocalStore } from "./localstore.cntxt";
 
@@ -204,8 +211,6 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, []);
 
-  
-
   const refreshPermissions = useCallback(async () => {
     await checkConnection();
     await checkLocationPermission();
@@ -237,7 +242,7 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
   const requestAllPermissionsSequentially = useCallback(async () => {
     try {
       setRequestingPerms(true);
-    
+
       await requestNotificationPermission();
       await requestLocationPermission();
       await requestCameraPermission();
@@ -274,13 +279,16 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
 
     void initializeState();
 
-    const subscription = AppState.addEventListener("change", async (nextAppState) => {
-      if (nextAppState === "active") {
-        await refreshPermissions();
-        setShowPermsExplainer(!computeAllGranted());
-        console.log("App became active - refreshed permission status");
-      }
-    });
+    const subscription = AppState.addEventListener(
+      "change",
+      async (nextAppState) => {
+        if (nextAppState === "active") {
+          await refreshPermissions();
+          setShowPermsExplainer(!computeAllGranted());
+          console.log("App became active - refreshed permission status");
+        }
+      },
+    );
 
     return () => {
       subscription.remove();
@@ -307,16 +315,26 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
       <Modal visible={showPermsExplainer} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
-            <View style={styles.iconContainer}><Ionicons name="key-outline" size={32} color="#2563eb" /></View>
+            <View style={styles.iconContainer}>
+              <Ionicons name="key-outline" size={32} color="#2563eb" />
+            </View>
             <Text style={styles.titleText}>Permissions Required</Text>
             <Text style={styles.messageText}>
               We request these permissions to deliver core features:
             </Text>
             <View style={{ width: "100%", marginTop: 8 }}>
-              <Text style={styles.bulletText}>• Notifications: attendance alerts and updates</Text>
-              <Text style={styles.bulletText}>• Location: geofenced attendance validation</Text>
-              <Text style={styles.bulletText}>• Camera: QR scan for check-ins</Text>
-              <Text style={styles.bulletText}>• Media Library: export and file attachments</Text>
+              <Text style={styles.bulletText}>
+                • Notifications: attendance alerts and updates
+              </Text>
+              <Text style={styles.bulletText}>
+                • Location: geofenced attendance validation
+              </Text>
+              <Text style={styles.bulletText}>
+                • Camera: QR scan for check-ins
+              </Text>
+              <Text style={styles.bulletText}>
+                • Media Library: export and file attachments
+              </Text>
             </View>
 
             {!computeAllGranted() ? (
