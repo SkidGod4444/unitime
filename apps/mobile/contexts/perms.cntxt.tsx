@@ -61,8 +61,7 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
     useState<Notifications.PermissionStatus | null>(null);
   const [cameraPermission, setCameraPermission] =
     useState<PermissionStatus | null>(null);
-  // Start hidden; we'll decide after hydration to avoid flicker
-  const [showPermsExplainer, setShowPermsExplainer] = useState<boolean>(false);
+  // Hydration flag to avoid initial flicker before we know statuses
   const [permsHydrated, setPermsHydrated] = useState<boolean>(false);
   const [requestingPerms, setRequestingPerms] = useState<boolean>(false);
 
@@ -239,9 +238,13 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
       const med = s ? s.media : mediaLibraryPermission;
       const noti = s ? s.notifications : notificationPermission;
       const cam = s ? s.camera : cameraPermission;
+      const LIMITED =
+        (MediaLibrary.PermissionStatus as any)?.LIMITED ?? ("limited" as any);
+      const mediaGranted =
+        med === MediaLibrary.PermissionStatus.GRANTED || (med as any) === LIMITED;
       return (
         loc === Location.PermissionStatus.GRANTED &&
-        med === MediaLibrary.PermissionStatus.GRANTED &&
+        mediaGranted &&
         noti === Notifications.PermissionStatus.GRANTED &&
         cam === PermissionStatus.GRANTED
       );
@@ -262,9 +265,8 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
       await requestLocationPermission();
       await requestCameraPermission();
       await requestMediaLibraryPermission();
-      // Refresh statuses after requests and decide visibility deterministically
-      const statuses = await refreshPermissions();
-      setShowPermsExplainer(!computeAllGranted(statuses));
+      // Refresh statuses after requests; modal visibility is derived
+      await refreshPermissions();
     } finally {
       setRequestingPerms(false);
     }
@@ -283,10 +285,9 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
       if (storedOnline !== null) {
         setIsOnline(storedOnline === "true");
       }
-      const statuses = await refreshPermissions();
-      // Hydration done; decide once to avoid flash
+      await refreshPermissions();
+      // Hydration done; visibility is fully derived from current statuses
       setPermsHydrated(true);
-      setShowPermsExplainer(!computeAllGranted(statuses));
     };
 
     void initializeState();
@@ -295,8 +296,7 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
       "change",
       async (nextAppState) => {
         if (nextAppState === "active") {
-          const statuses = await refreshPermissions();
-          setShowPermsExplainer(!computeAllGranted(statuses));
+          await refreshPermissions();
           console.log("App became active - refreshed permission status");
         }
       },
@@ -325,7 +325,7 @@ export const PermsProvider: React.FC<{ children: React.ReactNode }> = ({
 
       {/* Permissions Explainer Modal (blocks app until all granted) */}
       <Modal
-        visible={permsHydrated && showPermsExplainer}
+        visible={permsHydrated && !computeAllGranted()}
         transparent
         animationType="fade"
       >

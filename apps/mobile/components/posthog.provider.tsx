@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Updates from "expo-updates";
 import { useGlobalSearchParams, usePathname } from "expo-router";
 import {
   PostHogCustomStorage,
@@ -57,8 +58,26 @@ export function PostHogAnalyticsProvider({
         customStorage: posthogCustomStorage,
       }}
     >
+      <BootstrapSuperProps />
       <ScreenTracker />
       {children}
     </PostHogProvider>
   );
+}
+
+function BootstrapSuperProps() {
+  const posthog = usePostHog();
+  useEffect(() => {
+    if (!posthog) return;
+    try {
+      const superProps: Record<string, any> = {
+        ota_update_id: Updates.updateId ?? "embedded",
+        ota_runtime_version: Updates.runtimeVersion ?? null,
+        ota_channel: (Updates as any).channel ?? null,
+      };
+      // Register as super properties so they attach to all future events
+      (posthog as any).register?.(superProps);
+    } catch {}
+  }, [posthog]);
+  return null;
 }
