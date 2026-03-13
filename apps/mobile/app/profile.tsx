@@ -64,13 +64,17 @@ export default function Profile() {
                   Alert.alert(
                     "Update Ready",
                     "The update has been downloaded. The app will now restart to apply the changes.",
-                    [{
-                      text: "OK",
-                      onPress: async () => {
-                        try { await AsyncStorage.clear(); } catch {}
-                        Updates.reloadAsync();
-                      }
-                    }],
+                    [
+                      {
+                        text: "OK",
+                        onPress: async () => {
+                          try {
+                            await AsyncStorage.clear();
+                          } catch {}
+                          Updates.reloadAsync();
+                        },
+                      },
+                    ],
                   );
                 } catch {
                   Alert.alert(
