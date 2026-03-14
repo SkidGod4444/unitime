@@ -23,8 +23,6 @@ import React, { ReactNode } from "react";
 import { useColorScheme as useNWColorScheme } from "nativewind";
 import { useThemeStore } from "@/lib/store";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Updates from "expo-updates";
 import { ActivityIndicator, View } from "react-native";
 import { runUpdateMigrationsOnce } from "@/utils/update.migrations";
 import { SafeAreaProvider } from "react-native-safe-area-context";

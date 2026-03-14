@@ -9,7 +9,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as Updates from "expo-updates";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import React from "react";
 import {
   ActivityIndicator,
