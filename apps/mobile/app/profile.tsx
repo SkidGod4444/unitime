@@ -9,6 +9,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as Updates from "expo-updates";
+import Constants from "expo-constants";
 import React from "react";
 import {
   ActivityIndicator,
@@ -456,7 +457,7 @@ export default function Profile() {
           </TouchableOpacity>
 
           <Text className="text-center text-xs text-gray-400 dark:text-zinc-500 mt-4">
-            Version 1.0.2 (Build 202402)
+            Version {Constants.expoConfig?.version ?? "—"}{Updates.runtimeVersion ? ` (${Updates.runtimeVersion})` : ""}
           </Text>
         </View>
       </ScrollView>
