@@ -457,7 +457,8 @@ export default function Profile() {
           </TouchableOpacity>
 
           <Text className="text-center text-xs text-gray-400 dark:text-zinc-500 mt-4">
-            Version {Constants.expoConfig?.version ?? "—"}{Updates.runtimeVersion ? ` (${Updates.runtimeVersion})` : ""}
+            Version {Constants.expoConfig?.version ?? "—"}
+            {Updates.runtimeVersion ? ` (${Updates.runtimeVersion})` : ""}
           </Text>
         </View>
       </ScrollView>
