@@ -175,6 +175,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     } catch (err: any) {
       setError(err.message || "Failed to login");
+      throw err;
     } finally {
       setLoading(false);
     }
@@ -376,7 +377,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     }
     setupPush();
-  }, [loggedInUser?.id, loggedInUser?.expoPushToken, refreshJwt]);
+  }, [loggedInUser?.id, loggedInUser?.expoPushToken, refreshJwt, jwt]);
 
   return (
     <AuthContext.Provider

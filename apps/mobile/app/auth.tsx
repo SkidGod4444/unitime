@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
 import {
+  Alert,
   Image,
   Linking,
   Text,
@@ -24,18 +25,42 @@ export default function Auth() {
   const [lastName, setLastName] = useState("");
   const [password, setPassword] = useState("");
 
-  const { register, login } = useAuth();
+  const { register, login, setError } = useAuth();
   const isDark = theme === "dark";
 
   const handleLogin = async () => {
     try {
       if (!isInstitutionalEmail(email)) {
-        alert("Please use your institutional email address.");
+        Alert.alert("Invalid Email", "Please use your institutional email address.");
+        return;
       }
       await login(email, password);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Login failed:", err);
-      alert("Login failed. Please check your credentials and try again.");
+      // Appwrite error code 401 with specific message often indicates user not found or wrong creds.
+      // However, usually "user_not_found" or similar is what we look for.
+      const errMsg = err.message?.toLowerCase() || "";
+      if (errMsg.includes("user not found") || errMsg.includes("invalid credentials")) {
+        Alert.alert(
+          "Account Not Found",
+          "We couldn't find an account with this email. Would you like to sign up instead?",
+          [
+            { text: "Cancel", style: "cancel" },
+            {
+              text: "Sign Up",
+              onPress: () => {
+                setIsLogin(false);
+                setError(""); // Clear error in context if any
+              },
+            },
+          ],
+        );
+      } else {
+        Alert.alert(
+          "Login Failed",
+          "Please check your credentials and try again.",
+        );
+      }
     }
   };
 
