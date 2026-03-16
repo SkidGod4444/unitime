@@ -36,13 +36,13 @@ notifications.post("/", async (c) => {
 
     if (userId) {
       await invalidateCache(`notifications:${userId}`);
-      
+
       // Fetch user to get push token
       const user = await prisma.user.findUnique({
         where: { id: userId },
         select: { expoPushToken: true },
       });
-      
+
       if (user?.expoPushToken) {
         await sendPushNotification([user.expoPushToken], title, body);
       }
