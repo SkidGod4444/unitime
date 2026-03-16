@@ -92,4 +92,41 @@ orgs.delete("/:id", async (c) => {
   );
 });
 
+orgs.get("/:id/members", async (c) => {
+  const id = c.req.param("id");
+  try {
+    const members = await getOrSetCache(
+      `org:${id}:members`,
+      () =>
+        prisma.user.findMany({
+          where: {
+            studentProfile: {
+              organizationId: id,
+            },
+          },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            expoPushToken: true,
+          },
+        }),
+      120,
+    );
+
+    return c.json(
+      {
+        success: true,
+        status_code: 200,
+        members,
+      },
+      200,
+    );
+  } catch (error) {
+    console.error("Error fetching org members:", error);
+    return createHonoErrorResponse(c, ERROR_CODES.QUERY_FAILED);
+  }
+});
+
 export default orgs;

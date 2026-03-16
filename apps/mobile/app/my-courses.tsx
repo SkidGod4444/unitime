@@ -104,6 +104,38 @@ export default function MyCoursesScreen() {
       });
       if (!res.ok) throw new Error("Batch enrollment failed");
 
+      // Notify admins and representatives of the organization
+      if (organizationId) {
+        try {
+          const membersRes = await apiFetch(`/orgs/${organizationId}/members`);
+          if (membersRes.ok) {
+            const { members } = await membersRes.json();
+            const admins = members.filter(
+              (m: any) => m.role === "ADMIN" || m.role === "REPRESENTATIVE",
+            );
+
+            await Promise.all(
+              admins.map((admin: any) =>
+                apiFetch("/notifications", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    title: "New Enrollment Request",
+                    body: `${loggedInUser?.name || "A student"} sent course enrollment request`,
+                    type: "SYSTEM",
+                    userId: admin.id,
+                    organizationId: organizationId,
+                    actionUrl: "/manage-requests",
+                  }),
+                }),
+              ),
+            );
+          }
+        } catch (err) {
+          console.warn("Failed to notify admins of enrollment request", err);
+        }
+      }
+
       Alert.alert(
         "Success",
         "Enrollment requests sent for all selected courses.",

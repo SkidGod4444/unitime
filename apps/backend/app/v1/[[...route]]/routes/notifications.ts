@@ -4,6 +4,7 @@ import type { AppEnv } from "@/types/app-env";
 import { getOrSetCache, invalidateCache } from "@unitime/cache";
 import { prisma } from "@unitime/db";
 import { Hono } from "hono";
+import { sendPushNotification } from "@/lib/expo.notifications";
 
 const notifications = new Hono<AppEnv>();
 
@@ -35,6 +36,16 @@ notifications.post("/", async (c) => {
 
     if (userId) {
       await invalidateCache(`notifications:${userId}`);
+      
+      // Fetch user to get push token
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { expoPushToken: true },
+      });
+      
+      if (user?.expoPushToken) {
+        await sendPushNotification([user.expoPushToken], title, body);
+      }
     }
 
     return c.json(
