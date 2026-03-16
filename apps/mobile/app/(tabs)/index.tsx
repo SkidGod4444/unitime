@@ -105,7 +105,7 @@ export default function Index() {
     if (authenticated) router.push("/admin");
   };
 
-  const { summary } = useAttendanceStore();
+  const { fetchSummary, summary } = useAttendanceStore();
   const { timetables, loading, fetchWeekTimetable } = useTimetableStore();
   const { createFeedback } = useFeedbacksStore();
 
@@ -113,8 +113,9 @@ export default function Index() {
   useEffect(() => {
     if (loggedInUser?.id) {
       fetchWeekTimetable(loggedInUser.id);
+      fetchSummary(loggedInUser.id);
     }
-  }, [loggedInUser?.id, fetchWeekTimetable]);
+  }, [loggedInUser?.id, fetchWeekTimetable, fetchSummary]);
 
   const validSummary = summary.filter((s) => s.total > 0);
   const totalAttended = validSummary.reduce(
@@ -228,7 +229,8 @@ export default function Index() {
       };
     })
     .sort((a, b) => a.sortVal - b.sortVal)
-    .slice(0, 3);
+    .filter((item) => item.status !== "Past")
+    .slice(0, 5);
 
   return (
     <SafeAreaView
