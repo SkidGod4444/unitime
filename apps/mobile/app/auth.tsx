@@ -31,7 +31,10 @@ export default function Auth() {
   const handleLogin = async () => {
     try {
       if (!isInstitutionalEmail(email)) {
-        Alert.alert("Invalid Email", "Please use your institutional email address.");
+        Alert.alert(
+          "Invalid Email",
+          "Please use your institutional email address.",
+        );
         return;
       }
       await login(email, password);
@@ -40,7 +43,10 @@ export default function Auth() {
       // Appwrite error code 401 with specific message often indicates user not found or wrong creds.
       // However, usually "user_not_found" or similar is what we look for.
       const errMsg = err.message?.toLowerCase() || "";
-      if (errMsg.includes("user not found") || errMsg.includes("invalid credentials")) {
+      if (
+        errMsg.includes("user not found") ||
+        errMsg.includes("invalid credentials")
+      ) {
         Alert.alert(
           "Account Not Found",
           "We couldn't find an account with this email. Would you like to sign up instead?",
