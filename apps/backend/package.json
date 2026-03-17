@@ -15,7 +15,7 @@
     "@vercel/analytics": "^1.6.1",
     "expo-server-sdk": "^6.1.0",
     "hono": "^4.11.1",
-    "next": "16.1.6",
+    "next": "16.1.7",
     "node-appwrite": "^22.0.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
