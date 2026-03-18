@@ -47,7 +47,7 @@ const TapToMark = () => {
       if (locStatus !== "granted") {
         Alert.alert(
           "Permission Denied",
-          "Location is required for geofencing."
+          "Location is required for geofencing.",
         );
         setStatus("idle");
         isSubmittingRef.current = false;
@@ -86,7 +86,7 @@ const TapToMark = () => {
         ].slice(0, 50);
         await AsyncStorage.setItem(
           "MARKED_SESSIONS",
-          JSON.stringify(markedIds)
+          JSON.stringify(markedIds),
         );
 
         // Refresh stats on home screen
@@ -170,7 +170,9 @@ const TapToMark = () => {
             ) : status === "error" || status === "expired" ? (
               <>
                 <Ionicons
-                  name={status === "error" ? "alert-circle-outline" : "time-outline"}
+                  name={
+                    status === "error" ? "alert-circle-outline" : "time-outline"
+                  }
                   size={64}
                   color="white"
                   className="mb-2"

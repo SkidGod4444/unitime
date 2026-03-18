@@ -1,12 +1,12 @@
-import { HypertuneProvider } from '../lib/flags/hypertune.react'
-import { useAuth } from './auth.cntxt'
+import { HypertuneProvider } from "../lib/flags/hypertune.react";
+import { useAuth } from "./auth.cntxt";
 
 export default function FlagsProvider({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
-  const { loggedInUser } = useAuth()
+  const { loggedInUser } = useAuth();
 
   return (
     <HypertuneProvider
@@ -16,9 +16,9 @@ export default function FlagsProvider({
       rootArgs={{
         context: {
           environment:
-            process.env.NODE_ENV === 'development'
-              ? 'development'
-              : 'production',
+            process.env.NODE_ENV === "development"
+              ? "development"
+              : "production",
           user: loggedInUser
             ? {
                 id: loggedInUser.id,
@@ -26,14 +26,14 @@ export default function FlagsProvider({
                 email: loggedInUser.email,
               }
             : {
-                id: 'anonymous',
-                name: 'Anonymous',
-                email: 'anonymous@example.com',
+                id: "anonymous",
+                name: "Anonymous",
+                email: "anonymous@example.com",
               },
         },
       }}
     >
       {children}
     </HypertuneProvider>
-  )
+  );
 }

@@ -101,28 +101,19 @@ export default function Profile() {
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
-
       {/* Header */}
       <View className="px-5 py-2 flex-row items-center justify-between border-b border-gray-100 pb-4">
         <TouchableOpacity
           onPress={() => router.back()}
           className="h-10 w-10 bg-gray-50 rounded-full items-center justify-center"
         >
-          <Ionicons
-            name="arrow-back"
-            size={24}
-            color="#374151"
-          />
+          <Ionicons name="arrow-back" size={24} color="#374151" />
         </TouchableOpacity>
         <Text className="text-lg font-bold font-lora text-zinc-900">
           My Profile
         </Text>
         <TouchableOpacity className="h-10 w-10 bg-gray-50 rounded-full items-center justify-center">
-          <Ionicons
-            name="settings-outline"
-            size={22}
-            color="#374151"
-          />
+          <Ionicons name="settings-outline" size={22} color="#374151" />
         </TouchableOpacity>
       </View>
 
@@ -379,11 +370,7 @@ export default function Profile() {
             >
               <View className="flex-row items-center gap-4">
                 <View className="h-10 w-10 bg-slate-50 rounded-full items-center justify-center">
-                  <Ionicons
-                    name="logo-github"
-                    size={20}
-                    color="#374151"
-                  />
+                  <Ionicons name="logo-github" size={20} color="#374151" />
                 </View>
                 <View>
                   <Text className="text-base font-semibold text-gray-700">
@@ -437,11 +424,7 @@ export default function Profile() {
               <View className="bg-amber-50 rounded-2xl border border-amber-100 shadow-sm overflow-hidden p-4 flex-row items-center justify-between">
                 <View className="flex-row items-center gap-4">
                   <View className="h-10 w-10 bg-amber-100 rounded-full items-center justify-center">
-                    <Ionicons
-                      name="flask-outline"
-                      size={20}
-                      color="#f59e0b"
-                    />
+                    <Ionicons name="flask-outline" size={20} color="#f59e0b" />
                   </View>
                   <Text className="text-base font-semibold text-amber-900">
                     Hypertune Beta Enabled

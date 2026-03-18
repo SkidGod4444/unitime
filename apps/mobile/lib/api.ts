@@ -22,10 +22,16 @@ export const withAuth = (init?: RequestInit): RequestInit => {
 export const apiFetch = (path: string, init?: RequestInit) => {
   if (isAppOnMaintenance) {
     return Promise.resolve(
-      new Response(JSON.stringify({ success: false, error: "We are under maintenance. Please try again later." }), {
-        status: 503,
-        headers: { "Content-Type": "application/json" },
-      })
+      new Response(
+        JSON.stringify({
+          success: false,
+          error: "We are under maintenance. Please try again later.",
+        }),
+        {
+          status: 503,
+          headers: { "Content-Type": "application/json" },
+        },
+      ),
     );
   }
 

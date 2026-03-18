@@ -100,29 +100,29 @@ function AppContent() {
           <FlagsProvider>
             <MaintenanceProvider>
               <RoutesProvider>
-              <StoreProvider>
-                <AlarmsInnerProvider>
-                <PermsProvider>
-                  <AttendanceListener />
-                  <StatusBar
-                    style={appTheme === "dark" ? "light" : "dark"}
-                    animated
-                  />
-                  <QuickActionsListener />
-                  <BannedUserPopup />
-                  <ProfileCompletionPopup />
-                  <UpdateModal updater={updater} />
+                <StoreProvider>
+                  <AlarmsInnerProvider>
+                    <PermsProvider>
+                      <AttendanceListener />
+                      <StatusBar
+                        style={appTheme === "dark" ? "light" : "dark"}
+                        animated
+                      />
+                      <QuickActionsListener />
+                      <BannedUserPopup />
+                      <ProfileCompletionPopup />
+                      <UpdateModal updater={updater} />
 
-                  <ThemeProvider
-                    value={appTheme === "dark" ? DarkTheme : DefaultTheme}
-                  >
-                    <Stack screenOptions={{ headerShown: false }} />
-                  </ThemeProvider>
-                  {!isHiddenScreen && <QRScannerWidget />}
-                  <Loader />
-                </PermsProvider>
-              </AlarmsInnerProvider>
-            </StoreProvider>
+                      <ThemeProvider
+                        value={appTheme === "dark" ? DarkTheme : DefaultTheme}
+                      >
+                        <Stack screenOptions={{ headerShown: false }} />
+                      </ThemeProvider>
+                      {!isHiddenScreen && <QRScannerWidget />}
+                      <Loader />
+                    </PermsProvider>
+                  </AlarmsInnerProvider>
+                </StoreProvider>
               </RoutesProvider>
             </MaintenanceProvider>
           </FlagsProvider>

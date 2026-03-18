@@ -1,5 +1,12 @@
 import React, { ReactNode, useEffect } from "react";
-import { Modal, Text, View, StyleSheet, BackHandler, TouchableOpacity } from "react-native";
+import {
+  Modal,
+  Text,
+  View,
+  StyleSheet,
+  BackHandler,
+  TouchableOpacity,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useHypertune } from "@/lib/flags/hypertune.react";
 import { setAppOnMaintenance } from "@/lib/api";
@@ -33,7 +40,8 @@ export function MaintenanceProvider({ children }: { children: ReactNode }) {
             </View>
             <Text style={styles.titleText}>Ongoing Maintenance</Text>
             <Text style={styles.messageText}>
-              We are currently performing scheduled maintenance to improve your experience.{"\n"}
+              We are currently performing scheduled maintenance to improve your
+              experience.{"\n"}
               Please check back later.
             </Text>
             <TouchableOpacity

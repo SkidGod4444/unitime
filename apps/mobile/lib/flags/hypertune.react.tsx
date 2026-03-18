@@ -35,7 +35,9 @@ const HypertuneSourceContext = React.createContext<{
   setOverride: (newOverride: sdk.DeepPartial<hypertune.Source> | null) => void;
 }>({
   hypertuneSource: hypertune.emptySource,
-  setOverride: () => { /* noop */ },
+  setOverride: () => {
+    /* noop */
+  },
 });
 
 export function HypertuneSourceProvider({
@@ -48,7 +50,7 @@ export function HypertuneSourceProvider({
   const hypertuneSource = hypertune.createSource(createSourceOptions);
 
   const [stateHash, setStateHash] = React.useState(
-    hypertuneSource.getStateHash()
+    hypertuneSource.getStateHash(),
   );
 
   React.useEffect(() => {
@@ -80,12 +82,12 @@ export function HypertuneSourceProvider({
       hypertuneSource.setOverride(newOverride);
       setStateHash(hypertuneSource.getStateHash());
     },
-    [hypertuneSource, setStateHash]
+    [hypertuneSource, setStateHash],
   );
 
   const value = React.useMemo(
     () => ({ hypertuneSource: hypertuneSourceForStateHash, setOverride }),
-    [hypertuneSourceForStateHash, setOverride]
+    [hypertuneSourceForStateHash, setOverride],
   );
 
   return (
@@ -100,7 +102,9 @@ export function useHypertuneSource(): hypertune.SourceNode {
   return hypertuneSource;
 }
 
-export function useSetOverride(): (newOverride: sdk.DeepPartial<hypertune.Source> | null) => void {
+export function useSetOverride(): (
+  newOverride: sdk.DeepPartial<hypertune.Source> | null,
+) => void {
   const { setOverride } = React.useContext(HypertuneSourceContext);
   return setOverride;
 }
@@ -131,14 +135,11 @@ export function HypertuneRootProvider({
 
   const rootArgsKey = sdk.stableStringify(rootArgs);
 
-  const hypertuneRoot = React.useMemo(
-    () => {
-      const value = hypertuneSource.root({ args: rootArgs });
-      hypertuneRootSingleton = value;
-      return value;
-    },
-    [hypertuneSource, rootArgsKey]
-  );
+  const hypertuneRoot = React.useMemo(() => {
+    const value = hypertuneSource.root({ args: rootArgs });
+    hypertuneRootSingleton = value;
+    return value;
+  }, [hypertuneSource, rootArgsKey]);
 
   return (
     <HypertuneRootContext.Provider value={hypertuneRoot}>
@@ -152,7 +153,7 @@ export function useHypertune(): hypertune.RootNode {
 
   if (!hypertuneRoot.props.context) {
     console.warn(
-      "[Hypertune] Calling `useHypertune` hook outside of the `HypertuneProvider`. Fallback values will be used."
+      "[Hypertune] Calling `useHypertune` hook outside of the `HypertuneProvider`. Fallback values will be used.",
     );
   }
   return hypertuneRoot;
@@ -186,4 +187,3 @@ export function HypertuneClientLogger({
 
   return null;
 }
-

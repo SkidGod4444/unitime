@@ -637,8 +637,7 @@ export default function Index() {
             </View>
           )}
 
-
-{/* Recent Announcements */}
+        {/* Recent Announcements */}
         <View className="gap-3 mt-2">
           <View className="flex-row justify-between items-center mb-2">
             <Text className="text-lg font-bold text-zinc-900 dark:text-zinc-100 font-lora">
@@ -660,7 +659,6 @@ export default function Index() {
           </View>
         </View>
 
-        
         {/* Today's Schedule */}
         <View>
           <View className="flex-row justify-between items-center mb-4">
@@ -682,12 +680,12 @@ export default function Index() {
               </Text>
             ) : todaysSchedule.length === 0 ? (
               <View className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-sm overflow-hidden flex-col">
-            <View className="bg-gray-50 dark:bg-zinc-800 p-6 items-center justify-center border border-gray-100 dark:border-zinc-800 border-dashed m-2 rounded-2xl">
-              <Text className="text-gray-500 font-medium my-2">
-                No classes today!
-              </Text>
-            </View>
-          </View>
+                <View className="bg-gray-50 dark:bg-zinc-800 p-6 items-center justify-center border border-gray-100 dark:border-zinc-800 border-dashed m-2 rounded-2xl">
+                  <Text className="text-gray-500 font-medium my-2">
+                    No classes today!
+                  </Text>
+                </View>
+              </View>
             ) : (
               todaysSchedule.map((item) => (
                 <View
@@ -744,7 +742,6 @@ export default function Index() {
             )}
           </View>
         </View>
-
       </ScrollView>
 
       {/* Feedback Modal */}
