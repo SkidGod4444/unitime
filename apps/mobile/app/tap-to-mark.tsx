@@ -5,21 +5,29 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useRef, useState } from "react";
+import { useAttendanceStore } from "@/lib/store";
 import {
   Alert,
   Text,
   TouchableOpacity,
   View,
   ActivityIndicator,
+  Image,
+  useColorScheme,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const TapToMark = () => {
-  const { sessionId, courseName } = useLocalSearchParams<{
-    sessionId: string;
-    courseName: string;
-  }>();
+  const { sessionId, courseName, locationName, sessionTime } =
+    useLocalSearchParams<{
+      sessionId: string;
+      courseName: string;
+      locationName?: string;
+      sessionTime?: string;
+    }>();
   const { loggedInUser } = useAuth();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
 
   const [status, setStatus] = useState<
     "idle" | "loading" | "success" | "error" | "expired"
@@ -33,13 +41,13 @@ const TapToMark = () => {
     setStatus("loading");
 
     try {
-      // 1. Get Location (B15: High Accuracy)
+      // 1. Get Location (High Accuracy)
       const { status: locStatus } =
         await Location.requestForegroundPermissionsAsync();
       if (locStatus !== "granted") {
         Alert.alert(
           "Permission Denied",
-          "Location is required for geofencing.",
+          "Location is required for geofencing."
         );
         setStatus("idle");
         isSubmittingRef.current = false;
@@ -52,6 +60,9 @@ const TapToMark = () => {
       // 2. Submit Checkin
       const res = await apiFetch("/attendance/checkin", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           sessionId,
           coordinates: {
@@ -61,10 +72,12 @@ const TapToMark = () => {
         }),
       });
 
-      const data = await res.json();
-      if (res.ok) {
+      const text = await res.text();
+      const data = text ? JSON.parse(text) : {};
+
+      if (res.ok && data.success) {
         setStatus("success");
-        // B9: Store only the last 50 IDs to prevent storage bloat
+        // Store only the last 50 IDs to prevent storage bloat
         const markedStr = await AsyncStorage.getItem("MARKED_SESSIONS");
         let markedIds = markedStr ? JSON.parse(markedStr) : [];
         markedIds = [
@@ -73,14 +86,18 @@ const TapToMark = () => {
         ].slice(0, 50);
         await AsyncStorage.setItem(
           "MARKED_SESSIONS",
-          JSON.stringify(markedIds),
+          JSON.stringify(markedIds)
         );
+
+        // Refresh stats on home screen
+        useAttendanceStore.getState().fetchSummary(loggedInUser.id);
 
         setTimeout(() => router.replace("/(tabs)/attendance" as any), 2000);
       } else {
-        // B17: Improved error feedback
-        setErrorMessage(data.message || "Failed to mark attendance.");
-        if (data.message?.toLowerCase().includes("expired")) {
+        // Improved error feedback
+        const msg = data.message || data.error || "Failed to mark attendance.";
+        setErrorMessage(msg);
+        if (msg.toLowerCase().includes("expired")) {
           setStatus("expired");
         } else {
           setStatus("error");
@@ -96,71 +113,147 @@ const TapToMark = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white dark:bg-zinc-900 justify-center items-center px-6">
-      <View className="items-center mb-10">
-        <View className="w-20 h-20 bg-indigo-100 dark:bg-indigo-900/30 rounded-full items-center justify-center mb-4">
-          <Ionicons name="location" size={40} color="#6366f1" />
-        </View>
-        <Text className="text-2xl font-bold text-gray-900 dark:text-white text-center">
-          {courseName || "Class Attendance"}
-        </Text>
-        <Text className="text-gray-500 text-center mt-2">
-          Tap the button below to confirm your presence in the classroom.
-        </Text>
-      </View>
-
-      {status === "idle" && (
-        <TouchableOpacity
-          onPress={handleMarkAttendance}
-          className="bg-indigo-600 w-full p-5 rounded-2xl items-center shadow-lg active:opacity-80"
-        >
-          <Text className="text-white font-bold text-lg">Mark Attendance</Text>
-        </TouchableOpacity>
-      )}
-
-      {status === "loading" && (
-        <ActivityIndicator size="large" color="#6366f1" />
-      )}
-
-      {status === "success" && (
-        <View className="items-center">
-          <Ionicons name="checkmark-circle" size={80} color="#22c55e" />
-          <Text className="text-green-600 font-bold text-xl mt-4">
-            Verified!
+    <SafeAreaView className="flex-1 bg-[#f8f6f6] dark:bg-[#221610]">
+      <View className="flex-1 items-center justify-center p-6 gap-16">
+        {/* Class Info Section */}
+        <View className="items-center gap-3">
+          <View className="flex-row items-center gap-2 px-3 py-1.5 rounded-full bg-[#ec5b13]/10">
+            <Ionicons name="wifi" size={16} color="#ec5b13" />
+            <Text className="text-[#ec5b13] text-xs font-bold uppercase tracking-wider">
+              Attendance Session Active
+            </Text>
+          </View>
+          <Text className="text-4xl text-center font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
+            {courseName || "Biology 101"}
           </Text>
+          <View className="items-center gap-1.5">
+            <View className="flex-row items-center gap-2">
+              <Ionicons
+                name="location-sharp"
+                size={16}
+                color={isDark ? "#94a3b8" : "#475569"}
+              />
+              <Text className="font-medium text-slate-600 dark:text-slate-400">
+                {locationName || "Lecture Hall A"}
+              </Text>
+            </View>
+            <View className="flex-row items-center gap-2">
+              <Ionicons
+                name="calendar-outline"
+                size={14}
+                color={isDark ? "#94a3b8" : "#475569"}
+              />
+              <Text className="text-sm text-slate-600 dark:text-slate-400">
+                {sessionTime || "Monday, Oct 23 • 10:30 AM"}
+              </Text>
+            </View>
+          </View>
         </View>
-      )}
 
-      {status === "error" && (
-        <View className="items-center w-full">
-          <Ionicons name="alert-circle" size={80} color="#ef4444" />
-          <Text className="text-red-500 font-bold text-xl mt-4">Failed</Text>
-          <Text className="text-gray-500 text-center mt-2 px-4">
-            {errorMessage}
-          </Text>
+        {/* Main Action Button */}
+        <View className="relative items-center justify-center w-64 h-64">
+          <View className="absolute inset-0 bg-[#ec5b13]/20 rounded-full scale-110 animate-pulse" />
+          <View className="absolute inset-0 bg-[#ec5b13]/10 rounded-full scale-125" />
+
           <TouchableOpacity
-            onPress={() => setStatus("idle")}
-            className="mt-6 bg-gray-100 dark:bg-zinc-800 p-4 rounded-xl w-full items-center"
+            onPress={
+              status === "error" || status === "expired"
+                ? () => setStatus("idle")
+                : handleMarkAttendance
+            }
+            disabled={status === "loading" || status === "success"}
+            className="w-full h-full bg-[#ec5b13] rounded-full items-center justify-center shadow-2xl shadow-[#ec5b13]/40 active:scale-95 transition-transform"
+            style={{ elevation: 10 }}
           >
-            <Text className="text-indigo-600 font-semibold">Try Again</Text>
+            {status === "loading" ? (
+              <ActivityIndicator size="large" color="#ffffff" />
+            ) : status === "error" || status === "expired" ? (
+              <>
+                <Ionicons
+                  name={status === "error" ? "alert-circle-outline" : "time-outline"}
+                  size={64}
+                  color="white"
+                  className="mb-2"
+                />
+                <Text className="text-white text-xl font-bold uppercase tracking-widest mt-2">
+                  {status === "error" ? "Failed" : "Expired"}
+                </Text>
+                <Text className="text-white/80 text-xs font-medium mt-1 text-center px-4">
+                  {status === "error"
+                    ? errorMessage
+                    : "Session is no longer active."}
+                </Text>
+                <Text className="text-white/90 text-xs font-bold mt-2 underline">
+                  Tap to retry
+                </Text>
+              </>
+            ) : (
+              <>
+                <Ionicons
+                  name="finger-print-outline"
+                  size={72}
+                  color="white"
+                  className="mb-2"
+                />
+                <Text className="text-white text-xl font-bold uppercase tracking-widest mt-2">
+                  Tap to Mark
+                </Text>
+                <Text className="text-white/80 text-xs font-medium mt-1">
+                  Must be in range
+                </Text>
+              </>
+            )}
           </TouchableOpacity>
         </View>
-      )}
 
-      {status === "expired" && (
-        <View className="items-center w-full">
-          <Ionicons name="time" size={80} color="#f59e0b" />
-          <Text className="text-amber-500 font-bold text-xl mt-4">
-            Session Expired
+        {/* Map/Location Context Card */}
+        {status !== "success" && (
+          <View className="w-full max-w-sm bg-white dark:bg-slate-800/80 p-4 rounded-xl border border-[#ec5b13]/10 flex-row items-center gap-4">
+            <View className="w-16 h-16 rounded-lg bg-slate-200 dark:bg-slate-700 overflow-hidden shrink-0">
+              <Image
+                source={{
+                  uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuBSQoKzuJxCRRDGJnfbGBRmDDirEARkeNZQCt4XmrXVFPrLypTsMjgVNZmwFOmfMxfsCbiK6WHxi7Ba-YHbbSALwFAwDcZi3F7e64bJ59TQlnKCTBc19H0GmWKE39B5YB1bsuGGt5GnkZGffGSM1hTHnJxVrEvQCawE4phdVdKgz9L5XkYMpJSNdm7d3QDvfs4Was3GGZGSnSnkA-qYnSDqkyHKZihKg283H_eU5hfsmmpJyAAbNiBuia-U0Qt-jb6mtC8Y2k7KKij9",
+                }}
+                className="w-full h-full"
+                resizeMode="cover"
+              />
+            </View>
+            <View className="flex-1">
+              <Text className="text-[10px] font-bold text-[#ec5b13] uppercase tracking-wider">
+                Your Location
+              </Text>
+              <Text className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                {locationName || "Science Building, Wing B"}
+              </Text>
+              <Text className="text-xs text-slate-500">
+                You are within the geo-fence
+              </Text>
+            </View>
+            <Ionicons name="checkmark-circle" size={24} color="#22c55e" />
+          </View>
+        )}
+      </View>
+
+      {/* Success Feedback Overlay */}
+      {status === "success" && (
+        <View className="absolute inset-0 bg-[#f8f6f6]/95 dark:bg-[#221610]/95 z-50 flex-col items-center justify-center p-6">
+          <View className="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mb-6 shadow-lg shadow-green-500/30">
+            <Ionicons name="checkmark-done-circle" size={48} color="white" />
+          </View>
+          <Text className="text-center text-3xl font-bold mb-2 text-slate-900 dark:text-white">
+            Attendance Marked!
           </Text>
-          <Text className="text-gray-500 text-center mt-2">
-            This attendance session is no longer active.
+          <Text className="text-slate-500 text-center mb-10 text-lg mt-1">
+            {courseName || "Biology 101"} • Verified
           </Text>
+
           <TouchableOpacity
-            onPress={() => router.back()}
-            className="mt-6 bg-gray-100 dark:bg-zinc-800 p-4 rounded-xl w-full items-center"
+            onPress={() => router.replace("/(tabs)/attendance" as any)}
+            className="px-8 py-4 bg-[#ec5b13] rounded-xl active:bg-[#d9530f]"
           >
-            <Text className="text-indigo-600 font-semibold">Go Back</Text>
+            <Text className="text-white font-bold text-lg">
+              Back to Dashboard
+            </Text>
           </TouchableOpacity>
         </View>
       )}

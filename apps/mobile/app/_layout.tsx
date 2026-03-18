@@ -10,6 +10,8 @@ import { LocalStoreProvider } from "@/contexts/localstore.cntxt";
 import { PermsProvider } from "@/contexts/perms.cntxt";
 import { RoutesProvider } from "@/contexts/routes.cntxt";
 import { StoreProvider } from "@/contexts/store.cntxt";
+import FlagsProvider from "@/contexts/flags.cntxt";
+import { MaintenanceProvider } from "@/contexts/maintenance.cntxt";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   DarkTheme,
@@ -95,9 +97,11 @@ function AppContent() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <LocalStoreProvider>
         <AuthProvider>
-          <RoutesProvider>
-            <StoreProvider>
-              <AlarmsInnerProvider>
+          <FlagsProvider>
+            <MaintenanceProvider>
+              <RoutesProvider>
+              <StoreProvider>
+                <AlarmsInnerProvider>
                 <PermsProvider>
                   <AttendanceListener />
                   <StatusBar
@@ -119,7 +123,9 @@ function AppContent() {
                 </PermsProvider>
               </AlarmsInnerProvider>
             </StoreProvider>
-          </RoutesProvider>
+              </RoutesProvider>
+            </MaintenanceProvider>
+          </FlagsProvider>
         </AuthProvider>
       </LocalStoreProvider>
     </GestureHandlerRootView>

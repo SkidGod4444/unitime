@@ -99,6 +99,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         method: "GET",
         headers,
       });
+      // 503 means maintenance mode, ignore and return safely
+      if (response.status === 503) {
+        return null;
+      }
+
       // 404 means the user simply doesn't exist in the DB yet — fall through to create them
       if (!response.ok && response.status !== 404) {
         const text = await response.text();

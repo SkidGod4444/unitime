@@ -70,7 +70,8 @@ export const useAttendanceStore = create<AttendanceState>()(
         set({ summaryLoading: true });
         try {
           const res = await apiFetch(`/attendance/summary/${userId}`);
-          const data = await res.json();
+          const text = await res.text();
+          const data = text ? JSON.parse(text) : {};
           if (res.ok && data.success) {
             set({ summary: data.summary });
           } else if (res.status === 404 || data?.status_code === 404) {
@@ -87,7 +88,8 @@ export const useAttendanceStore = create<AttendanceState>()(
         set({ sessionsLoading: true });
         try {
           const res = await apiFetch("/attendance/sessions/all");
-          const data = await res.json();
+          const text = await res.text();
+          const data = text ? JSON.parse(text) : {};
           if (res.ok && data.success) {
             set({ sessions: data.sessions });
           } else if (res.status === 404 || data?.status_code === 404) {
@@ -110,7 +112,8 @@ export const useAttendanceStore = create<AttendanceState>()(
               body: JSON.stringify({ students: updates }),
             },
           );
-          const data = await res.json();
+          const text = await res.text();
+          const data = text ? JSON.parse(text) : {};
 
           if (res.status === 401) {
             console.warn("Not authenticated while updating session attendance");
@@ -158,7 +161,8 @@ export const useAttendanceStore = create<AttendanceState>()(
             },
             body: JSON.stringify({ sessionId, coordinates }),
           });
-          const data = await res.json();
+          const text = await res.text();
+          const data = text ? JSON.parse(text) : {};
           return { success: res.ok && data.success, message: data.message };
         } catch (error: any) {
           console.error("Error marking attendance:", error);

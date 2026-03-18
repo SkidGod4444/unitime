@@ -413,6 +413,14 @@ export default function Index() {
                 route: "/alarm",
                 visible: true,
               },
+              {
+                icon: "alarm-outline",
+                label: "TTM",
+                color: "text-red-600",
+                bg: "bg-red-50",
+                route: "/tap-to-mark",
+                visible: true,
+              },
             ]
               .filter((action) => action.visible)
               .map((action, index) => (
@@ -629,17 +637,41 @@ export default function Index() {
             </View>
           )}
 
+
+{/* Recent Announcements */}
+        <View className="gap-3 mt-2">
+          <View className="flex-row justify-between items-center mb-2">
+            <Text className="text-lg font-bold text-zinc-900 dark:text-zinc-100 font-lora">
+              Recent Announcements
+            </Text>
+            <TouchableOpacity
+              onPress={() => router.push("/annc" as any)}
+              className="px-3 py-1 rounded-full border border-primary"
+            >
+              <Text className="text-primary text-sm font-medium">View All</Text>
+            </TouchableOpacity>
+          </View>
+          <View className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-sm overflow-hidden flex-col">
+            <View className="bg-gray-50 dark:bg-zinc-800 p-6 items-center justify-center border border-gray-100 dark:border-zinc-800 border-dashed m-2 rounded-2xl">
+              <Text className="text-gray-500 font-medium my-2">
+                No announcements yet!
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        
         {/* Today's Schedule */}
         <View>
           <View className="flex-row justify-between items-center mb-4">
             <Text className="text-lg font-bold text-zinc-900 dark:text-zinc-100 font-lora">
-              Today&apos;s Schedule
+              Today&apos;s Timetable
             </Text>
             <TouchableOpacity
               onPress={() => router.push("/schedule")}
               className="px-3 py-1 rounded-full border border-primary"
             >
-              <Text className="text-primary text-sm font-medium">See All</Text>
+              <Text className="text-primary text-sm font-medium">View All</Text>
             </TouchableOpacity>
           </View>
 
@@ -649,11 +681,13 @@ export default function Index() {
                 Loading schedule...
               </Text>
             ) : todaysSchedule.length === 0 ? (
-              <View className="bg-gray-50 dark:bg-zinc-800 rounded-2xl p-6 items-center justify-center border border-gray-100 dark:border-zinc-800 border-dashed">
-                <Text className="text-gray-500 font-medium my-2">
-                  No classes today!
-                </Text>
-              </View>
+              <View className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-sm overflow-hidden flex-col">
+            <View className="bg-gray-50 dark:bg-zinc-800 p-6 items-center justify-center border border-gray-100 dark:border-zinc-800 border-dashed m-2 rounded-2xl">
+              <Text className="text-gray-500 font-medium my-2">
+                No classes today!
+              </Text>
+            </View>
+          </View>
             ) : (
               todaysSchedule.map((item) => (
                 <View
@@ -710,6 +744,7 @@ export default function Index() {
             )}
           </View>
         </View>
+
       </ScrollView>
 
       {/* Feedback Modal */}

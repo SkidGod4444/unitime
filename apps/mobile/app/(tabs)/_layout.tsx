@@ -129,6 +129,21 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="annc"
+        options={{
+          title: "Announcement",
+          headerShown: false,
+          tabBarIcon: ({ focused }) => (
+            <TabBarIcons
+              focused={focused}
+              icon={focused ? "at" : "at-outline"}
+              size={24}
+            />
+          ),
+          tabBarButton: (props) => <NoEffectTabButton {...props} />,
+        }}
+      />
+      <Tabs.Screen
         name="chats"
         options={{
           title: "Chats",
